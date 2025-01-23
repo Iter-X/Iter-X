@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/iter-x/iter-x/internal/repo/ent/refreshtoken"
 	"github.com/iter-x/iter-x/internal/repo/ent/user"
 )
 
@@ -73,7 +74,8 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			user.Table: user.ValidColumn,
+			refreshtoken.Table: refreshtoken.ValidColumn,
+			user.Table:         user.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

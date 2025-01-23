@@ -65,6 +65,7 @@ message Jwt {
   string secret = 1;
   google.protobuf.Duration expiration = 2;
   string issuer = 3;
+  google.protobuf.Duration refresh_expiration = 4;
 }
 
 message Auth {

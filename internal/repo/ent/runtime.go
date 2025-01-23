@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/iter-x/iter-x/internal/repo/ent/refreshtoken"
 	"github.com/iter-x/iter-x/internal/repo/ent/schema"
 	"github.com/iter-x/iter-x/internal/repo/ent/user"
 )
@@ -14,6 +15,43 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	refreshtokenMixin := schema.RefreshToken{}.Mixin()
+	refreshtokenMixinFields0 := refreshtokenMixin[0].Fields()
+	_ = refreshtokenMixinFields0
+	refreshtokenFields := schema.RefreshToken{}.Fields()
+	_ = refreshtokenFields
+	// refreshtokenDescCreatedAt is the schema descriptor for created_at field.
+	refreshtokenDescCreatedAt := refreshtokenMixinFields0[0].Descriptor()
+	// refreshtoken.DefaultCreatedAt holds the default value on creation for the created_at field.
+	refreshtoken.DefaultCreatedAt = refreshtokenDescCreatedAt.Default.(func() time.Time)
+	// refreshtokenDescUpdatedAt is the schema descriptor for updated_at field.
+	refreshtokenDescUpdatedAt := refreshtokenMixinFields0[1].Descriptor()
+	// refreshtoken.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	refreshtoken.DefaultUpdatedAt = refreshtokenDescUpdatedAt.Default.(func() time.Time)
+	// refreshtoken.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	refreshtoken.UpdateDefaultUpdatedAt = refreshtokenDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// refreshtokenDescToken is the schema descriptor for token field.
+	refreshtokenDescToken := refreshtokenFields[1].Descriptor()
+	// refreshtoken.TokenValidator is a validator for the "token" field. It is called by the builders before save.
+	refreshtoken.TokenValidator = func() func(string) error {
+		validators := refreshtokenDescToken.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(token string) error {
+			for _, fn := range fns {
+				if err := fn(token); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// refreshtokenDescID is the schema descriptor for id field.
+	refreshtokenDescID := refreshtokenFields[0].Descriptor()
+	// refreshtoken.DefaultID holds the default value on creation for the id field.
+	refreshtoken.DefaultID = refreshtokenDescID.Default.(func() uuid.UUID)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	_ = userMixinFields0

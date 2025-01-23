@@ -3,6 +3,7 @@ package biz
 import (
 	"context"
 	"github.com/google/uuid"
+	"github.com/ifuryst/lol"
 	v1 "github.com/iter-x/iter-x/internal/api/auth/v1"
 	"github.com/iter-x/iter-x/internal/common/xerr"
 	"github.com/iter-x/iter-x/internal/conf"
@@ -10,13 +11,22 @@ import (
 	"github.com/iter-x/iter-x/internal/repo"
 	"github.com/iter-x/iter-x/internal/repo/ent"
 	"go.uber.org/zap"
+	"time"
 )
 
-type Auth struct {
-	cfg    *conf.Auth
-	repo   *repo.Auth
-	logger *zap.SugaredLogger
-}
+type (
+	Auth struct {
+		cfg    *conf.Auth
+		repo   *repo.Auth
+		logger *zap.SugaredLogger
+	}
+
+	SignInResponse struct {
+		Token        string
+		RefreshToken string
+		ExpiresIn    float64
+	}
+)
 
 func NewAuth(c *conf.Auth, repo *repo.Auth, logger *zap.SugaredLogger) *Auth {
 	return &Auth{
@@ -26,40 +36,87 @@ func NewAuth(c *conf.Auth, repo *repo.Auth, logger *zap.SugaredLogger) *Auth {
 	}
 }
 
-// SignIn signs in and returns a token.
-func (b *Auth) SignIn(ctx context.Context, params *v1.SignInRequest) (string, error) {
-	usr, err := b.repo.FindByEmail(ctx, params.Email)
-	if err != nil || usr == nil {
-		return "", xerr.ErrorInvalidEmailOrPassword()
-	}
-
-	if !auth.CompareHashAndPassword(params.Password, usr.Password) {
-		return "", xerr.ErrorInvalidEmailOrPassword()
-	}
-
-	return auth.GenerateToken([]byte(b.cfg.Jwt.Secret), auth.Claims{
-		UID:       usr.ID,
-		Username:  usr.Username,
-		Email:     usr.Email,
-		Status:    usr.Status,
-		AvatarURL: usr.AvatarURL,
+func (b *Auth) getToken(ctx context.Context, user *ent.User, renew bool) (*SignInResponse, error) {
+	token, err := auth.GenerateToken([]byte(b.cfg.Jwt.Secret), auth.Claims{
+		UID:       user.ID,
+		Username:  user.Username,
+		Email:     user.Email,
+		Status:    user.Status,
+		AvatarURL: user.AvatarURL,
 	}, b.cfg.Jwt.Issuer, b.cfg.Jwt.Expiration.AsDuration())
+	if err != nil {
+		return nil, err
+	}
+
+	var refreshToken string
+	if renew {
+		refreshToken = lol.RandomString(64)
+		now := time.Now()
+		err = b.repo.Tx.WithTx(ctx, func(tx *ent.Tx) error {
+			rt, err := b.repo.GetRefreshTokenByUserId(ctx, user.ID, tx)
+			if err != nil && !ent.IsNotFound(err) {
+				return err
+			}
+
+			if ent.IsNotFound(err) {
+				return b.repo.SaveRefreshToken(ctx, &ent.RefreshToken{
+					Token:     refreshToken,
+					ExpiresAt: now.Add(b.cfg.Jwt.RefreshExpiration.AsDuration()),
+					CreatedAt: now,
+					UserID:    user.ID,
+				}, tx)
+			}
+
+			rt.Token = refreshToken
+			rt.ExpiresAt = now.Add(b.cfg.Jwt.RefreshExpiration.AsDuration())
+			rt.UpdatedAt = now
+			return b.repo.UpdateRefreshToken(ctx, rt, tx)
+		})
+	}
+
+	return &SignInResponse{
+		Token:        token,
+		RefreshToken: refreshToken,
+		ExpiresIn:    b.cfg.Jwt.Expiration.AsDuration().Seconds(),
+	}, nil
+}
+
+// SignIn signs in and returns a token.
+func (b *Auth) SignIn(ctx context.Context, params *v1.SignInRequest) (*v1.SignInResponse, error) {
+	user, err := b.repo.FindByEmail(ctx, params.Email)
+	if err != nil || user == nil {
+		return nil, xerr.ErrorInvalidEmailOrPassword()
+	}
+
+	if !auth.CompareHashAndPassword(params.Password, user.Password) {
+		return nil, xerr.ErrorInvalidEmailOrPassword()
+	}
+
+	res, err := b.getToken(ctx, user, true)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.SignInResponse{
+		Token:        res.Token,
+		RefreshToken: res.RefreshToken,
+		ExpiresIn:    res.ExpiresIn,
+	}, nil
 }
 
 // SignUp creates a new user.
-func (b *Auth) SignUp(ctx context.Context, params *v1.SignUpRequest) (string, error) {
+func (b *Auth) SignUp(ctx context.Context, params *v1.SignUpRequest) (*v1.SignUpResponse, error) {
 	// confirm the user does not exist
 	usr, err := b.repo.FindByEmail(ctx, params.Email)
 	if err != nil && !xerr.IsUserNotFound(err) {
-		return "", err
+		return nil, err
 	}
 	if usr != nil {
-		return "", xerr.ErrorUserAlreadyExists()
+		return nil, xerr.ErrorUserAlreadyExists()
 	}
 
 	hashedPass, err := auth.HashPassword(params.Password)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// create the user
@@ -70,17 +127,18 @@ func (b *Auth) SignUp(ctx context.Context, params *v1.SignUpRequest) (string, er
 	}
 	user, err := b.repo.Create(ctx, data)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	// generate the token
-	return auth.GenerateToken([]byte(b.cfg.Jwt.Secret), auth.Claims{
-		UID:       user.ID,
-		Username:  user.Username,
-		Email:     user.Email,
-		Status:    user.Status,
-		AvatarURL: user.AvatarURL,
-	}, b.cfg.Jwt.Issuer, b.cfg.Jwt.Expiration.AsDuration())
+	res, err := b.getToken(ctx, user, true)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.SignUpResponse{
+		Token:        res.Token,
+		RefreshToken: res.RefreshToken,
+		ExpiresIn:    res.ExpiresIn,
+	}, nil
 }
 
 // SignInWithOAuth signs in with oauth and returns a token.
@@ -141,4 +199,31 @@ func (b *Auth) SignInWithOAuth(ctx context.Context, params *v1.SignInWithOAuthRe
 		Status:    user.Status,
 		AvatarURL: user.AvatarURL,
 	}, b.cfg.Jwt.Issuer, b.cfg.Jwt.Expiration.AsDuration())
+}
+
+func (b *Auth) RefreshToken(ctx context.Context, params *v1.RefreshTokenRequest) (*v1.RefreshTokenResponse, error) {
+	refreshToken, err := b.repo.GetRefreshToken(ctx, params.RefreshToken)
+	if err != nil {
+		return nil, xerr.ErrorUnauthorized()
+	}
+	if refreshToken.ExpiresAt.Before(time.Now()) {
+		return nil, xerr.ErrorTokenExpired()
+	}
+
+	user, err := b.repo.FindUserById(ctx, refreshToken.UserID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, xerr.ErrorUnauthorized()
+		}
+		return nil, err
+	}
+
+	res, err := b.getToken(ctx, user, false)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.RefreshTokenResponse{
+		Token:     res.Token,
+		ExpiresIn: res.ExpiresIn,
+	}, nil
 }

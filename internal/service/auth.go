@@ -19,13 +19,7 @@ func NewAuth(authBiz *biz.Auth) *Auth {
 }
 
 func (s *Auth) SignIn(ctx context.Context, req *pb.SignInRequest) (*pb.SignInResponse, error) {
-	token, err := s.authBiz.SignIn(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	return &pb.SignInResponse{
-		Token: token,
-	}, nil
+	return s.authBiz.SignIn(ctx, req)
 }
 
 func (s *Auth) SignInWithOAuth(ctx context.Context, req *pb.SignInWithOAuthRequest) (*pb.SignInWithOAuthResponse, error) {
@@ -39,13 +33,7 @@ func (s *Auth) SignInWithOAuth(ctx context.Context, req *pb.SignInWithOAuthReque
 }
 
 func (s *Auth) SignUp(ctx context.Context, req *pb.SignUpRequest) (*pb.SignUpResponse, error) {
-	token, err := s.authBiz.SignUp(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	return &pb.SignUpResponse{
-		Token: token,
-	}, nil
+	return s.authBiz.SignUp(ctx, req)
 }
 
 func (s *Auth) RequestPasswordReset(ctx context.Context, req *pb.RequestPasswordResetRequest) (*pb.RequestPasswordResetResponse, error) {
@@ -67,6 +55,10 @@ func (s *Auth) ResetPassword(ctx context.Context, req *pb.ResetPasswordRequest) 
 	return &pb.ResetPasswordResponse{
 		Status: "password reset successful",
 	}, nil
+}
+
+func (s *Auth) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.RefreshTokenResponse, error) {
+	return s.authBiz.RefreshToken(ctx, req)
 }
 
 func (s *Auth) ValidateToken(ctx context.Context, token string) (jwt.Claims, error) {

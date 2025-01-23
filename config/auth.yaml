@@ -3,6 +3,7 @@ auth:
     secret: "${X_JWT_SECRET}"
     expiration: 3600s
     issuer: "https://github.com/Iter-X/Iter-X"
+    refresh_expiration: 720h
   oauth:
     google_client_id: "${X_GOOGLE_CLIENT_ID:PlsChangeMe}"
     google_client_secret: "${X_GOOGLE_CLIENT_SECRET:PlsChangeMe}"

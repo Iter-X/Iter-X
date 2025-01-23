@@ -31,8 +31,29 @@ type User struct {
 	// Email holds the value of the "email" field.
 	Email string `json:"email,omitempty"`
 	// AvatarURL holds the value of the "avatar_url" field.
-	AvatarURL    string `json:"avatar_url,omitempty"`
+	AvatarURL string `json:"avatar_url,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UserQuery when eager-loading is set.
+	Edges        UserEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// UserEdges holds the relations/edges for other nodes in the graph.
+type UserEdges struct {
+	// RefreshToken holds the value of the refresh_token edge.
+	RefreshToken []*RefreshToken `json:"refresh_token,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// RefreshTokenOrErr returns the RefreshToken value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) RefreshTokenOrErr() ([]*RefreshToken, error) {
+	if e.loadedTypes[0] {
+		return e.RefreshToken, nil
+	}
+	return nil, &NotLoadedError{edge: "refresh_token"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -122,6 +143,11 @@ func (u *User) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (u *User) Value(name string) (ent.Value, error) {
 	return u.selectValues.Get(name)
+}
+
+// QueryRefreshToken queries the "refresh_token" edge of the User entity.
+func (u *User) QueryRefreshToken() *RefreshTokenQuery {
+	return NewUserClient(u.config).QueryRefreshToken(u)
 }
 
 // Update returns a builder for updating this User.
