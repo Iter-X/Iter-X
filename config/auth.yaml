@@ -1,0 +1,12 @@
+auth:
+  jwt:
+    secret: "${X_JWT_SECRET}"
+    expiration: 3600s
+    issuer: "https://github.com/Iter-X/Iter-X"
+  oauth:
+    google_client_id: "${X_GOOGLE_CLIENT_ID:PlsChangeMe}"
+    google_client_secret: "${X_GOOGLE_CLIENT_SECRET:PlsChangeMe}"
+    google_redirect_url: "${X_GOOGLE_REDIRECT_URL:PlsChangeMe}"
+    github_client_id: "${X_GITHUB_CLIENT_ID:PlsChange}"
+    github_client_secret: "${X_GITHUB_CLIENT_SECRET:PlsChange}"
+    github_redirect_url: "${X_GITHUB_REDIRECT_URL:PlsChangeMe}"

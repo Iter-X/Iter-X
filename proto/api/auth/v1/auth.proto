@@ -1,0 +1,103 @@
+syntax = "proto3";
+
+package auth.v1;
+
+import "google/api/annotations.proto";
+import "validate/validate.proto";
+
+option go_package = "github.com/iter-x/server/internal/api/auth/v1;v1";
+
+service AuthService {
+	rpc SignIn (SignInRequest) returns (SignInResponse) {
+		option (google.api.http) = {
+			post: "/api/v1/auth/sign-in/password"
+			body: "*"
+		};
+	};
+	rpc SignInWithOAuth (SignInWithOAuthRequest) returns (SignInWithOAuthResponse) {
+		option (google.api.http) = {
+			post: "/api/v1/auth/sign-in/oauth"
+			body: "*"
+		};
+	};
+	rpc SignUp (SignUpRequest) returns (SignUpResponse) {
+		option (google.api.http) = {
+			post: "/api/v1/auth/sign-up"
+			body: "*"
+		};
+	};
+	rpc RequestPasswordReset (RequestPasswordResetRequest) returns (RequestPasswordResetResponse) {
+		option (google.api.http) = {
+			post: "/api/v1/auth/request-password-reset"
+			body: "*"
+		};
+	}
+	rpc VerifyPasswordResetToken (VerifyPasswordResetTokenRequest) returns (VerifyPasswordResetTokenResponse) {
+		option (google.api.http) = {
+			get: "/api/v1/auth/verify-password-reset-token"
+		};
+	}
+	rpc ResetPassword (ResetPasswordRequest) returns (ResetPasswordResponse) {
+		option (google.api.http) = {
+			post: "/api/v1/auth/reset-password"
+			body: "*"
+		};
+	}
+}
+
+message SignInRequest {
+	string email = 1 [(validate.rules).string.email = true];
+	string password = 2 [(validate.rules).string = {min_len: 5, max_len: 50}];
+}
+
+message SignInResponse {
+	string token = 1;
+}
+
+enum OAuthProvider {
+	GOOGLE = 0;
+	GITHUB = 1;
+}
+
+message SignInWithOAuthRequest {
+	OAuthProvider provider = 1;
+	string code = 2 [(validate.rules).string = {min_len: 1, max_len: 256}];
+}
+
+message SignInWithOAuthResponse {
+	string token = 1;
+}
+
+message SignUpRequest {
+	string email = 1 [(validate.rules).string.email = true];
+	string password = 2 [(validate.rules).string = {min_len: 5, max_len: 50}];
+}
+
+message SignUpResponse {
+	string token = 1;
+}
+
+message RequestPasswordResetRequest {
+	string email = 1;
+}
+
+message RequestPasswordResetResponse {
+	string status = 1;
+}
+
+message VerifyPasswordResetTokenRequest {
+	string token = 1;
+}
+
+message VerifyPasswordResetTokenResponse {
+	bool valid = 1;
+}
+
+message ResetPasswordRequest {
+	string token = 1;
+	string new_password = 2;
+}
+
+message ResetPasswordResponse {
+	string status = 1;
+}

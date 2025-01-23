@@ -1,0 +1,8 @@
+environment: "${X_ENV:PROD}"
+log:
+  level: "${X_LOG_LEVEL:info}"
+  format: "${X_LOG_FORMAT:console}"
+  output: "${X_LOG_OUTPUT:stdout}"
+  disable_caller: ${X_LOG_DISABLE_CALLER:false}
+  disable_stacktrace: ${X_LOG_DISABLE_STACKTRACE:true}
+  enable_color: ${X_LOG_DISABLE_TIMESTAMP:false}

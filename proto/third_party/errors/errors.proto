@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package errors;
+
+option go_package = "github.com/memoria-x/protoc-gen-go-errors/errors;errors";
+
+import "google/protobuf/descriptor.proto";
+
+message Status {
+  int32 code = 1; // The status code.
+  string reason = 2; // A unique identifier of the error
+  string message = 3; // A human-readable description of the error
+  map<string, string> metadata = 4; // A map of metadata for the error, e.g. the trace id
+};
+
+extend google.protobuf.EnumOptions {
+  int32 default_http_code = 10500;
+}
+
+extend google.protobuf.EnumValueOptions {
+  int32 http_code = 10500;
+}

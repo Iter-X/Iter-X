@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package xerr;
+
+option go_package = "github.com/iter-x/iter-x/internal/common/xerr;xerr";
+
+import "errors/errors.proto";
+
+enum ClientError {
+  option (errors.default_http_code) = 400;
+  BAD_REQUEST = 0;
+  USER_NOT_FOUND = 1;
+  USER_ALREADY_EXISTS = 2;
+  INVALID_EMAIL_OR_PASSWORD = 3;
+  PROVIDER_NOT_SUPPORTED = 4;
+}
+
+enum UnauthorizedError {
+  option (errors.default_http_code) = 401;
+  UNAUTHORIZED = 0;
+  INVALID_TOKEN = 1;
+  TOKEN_EXPIRED = 2;
+}
+
+enum ServerError {
+  option (errors.default_http_code) = 500;
+  INTERNAL_SERVER_ERROR = 0;
+}

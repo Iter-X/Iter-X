@@ -1,0 +1,25 @@
+server:
+  http:
+    grpc_addr: "${X_GRPC_INSIDE_ADDR:localhost:9000}"
+    addr: "${X_HTTP_ADDR:0.0.0.0:8000}"
+    timeout: 30s
+    enable_cors: true
+    allowed_origins: "${X_ALLOWED_ORIGINS:http://localhost:3000}"
+    allowed_methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+      - "PATCH"
+      - "OPTIONS"
+    allowed_headers:
+      - "Content-Type"
+      - "Authorization"
+    exposed_headers:
+      - "Content-Length"
+    allow_credentials: true
+
+  grpc:
+    network: tcp
+    addr: "${X_GRPC_ADDR:0.0.0.0:9000}"
+    timeout: 30s

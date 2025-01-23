@@ -1,0 +1,5 @@
+data:
+  database:
+    driver: postgres
+    source: "host=${X_DB_HOST:localhost} port=${X_DB_PORT:5432} 
+    user=${X_DB_USER:postgres} dbname=${X_DB_NAME:postgres} password=${X_DB_PASS:example} sslmode=disable"

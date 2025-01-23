@@ -1,0 +1,95 @@
+syntax = "proto3";
+package conf;
+
+option go_package = "github.com/iter-x/iter-x/internal/conf;conf";
+
+import "google/protobuf/duration.proto";
+
+message Bootstrap {
+  Environment environment = 1;
+  Log log = 2;
+  Server server = 3;
+  Data data = 4;
+  Auth auth = 5;
+  I18n i18n = 6;
+  Agent agent = 7;
+}
+
+enum Environment {
+  UNKNOWN = 0;
+  DEV = 1;
+  PROD = 2;
+  TEST = 3;
+}
+
+message Log {
+  string level = 1;
+  string format = 2;
+  string output = 3;
+  bool disable_caller = 4;
+  bool disable_stacktrace = 5;
+  bool enable_color = 6;
+}
+
+message Server {
+  message HTTP {
+    string network = 1;
+    string addr = 2;
+    google.protobuf.Duration timeout = 3;
+    bool enable_cors = 4;
+    string allowed_origins = 5;
+    repeated string allowed_methods = 6;
+    repeated string allowed_headers = 7;
+    repeated string exposed_headers = 8;
+    bool allow_credentials = 9;
+    string grpc_addr = 10;
+  }
+  message GRPC {
+    string network = 1;
+    string addr = 2;
+    google.protobuf.Duration timeout = 3;
+  }
+  HTTP http = 1;
+  GRPC grpc = 2;
+}
+
+message Data {
+  message Database {
+    string driver = 1;
+    string source = 2;
+  }
+  Database database = 1;
+}
+
+message Jwt {
+  string secret = 1;
+  google.protobuf.Duration expiration = 2;
+  string issuer = 3;
+}
+
+message Auth {
+  message OAuth {
+    string google_client_id = 1;
+    string google_client_secret = 2;
+    string google_redirect_url = 3;
+    string github_client_id = 4;
+    string github_client_secret = 5;
+    string github_redirect_url = 6;
+  }
+  Jwt jwt = 1;
+  OAuth oauth = 2;
+}
+
+message I18n {
+  string dir = 1;
+  I18nFormat format = 2;
+}
+
+enum I18nFormat {
+  TOML = 0;
+  JSON = 1;
+}
+
+message Agent {
+  Jwt jwt = 1;
+}
