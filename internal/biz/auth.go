@@ -2,6 +2,8 @@ package biz
 
 import (
 	"context"
+	"errors"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/ifuryst/lol"
 	v1 "github.com/iter-x/iter-x/internal/api/auth/v1"
@@ -11,6 +13,7 @@ import (
 	"github.com/iter-x/iter-x/internal/repo"
 	"github.com/iter-x/iter-x/internal/repo/ent"
 	"go.uber.org/zap"
+	"strings"
 	"time"
 )
 
@@ -226,4 +229,26 @@ func (b *Auth) RefreshToken(ctx context.Context, params *v1.RefreshTokenRequest)
 		Token:     res.Token,
 		ExpiresIn: res.ExpiresIn,
 	}, nil
+}
+
+func (b *Auth) ValidateToken(_ context.Context, s string) (jwt.Claims, error) {
+	token, err := auth.ValidToken(
+		[]byte(b.cfg.Jwt.Secret),
+		strings.TrimPrefix(s, "Bearer "),
+		&auth.AgentClaims{},
+	)
+	if err != nil {
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return nil, xerr.ErrorTokenExpired()
+		}
+		return nil, xerr.ErrorUnauthorized()
+	}
+	if !token.Valid {
+		return nil, xerr.ErrorInvalidToken()
+	}
+	claims, ok := token.Claims.(*auth.AgentClaims)
+	if !ok {
+		return nil, xerr.ErrorInvalidToken()
+	}
+	return claims, nil
 }

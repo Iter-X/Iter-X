@@ -62,5 +62,5 @@ func (s *Auth) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*
 }
 
 func (s *Auth) ValidateToken(ctx context.Context, token string) (jwt.Claims, error) {
-	return nil, nil
+	return s.authBiz.ValidateToken(ctx, token)
 }
