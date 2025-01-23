@@ -1,4 +1,15 @@
-# Iter-X
+<div align="center">
+    <h1>Iter-X</h1>
+</div>
+
+<div align="center">
+
+| [English](https://github.com/Iter-X/Iter-X) | [中文简体](README_zh-CN.md) |
+
+</div>
+
+---
+
 Iter-X是一款基于AI的智能旅行规划APP，我们会基于开源社区去打造一个从工具向到工具+社区向的综合平台。用户不仅可以快速生成个性化旅行行程，还能浏览、分享和复制他人的行程规划，探索热门目的地与流行玩法，大幅简化繁琐的出行准备流程，轻松规划快乐出行。
 
 ## 核心功能

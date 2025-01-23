@@ -1,4 +1,15 @@
-# Iter-X
+<div align="center">
+    <h1>Iter-X</h1>
+</div>
+
+<div align="center">
+
+| [English](https://github.com/Iter-X/Iter-X) | [中文简体](docs/README_zh-CN.md) |
+
+</div>
+
+---
+
 Iter-X is an AI-powered smart travel planning app designed to evolve from a tool-oriented platform to a combined tool + community platform based on the open-source community. Users can quickly generate personalized travel itineraries, browse, share, and copy others’ plans, and explore popular destinations and trends. This simplifies the traditionally tedious travel preparation process for effortless and enjoyable planning.
 
 ## Key Features
