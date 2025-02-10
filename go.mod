@@ -8,7 +8,6 @@ require (
 	github.com/BurntSushi/toml v1.4.0
 	github.com/bytedance/sonic v1.12.7
 	github.com/emicklei/proto v1.14.0
-	github.com/envoyproxy/protoc-gen-validate v1.2.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.6.0
@@ -19,6 +18,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/memoria-x/protoc-gen-go-errors v0.1.0
 	github.com/nicksnyder/go-i18n/v2 v2.5.0
+	github.com/protoc-gen/protoc-gen-validatex v0.3.2
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/zap v1.27.0
@@ -27,7 +27,7 @@ require (
 	golang.org/x/oauth2 v0.25.0
 	golang.org/x/text v0.21.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250122153221-138b5a5a4fd4
-	google.golang.org/grpc v1.69.4
+	google.golang.org/grpc v1.70.0
 	google.golang.org/protobuf v1.36.3
 )
 
@@ -45,6 +45,7 @@ require (
 	github.com/bytedance/sonic/loader v0.2.3 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/envoyproxy/protoc-gen-validate v1.2.1 // indirect
 	github.com/go-openapi/inflect v0.21.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/cel-go v0.22.1 // indirect

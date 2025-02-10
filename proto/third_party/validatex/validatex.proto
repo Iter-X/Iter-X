@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package validatex;
+
+import "google/protobuf/descriptor.proto";
+
+option go_package = "github.com/protoc-gen/protoc-gen-validatex/validatex;validatex";
+
+message StringRules {
+  bool email = 1;
+  int32 min_len = 2;
+  int32 max_len = 3;
+}
+
+message FieldRules {
+  oneof type {
+    StringRules string = 1;
+  }
+}
+
+extend google.protobuf.FieldOptions {
+  FieldRules rules = 50001;
+}

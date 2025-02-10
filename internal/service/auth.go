@@ -5,6 +5,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	pb "github.com/iter-x/iter-x/internal/api/auth/v1"
 	"github.com/iter-x/iter-x/internal/biz"
+	"strings"
 )
 
 type Auth struct {
@@ -18,7 +19,18 @@ func NewAuth(authBiz *biz.Auth) *Auth {
 	}
 }
 
+func GetValFromCtx(ctx context.Context, key string) string {
+	val := ctx.Value(strings.ToLower(key))
+	if val == nil {
+		return ""
+	}
+	return val.(string)
+}
+
 func (s *Auth) SignIn(ctx context.Context, req *pb.SignInRequest) (*pb.SignInResponse, error) {
+	if err := req.Validate(ctx); err != nil {
+		return nil, err
+	}
 	return s.authBiz.SignIn(ctx, req)
 }
 

@@ -12,7 +12,7 @@ init:
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.3
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
 	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.25.1
-	go install github.com/envoyproxy/protoc-gen-validate@v1.1.0
+	go install github.com/protoc-gen/protoc-gen-validatex@v0.3.2
 	go install github.com/memoria-x/protoc-gen-go-errors@v0.1.0
 	go install github.com/google/wire/cmd/wire@v0.6.0
 
@@ -48,7 +48,8 @@ api:
  	       --go_out=paths=source_relative:./internal/api \
  	       --go-grpc_out=paths=source_relative:./internal/api \
  	       --grpc-gateway_out=paths=source_relative:./internal/api \
- 	       --validate_out=paths=source_relative,lang=go:./internal/api \
+		   --validatex_out=paths=source_relative:./internal/api \
+		   --validatex_opt=i18n_dir=./i18n/validatex,i18n_out_relative_dir=../../i18n/validatex \
 	       $(API_PROTO_FILES)
 
 .PHONY: generate

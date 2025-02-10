@@ -3,7 +3,7 @@ syntax = "proto3";
 package auth.v1;
 
 import "google/api/annotations.proto";
-import "validate/validate.proto";
+import "validatex/validatex.proto";
 
 option go_package = "github.com/iter-x/server/internal/api/auth/v1;v1";
 
@@ -52,8 +52,8 @@ service AuthService {
 }
 
 message SignInRequest {
-	string email = 1 [(validate.rules).string.email = true];
-	string password = 2 [(validate.rules).string = {min_len: 5, max_len: 50}];
+	string email = 1 [(validatex.rules).string.email = true];
+	string password = 2 [(validatex.rules).string = {min_len: 5, max_len: 50}];
 }
 
 message SignInResponse {
@@ -69,7 +69,7 @@ enum OAuthProvider {
 
 message SignInWithOAuthRequest {
 	OAuthProvider provider = 1;
-	string code = 2 [(validate.rules).string = {min_len: 1, max_len: 256}];
+	string code = 2 [(validatex.rules).string = {min_len: 1, max_len: 256}];
 }
 
 message SignInWithOAuthResponse {
@@ -77,8 +77,8 @@ message SignInWithOAuthResponse {
 }
 
 message SignUpRequest {
-	string email = 1 [(validate.rules).string.email = true];
-	string password = 2 [(validate.rules).string = {min_len: 5, max_len: 50}];
+	string email = 1 [(validatex.rules).string.email = true];
+	string password = 2 [(validatex.rules).string = {min_len: 5, max_len: 50}];
 }
 
 message SignUpResponse {

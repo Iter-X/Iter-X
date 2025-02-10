@@ -47,7 +47,7 @@ func run(cfgPath string) {
 
 	app, cleanup, err := wireApp(cfg.I18N, cfg.Server.Grpc, cfg.Server.Http, cfg.Data, cfg.Auth, cfg.Agent, logger)
 	if err != nil {
-		logger.Error("Failed to init the app", err)
+		logger.Error("Failed to init the app: ", err)
 		os.Exit(1)
 	}
 
