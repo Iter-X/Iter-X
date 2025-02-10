@@ -1,4 +1,4 @@
-//go:generate go run main.go -O ../../i18n/ -P ../../proto/xerr/errors.proto
+//go:generate go run main.go -O ../../i18n/ -P ../../proto/xerr/xerr.proto
 package main
 
 import (

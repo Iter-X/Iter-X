@@ -96,8 +96,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/protoc-gen/protoc-gen-go-errors v0.3.0 h1:ep+eaDnt5+OUKMdZQl/cIohn+RNqO8AY5xCd/HrscD0=
 github.com/protoc-gen/protoc-gen-go-errors v0.3.0/go.mod h1:Zo/474Rz2wfVRjc8LSXDikz4ftwktllcl30JVHHhT+8=
-github.com/protoc-gen/protoc-gen-validatex v0.3.2 h1:IonncQ5KWY+8KCntEpkzjk/CPQujXDN2x5XN4whAtPI=
-github.com/protoc-gen/protoc-gen-validatex v0.3.2/go.mod h1:WlKo/8DV/KERx4PRPAU6Hopw6qykuS+L+eoQXYKiG2A=
+github.com/protoc-gen/protoc-gen-validatex v0.4.1 h1:bT6ZCDjhKi69gDtOH36NQWW7ubWV+8QGgFhqtb3sgJg=
+github.com/protoc-gen/protoc-gen-validatex v0.4.1/go.mod h1:17tH1yAHAYV1cNORu0bWEy/kUtYHqqtEW92QGE0+fzA=
 github.com/rogpeppe/go-internal v1.13.1 h1:KvO1DLK/DRN07sQ1LQKScxyZJuNnedQ5/wKSR38lUII=
 github.com/rogpeppe/go-internal v1.13.1/go.mod h1:uMEvuHeurkdAXX61udpOXGD/AzZDWNMNyH2VO9fmH0o=
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
