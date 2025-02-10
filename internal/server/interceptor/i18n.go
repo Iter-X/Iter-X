@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/iter-x/iter-x/internal/common/cnst"
-	xerr "github.com/memoria-x/protoc-gen-go-errors/errors"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
+	xerr "github.com/protoc-gen/protoc-gen-go-errors/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )

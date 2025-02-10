@@ -13,7 +13,7 @@ init:
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
 	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.25.1
 	go install github.com/protoc-gen/protoc-gen-validatex@v0.3.2
-	go install github.com/memoria-x/protoc-gen-go-errors@v0.2.0
+	go install github.com/protoc-gen/protoc-gen-go-errors@v0.3.0
 	go install github.com/google/wire/cmd/wire@v0.6.0
 
 .PHONY: config

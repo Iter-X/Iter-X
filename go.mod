@@ -16,8 +16,8 @@ require (
 	github.com/jhump/protoreflect v1.17.0
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
-	github.com/memoria-x/protoc-gen-go-errors v0.2.0
 	github.com/nicksnyder/go-i18n/v2 v2.5.0
+	github.com/protoc-gen/protoc-gen-go-errors v0.3.0
 	github.com/protoc-gen/protoc-gen-validatex v0.3.2
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.10.0

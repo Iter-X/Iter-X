@@ -4,7 +4,7 @@ package xerr
 
 import (
 	errors1 "errors"
-	errors "github.com/memoria-x/protoc-gen-go-errors/errors"
+	errors "github.com/protoc-gen/protoc-gen-go-errors/errors"
 )
 
 func As(err error) *errors.Error {
