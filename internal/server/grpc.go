@@ -27,6 +27,7 @@ func NewGRPCServer(c *conf.Server_GRPC, i18nBundle *i18n.Bundle,
 		grpc.ChainUnaryInterceptor(
 			interceptor.I18n(i18nBundle),
 			interceptor.TokenValidation(auth),
+			interceptor.Validatex(),
 		),
 	)
 	authV1.RegisterAuthServiceServer(server, auth)

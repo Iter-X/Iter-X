@@ -18,6 +18,10 @@ func As(err error) *errors.Error {
 	return nil
 }
 
+func New(code int, reason, message string) *errors.Error {
+	return errors.New(code, reason, message)
+}
+
 func IsBadRequest(err error) bool {
 	if err == nil {
 		return false
