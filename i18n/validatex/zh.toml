@@ -1,3 +1,15 @@
 [EmailInvalid]
 other = "必须是一个有效的邮箱地址"
 
+[StringMinLen]
+other = "长度不能小于{{.MinLen}}"
+
+[StringMaxLen]
+other = "长度不能大于{{.MaxLen}}"
+
+[StringLen]
+other = "长度必须等于{{.Len}}"
+
+[StringNonEmpty]
+other = "不能为空"
+

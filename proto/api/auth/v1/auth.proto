@@ -113,7 +113,7 @@ message ResetPasswordResponse {
 }
 
 message RefreshTokenRequest {
-	string refresh_token = 1;
+	string refresh_token = 1 [(validatex.rules).string = {non_empty: true}];
 }
 
 message RefreshTokenResponse {

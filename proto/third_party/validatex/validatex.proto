@@ -10,6 +10,8 @@ message StringRules {
   bool email = 1;
   int32 min_len = 2;
   int32 max_len = 3;
+  int32 exact_len = 4;
+  bool non_empty = 5;
 }
 
 message FieldRules {
