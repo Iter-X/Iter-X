@@ -47,8 +47,8 @@ type DailyTripMutation struct {
 	id                     *uuid.UUID
 	created_at             *time.Time
 	updated_at             *time.Time
-	day                    *int
-	addday                 *int
+	day                    *int32
+	addday                 *int32
 	date                   *time.Time
 	notes                  *string
 	clearedFields          map[string]struct{}
@@ -275,13 +275,13 @@ func (m *DailyTripMutation) ResetTripID() {
 }
 
 // SetDay sets the "day" field.
-func (m *DailyTripMutation) SetDay(i int) {
+func (m *DailyTripMutation) SetDay(i int32) {
 	m.day = &i
 	m.addday = nil
 }
 
 // Day returns the value of the "day" field in the mutation.
-func (m *DailyTripMutation) Day() (r int, exists bool) {
+func (m *DailyTripMutation) Day() (r int32, exists bool) {
 	v := m.day
 	if v == nil {
 		return
@@ -292,7 +292,7 @@ func (m *DailyTripMutation) Day() (r int, exists bool) {
 // OldDay returns the old "day" field's value of the DailyTrip entity.
 // If the DailyTrip object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DailyTripMutation) OldDay(ctx context.Context) (v int, err error) {
+func (m *DailyTripMutation) OldDay(ctx context.Context) (v int32, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDay is only allowed on UpdateOne operations")
 	}
@@ -307,7 +307,7 @@ func (m *DailyTripMutation) OldDay(ctx context.Context) (v int, err error) {
 }
 
 // AddDay adds i to the "day" field.
-func (m *DailyTripMutation) AddDay(i int) {
+func (m *DailyTripMutation) AddDay(i int32) {
 	if m.addday != nil {
 		*m.addday += i
 	} else {
@@ -316,7 +316,7 @@ func (m *DailyTripMutation) AddDay(i int) {
 }
 
 // AddedDay returns the value that was added to the "day" field in this mutation.
-func (m *DailyTripMutation) AddedDay() (r int, exists bool) {
+func (m *DailyTripMutation) AddedDay() (r int32, exists bool) {
 	v := m.addday
 	if v == nil {
 		return
@@ -621,7 +621,7 @@ func (m *DailyTripMutation) SetField(name string, value ent.Value) error {
 		m.SetTripID(v)
 		return nil
 	case dailytrip.FieldDay:
-		v, ok := value.(int)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -672,7 +672,7 @@ func (m *DailyTripMutation) AddedField(name string) (ent.Value, bool) {
 func (m *DailyTripMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	case dailytrip.FieldDay:
-		v, ok := value.(int)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

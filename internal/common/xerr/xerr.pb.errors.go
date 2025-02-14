@@ -106,6 +106,30 @@ func ErrorInvalidTripId() *errors.Error {
 	return errors.New(400, ClientError_INVALID_TRIP_ID.String(), "")
 }
 
+func IsDailyTripNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ClientError_DAILY_TRIP_NOT_FOUND.String() && e.Code == 400
+}
+
+func ErrorDailyTripNotFound() *errors.Error {
+	return errors.New(400, ClientError_DAILY_TRIP_NOT_FOUND.String(), "")
+}
+
+func IsInvalidDailyTripId(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ClientError_INVALID_DAILY_TRIP_ID.String() && e.Code == 400
+}
+
+func ErrorInvalidDailyTripId() *errors.Error {
+	return errors.New(400, ClientError_INVALID_DAILY_TRIP_ID.String(), "")
+}
+
 func IsUnauthorized(err error) bool {
 	if err == nil {
 		return false
@@ -212,4 +236,64 @@ func IsDeleteTripFailed(err error) bool {
 
 func ErrorDeleteTripFailed() *errors.Error {
 	return errors.New(500, ServerError_DELETE_TRIP_FAILED.String(), "")
+}
+
+func IsCreateDailyTripFailed(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ServerError_CREATE_DAILY_TRIP_FAILED.String() && e.Code == 500
+}
+
+func ErrorCreateDailyTripFailed() *errors.Error {
+	return errors.New(500, ServerError_CREATE_DAILY_TRIP_FAILED.String(), "")
+}
+
+func IsGetDailyTripFailed(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ServerError_GET_DAILY_TRIP_FAILED.String() && e.Code == 500
+}
+
+func ErrorGetDailyTripFailed() *errors.Error {
+	return errors.New(500, ServerError_GET_DAILY_TRIP_FAILED.String(), "")
+}
+
+func IsGetDailyTripListFailed(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ServerError_GET_DAILY_TRIP_LIST_FAILED.String() && e.Code == 500
+}
+
+func ErrorGetDailyTripListFailed() *errors.Error {
+	return errors.New(500, ServerError_GET_DAILY_TRIP_LIST_FAILED.String(), "")
+}
+
+func IsUpdateDailyTripFailed(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ServerError_UPDATE_DAILY_TRIP_FAILED.String() && e.Code == 500
+}
+
+func ErrorUpdateDailyTripFailed() *errors.Error {
+	return errors.New(500, ServerError_UPDATE_DAILY_TRIP_FAILED.String(), "")
+}
+
+func IsDeleteDailyTripFailed(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ServerError_DELETE_DAILY_TRIP_FAILED.String() && e.Code == 500
+}
+
+func ErrorDeleteDailyTripFailed() *errors.Error {
+	return errors.New(500, ServerError_DELETE_DAILY_TRIP_FAILED.String(), "")
 }

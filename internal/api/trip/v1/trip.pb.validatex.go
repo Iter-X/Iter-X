@@ -119,6 +119,128 @@ func (x *ListTripsResponse) Validate(ctx context.Context) error {
 	}
 	return nil
 }
+func (x *CreateDailyTripRequest) Validate(ctx context.Context) error {
+	if x == nil {
+		return nil
+	}
+	if !validatex.ValidUUID(x.TripId) {
+		return validatex.NewError(
+			validatex.MustLocalize(ctx, &i18n.LocalizeConfig{MessageID: "UUIDInvalid",
+				TemplateData: map[string]string{"FieldName": "trip_id"},
+			}, "must be a valid UUID")).
+			WithMetadata(map[string]string{"field": "trip_id"})
+	}
+	return nil
+}
+func (x *CreateDailyTripResponse) Validate(ctx context.Context) error {
+	if x == nil {
+		return nil
+	}
+	return nil
+}
+func (x *GetDailyTripRequest) Validate(ctx context.Context) error {
+	if x == nil {
+		return nil
+	}
+	if !validatex.ValidUUID(x.TripId) {
+		return validatex.NewError(
+			validatex.MustLocalize(ctx, &i18n.LocalizeConfig{MessageID: "UUIDInvalid",
+				TemplateData: map[string]string{"FieldName": "trip_id"},
+			}, "must be a valid UUID")).
+			WithMetadata(map[string]string{"field": "trip_id"})
+	}
+	if !validatex.ValidUUID(x.DailyId) {
+		return validatex.NewError(
+			validatex.MustLocalize(ctx, &i18n.LocalizeConfig{MessageID: "UUIDInvalid",
+				TemplateData: map[string]string{"FieldName": "daily_id"},
+			}, "must be a valid UUID")).
+			WithMetadata(map[string]string{"field": "daily_id"})
+	}
+	return nil
+}
+func (x *GetDailyTripResponse) Validate(ctx context.Context) error {
+	if x == nil {
+		return nil
+	}
+	return nil
+}
+func (x *UpdateDailyTripRequest) Validate(ctx context.Context) error {
+	if x == nil {
+		return nil
+	}
+	if !validatex.ValidUUID(x.TripId) {
+		return validatex.NewError(
+			validatex.MustLocalize(ctx, &i18n.LocalizeConfig{MessageID: "UUIDInvalid",
+				TemplateData: map[string]string{"FieldName": "trip_id"},
+			}, "must be a valid UUID")).
+			WithMetadata(map[string]string{"field": "trip_id"})
+	}
+	if !validatex.ValidUUID(x.DailyId) {
+		return validatex.NewError(
+			validatex.MustLocalize(ctx, &i18n.LocalizeConfig{MessageID: "UUIDInvalid",
+				TemplateData: map[string]string{"FieldName": "daily_id"},
+			}, "must be a valid UUID")).
+			WithMetadata(map[string]string{"field": "daily_id"})
+	}
+	return nil
+}
+func (x *UpdateDailyTripResponse) Validate(ctx context.Context) error {
+	if x == nil {
+		return nil
+	}
+	return nil
+}
+func (x *DeleteDailyTripRequest) Validate(ctx context.Context) error {
+	if x == nil {
+		return nil
+	}
+	if !validatex.ValidUUID(x.TripId) {
+		return validatex.NewError(
+			validatex.MustLocalize(ctx, &i18n.LocalizeConfig{MessageID: "UUIDInvalid",
+				TemplateData: map[string]string{"FieldName": "trip_id"},
+			}, "must be a valid UUID")).
+			WithMetadata(map[string]string{"field": "trip_id"})
+	}
+	if !validatex.ValidUUID(x.DailyId) {
+		return validatex.NewError(
+			validatex.MustLocalize(ctx, &i18n.LocalizeConfig{MessageID: "UUIDInvalid",
+				TemplateData: map[string]string{"FieldName": "daily_id"},
+			}, "must be a valid UUID")).
+			WithMetadata(map[string]string{"field": "daily_id"})
+	}
+	return nil
+}
+func (x *DeleteDailyTripResponse) Validate(ctx context.Context) error {
+	if x == nil {
+		return nil
+	}
+	return nil
+}
+func (x *ListDailyTripsRequest) Validate(ctx context.Context) error {
+	if x == nil {
+		return nil
+	}
+	if !validatex.ValidUUID(x.TripId) {
+		return validatex.NewError(
+			validatex.MustLocalize(ctx, &i18n.LocalizeConfig{MessageID: "UUIDInvalid",
+				TemplateData: map[string]string{"FieldName": "trip_id"},
+			}, "must be a valid UUID")).
+			WithMetadata(map[string]string{"field": "trip_id"})
+	}
+	return nil
+}
+func (x *ListDailyTripsResponse) Validate(ctx context.Context) error {
+	if x == nil {
+		return nil
+	}
+	return nil
+}
+func (x *DailyTrip) Validate(ctx context.Context) error {
+	if x == nil {
+		return nil
+	}
+	return nil
+}
 
 func init() {
 	validatex.Init18n("./i18n/validatex")

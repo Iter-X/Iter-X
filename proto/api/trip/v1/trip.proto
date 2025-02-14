@@ -36,6 +36,34 @@ service TripService {
       get: "/api/v1/trips"
     };
   }
+
+  rpc CreateDailyTrip(CreateDailyTripRequest) returns (CreateDailyTripResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/trips/{trip_id}/daily"
+      body: "*"
+    };
+  }
+  rpc GetDailyTrip(GetDailyTripRequest) returns (GetDailyTripResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/trips/{trip_id}/daily/{daily_id}"
+    };
+  }
+  rpc UpdateDailyTrip(UpdateDailyTripRequest) returns (UpdateDailyTripResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/trips/{trip_id}/daily/{daily_id}"
+      body: "*"
+    };
+  }
+  rpc DeleteDailyTrip(DeleteDailyTripRequest) returns (DeleteDailyTripResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/trips/{trip_id}/daily/{daily_id}"
+    };
+  }
+  rpc ListDailyTrips(ListDailyTripsRequest) returns (ListDailyTripsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/trips/{trip_id}/daily"
+    };
+  }
 }
 
 message Trip {
@@ -94,4 +122,63 @@ message ListTripsRequest {
 
 message ListTripsResponse {
   repeated Trip trips = 1;
+}
+
+message CreateDailyTripRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+  int32 day = 2;
+  google.protobuf.Timestamp date = 3;
+  string notes = 4;
+}
+
+message CreateDailyTripResponse {
+  DailyTrip daily_trip = 1;
+}
+
+message GetDailyTripRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+  string daily_id = 2 [(validatex.rules).string.uuid = true];
+}
+
+message GetDailyTripResponse {
+  DailyTrip daily_trip = 1;
+}
+
+message UpdateDailyTripRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+  string daily_id = 2 [(validatex.rules).string.uuid = true];
+  int32 day = 3;
+  google.protobuf.Timestamp date = 4;
+  string notes = 5;
+}
+
+message UpdateDailyTripResponse {
+  DailyTrip daily_trip = 1;
+}
+
+message DeleteDailyTripRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+  string daily_id = 2 [(validatex.rules).string.uuid = true];
+}
+
+message DeleteDailyTripResponse {
+  string status = 1;
+}
+
+message ListDailyTripsRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+}
+
+message ListDailyTripsResponse {
+  repeated DailyTrip daily_trips = 1;
+}
+
+message DailyTrip {
+  string id = 1;
+  google.protobuf.Timestamp created_at = 2;
+  google.protobuf.Timestamp updated_at = 3;
+  string trip_id = 4;
+  int32 day = 5;
+  google.protobuf.Timestamp date = 6;
+  string notes = 7;
 }

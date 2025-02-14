@@ -17,7 +17,7 @@ func (DailyTrip) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Unique().Default(uuid.New),
 		field.UUID("trip_id", uuid.UUID{}).Unique(),
-		field.Int("day").Positive(),
+		field.Int32("day").Positive(),
 		field.Time("date"),
 		field.String("notes").MaxLen(255).Optional(),
 	}

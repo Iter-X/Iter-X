@@ -13,7 +13,7 @@ var (
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "day", Type: field.TypeInt},
+		{Name: "day", Type: field.TypeInt32},
 		{Name: "date", Type: field.TypeTime},
 		{Name: "notes", Type: field.TypeString, Nullable: true, Size: 255},
 		{Name: "trip_id", Type: field.TypeUUID},
