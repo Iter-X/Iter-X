@@ -4,6 +4,7 @@ package auth.v1;
 
 import "google/api/annotations.proto";
 import "validatex/validatex.proto";
+import "cnst/constant.proto";
 
 option go_package = "github.com/iter-x/server/internal/api/auth/v1;v1";
 
@@ -13,41 +14,48 @@ service AuthService {
 			post: "/api/v1/auth/sign-in/password"
 			body: "*"
 		};
+		option (common.cnst.skip_token) = true;
 	};
 	rpc SignInWithOAuth (SignInWithOAuthRequest) returns (SignInWithOAuthResponse) {
 		option (google.api.http) = {
 			post: "/api/v1/auth/sign-in/oauth"
 			body: "*"
 		};
+		option (common.cnst.skip_token) = true;
 	};
 	rpc SignUp (SignUpRequest) returns (SignUpResponse) {
 		option (google.api.http) = {
 			post: "/api/v1/auth/sign-up"
 			body: "*"
 		};
+		option (common.cnst.skip_token) = true;
 	};
 	rpc RequestPasswordReset (RequestPasswordResetRequest) returns (RequestPasswordResetResponse) {
 		option (google.api.http) = {
 			post: "/api/v1/auth/request-password-reset"
 			body: "*"
 		};
+		option (common.cnst.skip_token) = true;
 	}
 	rpc VerifyPasswordResetToken (VerifyPasswordResetTokenRequest) returns (VerifyPasswordResetTokenResponse) {
 		option (google.api.http) = {
 			get: "/api/v1/auth/verify-password-reset-token"
 		};
+		option (common.cnst.skip_token) = true;
 	}
 	rpc ResetPassword (ResetPasswordRequest) returns (ResetPasswordResponse) {
 		option (google.api.http) = {
 			post: "/api/v1/auth/reset-password"
 			body: "*"
 		};
+		option (common.cnst.skip_token) = true;
 	}
 	rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse) {
 		option (google.api.http) = {
 			post: "/api/v1/auth/refresh-token"
 			body: "*"
 		};
+		option (common.cnst.skip_token) = true;
 	};
 }
 

@@ -27,7 +27,10 @@ func wireApp(i18nCfg *conf.I18N, grpcCfg *conf.Server_GRPC, httpCfg *conf.Server
 	auth := repo.NewAuth(client, logger)
 	bizAuth := biz.NewAuth(authCfg, auth, logger)
 	serviceAuth := service.NewAuth(bizAuth)
-	grpcServer := server.NewGRPCServer(grpcCfg, bundle, serviceAuth, logger)
+	trip := repo.NewTrip(client, logger)
+	bizTrip := biz.NewTrip(trip, logger)
+	serviceTrip := service.NewTrip(bizTrip)
+	grpcServer := server.NewGRPCServer(grpcCfg, bundle, serviceAuth, serviceTrip, logger)
 	httpServer := server.NewHTTPServer(httpCfg, logger)
 	app := newApp(grpcServer, httpServer)
 	return app, func() {

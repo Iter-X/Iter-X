@@ -27,9 +27,9 @@ config:
 # generate internal proto
 common:
 	protoc --proto_path=./proto/common \
- 	       --go_out=paths=source_relative:./internal/common/cnst \
- 	       --go-grpc_out=paths=source_relative:./internal/common/cnst \
-		   ./proto/common/*.proto
+ 	       --go_out=paths=source_relative:./internal/common \
+ 	       --go-grpc_out=paths=source_relative:./internal/common \
+		   ./proto/common/**/*.proto
 
 .PHONY: errors
 # generate errors
@@ -45,6 +45,7 @@ errors:
 api:
 	protoc --proto_path=./proto/api \
  	       --proto_path=./proto/third_party \
+ 	       --proto_path=./proto/common \
  	       --go_out=paths=source_relative:./internal/api \
  	       --go-grpc_out=paths=source_relative:./internal/api \
  	       --grpc-gateway_out=paths=source_relative:./internal/api \

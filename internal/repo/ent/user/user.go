@@ -31,6 +31,8 @@ const (
 	FieldAvatarURL = "avatar_url"
 	// EdgeRefreshToken holds the string denoting the refresh_token edge name in mutations.
 	EdgeRefreshToken = "refresh_token"
+	// EdgeTrip holds the string denoting the trip edge name in mutations.
+	EdgeTrip = "trip"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// RefreshTokenTable is the table that holds the refresh_token relation/edge.
@@ -40,6 +42,13 @@ const (
 	RefreshTokenInverseTable = "refresh_tokens"
 	// RefreshTokenColumn is the table column denoting the refresh_token relation/edge.
 	RefreshTokenColumn = "user_id"
+	// TripTable is the table that holds the trip relation/edge.
+	TripTable = "trips"
+	// TripInverseTable is the table name for the Trip entity.
+	// It exists in this package in order to avoid circular dependency with the "trip" package.
+	TripInverseTable = "trips"
+	// TripColumn is the table column denoting the trip relation/edge.
+	TripColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -141,10 +150,31 @@ func ByRefreshToken(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newRefreshTokenStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByTripCount orders the results by trip count.
+func ByTripCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTripStep(), opts...)
+	}
+}
+
+// ByTrip orders the results by trip terms.
+func ByTrip(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTripStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newRefreshTokenStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(RefreshTokenInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, RefreshTokenTable, RefreshTokenColumn),
+	)
+}
+func newTripStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TripInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, TripTable, TripColumn),
 	)
 }

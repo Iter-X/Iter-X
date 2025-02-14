@@ -6,8 +6,20 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// DailyTrip is the predicate function for dailytrip builders.
+type DailyTrip func(*sql.Selector)
+
+// DailyTripItem is the predicate function for dailytripitem builders.
+type DailyTripItem func(*sql.Selector)
+
+// Media is the predicate function for media builders.
+type Media func(*sql.Selector)
+
 // RefreshToken is the predicate function for refreshtoken builders.
 type RefreshToken func(*sql.Selector)
+
+// Trip is the predicate function for trip builders.
+type Trip func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

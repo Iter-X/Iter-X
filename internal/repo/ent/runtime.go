@@ -6,8 +6,12 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/iter-x/iter-x/internal/repo/ent/dailytrip"
+	"github.com/iter-x/iter-x/internal/repo/ent/dailytripitem"
+	"github.com/iter-x/iter-x/internal/repo/ent/media"
 	"github.com/iter-x/iter-x/internal/repo/ent/refreshtoken"
 	"github.com/iter-x/iter-x/internal/repo/ent/schema"
+	"github.com/iter-x/iter-x/internal/repo/ent/trip"
 	"github.com/iter-x/iter-x/internal/repo/ent/user"
 )
 
@@ -15,6 +19,129 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	dailytripMixin := schema.DailyTrip{}.Mixin()
+	dailytripMixinFields0 := dailytripMixin[0].Fields()
+	_ = dailytripMixinFields0
+	dailytripFields := schema.DailyTrip{}.Fields()
+	_ = dailytripFields
+	// dailytripDescCreatedAt is the schema descriptor for created_at field.
+	dailytripDescCreatedAt := dailytripMixinFields0[0].Descriptor()
+	// dailytrip.DefaultCreatedAt holds the default value on creation for the created_at field.
+	dailytrip.DefaultCreatedAt = dailytripDescCreatedAt.Default.(func() time.Time)
+	// dailytripDescUpdatedAt is the schema descriptor for updated_at field.
+	dailytripDescUpdatedAt := dailytripMixinFields0[1].Descriptor()
+	// dailytrip.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	dailytrip.DefaultUpdatedAt = dailytripDescUpdatedAt.Default.(func() time.Time)
+	// dailytrip.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	dailytrip.UpdateDefaultUpdatedAt = dailytripDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// dailytripDescDay is the schema descriptor for day field.
+	dailytripDescDay := dailytripFields[2].Descriptor()
+	// dailytrip.DayValidator is a validator for the "day" field. It is called by the builders before save.
+	dailytrip.DayValidator = dailytripDescDay.Validators[0].(func(int) error)
+	// dailytripDescNotes is the schema descriptor for notes field.
+	dailytripDescNotes := dailytripFields[4].Descriptor()
+	// dailytrip.NotesValidator is a validator for the "notes" field. It is called by the builders before save.
+	dailytrip.NotesValidator = dailytripDescNotes.Validators[0].(func(string) error)
+	// dailytripDescID is the schema descriptor for id field.
+	dailytripDescID := dailytripFields[0].Descriptor()
+	// dailytrip.DefaultID holds the default value on creation for the id field.
+	dailytrip.DefaultID = dailytripDescID.Default.(func() uuid.UUID)
+	dailytripitemMixin := schema.DailyTripItem{}.Mixin()
+	dailytripitemMixinFields0 := dailytripitemMixin[0].Fields()
+	_ = dailytripitemMixinFields0
+	dailytripitemFields := schema.DailyTripItem{}.Fields()
+	_ = dailytripitemFields
+	// dailytripitemDescCreatedAt is the schema descriptor for created_at field.
+	dailytripitemDescCreatedAt := dailytripitemMixinFields0[0].Descriptor()
+	// dailytripitem.DefaultCreatedAt holds the default value on creation for the created_at field.
+	dailytripitem.DefaultCreatedAt = dailytripitemDescCreatedAt.Default.(func() time.Time)
+	// dailytripitemDescUpdatedAt is the schema descriptor for updated_at field.
+	dailytripitemDescUpdatedAt := dailytripitemMixinFields0[1].Descriptor()
+	// dailytripitem.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	dailytripitem.DefaultUpdatedAt = dailytripitemDescUpdatedAt.Default.(func() time.Time)
+	// dailytripitem.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	dailytripitem.UpdateDefaultUpdatedAt = dailytripitemDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// dailytripitemDescNotes is the schema descriptor for notes field.
+	dailytripitemDescNotes := dailytripitemFields[3].Descriptor()
+	// dailytripitem.NotesValidator is a validator for the "notes" field. It is called by the builders before save.
+	dailytripitem.NotesValidator = dailytripitemDescNotes.Validators[0].(func(string) error)
+	// dailytripitemDescID is the schema descriptor for id field.
+	dailytripitemDescID := dailytripitemFields[0].Descriptor()
+	// dailytripitem.DefaultID holds the default value on creation for the id field.
+	dailytripitem.DefaultID = dailytripitemDescID.Default.(func() uuid.UUID)
+	mediaMixin := schema.Media{}.Mixin()
+	mediaMixinFields0 := mediaMixin[0].Fields()
+	_ = mediaMixinFields0
+	mediaFields := schema.Media{}.Fields()
+	_ = mediaFields
+	// mediaDescCreatedAt is the schema descriptor for created_at field.
+	mediaDescCreatedAt := mediaMixinFields0[0].Descriptor()
+	// media.DefaultCreatedAt holds the default value on creation for the created_at field.
+	media.DefaultCreatedAt = mediaDescCreatedAt.Default.(func() time.Time)
+	// mediaDescUpdatedAt is the schema descriptor for updated_at field.
+	mediaDescUpdatedAt := mediaMixinFields0[1].Descriptor()
+	// media.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	media.DefaultUpdatedAt = mediaDescUpdatedAt.Default.(func() time.Time)
+	// media.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	media.UpdateDefaultUpdatedAt = mediaDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// mediaDescFilename is the schema descriptor for filename field.
+	mediaDescFilename := mediaFields[1].Descriptor()
+	// media.FilenameValidator is a validator for the "filename" field. It is called by the builders before save.
+	media.FilenameValidator = func() func(string) error {
+		validators := mediaDescFilename.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(filename string) error {
+			for _, fn := range fns {
+				if err := fn(filename); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// mediaDescFileType is the schema descriptor for file_type field.
+	mediaDescFileType := mediaFields[2].Descriptor()
+	// media.FileTypeValidator is a validator for the "file_type" field. It is called by the builders before save.
+	media.FileTypeValidator = func() func(string) error {
+		validators := mediaDescFileType.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(file_type string) error {
+			for _, fn := range fns {
+				if err := fn(file_type); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// mediaDescPath is the schema descriptor for path field.
+	mediaDescPath := mediaFields[4].Descriptor()
+	// media.PathValidator is a validator for the "path" field. It is called by the builders before save.
+	media.PathValidator = func() func(string) error {
+		validators := mediaDescPath.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(_path string) error {
+			for _, fn := range fns {
+				if err := fn(_path); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// mediaDescID is the schema descriptor for id field.
+	mediaDescID := mediaFields[0].Descriptor()
+	// media.DefaultID holds the default value on creation for the id field.
+	media.DefaultID = mediaDescID.Default.(func() uuid.UUID)
 	refreshtokenMixin := schema.RefreshToken{}.Mixin()
 	refreshtokenMixinFields0 := refreshtokenMixin[0].Fields()
 	_ = refreshtokenMixinFields0
@@ -52,6 +179,51 @@ func init() {
 	refreshtokenDescID := refreshtokenFields[0].Descriptor()
 	// refreshtoken.DefaultID holds the default value on creation for the id field.
 	refreshtoken.DefaultID = refreshtokenDescID.Default.(func() uuid.UUID)
+	tripMixin := schema.Trip{}.Mixin()
+	tripMixinFields0 := tripMixin[0].Fields()
+	_ = tripMixinFields0
+	tripFields := schema.Trip{}.Fields()
+	_ = tripFields
+	// tripDescCreatedAt is the schema descriptor for created_at field.
+	tripDescCreatedAt := tripMixinFields0[0].Descriptor()
+	// trip.DefaultCreatedAt holds the default value on creation for the created_at field.
+	trip.DefaultCreatedAt = tripDescCreatedAt.Default.(func() time.Time)
+	// tripDescUpdatedAt is the schema descriptor for updated_at field.
+	tripDescUpdatedAt := tripMixinFields0[1].Descriptor()
+	// trip.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	trip.DefaultUpdatedAt = tripDescUpdatedAt.Default.(func() time.Time)
+	// trip.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	trip.UpdateDefaultUpdatedAt = tripDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// tripDescStatus is the schema descriptor for status field.
+	tripDescStatus := tripFields[2].Descriptor()
+	// trip.DefaultStatus holds the default value on creation for the status field.
+	trip.DefaultStatus = tripDescStatus.Default.(bool)
+	// tripDescTitle is the schema descriptor for title field.
+	tripDescTitle := tripFields[3].Descriptor()
+	// trip.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	trip.TitleValidator = func() func(string) error {
+		validators := tripDescTitle.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(title string) error {
+			for _, fn := range fns {
+				if err := fn(title); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// tripDescDescription is the schema descriptor for description field.
+	tripDescDescription := tripFields[4].Descriptor()
+	// trip.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	trip.DescriptionValidator = tripDescDescription.Validators[0].(func(string) error)
+	// tripDescID is the schema descriptor for id field.
+	tripDescID := tripFields[0].Descriptor()
+	// trip.DefaultID holds the default value on creation for the id field.
+	trip.DefaultID = tripDescID.Default.(func() uuid.UUID)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	_ = userMixinFields0

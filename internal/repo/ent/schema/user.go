@@ -28,6 +28,7 @@ func (User) Fields() []ent.Field {
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("refresh_token", RefreshToken.Type),
+		edge.To("trip", Trip.Type),
 	}
 }
 

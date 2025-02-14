@@ -474,6 +474,29 @@ func HasRefreshTokenWith(preds ...predicate.RefreshToken) predicate.User {
 	})
 }
 
+// HasTrip applies the HasEdge predicate on the "trip" edge.
+func HasTrip() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, TripTable, TripColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTripWith applies the HasEdge predicate on the "trip" edge with a given conditions (other predicates).
+func HasTripWith(preds ...predicate.Trip) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newTripStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(sql.AndPredicates(predicates...))

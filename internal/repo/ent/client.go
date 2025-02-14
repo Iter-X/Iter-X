@@ -16,7 +16,11 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/iter-x/iter-x/internal/repo/ent/dailytrip"
+	"github.com/iter-x/iter-x/internal/repo/ent/dailytripitem"
+	"github.com/iter-x/iter-x/internal/repo/ent/media"
 	"github.com/iter-x/iter-x/internal/repo/ent/refreshtoken"
+	"github.com/iter-x/iter-x/internal/repo/ent/trip"
 	"github.com/iter-x/iter-x/internal/repo/ent/user"
 )
 
@@ -25,8 +29,16 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// DailyTrip is the client for interacting with the DailyTrip builders.
+	DailyTrip *DailyTripClient
+	// DailyTripItem is the client for interacting with the DailyTripItem builders.
+	DailyTripItem *DailyTripItemClient
+	// Media is the client for interacting with the Media builders.
+	Media *MediaClient
 	// RefreshToken is the client for interacting with the RefreshToken builders.
 	RefreshToken *RefreshTokenClient
+	// Trip is the client for interacting with the Trip builders.
+	Trip *TripClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -40,7 +52,11 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.DailyTrip = NewDailyTripClient(c.config)
+	c.DailyTripItem = NewDailyTripItemClient(c.config)
+	c.Media = NewMediaClient(c.config)
 	c.RefreshToken = NewRefreshTokenClient(c.config)
+	c.Trip = NewTripClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -132,10 +148,14 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:          ctx,
-		config:       cfg,
-		RefreshToken: NewRefreshTokenClient(cfg),
-		User:         NewUserClient(cfg),
+		ctx:           ctx,
+		config:        cfg,
+		DailyTrip:     NewDailyTripClient(cfg),
+		DailyTripItem: NewDailyTripItemClient(cfg),
+		Media:         NewMediaClient(cfg),
+		RefreshToken:  NewRefreshTokenClient(cfg),
+		Trip:          NewTripClient(cfg),
+		User:          NewUserClient(cfg),
 	}, nil
 }
 
@@ -153,17 +173,21 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:          ctx,
-		config:       cfg,
-		RefreshToken: NewRefreshTokenClient(cfg),
-		User:         NewUserClient(cfg),
+		ctx:           ctx,
+		config:        cfg,
+		DailyTrip:     NewDailyTripClient(cfg),
+		DailyTripItem: NewDailyTripItemClient(cfg),
+		Media:         NewMediaClient(cfg),
+		RefreshToken:  NewRefreshTokenClient(cfg),
+		Trip:          NewTripClient(cfg),
+		User:          NewUserClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		RefreshToken.
+//		DailyTrip.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -185,26 +209,503 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.RefreshToken.Use(hooks...)
-	c.User.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.DailyTrip, c.DailyTripItem, c.Media, c.RefreshToken, c.Trip, c.User,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.RefreshToken.Intercept(interceptors...)
-	c.User.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.DailyTrip, c.DailyTripItem, c.Media, c.RefreshToken, c.Trip, c.User,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *DailyTripMutation:
+		return c.DailyTrip.mutate(ctx, m)
+	case *DailyTripItemMutation:
+		return c.DailyTripItem.mutate(ctx, m)
+	case *MediaMutation:
+		return c.Media.mutate(ctx, m)
 	case *RefreshTokenMutation:
 		return c.RefreshToken.mutate(ctx, m)
+	case *TripMutation:
+		return c.Trip.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// DailyTripClient is a client for the DailyTrip schema.
+type DailyTripClient struct {
+	config
+}
+
+// NewDailyTripClient returns a client for the DailyTrip from the given config.
+func NewDailyTripClient(c config) *DailyTripClient {
+	return &DailyTripClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `dailytrip.Hooks(f(g(h())))`.
+func (c *DailyTripClient) Use(hooks ...Hook) {
+	c.hooks.DailyTrip = append(c.hooks.DailyTrip, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `dailytrip.Intercept(f(g(h())))`.
+func (c *DailyTripClient) Intercept(interceptors ...Interceptor) {
+	c.inters.DailyTrip = append(c.inters.DailyTrip, interceptors...)
+}
+
+// Create returns a builder for creating a DailyTrip entity.
+func (c *DailyTripClient) Create() *DailyTripCreate {
+	mutation := newDailyTripMutation(c.config, OpCreate)
+	return &DailyTripCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DailyTrip entities.
+func (c *DailyTripClient) CreateBulk(builders ...*DailyTripCreate) *DailyTripCreateBulk {
+	return &DailyTripCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *DailyTripClient) MapCreateBulk(slice any, setFunc func(*DailyTripCreate, int)) *DailyTripCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &DailyTripCreateBulk{err: fmt.Errorf("calling to DailyTripClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*DailyTripCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &DailyTripCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DailyTrip.
+func (c *DailyTripClient) Update() *DailyTripUpdate {
+	mutation := newDailyTripMutation(c.config, OpUpdate)
+	return &DailyTripUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DailyTripClient) UpdateOne(dt *DailyTrip) *DailyTripUpdateOne {
+	mutation := newDailyTripMutation(c.config, OpUpdateOne, withDailyTrip(dt))
+	return &DailyTripUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DailyTripClient) UpdateOneID(id uuid.UUID) *DailyTripUpdateOne {
+	mutation := newDailyTripMutation(c.config, OpUpdateOne, withDailyTripID(id))
+	return &DailyTripUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DailyTrip.
+func (c *DailyTripClient) Delete() *DailyTripDelete {
+	mutation := newDailyTripMutation(c.config, OpDelete)
+	return &DailyTripDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DailyTripClient) DeleteOne(dt *DailyTrip) *DailyTripDeleteOne {
+	return c.DeleteOneID(dt.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *DailyTripClient) DeleteOneID(id uuid.UUID) *DailyTripDeleteOne {
+	builder := c.Delete().Where(dailytrip.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DailyTripDeleteOne{builder}
+}
+
+// Query returns a query builder for DailyTrip.
+func (c *DailyTripClient) Query() *DailyTripQuery {
+	return &DailyTripQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeDailyTrip},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a DailyTrip entity by its id.
+func (c *DailyTripClient) Get(ctx context.Context, id uuid.UUID) (*DailyTrip, error) {
+	return c.Query().Where(dailytrip.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DailyTripClient) GetX(ctx context.Context, id uuid.UUID) *DailyTrip {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTrip queries the trip edge of a DailyTrip.
+func (c *DailyTripClient) QueryTrip(dt *DailyTrip) *TripQuery {
+	query := (&TripClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := dt.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dailytrip.Table, dailytrip.FieldID, id),
+			sqlgraph.To(trip.Table, trip.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dailytrip.TripTable, dailytrip.TripColumn),
+		)
+		fromV = sqlgraph.Neighbors(dt.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDailyTripItem queries the daily_trip_item edge of a DailyTrip.
+func (c *DailyTripClient) QueryDailyTripItem(dt *DailyTrip) *DailyTripItemQuery {
+	query := (&DailyTripItemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := dt.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dailytrip.Table, dailytrip.FieldID, id),
+			sqlgraph.To(dailytripitem.Table, dailytripitem.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, dailytrip.DailyTripItemTable, dailytrip.DailyTripItemColumn),
+		)
+		fromV = sqlgraph.Neighbors(dt.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *DailyTripClient) Hooks() []Hook {
+	return c.hooks.DailyTrip
+}
+
+// Interceptors returns the client interceptors.
+func (c *DailyTripClient) Interceptors() []Interceptor {
+	return c.inters.DailyTrip
+}
+
+func (c *DailyTripClient) mutate(ctx context.Context, m *DailyTripMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DailyTripCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DailyTripUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DailyTripUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DailyTripDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown DailyTrip mutation op: %q", m.Op())
+	}
+}
+
+// DailyTripItemClient is a client for the DailyTripItem schema.
+type DailyTripItemClient struct {
+	config
+}
+
+// NewDailyTripItemClient returns a client for the DailyTripItem from the given config.
+func NewDailyTripItemClient(c config) *DailyTripItemClient {
+	return &DailyTripItemClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `dailytripitem.Hooks(f(g(h())))`.
+func (c *DailyTripItemClient) Use(hooks ...Hook) {
+	c.hooks.DailyTripItem = append(c.hooks.DailyTripItem, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `dailytripitem.Intercept(f(g(h())))`.
+func (c *DailyTripItemClient) Intercept(interceptors ...Interceptor) {
+	c.inters.DailyTripItem = append(c.inters.DailyTripItem, interceptors...)
+}
+
+// Create returns a builder for creating a DailyTripItem entity.
+func (c *DailyTripItemClient) Create() *DailyTripItemCreate {
+	mutation := newDailyTripItemMutation(c.config, OpCreate)
+	return &DailyTripItemCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DailyTripItem entities.
+func (c *DailyTripItemClient) CreateBulk(builders ...*DailyTripItemCreate) *DailyTripItemCreateBulk {
+	return &DailyTripItemCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *DailyTripItemClient) MapCreateBulk(slice any, setFunc func(*DailyTripItemCreate, int)) *DailyTripItemCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &DailyTripItemCreateBulk{err: fmt.Errorf("calling to DailyTripItemClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*DailyTripItemCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &DailyTripItemCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DailyTripItem.
+func (c *DailyTripItemClient) Update() *DailyTripItemUpdate {
+	mutation := newDailyTripItemMutation(c.config, OpUpdate)
+	return &DailyTripItemUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DailyTripItemClient) UpdateOne(dti *DailyTripItem) *DailyTripItemUpdateOne {
+	mutation := newDailyTripItemMutation(c.config, OpUpdateOne, withDailyTripItem(dti))
+	return &DailyTripItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DailyTripItemClient) UpdateOneID(id uuid.UUID) *DailyTripItemUpdateOne {
+	mutation := newDailyTripItemMutation(c.config, OpUpdateOne, withDailyTripItemID(id))
+	return &DailyTripItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DailyTripItem.
+func (c *DailyTripItemClient) Delete() *DailyTripItemDelete {
+	mutation := newDailyTripItemMutation(c.config, OpDelete)
+	return &DailyTripItemDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DailyTripItemClient) DeleteOne(dti *DailyTripItem) *DailyTripItemDeleteOne {
+	return c.DeleteOneID(dti.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *DailyTripItemClient) DeleteOneID(id uuid.UUID) *DailyTripItemDeleteOne {
+	builder := c.Delete().Where(dailytripitem.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DailyTripItemDeleteOne{builder}
+}
+
+// Query returns a query builder for DailyTripItem.
+func (c *DailyTripItemClient) Query() *DailyTripItemQuery {
+	return &DailyTripItemQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeDailyTripItem},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a DailyTripItem entity by its id.
+func (c *DailyTripItemClient) Get(ctx context.Context, id uuid.UUID) (*DailyTripItem, error) {
+	return c.Query().Where(dailytripitem.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DailyTripItemClient) GetX(ctx context.Context, id uuid.UUID) *DailyTripItem {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTrip queries the trip edge of a DailyTripItem.
+func (c *DailyTripItemClient) QueryTrip(dti *DailyTripItem) *TripQuery {
+	query := (&TripClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := dti.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dailytripitem.Table, dailytripitem.FieldID, id),
+			sqlgraph.To(trip.Table, trip.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dailytripitem.TripTable, dailytripitem.TripColumn),
+		)
+		fromV = sqlgraph.Neighbors(dti.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDailyTrip queries the daily_trip edge of a DailyTripItem.
+func (c *DailyTripItemClient) QueryDailyTrip(dti *DailyTripItem) *DailyTripQuery {
+	query := (&DailyTripClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := dti.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dailytripitem.Table, dailytripitem.FieldID, id),
+			sqlgraph.To(dailytrip.Table, dailytrip.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dailytripitem.DailyTripTable, dailytripitem.DailyTripColumn),
+		)
+		fromV = sqlgraph.Neighbors(dti.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *DailyTripItemClient) Hooks() []Hook {
+	return c.hooks.DailyTripItem
+}
+
+// Interceptors returns the client interceptors.
+func (c *DailyTripItemClient) Interceptors() []Interceptor {
+	return c.inters.DailyTripItem
+}
+
+func (c *DailyTripItemClient) mutate(ctx context.Context, m *DailyTripItemMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DailyTripItemCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DailyTripItemUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DailyTripItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DailyTripItemDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown DailyTripItem mutation op: %q", m.Op())
+	}
+}
+
+// MediaClient is a client for the Media schema.
+type MediaClient struct {
+	config
+}
+
+// NewMediaClient returns a client for the Media from the given config.
+func NewMediaClient(c config) *MediaClient {
+	return &MediaClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `media.Hooks(f(g(h())))`.
+func (c *MediaClient) Use(hooks ...Hook) {
+	c.hooks.Media = append(c.hooks.Media, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `media.Intercept(f(g(h())))`.
+func (c *MediaClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Media = append(c.inters.Media, interceptors...)
+}
+
+// Create returns a builder for creating a Media entity.
+func (c *MediaClient) Create() *MediaCreate {
+	mutation := newMediaMutation(c.config, OpCreate)
+	return &MediaCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Media entities.
+func (c *MediaClient) CreateBulk(builders ...*MediaCreate) *MediaCreateBulk {
+	return &MediaCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *MediaClient) MapCreateBulk(slice any, setFunc func(*MediaCreate, int)) *MediaCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &MediaCreateBulk{err: fmt.Errorf("calling to MediaClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*MediaCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &MediaCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Media.
+func (c *MediaClient) Update() *MediaUpdate {
+	mutation := newMediaMutation(c.config, OpUpdate)
+	return &MediaUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MediaClient) UpdateOne(m *Media) *MediaUpdateOne {
+	mutation := newMediaMutation(c.config, OpUpdateOne, withMedia(m))
+	return &MediaUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MediaClient) UpdateOneID(id uuid.UUID) *MediaUpdateOne {
+	mutation := newMediaMutation(c.config, OpUpdateOne, withMediaID(id))
+	return &MediaUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Media.
+func (c *MediaClient) Delete() *MediaDelete {
+	mutation := newMediaMutation(c.config, OpDelete)
+	return &MediaDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *MediaClient) DeleteOne(m *Media) *MediaDeleteOne {
+	return c.DeleteOneID(m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *MediaClient) DeleteOneID(id uuid.UUID) *MediaDeleteOne {
+	builder := c.Delete().Where(media.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MediaDeleteOne{builder}
+}
+
+// Query returns a query builder for Media.
+func (c *MediaClient) Query() *MediaQuery {
+	return &MediaQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeMedia},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Media entity by its id.
+func (c *MediaClient) Get(ctx context.Context, id uuid.UUID) (*Media, error) {
+	return c.Query().Where(media.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MediaClient) GetX(ctx context.Context, id uuid.UUID) *Media {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *MediaClient) Hooks() []Hook {
+	return c.hooks.Media
+}
+
+// Interceptors returns the client interceptors.
+func (c *MediaClient) Interceptors() []Interceptor {
+	return c.inters.Media
+}
+
+func (c *MediaClient) mutate(ctx context.Context, m *MediaMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&MediaCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&MediaUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&MediaUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&MediaDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Media mutation op: %q", m.Op())
 	}
 }
 
@@ -357,6 +858,187 @@ func (c *RefreshTokenClient) mutate(ctx context.Context, m *RefreshTokenMutation
 	}
 }
 
+// TripClient is a client for the Trip schema.
+type TripClient struct {
+	config
+}
+
+// NewTripClient returns a client for the Trip from the given config.
+func NewTripClient(c config) *TripClient {
+	return &TripClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `trip.Hooks(f(g(h())))`.
+func (c *TripClient) Use(hooks ...Hook) {
+	c.hooks.Trip = append(c.hooks.Trip, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `trip.Intercept(f(g(h())))`.
+func (c *TripClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Trip = append(c.inters.Trip, interceptors...)
+}
+
+// Create returns a builder for creating a Trip entity.
+func (c *TripClient) Create() *TripCreate {
+	mutation := newTripMutation(c.config, OpCreate)
+	return &TripCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Trip entities.
+func (c *TripClient) CreateBulk(builders ...*TripCreate) *TripCreateBulk {
+	return &TripCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TripClient) MapCreateBulk(slice any, setFunc func(*TripCreate, int)) *TripCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TripCreateBulk{err: fmt.Errorf("calling to TripClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TripCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TripCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Trip.
+func (c *TripClient) Update() *TripUpdate {
+	mutation := newTripMutation(c.config, OpUpdate)
+	return &TripUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TripClient) UpdateOne(t *Trip) *TripUpdateOne {
+	mutation := newTripMutation(c.config, OpUpdateOne, withTrip(t))
+	return &TripUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TripClient) UpdateOneID(id uuid.UUID) *TripUpdateOne {
+	mutation := newTripMutation(c.config, OpUpdateOne, withTripID(id))
+	return &TripUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Trip.
+func (c *TripClient) Delete() *TripDelete {
+	mutation := newTripMutation(c.config, OpDelete)
+	return &TripDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TripClient) DeleteOne(t *Trip) *TripDeleteOne {
+	return c.DeleteOneID(t.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TripClient) DeleteOneID(id uuid.UUID) *TripDeleteOne {
+	builder := c.Delete().Where(trip.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TripDeleteOne{builder}
+}
+
+// Query returns a query builder for Trip.
+func (c *TripClient) Query() *TripQuery {
+	return &TripQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTrip},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Trip entity by its id.
+func (c *TripClient) Get(ctx context.Context, id uuid.UUID) (*Trip, error) {
+	return c.Query().Where(trip.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TripClient) GetX(ctx context.Context, id uuid.UUID) *Trip {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a Trip.
+func (c *TripClient) QueryUser(t *Trip) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(trip.Table, trip.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, trip.UserTable, trip.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDailyTrip queries the daily_trip edge of a Trip.
+func (c *TripClient) QueryDailyTrip(t *Trip) *DailyTripQuery {
+	query := (&DailyTripClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(trip.Table, trip.FieldID, id),
+			sqlgraph.To(dailytrip.Table, dailytrip.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, trip.DailyTripTable, trip.DailyTripColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDailyTripItem queries the daily_trip_item edge of a Trip.
+func (c *TripClient) QueryDailyTripItem(t *Trip) *DailyTripItemQuery {
+	query := (&DailyTripItemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(trip.Table, trip.FieldID, id),
+			sqlgraph.To(dailytripitem.Table, dailytripitem.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, trip.DailyTripItemTable, trip.DailyTripItemColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TripClient) Hooks() []Hook {
+	return c.hooks.Trip
+}
+
+// Interceptors returns the client interceptors.
+func (c *TripClient) Interceptors() []Interceptor {
+	return c.inters.Trip
+}
+
+func (c *TripClient) mutate(ctx context.Context, m *TripMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TripCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TripUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TripUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TripDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Trip mutation op: %q", m.Op())
+	}
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -481,6 +1163,22 @@ func (c *UserClient) QueryRefreshToken(u *User) *RefreshTokenQuery {
 	return query
 }
 
+// QueryTrip queries the trip edge of a User.
+func (c *UserClient) QueryTrip(u *User) *TripQuery {
+	query := (&TripClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(trip.Table, trip.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.TripTable, user.TripColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -509,9 +1207,9 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		RefreshToken, User []ent.Hook
+		DailyTrip, DailyTripItem, Media, RefreshToken, Trip, User []ent.Hook
 	}
 	inters struct {
-		RefreshToken, User []ent.Interceptor
+		DailyTrip, DailyTripItem, Media, RefreshToken, Trip, User []ent.Interceptor
 	}
 )

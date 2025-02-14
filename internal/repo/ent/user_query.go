@@ -15,6 +15,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/iter-x/iter-x/internal/repo/ent/predicate"
 	"github.com/iter-x/iter-x/internal/repo/ent/refreshtoken"
+	"github.com/iter-x/iter-x/internal/repo/ent/trip"
 	"github.com/iter-x/iter-x/internal/repo/ent/user"
 )
 
@@ -26,6 +27,7 @@ type UserQuery struct {
 	inters           []Interceptor
 	predicates       []predicate.User
 	withRefreshToken *RefreshTokenQuery
+	withTrip         *TripQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -77,6 +79,28 @@ func (uq *UserQuery) QueryRefreshToken() *RefreshTokenQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(refreshtoken.Table, refreshtoken.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.RefreshTokenTable, user.RefreshTokenColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTrip chains the current query on the "trip" edge.
+func (uq *UserQuery) QueryTrip() *TripQuery {
+	query := (&TripClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(trip.Table, trip.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.TripTable, user.TripColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -277,6 +301,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		inters:           append([]Interceptor{}, uq.inters...),
 		predicates:       append([]predicate.User{}, uq.predicates...),
 		withRefreshToken: uq.withRefreshToken.Clone(),
+		withTrip:         uq.withTrip.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -291,6 +316,17 @@ func (uq *UserQuery) WithRefreshToken(opts ...func(*RefreshTokenQuery)) *UserQue
 		opt(query)
 	}
 	uq.withRefreshToken = query
+	return uq
+}
+
+// WithTrip tells the query-builder to eager-load the nodes that are connected to
+// the "trip" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithTrip(opts ...func(*TripQuery)) *UserQuery {
+	query := (&TripClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withTrip = query
 	return uq
 }
 
@@ -372,8 +408,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			uq.withRefreshToken != nil,
+			uq.withTrip != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -401,6 +438,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
+	if query := uq.withTrip; query != nil {
+		if err := uq.loadTrip(ctx, query, nodes,
+			func(n *User) { n.Edges.Trip = []*Trip{} },
+			func(n *User, e *Trip) { n.Edges.Trip = append(n.Edges.Trip, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -419,6 +463,36 @@ func (uq *UserQuery) loadRefreshToken(ctx context.Context, query *RefreshTokenQu
 	}
 	query.Where(predicate.RefreshToken(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.RefreshTokenColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadTrip(ctx context.Context, query *TripQuery, nodes []*User, init func(*User), assign func(*User, *Trip)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(trip.FieldUserID)
+	}
+	query.Where(predicate.Trip(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.TripColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

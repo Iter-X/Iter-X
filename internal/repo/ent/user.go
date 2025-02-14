@@ -42,9 +42,11 @@ type User struct {
 type UserEdges struct {
 	// RefreshToken holds the value of the refresh_token edge.
 	RefreshToken []*RefreshToken `json:"refresh_token,omitempty"`
+	// Trip holds the value of the trip edge.
+	Trip []*Trip `json:"trip,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // RefreshTokenOrErr returns the RefreshToken value or an error if the edge
@@ -54,6 +56,15 @@ func (e UserEdges) RefreshTokenOrErr() ([]*RefreshToken, error) {
 		return e.RefreshToken, nil
 	}
 	return nil, &NotLoadedError{edge: "refresh_token"}
+}
+
+// TripOrErr returns the Trip value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) TripOrErr() ([]*Trip, error) {
+	if e.loadedTypes[1] {
+		return e.Trip, nil
+	}
+	return nil, &NotLoadedError{edge: "trip"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -148,6 +159,11 @@ func (u *User) Value(name string) (ent.Value, error) {
 // QueryRefreshToken queries the "refresh_token" edge of the User entity.
 func (u *User) QueryRefreshToken() *RefreshTokenQuery {
 	return NewUserClient(u.config).QueryRefreshToken(u)
+}
+
+// QueryTrip queries the "trip" edge of the User entity.
+func (u *User) QueryTrip() *TripQuery {
+	return NewUserClient(u.config).QueryTrip(u)
 }
 
 // Update returns a builder for updating this User.

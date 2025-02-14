@@ -82,6 +82,30 @@ func ErrorProviderNotSupported() *errors.Error {
 	return errors.New(400, ClientError_PROVIDER_NOT_SUPPORTED.String(), "")
 }
 
+func IsTripNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ClientError_TRIP_NOT_FOUND.String() && e.Code == 400
+}
+
+func ErrorTripNotFound() *errors.Error {
+	return errors.New(400, ClientError_TRIP_NOT_FOUND.String(), "")
+}
+
+func IsInvalidTripId(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ClientError_INVALID_TRIP_ID.String() && e.Code == 400
+}
+
+func ErrorInvalidTripId() *errors.Error {
+	return errors.New(400, ClientError_INVALID_TRIP_ID.String(), "")
+}
+
 func IsUnauthorized(err error) bool {
 	if err == nil {
 		return false
@@ -128,4 +152,64 @@ func IsInternalServerError(err error) bool {
 
 func ErrorInternalServerError() *errors.Error {
 	return errors.New(500, ServerError_INTERNAL_SERVER_ERROR.String(), "")
+}
+
+func IsCreateTripFailed(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ServerError_CREATE_TRIP_FAILED.String() && e.Code == 500
+}
+
+func ErrorCreateTripFailed() *errors.Error {
+	return errors.New(500, ServerError_CREATE_TRIP_FAILED.String(), "")
+}
+
+func IsGetTripFailed(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ServerError_GET_TRIP_FAILED.String() && e.Code == 500
+}
+
+func ErrorGetTripFailed() *errors.Error {
+	return errors.New(500, ServerError_GET_TRIP_FAILED.String(), "")
+}
+
+func IsGetTripListFailed(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ServerError_GET_TRIP_LIST_FAILED.String() && e.Code == 500
+}
+
+func ErrorGetTripListFailed() *errors.Error {
+	return errors.New(500, ServerError_GET_TRIP_LIST_FAILED.String(), "")
+}
+
+func IsUpdateTripFailed(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ServerError_UPDATE_TRIP_FAILED.String() && e.Code == 500
+}
+
+func ErrorUpdateTripFailed() *errors.Error {
+	return errors.New(500, ServerError_UPDATE_TRIP_FAILED.String(), "")
+}
+
+func IsDeleteTripFailed(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ServerError_DELETE_TRIP_FAILED.String() && e.Code == 500
+}
+
+func ErrorDeleteTripFailed() *errors.Error {
+	return errors.New(500, ServerError_DELETE_TRIP_FAILED.String(), "")
 }

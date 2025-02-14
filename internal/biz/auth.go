@@ -235,7 +235,7 @@ func (b *Auth) ValidateToken(_ context.Context, s string) (jwt.Claims, error) {
 	token, err := auth.ValidToken(
 		[]byte(b.cfg.Jwt.Secret),
 		strings.TrimPrefix(s, "Bearer "),
-		&auth.AgentClaims{},
+		&auth.Claims{},
 	)
 	if err != nil {
 		if errors.Is(err, jwt.ErrTokenExpired) {
@@ -246,7 +246,7 @@ func (b *Auth) ValidateToken(_ context.Context, s string) (jwt.Claims, error) {
 	if !token.Valid {
 		return nil, xerr.ErrorInvalidToken()
 	}
-	claims, ok := token.Claims.(*auth.AgentClaims)
+	claims, ok := token.Claims.(*auth.Claims)
 	if !ok {
 		return nil, xerr.ErrorInvalidToken()
 	}

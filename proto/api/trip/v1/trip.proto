@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+package trip.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "validatex/validatex.proto";
+
+option go_package = "github.com/iter-x/server/internal/api/trip/v1;v1";
+
+service TripService {
+  rpc CreateTrip(CreateTripRequest) returns (CreateTripResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/trips"
+      body: "*"
+    };
+  }
+  rpc GetTrip(GetTripRequest) returns (GetTripResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/trips/{id}"
+    };
+  }
+  rpc UpdateTrip(UpdateTripRequest) returns (UpdateTripResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/trips/{id}"
+      body: "*"
+    };
+  }
+  rpc DeleteTrip(DeleteTripRequest) returns (DeleteTripResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/trips/{id}"
+    };
+  }
+  rpc ListTrips(ListTripsRequest) returns (ListTripsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/trips"
+    };
+  }
+}
+
+message Trip {
+  string id = 1;
+  google.protobuf.Timestamp created_at = 2;
+  google.protobuf.Timestamp updated_at = 3;
+  bool status = 4;
+  string title = 5;
+  string description = 6;
+  google.protobuf.Timestamp start_ts = 7;
+  google.protobuf.Timestamp end_ts = 8;
+}
+
+message CreateTripRequest {
+  string title = 1 [(validatex.rules).string = {min_len: 1, max_len: 50}];
+  string description = 2 [(validatex.rules).string = {max_len: 255}];
+  google.protobuf.Timestamp start_ts = 3;
+  google.protobuf.Timestamp end_ts = 4;
+}
+
+message CreateTripResponse {
+  Trip trip = 1;
+}
+
+message GetTripRequest {
+  string id = 1;
+}
+
+message GetTripResponse {
+  Trip trip = 1;
+}
+
+message UpdateTripRequest {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  google.protobuf.Timestamp start_ts = 4;
+  google.protobuf.Timestamp end_ts = 5;
+  bool status = 7;
+}
+
+message UpdateTripResponse {
+  Trip trip = 1;
+}
+
+message DeleteTripRequest {
+  string id = 1;
+}
+
+message DeleteTripResponse {
+  string status = 1;
+}
+
+message ListTripsRequest {
+}
+
+message ListTripsResponse {
+  repeated Trip trips = 1;
+}

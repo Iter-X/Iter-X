@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/iter-x/iter-x/internal/repo/ent/refreshtoken"
+	"github.com/iter-x/iter-x/internal/repo/ent/trip"
 	"github.com/iter-x/iter-x/internal/repo/ent/user"
 )
 
@@ -123,6 +124,21 @@ func (uc *UserCreate) AddRefreshToken(r ...*RefreshToken) *UserCreate {
 		ids[i] = r[i].ID
 	}
 	return uc.AddRefreshTokenIDs(ids...)
+}
+
+// AddTripIDs adds the "trip" edge to the Trip entity by IDs.
+func (uc *UserCreate) AddTripIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddTripIDs(ids...)
+	return uc
+}
+
+// AddTrip adds the "trip" edges to the Trip entity.
+func (uc *UserCreate) AddTrip(t ...*Trip) *UserCreate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return uc.AddTripIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -290,6 +306,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(refreshtoken.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.TripIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.TripTable,
+			Columns: []string{user.TripColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(trip.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

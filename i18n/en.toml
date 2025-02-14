@@ -13,6 +13,12 @@ other = "Invalid email or password"
 [PROVIDER_NOT_SUPPORTED]
 other = "Provider not supported"
 
+[TRIP_NOT_FOUND]
+other = "Trip not found"
+
+[INVALID_TRIP_ID]
+other = "Invalid trip ID"
+
 [UNAUTHORIZED]
 other = "Unauthorized"
 
@@ -24,4 +30,19 @@ other = "Token expired"
 
 [INTERNAL_SERVER_ERROR]
 other = "Internal server error"
+
+[CREATE_TRIP_FAILED]
+other = "Create trip failed"
+
+[GET_TRIP_FAILED]
+other = "Get trip failed"
+
+[GET_TRIP_LIST_FAILED]
+other = "Get trips failed"
+
+[UPDATE_TRIP_FAILED]
+other = "Update trip failed"
+
+[DELETE_TRIP_FAILED]
+other = "Delete trip failed"
 

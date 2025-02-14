@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package common.cnst;
+
+import "google/protobuf/descriptor.proto";
+
+option go_package = "github.com/iter-x/iter-x/internal/common/cnst;cnst";
+
+extend google.protobuf.MethodOptions {
+  bool skip_token = 50000;
+}

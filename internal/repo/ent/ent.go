@@ -12,7 +12,11 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/iter-x/iter-x/internal/repo/ent/dailytrip"
+	"github.com/iter-x/iter-x/internal/repo/ent/dailytripitem"
+	"github.com/iter-x/iter-x/internal/repo/ent/media"
 	"github.com/iter-x/iter-x/internal/repo/ent/refreshtoken"
+	"github.com/iter-x/iter-x/internal/repo/ent/trip"
 	"github.com/iter-x/iter-x/internal/repo/ent/user"
 )
 
@@ -74,8 +78,12 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			refreshtoken.Table: refreshtoken.ValidColumn,
-			user.Table:         user.ValidColumn,
+			dailytrip.Table:     dailytrip.ValidColumn,
+			dailytripitem.Table: dailytripitem.ValidColumn,
+			media.Table:         media.ValidColumn,
+			refreshtoken.Table:  refreshtoken.ValidColumn,
+			trip.Table:          trip.ValidColumn,
+			user.Table:          user.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

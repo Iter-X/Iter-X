@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	authV1 "github.com/iter-x/iter-x/internal/api/auth/v1"
+	tripV1 "github.com/iter-x/iter-x/internal/api/trip/v1"
 	"github.com/iter-x/iter-x/internal/common/cnst"
 	"github.com/iter-x/iter-x/internal/conf"
 	"go.uber.org/zap"
@@ -40,6 +41,7 @@ func (s *HTTPServer) Start(ctx context.Context) error {
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	for _, fn := range []func(context.Context, *runtime.ServeMux, string, []grpc.DialOption) error{
 		authV1.RegisterAuthServiceHandlerFromEndpoint,
+		tripV1.RegisterTripServiceHandlerFromEndpoint,
 	} {
 		err := fn(ctx, s.mux, s.cfg.GrpcAddr, opts)
 		if err != nil {
