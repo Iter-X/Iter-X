@@ -61,7 +61,7 @@ message CreateTripResponse {
 }
 
 message GetTripRequest {
-  string id = 1;
+  string id = 1 [(validatex.rules).string.uuid = true];
 }
 
 message GetTripResponse {
@@ -69,7 +69,7 @@ message GetTripResponse {
 }
 
 message UpdateTripRequest {
-  string id = 1;
+  string id = 1 [(validatex.rules).string.uuid = true];
   string title = 2;
   string description = 3;
   google.protobuf.Timestamp start_ts = 4;
@@ -82,7 +82,7 @@ message UpdateTripResponse {
 }
 
 message DeleteTripRequest {
-  string id = 1;
+  string id = 1 [(validatex.rules).string.uuid = true];
 }
 
 message DeleteTripResponse {

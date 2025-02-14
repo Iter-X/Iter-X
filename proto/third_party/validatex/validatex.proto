@@ -12,6 +12,7 @@ message StringRules {
   int32 max_len = 3;
   int32 exact_len = 4;
   bool non_empty = 5;
+  bool uuid = 6;
 }
 
 message FieldRules {

@@ -1,14 +1,18 @@
 [EmailInvalid]
 other = "must be a valid email address"
 
-[StringMinLen]
-other = "must be at least {{.MinLen}} characters long"
+[StringLen]
+other = "must be exactly {{.Len}} characters long"
 
 [StringMaxLen]
 other = "must be at most {{.MaxLen}} characters long"
 
-[StringLen]
-other = "must be exactly {{.Len}} characters long"
+[StringMinLen]
+other = "must be at least {{.MinLen}} characters long"
 
 [StringNonEmpty]
 other = "cannot be empty"
+
+[UUIDInvalid]
+other = "must be a valid UUID"
+

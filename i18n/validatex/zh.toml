@@ -1,15 +1,18 @@
 [EmailInvalid]
 other = "必须是一个有效的邮箱地址"
 
-[StringMinLen]
-other = "长度不能小于{{.MinLen}}"
+[StringLen]
+other = "长度必须等于{{.Len}}"
 
 [StringMaxLen]
 other = "长度不能大于{{.MaxLen}}"
 
-[StringLen]
-other = "长度必须等于{{.Len}}"
+[StringMinLen]
+other = "长度不能小于{{.MinLen}}"
 
 [StringNonEmpty]
 other = "不能为空"
+
+[UUIDInvalid]
+other = "必须是一个有效的UUID"
 
