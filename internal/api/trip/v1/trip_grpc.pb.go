@@ -19,11 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TripService_CreateTrip_FullMethodName = "/trip.v1.TripService/CreateTrip"
-	TripService_GetTrip_FullMethodName    = "/trip.v1.TripService/GetTrip"
-	TripService_UpdateTrip_FullMethodName = "/trip.v1.TripService/UpdateTrip"
-	TripService_DeleteTrip_FullMethodName = "/trip.v1.TripService/DeleteTrip"
-	TripService_ListTrips_FullMethodName  = "/trip.v1.TripService/ListTrips"
+	TripService_CreateTrip_FullMethodName      = "/trip.v1.TripService/CreateTrip"
+	TripService_GetTrip_FullMethodName         = "/trip.v1.TripService/GetTrip"
+	TripService_UpdateTrip_FullMethodName      = "/trip.v1.TripService/UpdateTrip"
+	TripService_DeleteTrip_FullMethodName      = "/trip.v1.TripService/DeleteTrip"
+	TripService_ListTrips_FullMethodName       = "/trip.v1.TripService/ListTrips"
+	TripService_CreateDailyTrip_FullMethodName = "/trip.v1.TripService/CreateDailyTrip"
+	TripService_GetDailyTrip_FullMethodName    = "/trip.v1.TripService/GetDailyTrip"
+	TripService_UpdateDailyTrip_FullMethodName = "/trip.v1.TripService/UpdateDailyTrip"
+	TripService_DeleteDailyTrip_FullMethodName = "/trip.v1.TripService/DeleteDailyTrip"
+	TripService_ListDailyTrips_FullMethodName  = "/trip.v1.TripService/ListDailyTrips"
 )
 
 // TripServiceClient is the client API for TripService service.
@@ -35,6 +40,11 @@ type TripServiceClient interface {
 	UpdateTrip(ctx context.Context, in *UpdateTripRequest, opts ...grpc.CallOption) (*UpdateTripResponse, error)
 	DeleteTrip(ctx context.Context, in *DeleteTripRequest, opts ...grpc.CallOption) (*DeleteTripResponse, error)
 	ListTrips(ctx context.Context, in *ListTripsRequest, opts ...grpc.CallOption) (*ListTripsResponse, error)
+	CreateDailyTrip(ctx context.Context, in *CreateDailyTripRequest, opts ...grpc.CallOption) (*CreateDailyTripResponse, error)
+	GetDailyTrip(ctx context.Context, in *GetDailyTripRequest, opts ...grpc.CallOption) (*GetDailyTripResponse, error)
+	UpdateDailyTrip(ctx context.Context, in *UpdateDailyTripRequest, opts ...grpc.CallOption) (*UpdateDailyTripResponse, error)
+	DeleteDailyTrip(ctx context.Context, in *DeleteDailyTripRequest, opts ...grpc.CallOption) (*DeleteDailyTripResponse, error)
+	ListDailyTrips(ctx context.Context, in *ListDailyTripsRequest, opts ...grpc.CallOption) (*ListDailyTripsResponse, error)
 }
 
 type tripServiceClient struct {
@@ -95,6 +105,56 @@ func (c *tripServiceClient) ListTrips(ctx context.Context, in *ListTripsRequest,
 	return out, nil
 }
 
+func (c *tripServiceClient) CreateDailyTrip(ctx context.Context, in *CreateDailyTripRequest, opts ...grpc.CallOption) (*CreateDailyTripResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateDailyTripResponse)
+	err := c.cc.Invoke(ctx, TripService_CreateDailyTrip_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tripServiceClient) GetDailyTrip(ctx context.Context, in *GetDailyTripRequest, opts ...grpc.CallOption) (*GetDailyTripResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetDailyTripResponse)
+	err := c.cc.Invoke(ctx, TripService_GetDailyTrip_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tripServiceClient) UpdateDailyTrip(ctx context.Context, in *UpdateDailyTripRequest, opts ...grpc.CallOption) (*UpdateDailyTripResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateDailyTripResponse)
+	err := c.cc.Invoke(ctx, TripService_UpdateDailyTrip_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tripServiceClient) DeleteDailyTrip(ctx context.Context, in *DeleteDailyTripRequest, opts ...grpc.CallOption) (*DeleteDailyTripResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteDailyTripResponse)
+	err := c.cc.Invoke(ctx, TripService_DeleteDailyTrip_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tripServiceClient) ListDailyTrips(ctx context.Context, in *ListDailyTripsRequest, opts ...grpc.CallOption) (*ListDailyTripsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDailyTripsResponse)
+	err := c.cc.Invoke(ctx, TripService_ListDailyTrips_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TripServiceServer is the server API for TripService service.
 // All implementations must embed UnimplementedTripServiceServer
 // for forward compatibility.
@@ -104,6 +164,11 @@ type TripServiceServer interface {
 	UpdateTrip(context.Context, *UpdateTripRequest) (*UpdateTripResponse, error)
 	DeleteTrip(context.Context, *DeleteTripRequest) (*DeleteTripResponse, error)
 	ListTrips(context.Context, *ListTripsRequest) (*ListTripsResponse, error)
+	CreateDailyTrip(context.Context, *CreateDailyTripRequest) (*CreateDailyTripResponse, error)
+	GetDailyTrip(context.Context, *GetDailyTripRequest) (*GetDailyTripResponse, error)
+	UpdateDailyTrip(context.Context, *UpdateDailyTripRequest) (*UpdateDailyTripResponse, error)
+	DeleteDailyTrip(context.Context, *DeleteDailyTripRequest) (*DeleteDailyTripResponse, error)
+	ListDailyTrips(context.Context, *ListDailyTripsRequest) (*ListDailyTripsResponse, error)
 	mustEmbedUnimplementedTripServiceServer()
 }
 
@@ -128,6 +193,21 @@ func (UnimplementedTripServiceServer) DeleteTrip(context.Context, *DeleteTripReq
 }
 func (UnimplementedTripServiceServer) ListTrips(context.Context, *ListTripsRequest) (*ListTripsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListTrips not implemented")
+}
+func (UnimplementedTripServiceServer) CreateDailyTrip(context.Context, *CreateDailyTripRequest) (*CreateDailyTripResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateDailyTrip not implemented")
+}
+func (UnimplementedTripServiceServer) GetDailyTrip(context.Context, *GetDailyTripRequest) (*GetDailyTripResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDailyTrip not implemented")
+}
+func (UnimplementedTripServiceServer) UpdateDailyTrip(context.Context, *UpdateDailyTripRequest) (*UpdateDailyTripResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateDailyTrip not implemented")
+}
+func (UnimplementedTripServiceServer) DeleteDailyTrip(context.Context, *DeleteDailyTripRequest) (*DeleteDailyTripResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteDailyTrip not implemented")
+}
+func (UnimplementedTripServiceServer) ListDailyTrips(context.Context, *ListDailyTripsRequest) (*ListDailyTripsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListDailyTrips not implemented")
 }
 func (UnimplementedTripServiceServer) mustEmbedUnimplementedTripServiceServer() {}
 func (UnimplementedTripServiceServer) testEmbeddedByValue()                     {}
@@ -240,6 +320,96 @@ func _TripService_ListTrips_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TripService_CreateDailyTrip_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateDailyTripRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TripServiceServer).CreateDailyTrip(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TripService_CreateDailyTrip_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TripServiceServer).CreateDailyTrip(ctx, req.(*CreateDailyTripRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TripService_GetDailyTrip_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDailyTripRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TripServiceServer).GetDailyTrip(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TripService_GetDailyTrip_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TripServiceServer).GetDailyTrip(ctx, req.(*GetDailyTripRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TripService_UpdateDailyTrip_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateDailyTripRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TripServiceServer).UpdateDailyTrip(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TripService_UpdateDailyTrip_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TripServiceServer).UpdateDailyTrip(ctx, req.(*UpdateDailyTripRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TripService_DeleteDailyTrip_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteDailyTripRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TripServiceServer).DeleteDailyTrip(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TripService_DeleteDailyTrip_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TripServiceServer).DeleteDailyTrip(ctx, req.(*DeleteDailyTripRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TripService_ListDailyTrips_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDailyTripsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TripServiceServer).ListDailyTrips(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TripService_ListDailyTrips_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TripServiceServer).ListDailyTrips(ctx, req.(*ListDailyTripsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TripService_ServiceDesc is the grpc.ServiceDesc for TripService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -266,6 +436,26 @@ var TripService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListTrips",
 			Handler:    _TripService_ListTrips_Handler,
+		},
+		{
+			MethodName: "CreateDailyTrip",
+			Handler:    _TripService_CreateDailyTrip_Handler,
+		},
+		{
+			MethodName: "GetDailyTrip",
+			Handler:    _TripService_GetDailyTrip_Handler,
+		},
+		{
+			MethodName: "UpdateDailyTrip",
+			Handler:    _TripService_UpdateDailyTrip_Handler,
+		},
+		{
+			MethodName: "DeleteDailyTrip",
+			Handler:    _TripService_DeleteDailyTrip_Handler,
+		},
+		{
+			MethodName: "ListDailyTrips",
+			Handler:    _TripService_ListDailyTrips_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

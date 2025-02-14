@@ -37,7 +37,7 @@ func init() {
 	// dailytripDescDay is the schema descriptor for day field.
 	dailytripDescDay := dailytripFields[2].Descriptor()
 	// dailytrip.DayValidator is a validator for the "day" field. It is called by the builders before save.
-	dailytrip.DayValidator = dailytripDescDay.Validators[0].(func(int) error)
+	dailytrip.DayValidator = dailytripDescDay.Validators[0].(func(int32) error)
 	// dailytripDescNotes is the schema descriptor for notes field.
 	dailytripDescNotes := dailytripFields[4].Descriptor()
 	// dailytrip.NotesValidator is a validator for the "notes" field. It is called by the builders before save.

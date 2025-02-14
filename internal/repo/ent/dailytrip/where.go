@@ -72,7 +72,7 @@ func TripID(v uuid.UUID) predicate.DailyTrip {
 }
 
 // Day applies equality check predicate on the "day" field. It's identical to DayEQ.
-func Day(v int) predicate.DailyTrip {
+func Day(v int32) predicate.DailyTrip {
 	return predicate.DailyTrip(sql.FieldEQ(FieldDay, v))
 }
 
@@ -187,42 +187,42 @@ func TripIDNotIn(vs ...uuid.UUID) predicate.DailyTrip {
 }
 
 // DayEQ applies the EQ predicate on the "day" field.
-func DayEQ(v int) predicate.DailyTrip {
+func DayEQ(v int32) predicate.DailyTrip {
 	return predicate.DailyTrip(sql.FieldEQ(FieldDay, v))
 }
 
 // DayNEQ applies the NEQ predicate on the "day" field.
-func DayNEQ(v int) predicate.DailyTrip {
+func DayNEQ(v int32) predicate.DailyTrip {
 	return predicate.DailyTrip(sql.FieldNEQ(FieldDay, v))
 }
 
 // DayIn applies the In predicate on the "day" field.
-func DayIn(vs ...int) predicate.DailyTrip {
+func DayIn(vs ...int32) predicate.DailyTrip {
 	return predicate.DailyTrip(sql.FieldIn(FieldDay, vs...))
 }
 
 // DayNotIn applies the NotIn predicate on the "day" field.
-func DayNotIn(vs ...int) predicate.DailyTrip {
+func DayNotIn(vs ...int32) predicate.DailyTrip {
 	return predicate.DailyTrip(sql.FieldNotIn(FieldDay, vs...))
 }
 
 // DayGT applies the GT predicate on the "day" field.
-func DayGT(v int) predicate.DailyTrip {
+func DayGT(v int32) predicate.DailyTrip {
 	return predicate.DailyTrip(sql.FieldGT(FieldDay, v))
 }
 
 // DayGTE applies the GTE predicate on the "day" field.
-func DayGTE(v int) predicate.DailyTrip {
+func DayGTE(v int32) predicate.DailyTrip {
 	return predicate.DailyTrip(sql.FieldGTE(FieldDay, v))
 }
 
 // DayLT applies the LT predicate on the "day" field.
-func DayLT(v int) predicate.DailyTrip {
+func DayLT(v int32) predicate.DailyTrip {
 	return predicate.DailyTrip(sql.FieldLT(FieldDay, v))
 }
 
 // DayLTE applies the LTE predicate on the "day" field.
-func DayLTE(v int) predicate.DailyTrip {
+func DayLTE(v int32) predicate.DailyTrip {
 	return predicate.DailyTrip(sql.FieldLTE(FieldDay, v))
 }
 

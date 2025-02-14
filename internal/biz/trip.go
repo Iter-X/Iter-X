@@ -70,7 +70,7 @@ func (b *Trip) UpdateTrip(ctx context.Context, req *v1.UpdateTripRequest) (*v1.T
 		if ent.IsNotFound(err) {
 			return nil, xerr.ErrorTripNotFound()
 		}
-		b.logger.Errorw("trip not found", "err", err)
+		b.logger.Errorw("failed to get trip", "err", err)
 		return nil, xerr.ErrorGetTripFailed()
 	}
 
@@ -114,6 +114,134 @@ func (b *Trip) ListTrips(ctx context.Context) ([]*v1.Trip, error) {
 	}
 
 	return tripList, nil
+}
+
+func (b *Trip) CreateDailyTrip(ctx context.Context, req *v1.CreateDailyTripRequest) (*v1.DailyTrip, error) {
+	tripId, err := uuid.Parse(req.TripId)
+	if err != nil {
+		b.logger.Errorw("failed to parse trip id", "err", err)
+		return nil, xerr.ErrorInvalidTripId()
+	}
+
+	_, err = b.repo.GetTrip(ctx, tripId)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, xerr.ErrorTripNotFound()
+		}
+		b.logger.Errorw("failed to get trip", "err", err)
+		return nil, xerr.ErrorGetTripFailed()
+	}
+
+	dailyTrip := &ent.DailyTrip{
+		TripID: tripId,
+		Day:    req.Day,
+		Date:   req.Date.AsTime(),
+		Notes:  req.Notes,
+	}
+
+	createdDailyTrip, err := b.repo.CreateDailyTrip(ctx, dailyTrip)
+	if err != nil {
+		b.logger.Errorw("failed to create daily trip", "err", err)
+		return nil, xerr.ErrorCreateDailyTripFailed()
+	}
+
+	return toDailyTripProto(createdDailyTrip), nil
+}
+
+func (b *Trip) GetDailyTrip(ctx context.Context, req *v1.GetDailyTripRequest) (*v1.DailyTrip, error) {
+	tripId, err := uuid.Parse(req.TripId)
+	if err != nil {
+		return nil, xerr.ErrorInvalidTripId()
+	}
+	dailyId, err := uuid.Parse(req.DailyId)
+	if err != nil {
+		return nil, xerr.ErrorInvalidDailyTripId()
+	}
+
+	dailyTrip, err := b.repo.GetDailyTrip(ctx, tripId, dailyId)
+	if err != nil {
+		b.logger.Errorw("failed to get daily trip", "err", err)
+		return nil, xerr.ErrorGetDailyTripFailed()
+	}
+	return toDailyTripProto(dailyTrip), nil
+}
+
+func (b *Trip) UpdateDailyTrip(ctx context.Context, req *v1.UpdateDailyTripRequest) (*v1.DailyTrip, error) {
+	tripId, err := uuid.Parse(req.TripId)
+	if err != nil {
+		return nil, xerr.ErrorInvalidTripId()
+	}
+	dailyId, err := uuid.Parse(req.DailyId)
+	if err != nil {
+		return nil, xerr.ErrorInvalidDailyTripId()
+	}
+
+	dailyTrip, err := b.repo.GetDailyTrip(ctx, tripId, dailyId)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, xerr.ErrorDailyTripNotFound()
+		}
+		b.logger.Errorw("daily trip not found", "err", err)
+		return nil, xerr.ErrorGetDailyTripFailed()
+	}
+
+	dailyTrip.Day = req.Day
+	dailyTrip.Date = req.Date.AsTime()
+	dailyTrip.Notes = req.Notes
+	dailyTrip.UpdatedAt = time.Now()
+
+	updatedDailyTrip, err := b.repo.UpdateDailyTrip(ctx, dailyTrip)
+	if err != nil {
+		b.logger.Errorw("failed to update daily trip", "err", err)
+		return nil, xerr.ErrorUpdateDailyTripFailed()
+	}
+
+	return toDailyTripProto(updatedDailyTrip), nil
+}
+
+func (b *Trip) DeleteDailyTrip(ctx context.Context, req *v1.DeleteDailyTripRequest) error {
+	dailyId, err := uuid.Parse(req.DailyId)
+	if err != nil {
+		return xerr.ErrorInvalidDailyTripId()
+	}
+
+	if err := b.repo.DeleteDailyTrip(ctx, dailyId); err != nil {
+		b.logger.Errorw("failed to delete daily trip", "err", err)
+		return xerr.ErrorDeleteDailyTripFailed()
+	}
+	return nil
+}
+
+func (b *Trip) ListDailyTrips(ctx context.Context, req *v1.ListDailyTripsRequest) ([]*v1.DailyTrip, error) {
+	tripId, err := uuid.Parse(req.TripId)
+	if err != nil {
+		return nil, xerr.ErrorInvalidTripId()
+	}
+
+	dailyTrips, err := b.repo.ListDailyTrips(ctx, tripId)
+	if err != nil {
+		b.logger.Errorw("failed to list daily trips", "err", err)
+		return nil, xerr.ErrorGetDailyTripListFailed()
+	}
+
+	dailyTripList := make([]*v1.DailyTrip, 0, len(dailyTrips))
+	for _, dt := range dailyTrips {
+		dailyTripList = append(dailyTripList, toDailyTripProto(dt))
+	}
+
+	return dailyTripList, nil
+}
+
+func toDailyTripProto(dt *ent.DailyTrip) *v1.DailyTrip {
+	return &v1.DailyTrip{
+		Id:        dt.ID.String(),
+		TripId:    dt.TripID.String(),
+		Day:       dt.Day,
+		Date:      timestamppb.New(dt.Date),
+		Notes:     dt.Notes,
+		CreatedAt: timestamppb.New(dt.CreatedAt),
+		UpdatedAt: timestamppb.New(dt.UpdatedAt),
+	}
 }
 
 func toTripProto(t *ent.Trip) *v1.Trip {

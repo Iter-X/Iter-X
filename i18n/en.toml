@@ -19,6 +19,12 @@ other = "Trip not found"
 [INVALID_TRIP_ID]
 other = "Invalid trip ID"
 
+[DAILY_TRIP_NOT_FOUND]
+other = "Daily trip not found"
+
+[INVALID_DAILY_TRIP_ID]
+other = "Invalid daily trip ID"
+
 [UNAUTHORIZED]
 other = "Unauthorized"
 
@@ -45,4 +51,19 @@ other = "Update trip failed"
 
 [DELETE_TRIP_FAILED]
 other = "Delete trip failed"
+
+[CREATE_DAILY_TRIP_FAILED]
+other = "Create daily trip failed"
+
+[GET_DAILY_TRIP_FAILED]
+other = "Get daily trip failed"
+
+[GET_DAILY_TRIP_LIST_FAILED]
+other = "Get daily trips failed"
+
+[UPDATE_DAILY_TRIP_FAILED]
+other = "Update daily trip failed"
+
+[DELETE_DAILY_TRIP_FAILED]
+other = "Delete daily trip failed"
 

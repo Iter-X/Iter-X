@@ -26,7 +26,7 @@ type DailyTrip struct {
 	// TripID holds the value of the "trip_id" field.
 	TripID uuid.UUID `json:"trip_id,omitempty"`
 	// Day holds the value of the "day" field.
-	Day int `json:"day,omitempty"`
+	Day int32 `json:"day,omitempty"`
 	// Date holds the value of the "date" field.
 	Date time.Time `json:"date,omitempty"`
 	// Notes holds the value of the "notes" field.
@@ -124,7 +124,7 @@ func (dt *DailyTrip) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field day", values[i])
 			} else if value.Valid {
-				dt.Day = int(value.Int64)
+				dt.Day = int32(value.Int64)
 			}
 		case dailytrip.FieldDate:
 			if value, ok := values[i].(*sql.NullTime); !ok {

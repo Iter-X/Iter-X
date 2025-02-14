@@ -58,7 +58,7 @@ func (dtc *DailyTripCreate) SetTripID(u uuid.UUID) *DailyTripCreate {
 }
 
 // SetDay sets the "day" field.
-func (dtc *DailyTripCreate) SetDay(i int) *DailyTripCreate {
+func (dtc *DailyTripCreate) SetDay(i int32) *DailyTripCreate {
 	dtc.mutation.SetDay(i)
 	return dtc
 }
@@ -240,7 +240,7 @@ func (dtc *DailyTripCreate) createSpec() (*DailyTrip, *sqlgraph.CreateSpec) {
 		_node.UpdatedAt = value
 	}
 	if value, ok := dtc.mutation.Day(); ok {
-		_spec.SetField(dailytrip.FieldDay, field.TypeInt, value)
+		_spec.SetField(dailytrip.FieldDay, field.TypeInt32, value)
 		_node.Day = value
 	}
 	if value, ok := dtc.mutation.Date(); ok {

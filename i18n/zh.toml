@@ -19,6 +19,12 @@ other = "行程未找到"
 [INVALID_TRIP_ID]
 other = "无效的行程ID"
 
+[DAILY_TRIP_NOT_FOUND]
+other = "每日行程未找到"
+
+[INVALID_DAILY_TRIP_ID]
+other = "无效的每日行程ID"
+
 [UNAUTHORIZED]
 other = "未授权"
 
@@ -45,4 +51,19 @@ other = "更新行程失败"
 
 [DELETE_TRIP_FAILED]
 other = "删除行程失败"
+
+[CREATE_DAILY_TRIP_FAILED]
+other = "创建每日行程失败"
+
+[GET_DAILY_TRIP_FAILED]
+other = "获取每日行程失败"
+
+[GET_DAILY_TRIP_LIST_FAILED]
+other = "获取每日行程失败"
+
+[UPDATE_DAILY_TRIP_FAILED]
+other = "更新每日行程失败"
+
+[DELETE_DAILY_TRIP_FAILED]
+other = "删除每日行程失败"
 

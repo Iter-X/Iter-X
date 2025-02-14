@@ -78,7 +78,7 @@ var (
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
 	// DayValidator is a validator for the "day" field. It is called by the builders before save.
-	DayValidator func(int) error
+	DayValidator func(int32) error
 	// NotesValidator is a validator for the "notes" field. It is called by the builders before save.
 	NotesValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.

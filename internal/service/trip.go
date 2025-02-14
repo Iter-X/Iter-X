@@ -66,3 +66,43 @@ func (s *Trip) ListTrips(ctx context.Context, _ *v1.ListTripsRequest) (*v1.ListT
 	}
 	return &v1.ListTripsResponse{Trips: trips}, nil
 }
+
+func (s *Trip) CreateDailyTrip(ctx context.Context, req *v1.CreateDailyTripRequest) (*v1.CreateDailyTripResponse, error) {
+	dailyTrip, err := s.biz.CreateDailyTrip(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.CreateDailyTripResponse{DailyTrip: dailyTrip}, nil
+}
+
+func (s *Trip) GetDailyTrip(ctx context.Context, req *v1.GetDailyTripRequest) (*v1.GetDailyTripResponse, error) {
+	dailyTrip, err := s.biz.GetDailyTrip(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.GetDailyTripResponse{DailyTrip: dailyTrip}, nil
+}
+
+func (s *Trip) UpdateDailyTrip(ctx context.Context, req *v1.UpdateDailyTripRequest) (*v1.UpdateDailyTripResponse, error) {
+	dailyTrip, err := s.biz.UpdateDailyTrip(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.UpdateDailyTripResponse{DailyTrip: dailyTrip}, nil
+}
+
+func (s *Trip) DeleteDailyTrip(ctx context.Context, req *v1.DeleteDailyTripRequest) (*v1.DeleteDailyTripResponse, error) {
+	err := s.biz.DeleteDailyTrip(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.DeleteDailyTripResponse{Status: "deleted"}, nil
+}
+
+func (s *Trip) ListDailyTrips(ctx context.Context, req *v1.ListDailyTripsRequest) (*v1.ListDailyTripsResponse, error) {
+	dailyTrips, err := s.biz.ListDailyTrips(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.ListDailyTripsResponse{DailyTrips: dailyTrips}, nil
+}

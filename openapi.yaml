@@ -218,6 +218,120 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/trip.v1.DeleteTripResponse'
+    /api/v1/trips/{tripId}/daily:
+        get:
+            tags:
+                - TripService
+            operationId: TripService_ListDailyTrips
+            parameters:
+                - name: tripId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.ListDailyTripsResponse'
+        post:
+            tags:
+                - TripService
+            operationId: TripService_CreateDailyTrip
+            parameters:
+                - name: tripId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/trip.v1.CreateDailyTripRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.CreateDailyTripResponse'
+    /api/v1/trips/{tripId}/daily/{dailyId}:
+        get:
+            tags:
+                - TripService
+            operationId: TripService_GetDailyTrip
+            parameters:
+                - name: tripId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: dailyId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.GetDailyTripResponse'
+        put:
+            tags:
+                - TripService
+            operationId: TripService_UpdateDailyTrip
+            parameters:
+                - name: tripId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: dailyId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/trip.v1.UpdateDailyTripRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.UpdateDailyTripResponse'
+        delete:
+            tags:
+                - TripService
+            operationId: TripService_DeleteDailyTrip
+            parameters:
+                - name: tripId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: dailyId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.DeleteDailyTripResponse'
 components:
     schemas:
         auth.v1.RefreshTokenRequest:
@@ -307,6 +421,24 @@ components:
             properties:
                 valid:
                     type: boolean
+        trip.v1.CreateDailyTripRequest:
+            type: object
+            properties:
+                tripId:
+                    type: string
+                day:
+                    type: integer
+                    format: int32
+                date:
+                    type: string
+                    format: date-time
+                notes:
+                    type: string
+        trip.v1.CreateDailyTripResponse:
+            type: object
+            properties:
+                dailyTrip:
+                    $ref: '#/components/schemas/trip.v1.DailyTrip'
         trip.v1.CreateTripRequest:
             type: object
             properties:
@@ -325,16 +457,54 @@ components:
             properties:
                 trip:
                     $ref: '#/components/schemas/trip.v1.Trip'
+        trip.v1.DailyTrip:
+            type: object
+            properties:
+                id:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+                tripId:
+                    type: string
+                day:
+                    type: integer
+                    format: int32
+                date:
+                    type: string
+                    format: date-time
+                notes:
+                    type: string
+        trip.v1.DeleteDailyTripResponse:
+            type: object
+            properties:
+                status:
+                    type: string
         trip.v1.DeleteTripResponse:
             type: object
             properties:
                 status:
                     type: string
+        trip.v1.GetDailyTripResponse:
+            type: object
+            properties:
+                dailyTrip:
+                    $ref: '#/components/schemas/trip.v1.DailyTrip'
         trip.v1.GetTripResponse:
             type: object
             properties:
                 trip:
                     $ref: '#/components/schemas/trip.v1.Trip'
+        trip.v1.ListDailyTripsResponse:
+            type: object
+            properties:
+                dailyTrips:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/trip.v1.DailyTrip'
         trip.v1.ListTripsResponse:
             type: object
             properties:
@@ -365,6 +535,26 @@ components:
                 endTs:
                     type: string
                     format: date-time
+        trip.v1.UpdateDailyTripRequest:
+            type: object
+            properties:
+                tripId:
+                    type: string
+                dailyId:
+                    type: string
+                day:
+                    type: integer
+                    format: int32
+                date:
+                    type: string
+                    format: date-time
+                notes:
+                    type: string
+        trip.v1.UpdateDailyTripResponse:
+            type: object
+            properties:
+                dailyTrip:
+                    $ref: '#/components/schemas/trip.v1.DailyTrip'
         trip.v1.UpdateTripRequest:
             type: object
             properties:

@@ -52,14 +52,14 @@ func (dtu *DailyTripUpdate) SetNillableTripID(u *uuid.UUID) *DailyTripUpdate {
 }
 
 // SetDay sets the "day" field.
-func (dtu *DailyTripUpdate) SetDay(i int) *DailyTripUpdate {
+func (dtu *DailyTripUpdate) SetDay(i int32) *DailyTripUpdate {
 	dtu.mutation.ResetDay()
 	dtu.mutation.SetDay(i)
 	return dtu
 }
 
 // SetNillableDay sets the "day" field if the given value is not nil.
-func (dtu *DailyTripUpdate) SetNillableDay(i *int) *DailyTripUpdate {
+func (dtu *DailyTripUpdate) SetNillableDay(i *int32) *DailyTripUpdate {
 	if i != nil {
 		dtu.SetDay(*i)
 	}
@@ -67,7 +67,7 @@ func (dtu *DailyTripUpdate) SetNillableDay(i *int) *DailyTripUpdate {
 }
 
 // AddDay adds i to the "day" field.
-func (dtu *DailyTripUpdate) AddDay(i int) *DailyTripUpdate {
+func (dtu *DailyTripUpdate) AddDay(i int32) *DailyTripUpdate {
 	dtu.mutation.AddDay(i)
 	return dtu
 }
@@ -228,10 +228,10 @@ func (dtu *DailyTripUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.SetField(dailytrip.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := dtu.mutation.Day(); ok {
-		_spec.SetField(dailytrip.FieldDay, field.TypeInt, value)
+		_spec.SetField(dailytrip.FieldDay, field.TypeInt32, value)
 	}
 	if value, ok := dtu.mutation.AddedDay(); ok {
-		_spec.AddField(dailytrip.FieldDay, field.TypeInt, value)
+		_spec.AddField(dailytrip.FieldDay, field.TypeInt32, value)
 	}
 	if value, ok := dtu.mutation.Date(); ok {
 		_spec.SetField(dailytrip.FieldDate, field.TypeTime, value)
@@ -357,14 +357,14 @@ func (dtuo *DailyTripUpdateOne) SetNillableTripID(u *uuid.UUID) *DailyTripUpdate
 }
 
 // SetDay sets the "day" field.
-func (dtuo *DailyTripUpdateOne) SetDay(i int) *DailyTripUpdateOne {
+func (dtuo *DailyTripUpdateOne) SetDay(i int32) *DailyTripUpdateOne {
 	dtuo.mutation.ResetDay()
 	dtuo.mutation.SetDay(i)
 	return dtuo
 }
 
 // SetNillableDay sets the "day" field if the given value is not nil.
-func (dtuo *DailyTripUpdateOne) SetNillableDay(i *int) *DailyTripUpdateOne {
+func (dtuo *DailyTripUpdateOne) SetNillableDay(i *int32) *DailyTripUpdateOne {
 	if i != nil {
 		dtuo.SetDay(*i)
 	}
@@ -372,7 +372,7 @@ func (dtuo *DailyTripUpdateOne) SetNillableDay(i *int) *DailyTripUpdateOne {
 }
 
 // AddDay adds i to the "day" field.
-func (dtuo *DailyTripUpdateOne) AddDay(i int) *DailyTripUpdateOne {
+func (dtuo *DailyTripUpdateOne) AddDay(i int32) *DailyTripUpdateOne {
 	dtuo.mutation.AddDay(i)
 	return dtuo
 }
@@ -563,10 +563,10 @@ func (dtuo *DailyTripUpdateOne) sqlSave(ctx context.Context) (_node *DailyTrip, 
 		_spec.SetField(dailytrip.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := dtuo.mutation.Day(); ok {
-		_spec.SetField(dailytrip.FieldDay, field.TypeInt, value)
+		_spec.SetField(dailytrip.FieldDay, field.TypeInt32, value)
 	}
 	if value, ok := dtuo.mutation.AddedDay(); ok {
-		_spec.AddField(dailytrip.FieldDay, field.TypeInt, value)
+		_spec.AddField(dailytrip.FieldDay, field.TypeInt32, value)
 	}
 	if value, ok := dtuo.mutation.Date(); ok {
 		_spec.SetField(dailytrip.FieldDate, field.TypeTime, value)
