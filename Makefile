@@ -15,6 +15,7 @@ init:
 	go install github.com/protoc-gen/protoc-gen-validatex@v0.7.0
 	go install github.com/protoc-gen/protoc-gen-go-errors@v0.3.0
 	go install github.com/google/wire/cmd/wire@v0.6.0
+	go install github.com/google/gnostic/cmd/protoc-gen-openapi@v0.7.0
 
 .PHONY: config
 # generate internal proto
@@ -51,6 +52,7 @@ api:
  	       --grpc-gateway_out=paths=source_relative:./internal/api \
 		   --validatex_out=paths=source_relative:./internal/api \
 		   --validatex_opt=i18n_dir=./i18n/validatex,i18n_out_relative_dir=../../i18n/validatex \
+	       --openapi_out=fq_schema_naming=true,default_response=false:. \
 	       $(API_PROTO_FILES)
 
 .PHONY: generate

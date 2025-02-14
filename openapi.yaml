@@ -1,0 +1,392 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: ""
+    version: 0.0.1
+paths:
+    /api/v1/auth/refresh-token:
+        post:
+            tags:
+                - AuthService
+            operationId: AuthService_RefreshToken
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth.v1.RefreshTokenRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/auth.v1.RefreshTokenResponse'
+    /api/v1/auth/request-password-reset:
+        post:
+            tags:
+                - AuthService
+            operationId: AuthService_RequestPasswordReset
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth.v1.RequestPasswordResetRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/auth.v1.RequestPasswordResetResponse'
+    /api/v1/auth/reset-password:
+        post:
+            tags:
+                - AuthService
+            operationId: AuthService_ResetPassword
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth.v1.ResetPasswordRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/auth.v1.ResetPasswordResponse'
+    /api/v1/auth/sign-in/oauth:
+        post:
+            tags:
+                - AuthService
+            operationId: AuthService_SignInWithOAuth
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth.v1.SignInWithOAuthRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/auth.v1.SignInWithOAuthResponse'
+    /api/v1/auth/sign-in/password:
+        post:
+            tags:
+                - AuthService
+            operationId: AuthService_SignIn
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth.v1.SignInRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/auth.v1.SignInResponse'
+    /api/v1/auth/sign-up:
+        post:
+            tags:
+                - AuthService
+            operationId: AuthService_SignUp
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth.v1.SignUpRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/auth.v1.SignUpResponse'
+    /api/v1/auth/verify-password-reset-token:
+        get:
+            tags:
+                - AuthService
+            operationId: AuthService_VerifyPasswordResetToken
+            parameters:
+                - name: token
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/auth.v1.VerifyPasswordResetTokenResponse'
+    /api/v1/trips:
+        get:
+            tags:
+                - TripService
+            operationId: TripService_ListTrips
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.ListTripsResponse'
+        post:
+            tags:
+                - TripService
+            operationId: TripService_CreateTrip
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/trip.v1.CreateTripRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.CreateTripResponse'
+    /api/v1/trips/{id}:
+        get:
+            tags:
+                - TripService
+            operationId: TripService_GetTrip
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.GetTripResponse'
+        put:
+            tags:
+                - TripService
+            operationId: TripService_UpdateTrip
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/trip.v1.UpdateTripRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.UpdateTripResponse'
+        delete:
+            tags:
+                - TripService
+            operationId: TripService_DeleteTrip
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.DeleteTripResponse'
+components:
+    schemas:
+        auth.v1.RefreshTokenRequest:
+            type: object
+            properties:
+                refreshToken:
+                    type: string
+        auth.v1.RefreshTokenResponse:
+            type: object
+            properties:
+                token:
+                    type: string
+                expiresIn:
+                    type: number
+                    format: double
+        auth.v1.RequestPasswordResetRequest:
+            type: object
+            properties:
+                email:
+                    type: string
+        auth.v1.RequestPasswordResetResponse:
+            type: object
+            properties:
+                status:
+                    type: string
+        auth.v1.ResetPasswordRequest:
+            type: object
+            properties:
+                token:
+                    type: string
+                newPassword:
+                    type: string
+        auth.v1.ResetPasswordResponse:
+            type: object
+            properties:
+                status:
+                    type: string
+        auth.v1.SignInRequest:
+            type: object
+            properties:
+                email:
+                    type: string
+                password:
+                    type: string
+        auth.v1.SignInResponse:
+            type: object
+            properties:
+                token:
+                    type: string
+                refreshToken:
+                    type: string
+                expiresIn:
+                    type: number
+                    format: double
+        auth.v1.SignInWithOAuthRequest:
+            type: object
+            properties:
+                provider:
+                    type: integer
+                    format: enum
+                code:
+                    type: string
+        auth.v1.SignInWithOAuthResponse:
+            type: object
+            properties:
+                token:
+                    type: string
+        auth.v1.SignUpRequest:
+            type: object
+            properties:
+                email:
+                    type: string
+                password:
+                    type: string
+        auth.v1.SignUpResponse:
+            type: object
+            properties:
+                token:
+                    type: string
+                refreshToken:
+                    type: string
+                expiresIn:
+                    type: number
+                    format: double
+        auth.v1.VerifyPasswordResetTokenResponse:
+            type: object
+            properties:
+                valid:
+                    type: boolean
+        trip.v1.CreateTripRequest:
+            type: object
+            properties:
+                title:
+                    type: string
+                description:
+                    type: string
+                startTs:
+                    type: string
+                    format: date-time
+                endTs:
+                    type: string
+                    format: date-time
+        trip.v1.CreateTripResponse:
+            type: object
+            properties:
+                trip:
+                    $ref: '#/components/schemas/trip.v1.Trip'
+        trip.v1.DeleteTripResponse:
+            type: object
+            properties:
+                status:
+                    type: string
+        trip.v1.GetTripResponse:
+            type: object
+            properties:
+                trip:
+                    $ref: '#/components/schemas/trip.v1.Trip'
+        trip.v1.ListTripsResponse:
+            type: object
+            properties:
+                trips:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/trip.v1.Trip'
+        trip.v1.Trip:
+            type: object
+            properties:
+                id:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+                status:
+                    type: boolean
+                title:
+                    type: string
+                description:
+                    type: string
+                startTs:
+                    type: string
+                    format: date-time
+                endTs:
+                    type: string
+                    format: date-time
+        trip.v1.UpdateTripRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                title:
+                    type: string
+                description:
+                    type: string
+                startTs:
+                    type: string
+                    format: date-time
+                endTs:
+                    type: string
+                    format: date-time
+                status:
+                    type: boolean
+        trip.v1.UpdateTripResponse:
+            type: object
+            properties:
+                trip:
+                    $ref: '#/components/schemas/trip.v1.Trip'
+tags:
+    - name: AuthService
+    - name: TripService
