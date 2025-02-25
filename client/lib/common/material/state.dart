@@ -30,7 +30,7 @@ abstract class BaseState<T extends StatefulWidget> extends State<T> with Event {
   StreamSubscription? _eventSub;
 
   //
-  ConnectivityResult? _connectivity;
+  List<ConnectivityResult>? _connectivity;
 
   //
   StreamSubscription? _connectSub;
@@ -45,7 +45,7 @@ abstract class BaseState<T extends StatefulWidget> extends State<T> with Event {
     super.initState();
     //
     if (checkConnectivity) {
-      _connectSub = Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+      _connectSub = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
         refreshConnectivityResult();
       });
     }
