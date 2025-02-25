@@ -60,7 +60,7 @@ class BaseApp {
       assert(configRouter != null);
       configRouter?.call(router);
     }
-    const designSize = Size(375, 812);
+    const designSize = Size(430, 932);
     //
     return ScreenUtilInit(
       designSize: designSize,

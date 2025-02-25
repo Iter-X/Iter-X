@@ -21,10 +21,13 @@ class BaseColor {
   static const int _themePrimaryValue = 0xFFB9F32B;
   static const Color theme = Color(_themePrimaryValue);
   static const Color divider = Color(0xFFE9E9E9);
-  static const Color scaffoldBackgroundColor = Color(0xFFF8F8F8);
+  static const Color scaffoldBackgroundColor = Color(0xFFF2F2F2);
 
   // text color
   static const Color title = Color(0xFF000000);
   static const Color content = Color(0xFF111111);
-  static const Color hint = Color(0xFF989A96);
+  static const Color hint = Color(0xFF535A5F);
+
+  static const Color c_1D1F1E = Color(0xFF1D1F1E);
+  static const Color c_F2F2F2 = Color(0xFFF2F2F2);
 }
