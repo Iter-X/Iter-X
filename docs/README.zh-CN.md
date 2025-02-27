@@ -4,7 +4,7 @@
 
 <div align="center">
 
-| [English](https://github.com/Iter-X/Iter-X) | [中文简体](README_zh-CN.md) |
+| [English](https://github.com/Iter-X/Iter-X) | [中文简体](README.zh-CN.md) |
 
 </div>
 
