@@ -2,6 +2,7 @@ package server
 
 import (
 	authV1 "github.com/iter-x/iter-x/internal/api/auth/v1"
+	poiV1 "github.com/iter-x/iter-x/internal/api/poi/v1"
 	tripV1 "github.com/iter-x/iter-x/internal/api/trip/v1"
 	"github.com/iter-x/iter-x/internal/conf"
 	"github.com/iter-x/iter-x/internal/server/interceptor"
@@ -22,7 +23,7 @@ type GRPCServer struct {
 }
 
 func NewGRPCServer(c *conf.Server_GRPC, i18nBundle *i18n.Bundle,
-	auth *service.Auth, trip *service.Trip,
+	auth *service.Auth, trip *service.Trip, poi *service.PointsOfInterestService,
 	logger *zap.SugaredLogger) *GRPCServer {
 	server := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
@@ -33,6 +34,7 @@ func NewGRPCServer(c *conf.Server_GRPC, i18nBundle *i18n.Bundle,
 	)
 	authV1.RegisterAuthServiceServer(server, auth)
 	tripV1.RegisterTripServiceServer(server, trip)
+	poiV1.RegisterPointsOfInterestServiceServer(server, poi)
 	interceptor.LoadMethodOptions(server)
 	return &GRPCServer{
 		Server:  server,

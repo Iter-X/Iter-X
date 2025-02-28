@@ -297,3 +297,15 @@ func IsDeleteDailyTripFailed(err error) bool {
 func ErrorDeleteDailyTripFailed() *errors.Error {
 	return errors.New(500, ServerError_DELETE_DAILY_TRIP_FAILED.String(), "")
 }
+
+func IsSearchPoiFailed(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ServerError_SEARCH_POI_FAILED.String() && e.Code == 500
+}
+
+func ErrorSearchPoiFailed() *errors.Error {
+	return errors.New(500, ServerError_SEARCH_POI_FAILED.String(), "")
+}
