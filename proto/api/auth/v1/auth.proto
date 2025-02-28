@@ -73,6 +73,7 @@ message SignInResponse {
 enum OAuthProvider {
 	GOOGLE = 0;
 	GITHUB = 1;
+	WECHAT = 2;
 }
 
 message SignInWithOAuthRequest {

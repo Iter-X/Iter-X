@@ -167,6 +167,15 @@ func (b *Auth) SignInWithOAuth(ctx context.Context, params *v1.SignInWithOAuthRe
 		user.Username = res["name"].(string)
 		user.Email = res["email"].(string)
 		user.AvatarURL = res["picture"].(string)
+	case v1.OAuthProvider_WECHAT:
+		res, err := auth.WeChat(ctx, b.cfg.Oauth.WechatClientId,
+			b.cfg.Oauth.WechatClientSecret, b.cfg.Oauth.WechatRedirectUrl, params.Code)
+		if err != nil {
+			return "", err
+		}
+		user.Username = res["nickname"].(string)
+		user.Email = res["email"].(string)
+		user.AvatarURL = res["headimgurl"].(string)
 	default:
 		return "", xerr.ErrorProviderNotSupported()
 	}
