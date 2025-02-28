@@ -131,6 +131,27 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/auth.v1.VerifyPasswordResetTokenResponse'
+    /api/v1/poi/search:
+        get:
+            tags:
+                - PointsOfInterestService
+            operationId: PointsOfInterestService_SearchPointsOfInterest
+            parameters:
+                - name: keyword
+                  in: query
+                  schema:
+                    type: string
+                - name: initialCity
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/poi.v1.SearchPointsOfInterestResponse'
     /api/v1/trips:
         get:
             tags:
@@ -421,6 +442,49 @@ components:
             properties:
                 valid:
                     type: boolean
+        poi.v1.PointOfInterest:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                nameEn:
+                    type: string
+                nameCn:
+                    type: string
+                description:
+                    type: string
+                address:
+                    type: string
+                latitude:
+                    type: number
+                    format: double
+                longitude:
+                    type: number
+                    format: double
+                type:
+                    type: string
+                category:
+                    type: string
+                rating:
+                    type: number
+                    format: float
+                recommendedDurationMinutes:
+                    type: string
+                city:
+                    type: string
+                state:
+                    type: string
+                country:
+                    type: string
+        poi.v1.SearchPointsOfInterestResponse:
+            type: object
+            properties:
+                pointsOfInterest:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/poi.v1.PointOfInterest'
         trip.v1.CreateDailyTripRequest:
             type: object
             properties:
@@ -579,4 +643,5 @@ components:
                     $ref: '#/components/schemas/trip.v1.Trip'
 tags:
     - name: AuthService
+    - name: PointsOfInterestService
     - name: TripService

@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package poi.v1;
+
+import "google/api/annotations.proto";
+import "validatex/validatex.proto";
+
+option go_package = "github.com/iter-x/server/internal/api/poi/v1;v1";
+
+service PointsOfInterestService {
+  rpc SearchPointsOfInterest(SearchPointsOfInterestRequest) returns (SearchPointsOfInterestResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/poi/search"
+    };
+  }
+}
+
+message SearchPointsOfInterestRequest {
+  string keyword = 1 [(validatex.rules).string = {non_empty: true, min_len: 0, max_len: 50}];
+  string initial_city = 2;
+}
+
+message SearchPointsOfInterestResponse {
+  repeated PointOfInterest points_of_interest = 1;
+}
+
+message PointOfInterest {
+  string id = 1;
+  string name = 2;
+  string name_en = 3;
+  string name_cn = 4;
+  string description = 5;
+  string address = 6;
+  double latitude = 7;
+  double longitude = 8;
+  string type = 9;
+  string category = 10;
+  float rating = 11;
+  int64 recommended_duration_minutes = 12;
+  string city = 13;
+  string state = 16;
+  string country = 15;
+}

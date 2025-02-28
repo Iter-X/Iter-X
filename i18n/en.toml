@@ -67,3 +67,6 @@ other = "Update daily trip failed"
 [DELETE_DAILY_TRIP_FAILED]
 other = "Delete daily trip failed"
 
+[SEARCH_POI_FAILED]
+other = "Search failed"
+

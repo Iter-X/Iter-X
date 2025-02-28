@@ -67,3 +67,6 @@ other = "更新每日行程失败"
 [DELETE_DAILY_TRIP_FAILED]
 other = "删除每日行程失败"
 
+[SEARCH_POI_FAILED]
+other = "搜索失败"
+
