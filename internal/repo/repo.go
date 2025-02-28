@@ -14,7 +14,7 @@ type Tx struct {
 	cli *ent.Client
 }
 
-var ProviderSet = wire.NewSet(NewConnection, NewAuth, NewTrip, NewPointsOfInterest)
+var ProviderSet = wire.NewSet(NewConnection, NewAuth, NewTrip, NewPointsOfInterest, NewTransactionRepository)
 
 func NewConnection(c *conf.Data, logger *zap.SugaredLogger) (*ent.Client, func(), error) {
 	logger = logger.Named("repo")

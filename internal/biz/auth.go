@@ -6,12 +6,14 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/ifuryst/lol"
-	v1 "github.com/iter-x/iter-x/internal/api/auth/v1"
+	authV1 "github.com/iter-x/iter-x/internal/api/auth/v1"
+	"github.com/iter-x/iter-x/internal/biz/bo"
 	"github.com/iter-x/iter-x/internal/common/xerr"
 	"github.com/iter-x/iter-x/internal/conf"
 	"github.com/iter-x/iter-x/internal/helper/auth"
 	"github.com/iter-x/iter-x/internal/repo"
 	"github.com/iter-x/iter-x/internal/repo/ent"
+	"github.com/iter-x/iter-x/pkg/sms"
 	"go.uber.org/zap"
 	"strings"
 	"time"
@@ -19,27 +21,24 @@ import (
 
 type (
 	Auth struct {
-		cfg    *conf.Auth
-		repo   *repo.Auth
-		logger *zap.SugaredLogger
-	}
-
-	SignInResponse struct {
-		Token        string
-		RefreshToken string
-		ExpiresIn    float64
+		cfg       *conf.Auth
+		repo      *repo.Auth
+		smsClient *sms.Client
+		logger    *zap.SugaredLogger
 	}
 )
 
 func NewAuth(c *conf.Auth, repo *repo.Auth, logger *zap.SugaredLogger) *Auth {
+	smsClient := sms.NewClient(sms.WithClientConfig(c.GetAliCloud()))
 	return &Auth{
-		cfg:    c,
-		repo:   repo,
-		logger: logger.Named("biz.auth"),
+		cfg:       c,
+		repo:      repo,
+		smsClient: smsClient,
+		logger:    logger.Named("biz.auth"),
 	}
 }
 
-func (b *Auth) getToken(ctx context.Context, user *ent.User, renew bool) (*SignInResponse, error) {
+func (b *Auth) getToken(ctx context.Context, user *ent.User, renew bool) (*bo.SignInResponse, error) {
 	token, err := auth.GenerateToken([]byte(b.cfg.Jwt.Secret), auth.Claims{
 		UID:       user.ID,
 		Username:  user.Username,
@@ -77,7 +76,7 @@ func (b *Auth) getToken(ctx context.Context, user *ent.User, renew bool) (*SignI
 		})
 	}
 
-	return &SignInResponse{
+	return &bo.SignInResponse{
 		Token:        token,
 		RefreshToken: refreshToken,
 		ExpiresIn:    b.cfg.Jwt.Expiration.AsDuration().Seconds(),
@@ -85,7 +84,7 @@ func (b *Auth) getToken(ctx context.Context, user *ent.User, renew bool) (*SignI
 }
 
 // SignIn signs in and returns a token.
-func (b *Auth) SignIn(ctx context.Context, params *v1.SignInRequest) (*v1.SignInResponse, error) {
+func (b *Auth) SignIn(ctx context.Context, params *authV1.SignInRequest) (*authV1.SignInResponse, error) {
 	user, err := b.repo.FindByEmail(ctx, params.Email)
 	if err != nil || user == nil {
 		return nil, xerr.ErrorInvalidEmailOrPassword()
@@ -99,7 +98,7 @@ func (b *Auth) SignIn(ctx context.Context, params *v1.SignInRequest) (*v1.SignIn
 	if err != nil {
 		return nil, err
 	}
-	return &v1.SignInResponse{
+	return &authV1.SignInResponse{
 		Token:        res.Token,
 		RefreshToken: res.RefreshToken,
 		ExpiresIn:    res.ExpiresIn,
@@ -107,7 +106,7 @@ func (b *Auth) SignIn(ctx context.Context, params *v1.SignInRequest) (*v1.SignIn
 }
 
 // SignUp creates a new user.
-func (b *Auth) SignUp(ctx context.Context, params *v1.SignUpRequest) (*v1.SignUpResponse, error) {
+func (b *Auth) SignUp(ctx context.Context, params *authV1.SignUpRequest) (*authV1.SignUpResponse, error) {
 	// confirm the user does not exist
 	usr, err := b.repo.FindByEmail(ctx, params.Email)
 	if err != nil && !xerr.IsUserNotFound(err) {
@@ -137,7 +136,7 @@ func (b *Auth) SignUp(ctx context.Context, params *v1.SignUpRequest) (*v1.SignUp
 	if err != nil {
 		return nil, err
 	}
-	return &v1.SignUpResponse{
+	return &authV1.SignUpResponse{
 		Token:        res.Token,
 		RefreshToken: res.RefreshToken,
 		ExpiresIn:    res.ExpiresIn,
@@ -145,11 +144,11 @@ func (b *Auth) SignUp(ctx context.Context, params *v1.SignUpRequest) (*v1.SignUp
 }
 
 // SignInWithOAuth signs in with oauth and returns a token.
-func (b *Auth) SignInWithOAuth(ctx context.Context, params *v1.SignInWithOAuthRequest) (string, error) {
+func (b *Auth) SignInWithOAuth(ctx context.Context, params *authV1.SignInWithOAuthRequest) (string, error) {
 	var user = &ent.User{}
 
 	switch params.Provider {
-	case v1.OAuthProvider_GITHUB:
+	case authV1.OAuthProvider_GITHUB:
 		res, err := auth.GitHub(ctx, b.cfg.Oauth.GithubClientId,
 			b.cfg.Oauth.GithubClientSecret, b.cfg.Oauth.GithubRedirectUrl, params.Code)
 		if err != nil {
@@ -158,7 +157,7 @@ func (b *Auth) SignInWithOAuth(ctx context.Context, params *v1.SignInWithOAuthRe
 		user.Username = res["login"].(string)
 		user.Email = res["email"].(string)
 		user.AvatarURL = res["avatar_url"].(string)
-	case v1.OAuthProvider_GOOGLE:
+	case authV1.OAuthProvider_GOOGLE:
 		res, err := auth.Google(ctx, b.cfg.Oauth.GoogleClientId,
 			b.cfg.Oauth.GoogleClientSecret, b.cfg.Oauth.GoogleRedirectUrl, params.Code)
 		if err != nil {
@@ -167,7 +166,7 @@ func (b *Auth) SignInWithOAuth(ctx context.Context, params *v1.SignInWithOAuthRe
 		user.Username = res["name"].(string)
 		user.Email = res["email"].(string)
 		user.AvatarURL = res["picture"].(string)
-	case v1.OAuthProvider_WECHAT:
+	case authV1.OAuthProvider_WECHAT:
 		res, err := auth.WeChat(ctx, b.cfg.Oauth.WechatClientId,
 			b.cfg.Oauth.WechatClientSecret, b.cfg.Oauth.WechatRedirectUrl, params.Code)
 		if err != nil {
@@ -213,7 +212,7 @@ func (b *Auth) SignInWithOAuth(ctx context.Context, params *v1.SignInWithOAuthRe
 	}, b.cfg.Jwt.Issuer, b.cfg.Jwt.Expiration.AsDuration())
 }
 
-func (b *Auth) RefreshToken(ctx context.Context, params *v1.RefreshTokenRequest) (*v1.RefreshTokenResponse, error) {
+func (b *Auth) RefreshToken(ctx context.Context, params *authV1.RefreshTokenRequest) (*authV1.RefreshTokenResponse, error) {
 	refreshToken, err := b.repo.GetRefreshToken(ctx, params.RefreshToken)
 	if err != nil {
 		return nil, xerr.ErrorUnauthorized()
@@ -234,7 +233,7 @@ func (b *Auth) RefreshToken(ctx context.Context, params *v1.RefreshTokenRequest)
 	if err != nil {
 		return nil, err
 	}
-	return &v1.RefreshTokenResponse{
+	return &authV1.RefreshTokenResponse{
 		Token:     res.Token,
 		ExpiresIn: res.ExpiresIn,
 	}, nil
@@ -260,4 +259,38 @@ func (b *Auth) ValidateToken(_ context.Context, s string) (jwt.Claims, error) {
 		return nil, xerr.ErrorInvalidToken()
 	}
 	return claims, nil
+}
+
+// GetSmsAuthTokens gets sms auth tokens.
+func (b *Auth) GetSmsAuthTokens(ctx context.Context) (*authV1.GetSmsAuthTokensResponse, error) {
+	authTokens, err := b.smsClient.GetSmsAuthTokens(ctx, b.cfg.AuthTokens)
+	if err != nil {
+		return nil, err
+	}
+	authData := authTokens.GetData()
+	response := &authV1.GetSmsAuthTokensResponse{
+		BizToken:           authData.GetBizToken(),
+		ExpireTime:         authData.GetExpireTime(),
+		StsAccessKeyId:     authData.GetStsAccessKeyId(),
+		StsAccessKeySecret: authData.GetStsAccessKeySecret(),
+		StsToken:           authData.GetStsToken(),
+	}
+	return response, nil
+}
+
+// VerifySmsCode verifies sms code.
+func (b *Auth) VerifySmsCode(ctx context.Context, params *authV1.VerifySmsCodeRequest) (*authV1.VerifySmsCodeResponse, error) {
+	verifySmsCode, err := b.smsClient.VerifySmsCode(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	if !verifySmsCode.IsOK() {
+		return nil, xerr.ErrorBadRequest()
+	}
+	// TODO generate token
+	response := &authV1.VerifySmsCodeResponse{
+		Token:     "",
+		ExpiresIn: 0,
+	}
+	return response, nil
 }

@@ -9,21 +9,21 @@ import (
 
 type Auth struct {
 	v1.UnimplementedAuthServiceServer
-	biz *biz.Auth
+	auth *biz.Auth
 }
 
 func NewAuth(biz *biz.Auth) *Auth {
 	return &Auth{
-		biz: biz,
+		auth: biz,
 	}
 }
 
 func (s *Auth) SignIn(ctx context.Context, req *v1.SignInRequest) (*v1.SignInResponse, error) {
-	return s.biz.SignIn(ctx, req)
+	return s.auth.SignIn(ctx, req)
 }
 
 func (s *Auth) SignInWithOAuth(ctx context.Context, req *v1.SignInWithOAuthRequest) (*v1.SignInWithOAuthResponse, error) {
-	token, err := s.biz.SignInWithOAuth(ctx, req)
+	token, err := s.auth.SignInWithOAuth(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +33,7 @@ func (s *Auth) SignInWithOAuth(ctx context.Context, req *v1.SignInWithOAuthReque
 }
 
 func (s *Auth) SignUp(ctx context.Context, req *v1.SignUpRequest) (*v1.SignUpResponse, error) {
-	return s.biz.SignUp(ctx, req)
+	return s.auth.SignUp(ctx, req)
 }
 
 func (s *Auth) RequestPasswordReset(ctx context.Context, req *v1.RequestPasswordResetRequest) (*v1.RequestPasswordResetResponse, error) {
@@ -58,9 +58,17 @@ func (s *Auth) ResetPassword(ctx context.Context, req *v1.ResetPasswordRequest) 
 }
 
 func (s *Auth) RefreshToken(ctx context.Context, req *v1.RefreshTokenRequest) (*v1.RefreshTokenResponse, error) {
-	return s.biz.RefreshToken(ctx, req)
+	return s.auth.RefreshToken(ctx, req)
 }
 
 func (s *Auth) ValidateToken(ctx context.Context, token string) (jwt.Claims, error) {
-	return s.biz.ValidateToken(ctx, token)
+	return s.auth.ValidateToken(ctx, token)
+}
+
+func (s *Auth) GetSmsAuthTokens(ctx context.Context, req *v1.GetSmsAuthTokensRequest) (*v1.GetSmsAuthTokensResponse, error) {
+	return s.auth.GetSmsAuthTokens(ctx, req)
+}
+
+func (s *Auth) VerifySmsCode(ctx context.Context, req *v1.VerifySmsCodeRequest) (*v1.VerifySmsCodeResponse, error) {
+	return s.auth.VerifySmsCode(ctx, req)
 }
