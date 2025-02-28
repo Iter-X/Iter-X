@@ -16,12 +16,12 @@ type Tx struct {
 	Cli *ent.Client
 }
 
-// NewTx create a new tx
-func NewTx(cli *ent.Client) *Tx {
+// newTx create a new tx
+func newTx(cli *ent.Client) *Tx {
 	return &Tx{Cli: cli}
 }
 
-func NewConnection(c *conf.Data, logger *zap.SugaredLogger) (*ent.Client, func(), error) {
+func NewConnection(c *conf.Data, logger *zap.SugaredLogger) (*Tx, func(), error) {
 	logger = logger.Named("repo")
 
 	client, err := ent.Open(c.Database.Driver, c.Database.Source)
@@ -39,7 +39,7 @@ func NewConnection(c *conf.Data, logger *zap.SugaredLogger) (*ent.Client, func()
 		}
 	}
 
-	return client, cleanup, nil
+	return newTx(client), cleanup, nil
 }
 
 // GetTx This method checks if there is a transaction in the context, and if so returns the client with the transaction

@@ -9,12 +9,12 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/ifuryst/lol"
-	"github.com/iter-x/iter-x/internal/biz/repository"
-	"github.com/iter-x/iter-x/internal/data/impl"
 	"go.uber.org/zap"
 
 	authV1 "github.com/iter-x/iter-x/internal/api/auth/v1"
 	"github.com/iter-x/iter-x/internal/biz/bo"
+	"github.com/iter-x/iter-x/internal/biz/do"
+	"github.com/iter-x/iter-x/internal/biz/repository"
 	"github.com/iter-x/iter-x/internal/common/xerr"
 	"github.com/iter-x/iter-x/internal/conf"
 	"github.com/iter-x/iter-x/internal/data/ent"
@@ -25,12 +25,12 @@ import (
 type Auth struct {
 	cfg *conf.Auth
 	repository.Transaction
-	authRepo  *impl.Auth
+	authRepo  repository.AuthRepo
 	smsClient *sms.Client
 	logger    *zap.SugaredLogger
 }
 
-func NewAuth(c *conf.Auth, transaction repository.Transaction, authRepo *impl.Auth, logger *zap.SugaredLogger) *Auth {
+func NewAuth(c *conf.Auth, transaction repository.Transaction, authRepo repository.AuthRepo, logger *zap.SugaredLogger) *Auth {
 	smsClient := sms.NewClient(sms.WithClientConfig(c.GetAliCloud()))
 	return &Auth{
 		cfg:         c,
@@ -41,7 +41,7 @@ func NewAuth(c *conf.Auth, transaction repository.Transaction, authRepo *impl.Au
 	}
 }
 
-func (b *Auth) getToken(ctx context.Context, user *ent.User, renew bool) (*bo.SignInResponse, error) {
+func (b *Auth) getToken(ctx context.Context, user *do.User, renew bool) (*bo.SignInResponse, error) {
 	token, err := auth.GenerateToken([]byte(b.cfg.Jwt.Secret), auth.Claims{
 		UID:       user.ID,
 		Username:  user.Username,
@@ -64,7 +64,7 @@ func (b *Auth) getToken(ctx context.Context, user *ent.User, renew bool) (*bo.Si
 			}
 
 			if ent.IsNotFound(err) {
-				return b.authRepo.SaveRefreshToken(ctx, &ent.RefreshToken{
+				return b.authRepo.SaveRefreshToken(ctx, &do.RefreshToken{
 					Token:     refreshToken,
 					ExpiresAt: now.Add(b.cfg.Jwt.RefreshExpiration.AsDuration()),
 					CreatedAt: now,
@@ -128,7 +128,7 @@ func (b *Auth) SignUp(ctx context.Context, params *authV1.SignUpRequest) (*authV
 	}
 
 	// create the user
-	data := &ent.User{
+	data := &do.User{
 		Username: params.Email,
 		Email:    params.Email,
 		Password: hashedPass,
@@ -151,7 +151,7 @@ func (b *Auth) SignUp(ctx context.Context, params *authV1.SignUpRequest) (*authV
 
 // SignInWithOAuth signs in with oauth and returns a token.
 func (b *Auth) SignInWithOAuth(ctx context.Context, params *authV1.SignInWithOAuthRequest) (string, error) {
-	var user = &ent.User{}
+	var user = &do.User{}
 
 	switch params.Provider {
 	case authV1.OAuthProvider_GITHUB:

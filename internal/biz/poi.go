@@ -3,47 +3,31 @@ package biz
 import (
 	"context"
 
-	v1 "github.com/iter-x/iter-x/internal/api/poi/v1"
+	poiV1 "github.com/iter-x/iter-x/internal/api/poi/v1"
+	"github.com/iter-x/iter-x/internal/biz/repository"
 	"github.com/iter-x/iter-x/internal/common/xerr"
-	"github.com/iter-x/iter-x/internal/data/impl"
 )
 
 type PointsOfInterest struct {
-	pointsOfInterestRepo *impl.PointsOfInterest
+	pointsOfInterestRepo repository.PointsOfInterestRepo
 }
 
-func NewPointsOfInterest(pointsOfInterestRepo *impl.PointsOfInterest) *PointsOfInterest {
+func NewPointsOfInterest(pointsOfInterestRepo repository.PointsOfInterestRepo) *PointsOfInterest {
 	return &PointsOfInterest{
 		pointsOfInterestRepo: pointsOfInterestRepo,
 	}
 }
 
-func (b *PointsOfInterest) SearchPointsOfInterest(ctx context.Context, keyword, initialCity string) ([]*v1.PointOfInterest, error) {
+func (b *PointsOfInterest) SearchPointsOfInterest(ctx context.Context, keyword, initialCity string) ([]*poiV1.PointOfInterest, error) {
 	// TODO: Search points of interest by initial city at first, expand the search if no result found
 	pois, err := b.pointsOfInterestRepo.SearchPointsOfInterest(ctx, keyword, 5)
 	if err != nil {
 		return nil, xerr.ErrorSearchPoiFailed()
 	}
 
-	var res = make([]*v1.PointOfInterest, 0, len(pois))
+	var res = make([]*poiV1.PointOfInterest, 0, len(pois))
 	for _, poi := range pois {
-		res = append(res, &v1.PointOfInterest{
-			Id:                         poi.ID.String(),
-			Name:                       poi.Name,
-			NameEn:                     poi.NameEn,
-			NameCn:                     poi.NameCn,
-			Description:                poi.Description,
-			Address:                    poi.Address,
-			Latitude:                   poi.Latitude,
-			Longitude:                  poi.Longitude,
-			Type:                       poi.Type,
-			Category:                   poi.Category,
-			Rating:                     poi.Rating,
-			RecommendedDurationMinutes: poi.RecommendedDurationMinutes,
-			City:                       poi.Edges.City.Name,
-			State:                      poi.Edges.State.Name,
-			Country:                    poi.Edges.Country.Name,
-		})
+		res = append(res, poi.ToPointsOfInterestProto())
 	}
 	return res, nil
 }

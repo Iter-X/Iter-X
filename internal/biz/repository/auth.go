@@ -28,3 +28,5 @@ type Auth[T *ent.User, R *do.User] interface {
 
 	UpdateRefreshToken(ctx context.Context, val *do.RefreshToken) error
 }
+
+type AuthRepo = Auth[*ent.User, *do.User]

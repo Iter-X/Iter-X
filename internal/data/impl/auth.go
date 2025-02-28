@@ -6,6 +6,8 @@ import (
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 
+	"github.com/iter-x/iter-x/internal/biz/do"
+	"github.com/iter-x/iter-x/internal/biz/repository"
 	"github.com/iter-x/iter-x/internal/common/xerr"
 	"github.com/iter-x/iter-x/internal/data"
 	"github.com/iter-x/iter-x/internal/data/ent"
@@ -13,67 +15,101 @@ import (
 	"github.com/iter-x/iter-x/internal/data/ent/user"
 )
 
-type Auth struct {
-	*data.Tx
-	logger *zap.SugaredLogger
-}
-
-func NewAuth(tx *data.Tx, logger *zap.SugaredLogger) *Auth {
-	return &Auth{
-		Tx:     tx,
-		logger: logger.Named("repo.auth"),
+func NewAuth(tx *data.Tx, logger *zap.SugaredLogger) repository.AuthRepo {
+	return &authRepositoryImpl{
+		Tx:                 tx,
+		logger:             logger.Named("repo.auth"),
+		refreshTokenImpl:   new(refreshTokenImpl),
+		tripRepositoryImpl: new(tripRepositoryImpl),
 	}
 }
 
-func (r *Auth) FindByEmail(ctx context.Context, email string) (*ent.User, error) {
+type authRepositoryImpl struct {
+	*data.Tx
+	logger *zap.SugaredLogger
+
+	refreshTokenImpl   repository.BaseRepo[*ent.RefreshToken, *do.RefreshToken]
+	tripRepositoryImpl repository.BaseRepo[*ent.Trip, *do.Trip]
+}
+
+func (r *authRepositoryImpl) ToEntity(po *ent.User) *do.User {
+	if po == nil {
+		return nil
+	}
+	return &do.User{
+		ID:            po.ID,
+		CreatedAt:     po.CreatedAt,
+		UpdatedAt:     po.UpdatedAt,
+		Status:        po.Status,
+		Username:      po.Username,
+		Password:      po.Password,
+		Email:         po.Email,
+		AvatarURL:     po.AvatarURL,
+		Trips:         r.tripRepositoryImpl.ToEntities(po.Edges.Trip),
+		RefreshTokens: r.refreshTokenImpl.ToEntities(po.Edges.RefreshToken),
+	}
+}
+
+func (r *authRepositoryImpl) ToEntities(pos []*ent.User) []*do.User {
+	if pos == nil {
+		return nil
+	}
+	list := make([]*do.User, 0, len(pos))
+	for _, v := range pos {
+		list = append(list, r.ToEntity(v))
+	}
+	return list
+}
+
+func (r *authRepositoryImpl) FindByEmail(ctx context.Context, email string) (*do.User, error) {
 	cli := r.GetTx(ctx).User
 
 	usr, err := cli.Query().Where(user.EmailEQ(email)).Only(ctx)
 	if err != nil && ent.IsNotFound(err) {
 		return nil, xerr.ErrorUserNotFound()
 	}
-	return usr, err
+	return r.ToEntity(usr), err
 }
 
-func (r *Auth) FindUserById(ctx context.Context, id uuid.UUID) (*ent.User, error) {
+func (r *authRepositoryImpl) FindUserById(ctx context.Context, id uuid.UUID) (*do.User, error) {
 	cli := r.GetTx(ctx).User
-
 	usr, err := cli.Get(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	return usr, err
+	return r.ToEntity(usr), err
 }
 
-func (r *Auth) Create(ctx context.Context, user *ent.User) (*ent.User, error) {
+func (r *authRepositoryImpl) Create(ctx context.Context, user *do.User) (*do.User, error) {
 	cli := r.GetTx(ctx).User
 
-	return cli.Create().
+	row, err := cli.Create().
 		SetUsername(user.Username).SetEmail(user.Email).SetPassword(user.Password).
 		Save(ctx)
+	return r.ToEntity(row), err
 }
 
-func (r *Auth) Update(ctx context.Context, user *ent.User) (*ent.User, error) {
+func (r *authRepositoryImpl) Update(ctx context.Context, user *do.User) (*do.User, error) {
 	cli := r.GetTx(ctx).User
 
-	return cli.UpdateOneID(user.ID).
+	row, err := cli.UpdateOneID(user.ID).
 		SetUsername(user.Username).SetEmail(user.Email).SetAvatarURL(user.AvatarURL).
 		Save(ctx)
+	return r.ToEntity(row), err
 }
 
-func (r *Auth) GetRefreshTokenByUserId(ctx context.Context, userId uuid.UUID) (*ent.RefreshToken, error) {
+func (r *authRepositoryImpl) GetRefreshTokenByUserId(ctx context.Context, userId uuid.UUID) (*do.RefreshToken, error) {
 	cli := r.GetTx(ctx).RefreshToken
 
-	return cli.Query().Where(refreshtoken.UserID(userId)).Only(ctx)
+	row, err := cli.Query().Where(refreshtoken.UserID(userId)).Only(ctx)
+	return r.refreshTokenImpl.ToEntity(row), err
 }
 
-func (r *Auth) GetRefreshToken(ctx context.Context, token string) (*ent.RefreshToken, error) {
+func (r *authRepositoryImpl) GetRefreshToken(ctx context.Context, token string) (*do.RefreshToken, error) {
 	cli := r.GetTx(ctx).RefreshToken
 
-	return cli.Query().Where(refreshtoken.TokenEQ(token)).Only(ctx)
+	row, err := cli.Query().Where(refreshtoken.TokenEQ(token)).Only(ctx)
+	return r.refreshTokenImpl.ToEntity(row), err
 }
 
-func (r *Auth) SaveRefreshToken(ctx context.Context, val *ent.RefreshToken) error {
+func (r *authRepositoryImpl) SaveRefreshToken(ctx context.Context, val *do.RefreshToken) error {
 	cli := r.GetTx(ctx).RefreshToken
 
 	_, err := cli.Create().
@@ -82,7 +118,7 @@ func (r *Auth) SaveRefreshToken(ctx context.Context, val *ent.RefreshToken) erro
 	return err
 }
 
-func (r *Auth) UpdateRefreshToken(ctx context.Context, val *ent.RefreshToken) error {
+func (r *authRepositoryImpl) UpdateRefreshToken(ctx context.Context, val *do.RefreshToken) error {
 	cli := r.GetTx(ctx).RefreshToken
 
 	_, err := cli.UpdateOneID(val.ID).
