@@ -24,26 +24,24 @@ func (PointsOfInterest) Annotations() []schema.Annotation {
 func (PointsOfInterest) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Unique().Default(uuid.New),
-		field.String("name").NotEmpty().MaxLen(255),
-		field.String("name_en").MaxLen(255),
-		field.String("name_cn").MaxLen(255),
 		field.String("description").MaxLen(1000),
-		field.String("city").MaxLen(255),
-		field.String("state").MaxLen(255),
-		field.String("country").MaxLen(255),
 		field.String("address").MaxLen(255),
 		field.Float("latitude"),
 		field.Float("longitude"),
 		field.String("type").MaxLen(50),     // Attractions, Restaurants, Hotels, Cities, etc.
 		field.String("category").MaxLen(50), // Historical, Modern, Natural, etc.
 		field.Float32("rating").Positive(),
-		field.Int64("recommended_duration_seconds").Positive(),
+		field.Int64("recommended_duration_minutes").Positive(),
 	}
 }
 
 // Edges of the PointsOfInterest.
 func (PointsOfInterest) Edges() []ent.Edge {
 	return []ent.Edge{
+		edge.From("city", City.Type).Ref("poi").Unique(),
+		edge.From("state", State.Type).Ref("poi").Unique(),
+		edge.From("country", Country.Type).Ref("poi").Unique(),
+		edge.From("continent", Continent.Type).Ref("poi").Unique(),
 		edge.To("daily_itinerary", DailyItinerary.Type),
 	}
 }
@@ -51,5 +49,6 @@ func (PointsOfInterest) Edges() []ent.Edge {
 func (PointsOfInterest) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixin{},
+		LocalizedNameMixin{},
 	}
 }

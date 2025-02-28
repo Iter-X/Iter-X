@@ -13,9 +13,13 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/iter-x/iter-x/internal/repo/ent/city"
+	"github.com/iter-x/iter-x/internal/repo/ent/continent"
+	"github.com/iter-x/iter-x/internal/repo/ent/country"
 	"github.com/iter-x/iter-x/internal/repo/ent/dailyitinerary"
 	"github.com/iter-x/iter-x/internal/repo/ent/pointsofinterest"
 	"github.com/iter-x/iter-x/internal/repo/ent/predicate"
+	"github.com/iter-x/iter-x/internal/repo/ent/state"
 )
 
 // PointsOfInterestQuery is the builder for querying PointsOfInterest entities.
@@ -25,7 +29,12 @@ type PointsOfInterestQuery struct {
 	order              []pointsofinterest.OrderOption
 	inters             []Interceptor
 	predicates         []predicate.PointsOfInterest
+	withCity           *CityQuery
+	withState          *StateQuery
+	withCountry        *CountryQuery
+	withContinent      *ContinentQuery
 	withDailyItinerary *DailyItineraryQuery
+	withFKs            bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -60,6 +69,94 @@ func (poiq *PointsOfInterestQuery) Unique(unique bool) *PointsOfInterestQuery {
 func (poiq *PointsOfInterestQuery) Order(o ...pointsofinterest.OrderOption) *PointsOfInterestQuery {
 	poiq.order = append(poiq.order, o...)
 	return poiq
+}
+
+// QueryCity chains the current query on the "city" edge.
+func (poiq *PointsOfInterestQuery) QueryCity() *CityQuery {
+	query := (&CityClient{config: poiq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := poiq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := poiq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pointsofinterest.Table, pointsofinterest.FieldID, selector),
+			sqlgraph.To(city.Table, city.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, pointsofinterest.CityTable, pointsofinterest.CityColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(poiq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryState chains the current query on the "state" edge.
+func (poiq *PointsOfInterestQuery) QueryState() *StateQuery {
+	query := (&StateClient{config: poiq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := poiq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := poiq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pointsofinterest.Table, pointsofinterest.FieldID, selector),
+			sqlgraph.To(state.Table, state.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, pointsofinterest.StateTable, pointsofinterest.StateColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(poiq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCountry chains the current query on the "country" edge.
+func (poiq *PointsOfInterestQuery) QueryCountry() *CountryQuery {
+	query := (&CountryClient{config: poiq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := poiq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := poiq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pointsofinterest.Table, pointsofinterest.FieldID, selector),
+			sqlgraph.To(country.Table, country.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, pointsofinterest.CountryTable, pointsofinterest.CountryColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(poiq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryContinent chains the current query on the "continent" edge.
+func (poiq *PointsOfInterestQuery) QueryContinent() *ContinentQuery {
+	query := (&ContinentClient{config: poiq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := poiq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := poiq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pointsofinterest.Table, pointsofinterest.FieldID, selector),
+			sqlgraph.To(continent.Table, continent.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, pointsofinterest.ContinentTable, pointsofinterest.ContinentColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(poiq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // QueryDailyItinerary chains the current query on the "daily_itinerary" edge.
@@ -276,11 +373,59 @@ func (poiq *PointsOfInterestQuery) Clone() *PointsOfInterestQuery {
 		order:              append([]pointsofinterest.OrderOption{}, poiq.order...),
 		inters:             append([]Interceptor{}, poiq.inters...),
 		predicates:         append([]predicate.PointsOfInterest{}, poiq.predicates...),
+		withCity:           poiq.withCity.Clone(),
+		withState:          poiq.withState.Clone(),
+		withCountry:        poiq.withCountry.Clone(),
+		withContinent:      poiq.withContinent.Clone(),
 		withDailyItinerary: poiq.withDailyItinerary.Clone(),
 		// clone intermediate query.
 		sql:  poiq.sql.Clone(),
 		path: poiq.path,
 	}
+}
+
+// WithCity tells the query-builder to eager-load the nodes that are connected to
+// the "city" edge. The optional arguments are used to configure the query builder of the edge.
+func (poiq *PointsOfInterestQuery) WithCity(opts ...func(*CityQuery)) *PointsOfInterestQuery {
+	query := (&CityClient{config: poiq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	poiq.withCity = query
+	return poiq
+}
+
+// WithState tells the query-builder to eager-load the nodes that are connected to
+// the "state" edge. The optional arguments are used to configure the query builder of the edge.
+func (poiq *PointsOfInterestQuery) WithState(opts ...func(*StateQuery)) *PointsOfInterestQuery {
+	query := (&StateClient{config: poiq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	poiq.withState = query
+	return poiq
+}
+
+// WithCountry tells the query-builder to eager-load the nodes that are connected to
+// the "country" edge. The optional arguments are used to configure the query builder of the edge.
+func (poiq *PointsOfInterestQuery) WithCountry(opts ...func(*CountryQuery)) *PointsOfInterestQuery {
+	query := (&CountryClient{config: poiq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	poiq.withCountry = query
+	return poiq
+}
+
+// WithContinent tells the query-builder to eager-load the nodes that are connected to
+// the "continent" edge. The optional arguments are used to configure the query builder of the edge.
+func (poiq *PointsOfInterestQuery) WithContinent(opts ...func(*ContinentQuery)) *PointsOfInterestQuery {
+	query := (&ContinentClient{config: poiq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	poiq.withContinent = query
+	return poiq
 }
 
 // WithDailyItinerary tells the query-builder to eager-load the nodes that are connected to
@@ -371,11 +516,22 @@ func (poiq *PointsOfInterestQuery) prepareQuery(ctx context.Context) error {
 func (poiq *PointsOfInterestQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*PointsOfInterest, error) {
 	var (
 		nodes       = []*PointsOfInterest{}
+		withFKs     = poiq.withFKs
 		_spec       = poiq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [5]bool{
+			poiq.withCity != nil,
+			poiq.withState != nil,
+			poiq.withCountry != nil,
+			poiq.withContinent != nil,
 			poiq.withDailyItinerary != nil,
 		}
 	)
+	if poiq.withCity != nil || poiq.withState != nil || poiq.withCountry != nil || poiq.withContinent != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, pointsofinterest.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*PointsOfInterest).scanValues(nil, columns)
 	}
@@ -394,6 +550,30 @@ func (poiq *PointsOfInterestQuery) sqlAll(ctx context.Context, hooks ...queryHoo
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := poiq.withCity; query != nil {
+		if err := poiq.loadCity(ctx, query, nodes, nil,
+			func(n *PointsOfInterest, e *City) { n.Edges.City = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := poiq.withState; query != nil {
+		if err := poiq.loadState(ctx, query, nodes, nil,
+			func(n *PointsOfInterest, e *State) { n.Edges.State = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := poiq.withCountry; query != nil {
+		if err := poiq.loadCountry(ctx, query, nodes, nil,
+			func(n *PointsOfInterest, e *Country) { n.Edges.Country = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := poiq.withContinent; query != nil {
+		if err := poiq.loadContinent(ctx, query, nodes, nil,
+			func(n *PointsOfInterest, e *Continent) { n.Edges.Continent = e }); err != nil {
+			return nil, err
+		}
+	}
 	if query := poiq.withDailyItinerary; query != nil {
 		if err := poiq.loadDailyItinerary(ctx, query, nodes,
 			func(n *PointsOfInterest) { n.Edges.DailyItinerary = []*DailyItinerary{} },
@@ -406,6 +586,134 @@ func (poiq *PointsOfInterestQuery) sqlAll(ctx context.Context, hooks ...queryHoo
 	return nodes, nil
 }
 
+func (poiq *PointsOfInterestQuery) loadCity(ctx context.Context, query *CityQuery, nodes []*PointsOfInterest, init func(*PointsOfInterest), assign func(*PointsOfInterest, *City)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*PointsOfInterest)
+	for i := range nodes {
+		if nodes[i].city_poi == nil {
+			continue
+		}
+		fk := *nodes[i].city_poi
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(city.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "city_poi" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (poiq *PointsOfInterestQuery) loadState(ctx context.Context, query *StateQuery, nodes []*PointsOfInterest, init func(*PointsOfInterest), assign func(*PointsOfInterest, *State)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*PointsOfInterest)
+	for i := range nodes {
+		if nodes[i].state_poi == nil {
+			continue
+		}
+		fk := *nodes[i].state_poi
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(state.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "state_poi" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (poiq *PointsOfInterestQuery) loadCountry(ctx context.Context, query *CountryQuery, nodes []*PointsOfInterest, init func(*PointsOfInterest), assign func(*PointsOfInterest, *Country)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*PointsOfInterest)
+	for i := range nodes {
+		if nodes[i].country_poi == nil {
+			continue
+		}
+		fk := *nodes[i].country_poi
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(country.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "country_poi" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (poiq *PointsOfInterestQuery) loadContinent(ctx context.Context, query *ContinentQuery, nodes []*PointsOfInterest, init func(*PointsOfInterest), assign func(*PointsOfInterest, *Continent)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*PointsOfInterest)
+	for i := range nodes {
+		if nodes[i].continent_poi == nil {
+			continue
+		}
+		fk := *nodes[i].continent_poi
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(continent.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "continent_poi" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
 func (poiq *PointsOfInterestQuery) loadDailyItinerary(ctx context.Context, query *DailyItineraryQuery, nodes []*PointsOfInterest, init func(*PointsOfInterest), assign func(*PointsOfInterest, *DailyItinerary)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*PointsOfInterest)

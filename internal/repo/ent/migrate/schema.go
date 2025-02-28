@@ -9,6 +9,51 @@ import (
 )
 
 var (
+	// CitiesColumns holds the columns for the "cities" table.
+	CitiesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString, Size: 255},
+		{Name: "name_en", Type: field.TypeString, Size: 255},
+		{Name: "name_cn", Type: field.TypeString, Size: 255},
+	}
+	// CitiesTable holds the schema information for the "cities" table.
+	CitiesTable = &schema.Table{
+		Name:       "cities",
+		Columns:    CitiesColumns,
+		PrimaryKey: []*schema.Column{CitiesColumns[0]},
+	}
+	// ContinentsColumns holds the columns for the "continents" table.
+	ContinentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString, Size: 255},
+		{Name: "name_en", Type: field.TypeString, Size: 255},
+		{Name: "name_cn", Type: field.TypeString, Size: 255},
+	}
+	// ContinentsTable holds the schema information for the "continents" table.
+	ContinentsTable = &schema.Table{
+		Name:       "continents",
+		Columns:    ContinentsColumns,
+		PrimaryKey: []*schema.Column{ContinentsColumns[0]},
+	}
+	// CountriesColumns holds the columns for the "countries" table.
+	CountriesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString, Size: 255},
+		{Name: "name_en", Type: field.TypeString, Size: 255},
+		{Name: "name_cn", Type: field.TypeString, Size: 255},
+	}
+	// CountriesTable holds the schema information for the "countries" table.
+	CountriesTable = &schema.Table{
+		Name:       "countries",
+		Columns:    CountriesColumns,
+		PrimaryKey: []*schema.Column{CountriesColumns[0]},
+	}
 	// DailyItinerariesColumns holds the columns for the "daily_itineraries" table.
 	DailyItinerariesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -94,22 +139,49 @@ var (
 		{Name: "name_en", Type: field.TypeString, Size: 255},
 		{Name: "name_cn", Type: field.TypeString, Size: 255},
 		{Name: "description", Type: field.TypeString, Size: 1000},
-		{Name: "city", Type: field.TypeString, Size: 255},
-		{Name: "state", Type: field.TypeString, Size: 255},
-		{Name: "country", Type: field.TypeString, Size: 255},
 		{Name: "address", Type: field.TypeString, Size: 255},
 		{Name: "latitude", Type: field.TypeFloat64},
 		{Name: "longitude", Type: field.TypeFloat64},
 		{Name: "type", Type: field.TypeString, Size: 50},
 		{Name: "category", Type: field.TypeString, Size: 50},
 		{Name: "rating", Type: field.TypeFloat32},
-		{Name: "recommended_duration_seconds", Type: field.TypeInt64},
+		{Name: "recommended_duration_minutes", Type: field.TypeInt64},
+		{Name: "city_poi", Type: field.TypeUUID, Nullable: true},
+		{Name: "continent_poi", Type: field.TypeUUID, Nullable: true},
+		{Name: "country_poi", Type: field.TypeUUID, Nullable: true},
+		{Name: "state_poi", Type: field.TypeUUID, Nullable: true},
 	}
 	// PointsOfInterestTable holds the schema information for the "points_of_interest" table.
 	PointsOfInterestTable = &schema.Table{
 		Name:       "points_of_interest",
 		Columns:    PointsOfInterestColumns,
 		PrimaryKey: []*schema.Column{PointsOfInterestColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "points_of_interest_cities_poi",
+				Columns:    []*schema.Column{PointsOfInterestColumns[14]},
+				RefColumns: []*schema.Column{CitiesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "points_of_interest_continents_poi",
+				Columns:    []*schema.Column{PointsOfInterestColumns[15]},
+				RefColumns: []*schema.Column{ContinentsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "points_of_interest_countries_poi",
+				Columns:    []*schema.Column{PointsOfInterestColumns[16]},
+				RefColumns: []*schema.Column{CountriesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "points_of_interest_states_poi",
+				Columns:    []*schema.Column{PointsOfInterestColumns[17]},
+				RefColumns: []*schema.Column{StatesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// RefreshTokensColumns holds the columns for the "refresh_tokens" table.
 	RefreshTokensColumns = []*schema.Column{
@@ -133,6 +205,21 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 		},
+	}
+	// StatesColumns holds the columns for the "states" table.
+	StatesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString, Size: 255},
+		{Name: "name_en", Type: field.TypeString, Size: 255},
+		{Name: "name_cn", Type: field.TypeString, Size: 255},
+	}
+	// StatesTable holds the schema information for the "states" table.
+	StatesTable = &schema.Table{
+		Name:       "states",
+		Columns:    StatesColumns,
+		PrimaryKey: []*schema.Column{StatesColumns[0]},
 	}
 	// TripsColumns holds the columns for the "trips" table.
 	TripsColumns = []*schema.Column{
@@ -179,11 +266,15 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		CitiesTable,
+		ContinentsTable,
+		CountriesTable,
 		DailyItinerariesTable,
 		DailyTripsTable,
 		MediaTable,
 		PointsOfInterestTable,
 		RefreshTokensTable,
+		StatesTable,
 		TripsTable,
 		UsersTable,
 	}
@@ -194,6 +285,10 @@ func init() {
 	DailyItinerariesTable.ForeignKeys[1].RefTable = PointsOfInterestTable
 	DailyItinerariesTable.ForeignKeys[2].RefTable = TripsTable
 	DailyTripsTable.ForeignKeys[0].RefTable = TripsTable
+	PointsOfInterestTable.ForeignKeys[0].RefTable = CitiesTable
+	PointsOfInterestTable.ForeignKeys[1].RefTable = ContinentsTable
+	PointsOfInterestTable.ForeignKeys[2].RefTable = CountriesTable
+	PointsOfInterestTable.ForeignKeys[3].RefTable = StatesTable
 	PointsOfInterestTable.Annotation = &entsql.Annotation{
 		Table: "points_of_interest",
 	}

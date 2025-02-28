@@ -10,7 +10,11 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
+	"github.com/iter-x/iter-x/internal/repo/ent/city"
+	"github.com/iter-x/iter-x/internal/repo/ent/continent"
+	"github.com/iter-x/iter-x/internal/repo/ent/country"
 	"github.com/iter-x/iter-x/internal/repo/ent/pointsofinterest"
+	"github.com/iter-x/iter-x/internal/repo/ent/state"
 )
 
 // PointsOfInterest is the model entity for the PointsOfInterest schema.
@@ -30,12 +34,6 @@ type PointsOfInterest struct {
 	NameCn string `json:"name_cn,omitempty"`
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
-	// City holds the value of the "city" field.
-	City string `json:"city,omitempty"`
-	// State holds the value of the "state" field.
-	State string `json:"state,omitempty"`
-	// Country holds the value of the "country" field.
-	Country string `json:"country,omitempty"`
 	// Address holds the value of the "address" field.
 	Address string `json:"address,omitempty"`
 	// Latitude holds the value of the "latitude" field.
@@ -48,27 +46,83 @@ type PointsOfInterest struct {
 	Category string `json:"category,omitempty"`
 	// Rating holds the value of the "rating" field.
 	Rating float32 `json:"rating,omitempty"`
-	// RecommendedDurationSeconds holds the value of the "recommended_duration_seconds" field.
-	RecommendedDurationSeconds int64 `json:"recommended_duration_seconds,omitempty"`
+	// RecommendedDurationMinutes holds the value of the "recommended_duration_minutes" field.
+	RecommendedDurationMinutes int64 `json:"recommended_duration_minutes,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PointsOfInterestQuery when eager-loading is set.
-	Edges        PointsOfInterestEdges `json:"edges"`
-	selectValues sql.SelectValues
+	Edges         PointsOfInterestEdges `json:"edges"`
+	city_poi      *uuid.UUID
+	continent_poi *uuid.UUID
+	country_poi   *uuid.UUID
+	state_poi     *uuid.UUID
+	selectValues  sql.SelectValues
 }
 
 // PointsOfInterestEdges holds the relations/edges for other nodes in the graph.
 type PointsOfInterestEdges struct {
+	// City holds the value of the city edge.
+	City *City `json:"city,omitempty"`
+	// State holds the value of the state edge.
+	State *State `json:"state,omitempty"`
+	// Country holds the value of the country edge.
+	Country *Country `json:"country,omitempty"`
+	// Continent holds the value of the continent edge.
+	Continent *Continent `json:"continent,omitempty"`
 	// DailyItinerary holds the value of the daily_itinerary edge.
 	DailyItinerary []*DailyItinerary `json:"daily_itinerary,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [5]bool
+}
+
+// CityOrErr returns the City value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PointsOfInterestEdges) CityOrErr() (*City, error) {
+	if e.City != nil {
+		return e.City, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: city.Label}
+	}
+	return nil, &NotLoadedError{edge: "city"}
+}
+
+// StateOrErr returns the State value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PointsOfInterestEdges) StateOrErr() (*State, error) {
+	if e.State != nil {
+		return e.State, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: state.Label}
+	}
+	return nil, &NotLoadedError{edge: "state"}
+}
+
+// CountryOrErr returns the Country value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PointsOfInterestEdges) CountryOrErr() (*Country, error) {
+	if e.Country != nil {
+		return e.Country, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: country.Label}
+	}
+	return nil, &NotLoadedError{edge: "country"}
+}
+
+// ContinentOrErr returns the Continent value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PointsOfInterestEdges) ContinentOrErr() (*Continent, error) {
+	if e.Continent != nil {
+		return e.Continent, nil
+	} else if e.loadedTypes[3] {
+		return nil, &NotFoundError{label: continent.Label}
+	}
+	return nil, &NotLoadedError{edge: "continent"}
 }
 
 // DailyItineraryOrErr returns the DailyItinerary value or an error if the edge
 // was not loaded in eager-loading.
 func (e PointsOfInterestEdges) DailyItineraryOrErr() ([]*DailyItinerary, error) {
-	if e.loadedTypes[0] {
+	if e.loadedTypes[4] {
 		return e.DailyItinerary, nil
 	}
 	return nil, &NotLoadedError{edge: "daily_itinerary"}
@@ -81,14 +135,22 @@ func (*PointsOfInterest) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case pointsofinterest.FieldLatitude, pointsofinterest.FieldLongitude, pointsofinterest.FieldRating:
 			values[i] = new(sql.NullFloat64)
-		case pointsofinterest.FieldRecommendedDurationSeconds:
+		case pointsofinterest.FieldRecommendedDurationMinutes:
 			values[i] = new(sql.NullInt64)
-		case pointsofinterest.FieldName, pointsofinterest.FieldNameEn, pointsofinterest.FieldNameCn, pointsofinterest.FieldDescription, pointsofinterest.FieldCity, pointsofinterest.FieldState, pointsofinterest.FieldCountry, pointsofinterest.FieldAddress, pointsofinterest.FieldType, pointsofinterest.FieldCategory:
+		case pointsofinterest.FieldName, pointsofinterest.FieldNameEn, pointsofinterest.FieldNameCn, pointsofinterest.FieldDescription, pointsofinterest.FieldAddress, pointsofinterest.FieldType, pointsofinterest.FieldCategory:
 			values[i] = new(sql.NullString)
 		case pointsofinterest.FieldCreatedAt, pointsofinterest.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case pointsofinterest.FieldID:
 			values[i] = new(uuid.UUID)
+		case pointsofinterest.ForeignKeys[0]: // city_poi
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
+		case pointsofinterest.ForeignKeys[1]: // continent_poi
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
+		case pointsofinterest.ForeignKeys[2]: // country_poi
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
+		case pointsofinterest.ForeignKeys[3]: // state_poi
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -146,24 +208,6 @@ func (poi *PointsOfInterest) assignValues(columns []string, values []any) error 
 			} else if value.Valid {
 				poi.Description = value.String
 			}
-		case pointsofinterest.FieldCity:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field city", values[i])
-			} else if value.Valid {
-				poi.City = value.String
-			}
-		case pointsofinterest.FieldState:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field state", values[i])
-			} else if value.Valid {
-				poi.State = value.String
-			}
-		case pointsofinterest.FieldCountry:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field country", values[i])
-			} else if value.Valid {
-				poi.Country = value.String
-			}
 		case pointsofinterest.FieldAddress:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field address", values[i])
@@ -200,11 +244,39 @@ func (poi *PointsOfInterest) assignValues(columns []string, values []any) error 
 			} else if value.Valid {
 				poi.Rating = float32(value.Float64)
 			}
-		case pointsofinterest.FieldRecommendedDurationSeconds:
+		case pointsofinterest.FieldRecommendedDurationMinutes:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field recommended_duration_seconds", values[i])
+				return fmt.Errorf("unexpected type %T for field recommended_duration_minutes", values[i])
 			} else if value.Valid {
-				poi.RecommendedDurationSeconds = value.Int64
+				poi.RecommendedDurationMinutes = value.Int64
+			}
+		case pointsofinterest.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field city_poi", values[i])
+			} else if value.Valid {
+				poi.city_poi = new(uuid.UUID)
+				*poi.city_poi = *value.S.(*uuid.UUID)
+			}
+		case pointsofinterest.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field continent_poi", values[i])
+			} else if value.Valid {
+				poi.continent_poi = new(uuid.UUID)
+				*poi.continent_poi = *value.S.(*uuid.UUID)
+			}
+		case pointsofinterest.ForeignKeys[2]:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field country_poi", values[i])
+			} else if value.Valid {
+				poi.country_poi = new(uuid.UUID)
+				*poi.country_poi = *value.S.(*uuid.UUID)
+			}
+		case pointsofinterest.ForeignKeys[3]:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field state_poi", values[i])
+			} else if value.Valid {
+				poi.state_poi = new(uuid.UUID)
+				*poi.state_poi = *value.S.(*uuid.UUID)
 			}
 		default:
 			poi.selectValues.Set(columns[i], values[i])
@@ -217,6 +289,26 @@ func (poi *PointsOfInterest) assignValues(columns []string, values []any) error 
 // This includes values selected through modifiers, order, etc.
 func (poi *PointsOfInterest) Value(name string) (ent.Value, error) {
 	return poi.selectValues.Get(name)
+}
+
+// QueryCity queries the "city" edge of the PointsOfInterest entity.
+func (poi *PointsOfInterest) QueryCity() *CityQuery {
+	return NewPointsOfInterestClient(poi.config).QueryCity(poi)
+}
+
+// QueryState queries the "state" edge of the PointsOfInterest entity.
+func (poi *PointsOfInterest) QueryState() *StateQuery {
+	return NewPointsOfInterestClient(poi.config).QueryState(poi)
+}
+
+// QueryCountry queries the "country" edge of the PointsOfInterest entity.
+func (poi *PointsOfInterest) QueryCountry() *CountryQuery {
+	return NewPointsOfInterestClient(poi.config).QueryCountry(poi)
+}
+
+// QueryContinent queries the "continent" edge of the PointsOfInterest entity.
+func (poi *PointsOfInterest) QueryContinent() *ContinentQuery {
+	return NewPointsOfInterestClient(poi.config).QueryContinent(poi)
 }
 
 // QueryDailyItinerary queries the "daily_itinerary" edge of the PointsOfInterest entity.
@@ -265,15 +357,6 @@ func (poi *PointsOfInterest) String() string {
 	builder.WriteString("description=")
 	builder.WriteString(poi.Description)
 	builder.WriteString(", ")
-	builder.WriteString("city=")
-	builder.WriteString(poi.City)
-	builder.WriteString(", ")
-	builder.WriteString("state=")
-	builder.WriteString(poi.State)
-	builder.WriteString(", ")
-	builder.WriteString("country=")
-	builder.WriteString(poi.Country)
-	builder.WriteString(", ")
 	builder.WriteString("address=")
 	builder.WriteString(poi.Address)
 	builder.WriteString(", ")
@@ -292,8 +375,8 @@ func (poi *PointsOfInterest) String() string {
 	builder.WriteString("rating=")
 	builder.WriteString(fmt.Sprintf("%v", poi.Rating))
 	builder.WriteString(", ")
-	builder.WriteString("recommended_duration_seconds=")
-	builder.WriteString(fmt.Sprintf("%v", poi.RecommendedDurationSeconds))
+	builder.WriteString("recommended_duration_minutes=")
+	builder.WriteString(fmt.Sprintf("%v", poi.RecommendedDurationMinutes))
 	builder.WriteByte(')')
 	return builder.String()
 }

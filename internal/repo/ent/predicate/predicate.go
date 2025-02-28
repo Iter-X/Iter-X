@@ -6,6 +6,15 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// City is the predicate function for city builders.
+type City func(*sql.Selector)
+
+// Continent is the predicate function for continent builders.
+type Continent func(*sql.Selector)
+
+// Country is the predicate function for country builders.
+type Country func(*sql.Selector)
+
 // DailyItinerary is the predicate function for dailyitinerary builders.
 type DailyItinerary func(*sql.Selector)
 
@@ -20,6 +29,9 @@ type PointsOfInterest func(*sql.Selector)
 
 // RefreshToken is the predicate function for refreshtoken builders.
 type RefreshToken func(*sql.Selector)
+
+// State is the predicate function for state builders.
+type State func(*sql.Selector)
 
 // Trip is the predicate function for trip builders.
 type Trip func(*sql.Selector)

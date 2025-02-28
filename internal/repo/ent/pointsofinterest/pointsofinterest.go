@@ -27,12 +27,6 @@ const (
 	FieldNameCn = "name_cn"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
-	// FieldCity holds the string denoting the city field in the database.
-	FieldCity = "city"
-	// FieldState holds the string denoting the state field in the database.
-	FieldState = "state"
-	// FieldCountry holds the string denoting the country field in the database.
-	FieldCountry = "country"
 	// FieldAddress holds the string denoting the address field in the database.
 	FieldAddress = "address"
 	// FieldLatitude holds the string denoting the latitude field in the database.
@@ -45,12 +39,48 @@ const (
 	FieldCategory = "category"
 	// FieldRating holds the string denoting the rating field in the database.
 	FieldRating = "rating"
-	// FieldRecommendedDurationSeconds holds the string denoting the recommended_duration_seconds field in the database.
-	FieldRecommendedDurationSeconds = "recommended_duration_seconds"
+	// FieldRecommendedDurationMinutes holds the string denoting the recommended_duration_minutes field in the database.
+	FieldRecommendedDurationMinutes = "recommended_duration_minutes"
+	// EdgeCity holds the string denoting the city edge name in mutations.
+	EdgeCity = "city"
+	// EdgeState holds the string denoting the state edge name in mutations.
+	EdgeState = "state"
+	// EdgeCountry holds the string denoting the country edge name in mutations.
+	EdgeCountry = "country"
+	// EdgeContinent holds the string denoting the continent edge name in mutations.
+	EdgeContinent = "continent"
 	// EdgeDailyItinerary holds the string denoting the daily_itinerary edge name in mutations.
 	EdgeDailyItinerary = "daily_itinerary"
 	// Table holds the table name of the pointsofinterest in the database.
 	Table = "points_of_interest"
+	// CityTable is the table that holds the city relation/edge.
+	CityTable = "points_of_interest"
+	// CityInverseTable is the table name for the City entity.
+	// It exists in this package in order to avoid circular dependency with the "city" package.
+	CityInverseTable = "cities"
+	// CityColumn is the table column denoting the city relation/edge.
+	CityColumn = "city_poi"
+	// StateTable is the table that holds the state relation/edge.
+	StateTable = "points_of_interest"
+	// StateInverseTable is the table name for the State entity.
+	// It exists in this package in order to avoid circular dependency with the "state" package.
+	StateInverseTable = "states"
+	// StateColumn is the table column denoting the state relation/edge.
+	StateColumn = "state_poi"
+	// CountryTable is the table that holds the country relation/edge.
+	CountryTable = "points_of_interest"
+	// CountryInverseTable is the table name for the Country entity.
+	// It exists in this package in order to avoid circular dependency with the "country" package.
+	CountryInverseTable = "countries"
+	// CountryColumn is the table column denoting the country relation/edge.
+	CountryColumn = "country_poi"
+	// ContinentTable is the table that holds the continent relation/edge.
+	ContinentTable = "points_of_interest"
+	// ContinentInverseTable is the table name for the Continent entity.
+	// It exists in this package in order to avoid circular dependency with the "continent" package.
+	ContinentInverseTable = "continents"
+	// ContinentColumn is the table column denoting the continent relation/edge.
+	ContinentColumn = "continent_poi"
 	// DailyItineraryTable is the table that holds the daily_itinerary relation/edge.
 	DailyItineraryTable = "daily_itineraries"
 	// DailyItineraryInverseTable is the table name for the DailyItinerary entity.
@@ -69,22 +99,33 @@ var Columns = []string{
 	FieldNameEn,
 	FieldNameCn,
 	FieldDescription,
-	FieldCity,
-	FieldState,
-	FieldCountry,
 	FieldAddress,
 	FieldLatitude,
 	FieldLongitude,
 	FieldType,
 	FieldCategory,
 	FieldRating,
-	FieldRecommendedDurationSeconds,
+	FieldRecommendedDurationMinutes,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the "points_of_interest"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"city_poi",
+	"continent_poi",
+	"country_poi",
+	"state_poi",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -106,12 +147,6 @@ var (
 	NameCnValidator func(string) error
 	// DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
 	DescriptionValidator func(string) error
-	// CityValidator is a validator for the "city" field. It is called by the builders before save.
-	CityValidator func(string) error
-	// StateValidator is a validator for the "state" field. It is called by the builders before save.
-	StateValidator func(string) error
-	// CountryValidator is a validator for the "country" field. It is called by the builders before save.
-	CountryValidator func(string) error
 	// AddressValidator is a validator for the "address" field. It is called by the builders before save.
 	AddressValidator func(string) error
 	// TypeValidator is a validator for the "type" field. It is called by the builders before save.
@@ -120,8 +155,8 @@ var (
 	CategoryValidator func(string) error
 	// RatingValidator is a validator for the "rating" field. It is called by the builders before save.
 	RatingValidator func(float32) error
-	// RecommendedDurationSecondsValidator is a validator for the "recommended_duration_seconds" field. It is called by the builders before save.
-	RecommendedDurationSecondsValidator func(int64) error
+	// RecommendedDurationMinutesValidator is a validator for the "recommended_duration_minutes" field. It is called by the builders before save.
+	RecommendedDurationMinutesValidator func(int64) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -164,21 +199,6 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
-// ByCity orders the results by the city field.
-func ByCity(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCity, opts...).ToFunc()
-}
-
-// ByState orders the results by the state field.
-func ByState(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldState, opts...).ToFunc()
-}
-
-// ByCountry orders the results by the country field.
-func ByCountry(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCountry, opts...).ToFunc()
-}
-
 // ByAddress orders the results by the address field.
 func ByAddress(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAddress, opts...).ToFunc()
@@ -209,9 +229,37 @@ func ByRating(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRating, opts...).ToFunc()
 }
 
-// ByRecommendedDurationSeconds orders the results by the recommended_duration_seconds field.
-func ByRecommendedDurationSeconds(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldRecommendedDurationSeconds, opts...).ToFunc()
+// ByRecommendedDurationMinutes orders the results by the recommended_duration_minutes field.
+func ByRecommendedDurationMinutes(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRecommendedDurationMinutes, opts...).ToFunc()
+}
+
+// ByCityField orders the results by city field.
+func ByCityField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCityStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByStateField orders the results by state field.
+func ByStateField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newStateStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByCountryField orders the results by country field.
+func ByCountryField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCountryStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByContinentField orders the results by continent field.
+func ByContinentField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newContinentStep(), sql.OrderByField(field, opts...))
+	}
 }
 
 // ByDailyItineraryCount orders the results by daily_itinerary count.
@@ -226,6 +274,34 @@ func ByDailyItinerary(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newDailyItineraryStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
+}
+func newCityStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CityInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, CityTable, CityColumn),
+	)
+}
+func newStateStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(StateInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, StateTable, StateColumn),
+	)
+}
+func newCountryStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CountryInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, CountryTable, CountryColumn),
+	)
+}
+func newContinentStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ContinentInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, ContinentTable, ContinentColumn),
+	)
 }
 func newDailyItineraryStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(

@@ -25,13 +25,6 @@ func NewConnection(c *conf.Data, logger *zap.SugaredLogger) (*ent.Client, func()
 		return nil, nil, err
 	}
 
-	// Run the auto migration tool.
-	err = client.Schema.Create(context.Background())
-	if err != nil {
-		logger.Error("failed creating schema resources: ", err)
-		return nil, nil, err
-	}
-
 	cleanup := func() {
 		err = client.Close()
 		if err != nil {

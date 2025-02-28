@@ -11,8 +11,12 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/iter-x/iter-x/internal/repo/ent/city"
+	"github.com/iter-x/iter-x/internal/repo/ent/continent"
+	"github.com/iter-x/iter-x/internal/repo/ent/country"
 	"github.com/iter-x/iter-x/internal/repo/ent/dailyitinerary"
 	"github.com/iter-x/iter-x/internal/repo/ent/pointsofinterest"
+	"github.com/iter-x/iter-x/internal/repo/ent/state"
 )
 
 // PointsOfInterestCreate is the builder for creating a PointsOfInterest entity.
@@ -74,24 +78,6 @@ func (poic *PointsOfInterestCreate) SetDescription(s string) *PointsOfInterestCr
 	return poic
 }
 
-// SetCity sets the "city" field.
-func (poic *PointsOfInterestCreate) SetCity(s string) *PointsOfInterestCreate {
-	poic.mutation.SetCity(s)
-	return poic
-}
-
-// SetState sets the "state" field.
-func (poic *PointsOfInterestCreate) SetState(s string) *PointsOfInterestCreate {
-	poic.mutation.SetState(s)
-	return poic
-}
-
-// SetCountry sets the "country" field.
-func (poic *PointsOfInterestCreate) SetCountry(s string) *PointsOfInterestCreate {
-	poic.mutation.SetCountry(s)
-	return poic
-}
-
 // SetAddress sets the "address" field.
 func (poic *PointsOfInterestCreate) SetAddress(s string) *PointsOfInterestCreate {
 	poic.mutation.SetAddress(s)
@@ -128,9 +114,9 @@ func (poic *PointsOfInterestCreate) SetRating(f float32) *PointsOfInterestCreate
 	return poic
 }
 
-// SetRecommendedDurationSeconds sets the "recommended_duration_seconds" field.
-func (poic *PointsOfInterestCreate) SetRecommendedDurationSeconds(i int64) *PointsOfInterestCreate {
-	poic.mutation.SetRecommendedDurationSeconds(i)
+// SetRecommendedDurationMinutes sets the "recommended_duration_minutes" field.
+func (poic *PointsOfInterestCreate) SetRecommendedDurationMinutes(i int64) *PointsOfInterestCreate {
+	poic.mutation.SetRecommendedDurationMinutes(i)
 	return poic
 }
 
@@ -146,6 +132,82 @@ func (poic *PointsOfInterestCreate) SetNillableID(u *uuid.UUID) *PointsOfInteres
 		poic.SetID(*u)
 	}
 	return poic
+}
+
+// SetCityID sets the "city" edge to the City entity by ID.
+func (poic *PointsOfInterestCreate) SetCityID(id uuid.UUID) *PointsOfInterestCreate {
+	poic.mutation.SetCityID(id)
+	return poic
+}
+
+// SetNillableCityID sets the "city" edge to the City entity by ID if the given value is not nil.
+func (poic *PointsOfInterestCreate) SetNillableCityID(id *uuid.UUID) *PointsOfInterestCreate {
+	if id != nil {
+		poic = poic.SetCityID(*id)
+	}
+	return poic
+}
+
+// SetCity sets the "city" edge to the City entity.
+func (poic *PointsOfInterestCreate) SetCity(c *City) *PointsOfInterestCreate {
+	return poic.SetCityID(c.ID)
+}
+
+// SetStateID sets the "state" edge to the State entity by ID.
+func (poic *PointsOfInterestCreate) SetStateID(id uuid.UUID) *PointsOfInterestCreate {
+	poic.mutation.SetStateID(id)
+	return poic
+}
+
+// SetNillableStateID sets the "state" edge to the State entity by ID if the given value is not nil.
+func (poic *PointsOfInterestCreate) SetNillableStateID(id *uuid.UUID) *PointsOfInterestCreate {
+	if id != nil {
+		poic = poic.SetStateID(*id)
+	}
+	return poic
+}
+
+// SetState sets the "state" edge to the State entity.
+func (poic *PointsOfInterestCreate) SetState(s *State) *PointsOfInterestCreate {
+	return poic.SetStateID(s.ID)
+}
+
+// SetCountryID sets the "country" edge to the Country entity by ID.
+func (poic *PointsOfInterestCreate) SetCountryID(id uuid.UUID) *PointsOfInterestCreate {
+	poic.mutation.SetCountryID(id)
+	return poic
+}
+
+// SetNillableCountryID sets the "country" edge to the Country entity by ID if the given value is not nil.
+func (poic *PointsOfInterestCreate) SetNillableCountryID(id *uuid.UUID) *PointsOfInterestCreate {
+	if id != nil {
+		poic = poic.SetCountryID(*id)
+	}
+	return poic
+}
+
+// SetCountry sets the "country" edge to the Country entity.
+func (poic *PointsOfInterestCreate) SetCountry(c *Country) *PointsOfInterestCreate {
+	return poic.SetCountryID(c.ID)
+}
+
+// SetContinentID sets the "continent" edge to the Continent entity by ID.
+func (poic *PointsOfInterestCreate) SetContinentID(id uuid.UUID) *PointsOfInterestCreate {
+	poic.mutation.SetContinentID(id)
+	return poic
+}
+
+// SetNillableContinentID sets the "continent" edge to the Continent entity by ID if the given value is not nil.
+func (poic *PointsOfInterestCreate) SetNillableContinentID(id *uuid.UUID) *PointsOfInterestCreate {
+	if id != nil {
+		poic = poic.SetContinentID(*id)
+	}
+	return poic
+}
+
+// SetContinent sets the "continent" edge to the Continent entity.
+func (poic *PointsOfInterestCreate) SetContinent(c *Continent) *PointsOfInterestCreate {
+	return poic.SetContinentID(c.ID)
 }
 
 // AddDailyItineraryIDs adds the "daily_itinerary" edge to the DailyItinerary entity by IDs.
@@ -252,30 +314,6 @@ func (poic *PointsOfInterestCreate) check() error {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.description": %w`, err)}
 		}
 	}
-	if _, ok := poic.mutation.City(); !ok {
-		return &ValidationError{Name: "city", err: errors.New(`ent: missing required field "PointsOfInterest.city"`)}
-	}
-	if v, ok := poic.mutation.City(); ok {
-		if err := pointsofinterest.CityValidator(v); err != nil {
-			return &ValidationError{Name: "city", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.city": %w`, err)}
-		}
-	}
-	if _, ok := poic.mutation.State(); !ok {
-		return &ValidationError{Name: "state", err: errors.New(`ent: missing required field "PointsOfInterest.state"`)}
-	}
-	if v, ok := poic.mutation.State(); ok {
-		if err := pointsofinterest.StateValidator(v); err != nil {
-			return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.state": %w`, err)}
-		}
-	}
-	if _, ok := poic.mutation.Country(); !ok {
-		return &ValidationError{Name: "country", err: errors.New(`ent: missing required field "PointsOfInterest.country"`)}
-	}
-	if v, ok := poic.mutation.Country(); ok {
-		if err := pointsofinterest.CountryValidator(v); err != nil {
-			return &ValidationError{Name: "country", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.country": %w`, err)}
-		}
-	}
 	if _, ok := poic.mutation.Address(); !ok {
 		return &ValidationError{Name: "address", err: errors.New(`ent: missing required field "PointsOfInterest.address"`)}
 	}
@@ -314,12 +352,12 @@ func (poic *PointsOfInterestCreate) check() error {
 			return &ValidationError{Name: "rating", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.rating": %w`, err)}
 		}
 	}
-	if _, ok := poic.mutation.RecommendedDurationSeconds(); !ok {
-		return &ValidationError{Name: "recommended_duration_seconds", err: errors.New(`ent: missing required field "PointsOfInterest.recommended_duration_seconds"`)}
+	if _, ok := poic.mutation.RecommendedDurationMinutes(); !ok {
+		return &ValidationError{Name: "recommended_duration_minutes", err: errors.New(`ent: missing required field "PointsOfInterest.recommended_duration_minutes"`)}
 	}
-	if v, ok := poic.mutation.RecommendedDurationSeconds(); ok {
-		if err := pointsofinterest.RecommendedDurationSecondsValidator(v); err != nil {
-			return &ValidationError{Name: "recommended_duration_seconds", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.recommended_duration_seconds": %w`, err)}
+	if v, ok := poic.mutation.RecommendedDurationMinutes(); ok {
+		if err := pointsofinterest.RecommendedDurationMinutesValidator(v); err != nil {
+			return &ValidationError{Name: "recommended_duration_minutes", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.recommended_duration_minutes": %w`, err)}
 		}
 	}
 	return nil
@@ -381,18 +419,6 @@ func (poic *PointsOfInterestCreate) createSpec() (*PointsOfInterest, *sqlgraph.C
 		_spec.SetField(pointsofinterest.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
-	if value, ok := poic.mutation.City(); ok {
-		_spec.SetField(pointsofinterest.FieldCity, field.TypeString, value)
-		_node.City = value
-	}
-	if value, ok := poic.mutation.State(); ok {
-		_spec.SetField(pointsofinterest.FieldState, field.TypeString, value)
-		_node.State = value
-	}
-	if value, ok := poic.mutation.Country(); ok {
-		_spec.SetField(pointsofinterest.FieldCountry, field.TypeString, value)
-		_node.Country = value
-	}
 	if value, ok := poic.mutation.Address(); ok {
 		_spec.SetField(pointsofinterest.FieldAddress, field.TypeString, value)
 		_node.Address = value
@@ -417,9 +443,77 @@ func (poic *PointsOfInterestCreate) createSpec() (*PointsOfInterest, *sqlgraph.C
 		_spec.SetField(pointsofinterest.FieldRating, field.TypeFloat32, value)
 		_node.Rating = value
 	}
-	if value, ok := poic.mutation.RecommendedDurationSeconds(); ok {
-		_spec.SetField(pointsofinterest.FieldRecommendedDurationSeconds, field.TypeInt64, value)
-		_node.RecommendedDurationSeconds = value
+	if value, ok := poic.mutation.RecommendedDurationMinutes(); ok {
+		_spec.SetField(pointsofinterest.FieldRecommendedDurationMinutes, field.TypeInt64, value)
+		_node.RecommendedDurationMinutes = value
+	}
+	if nodes := poic.mutation.CityIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pointsofinterest.CityTable,
+			Columns: []string{pointsofinterest.CityColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(city.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.city_poi = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := poic.mutation.StateIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pointsofinterest.StateTable,
+			Columns: []string{pointsofinterest.StateColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(state.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.state_poi = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := poic.mutation.CountryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pointsofinterest.CountryTable,
+			Columns: []string{pointsofinterest.CountryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.country_poi = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := poic.mutation.ContinentIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pointsofinterest.ContinentTable,
+			Columns: []string{pointsofinterest.ContinentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(continent.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.continent_poi = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := poic.mutation.DailyItineraryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

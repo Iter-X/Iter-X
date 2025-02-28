@@ -86,21 +86,6 @@ func Description(v string) predicate.PointsOfInterest {
 	return predicate.PointsOfInterest(sql.FieldEQ(FieldDescription, v))
 }
 
-// City applies equality check predicate on the "city" field. It's identical to CityEQ.
-func City(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldEQ(FieldCity, v))
-}
-
-// State applies equality check predicate on the "state" field. It's identical to StateEQ.
-func State(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldEQ(FieldState, v))
-}
-
-// Country applies equality check predicate on the "country" field. It's identical to CountryEQ.
-func Country(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldEQ(FieldCountry, v))
-}
-
 // Address applies equality check predicate on the "address" field. It's identical to AddressEQ.
 func Address(v string) predicate.PointsOfInterest {
 	return predicate.PointsOfInterest(sql.FieldEQ(FieldAddress, v))
@@ -131,9 +116,9 @@ func Rating(v float32) predicate.PointsOfInterest {
 	return predicate.PointsOfInterest(sql.FieldEQ(FieldRating, v))
 }
 
-// RecommendedDurationSeconds applies equality check predicate on the "recommended_duration_seconds" field. It's identical to RecommendedDurationSecondsEQ.
-func RecommendedDurationSeconds(v int64) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldEQ(FieldRecommendedDurationSeconds, v))
+// RecommendedDurationMinutes applies equality check predicate on the "recommended_duration_minutes" field. It's identical to RecommendedDurationMinutesEQ.
+func RecommendedDurationMinutes(v int64) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldEQ(FieldRecommendedDurationMinutes, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -476,201 +461,6 @@ func DescriptionContainsFold(v string) predicate.PointsOfInterest {
 	return predicate.PointsOfInterest(sql.FieldContainsFold(FieldDescription, v))
 }
 
-// CityEQ applies the EQ predicate on the "city" field.
-func CityEQ(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldEQ(FieldCity, v))
-}
-
-// CityNEQ applies the NEQ predicate on the "city" field.
-func CityNEQ(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldNEQ(FieldCity, v))
-}
-
-// CityIn applies the In predicate on the "city" field.
-func CityIn(vs ...string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldIn(FieldCity, vs...))
-}
-
-// CityNotIn applies the NotIn predicate on the "city" field.
-func CityNotIn(vs ...string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldNotIn(FieldCity, vs...))
-}
-
-// CityGT applies the GT predicate on the "city" field.
-func CityGT(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldGT(FieldCity, v))
-}
-
-// CityGTE applies the GTE predicate on the "city" field.
-func CityGTE(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldGTE(FieldCity, v))
-}
-
-// CityLT applies the LT predicate on the "city" field.
-func CityLT(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldLT(FieldCity, v))
-}
-
-// CityLTE applies the LTE predicate on the "city" field.
-func CityLTE(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldLTE(FieldCity, v))
-}
-
-// CityContains applies the Contains predicate on the "city" field.
-func CityContains(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldContains(FieldCity, v))
-}
-
-// CityHasPrefix applies the HasPrefix predicate on the "city" field.
-func CityHasPrefix(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldHasPrefix(FieldCity, v))
-}
-
-// CityHasSuffix applies the HasSuffix predicate on the "city" field.
-func CityHasSuffix(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldHasSuffix(FieldCity, v))
-}
-
-// CityEqualFold applies the EqualFold predicate on the "city" field.
-func CityEqualFold(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldEqualFold(FieldCity, v))
-}
-
-// CityContainsFold applies the ContainsFold predicate on the "city" field.
-func CityContainsFold(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldContainsFold(FieldCity, v))
-}
-
-// StateEQ applies the EQ predicate on the "state" field.
-func StateEQ(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldEQ(FieldState, v))
-}
-
-// StateNEQ applies the NEQ predicate on the "state" field.
-func StateNEQ(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldNEQ(FieldState, v))
-}
-
-// StateIn applies the In predicate on the "state" field.
-func StateIn(vs ...string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldIn(FieldState, vs...))
-}
-
-// StateNotIn applies the NotIn predicate on the "state" field.
-func StateNotIn(vs ...string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldNotIn(FieldState, vs...))
-}
-
-// StateGT applies the GT predicate on the "state" field.
-func StateGT(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldGT(FieldState, v))
-}
-
-// StateGTE applies the GTE predicate on the "state" field.
-func StateGTE(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldGTE(FieldState, v))
-}
-
-// StateLT applies the LT predicate on the "state" field.
-func StateLT(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldLT(FieldState, v))
-}
-
-// StateLTE applies the LTE predicate on the "state" field.
-func StateLTE(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldLTE(FieldState, v))
-}
-
-// StateContains applies the Contains predicate on the "state" field.
-func StateContains(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldContains(FieldState, v))
-}
-
-// StateHasPrefix applies the HasPrefix predicate on the "state" field.
-func StateHasPrefix(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldHasPrefix(FieldState, v))
-}
-
-// StateHasSuffix applies the HasSuffix predicate on the "state" field.
-func StateHasSuffix(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldHasSuffix(FieldState, v))
-}
-
-// StateEqualFold applies the EqualFold predicate on the "state" field.
-func StateEqualFold(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldEqualFold(FieldState, v))
-}
-
-// StateContainsFold applies the ContainsFold predicate on the "state" field.
-func StateContainsFold(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldContainsFold(FieldState, v))
-}
-
-// CountryEQ applies the EQ predicate on the "country" field.
-func CountryEQ(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldEQ(FieldCountry, v))
-}
-
-// CountryNEQ applies the NEQ predicate on the "country" field.
-func CountryNEQ(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldNEQ(FieldCountry, v))
-}
-
-// CountryIn applies the In predicate on the "country" field.
-func CountryIn(vs ...string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldIn(FieldCountry, vs...))
-}
-
-// CountryNotIn applies the NotIn predicate on the "country" field.
-func CountryNotIn(vs ...string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldNotIn(FieldCountry, vs...))
-}
-
-// CountryGT applies the GT predicate on the "country" field.
-func CountryGT(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldGT(FieldCountry, v))
-}
-
-// CountryGTE applies the GTE predicate on the "country" field.
-func CountryGTE(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldGTE(FieldCountry, v))
-}
-
-// CountryLT applies the LT predicate on the "country" field.
-func CountryLT(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldLT(FieldCountry, v))
-}
-
-// CountryLTE applies the LTE predicate on the "country" field.
-func CountryLTE(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldLTE(FieldCountry, v))
-}
-
-// CountryContains applies the Contains predicate on the "country" field.
-func CountryContains(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldContains(FieldCountry, v))
-}
-
-// CountryHasPrefix applies the HasPrefix predicate on the "country" field.
-func CountryHasPrefix(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldHasPrefix(FieldCountry, v))
-}
-
-// CountryHasSuffix applies the HasSuffix predicate on the "country" field.
-func CountryHasSuffix(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldHasSuffix(FieldCountry, v))
-}
-
-// CountryEqualFold applies the EqualFold predicate on the "country" field.
-func CountryEqualFold(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldEqualFold(FieldCountry, v))
-}
-
-// CountryContainsFold applies the ContainsFold predicate on the "country" field.
-func CountryContainsFold(v string) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldContainsFold(FieldCountry, v))
-}
-
 // AddressEQ applies the EQ predicate on the "address" field.
 func AddressEQ(v string) predicate.PointsOfInterest {
 	return predicate.PointsOfInterest(sql.FieldEQ(FieldAddress, v))
@@ -986,44 +776,136 @@ func RatingLTE(v float32) predicate.PointsOfInterest {
 	return predicate.PointsOfInterest(sql.FieldLTE(FieldRating, v))
 }
 
-// RecommendedDurationSecondsEQ applies the EQ predicate on the "recommended_duration_seconds" field.
-func RecommendedDurationSecondsEQ(v int64) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldEQ(FieldRecommendedDurationSeconds, v))
+// RecommendedDurationMinutesEQ applies the EQ predicate on the "recommended_duration_minutes" field.
+func RecommendedDurationMinutesEQ(v int64) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldEQ(FieldRecommendedDurationMinutes, v))
 }
 
-// RecommendedDurationSecondsNEQ applies the NEQ predicate on the "recommended_duration_seconds" field.
-func RecommendedDurationSecondsNEQ(v int64) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldNEQ(FieldRecommendedDurationSeconds, v))
+// RecommendedDurationMinutesNEQ applies the NEQ predicate on the "recommended_duration_minutes" field.
+func RecommendedDurationMinutesNEQ(v int64) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldNEQ(FieldRecommendedDurationMinutes, v))
 }
 
-// RecommendedDurationSecondsIn applies the In predicate on the "recommended_duration_seconds" field.
-func RecommendedDurationSecondsIn(vs ...int64) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldIn(FieldRecommendedDurationSeconds, vs...))
+// RecommendedDurationMinutesIn applies the In predicate on the "recommended_duration_minutes" field.
+func RecommendedDurationMinutesIn(vs ...int64) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldIn(FieldRecommendedDurationMinutes, vs...))
 }
 
-// RecommendedDurationSecondsNotIn applies the NotIn predicate on the "recommended_duration_seconds" field.
-func RecommendedDurationSecondsNotIn(vs ...int64) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldNotIn(FieldRecommendedDurationSeconds, vs...))
+// RecommendedDurationMinutesNotIn applies the NotIn predicate on the "recommended_duration_minutes" field.
+func RecommendedDurationMinutesNotIn(vs ...int64) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldNotIn(FieldRecommendedDurationMinutes, vs...))
 }
 
-// RecommendedDurationSecondsGT applies the GT predicate on the "recommended_duration_seconds" field.
-func RecommendedDurationSecondsGT(v int64) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldGT(FieldRecommendedDurationSeconds, v))
+// RecommendedDurationMinutesGT applies the GT predicate on the "recommended_duration_minutes" field.
+func RecommendedDurationMinutesGT(v int64) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldGT(FieldRecommendedDurationMinutes, v))
 }
 
-// RecommendedDurationSecondsGTE applies the GTE predicate on the "recommended_duration_seconds" field.
-func RecommendedDurationSecondsGTE(v int64) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldGTE(FieldRecommendedDurationSeconds, v))
+// RecommendedDurationMinutesGTE applies the GTE predicate on the "recommended_duration_minutes" field.
+func RecommendedDurationMinutesGTE(v int64) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldGTE(FieldRecommendedDurationMinutes, v))
 }
 
-// RecommendedDurationSecondsLT applies the LT predicate on the "recommended_duration_seconds" field.
-func RecommendedDurationSecondsLT(v int64) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldLT(FieldRecommendedDurationSeconds, v))
+// RecommendedDurationMinutesLT applies the LT predicate on the "recommended_duration_minutes" field.
+func RecommendedDurationMinutesLT(v int64) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldLT(FieldRecommendedDurationMinutes, v))
 }
 
-// RecommendedDurationSecondsLTE applies the LTE predicate on the "recommended_duration_seconds" field.
-func RecommendedDurationSecondsLTE(v int64) predicate.PointsOfInterest {
-	return predicate.PointsOfInterest(sql.FieldLTE(FieldRecommendedDurationSeconds, v))
+// RecommendedDurationMinutesLTE applies the LTE predicate on the "recommended_duration_minutes" field.
+func RecommendedDurationMinutesLTE(v int64) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldLTE(FieldRecommendedDurationMinutes, v))
+}
+
+// HasCity applies the HasEdge predicate on the "city" edge.
+func HasCity() predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, CityTable, CityColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCityWith applies the HasEdge predicate on the "city" edge with a given conditions (other predicates).
+func HasCityWith(preds ...predicate.City) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(func(s *sql.Selector) {
+		step := newCityStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasState applies the HasEdge predicate on the "state" edge.
+func HasState() predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, StateTable, StateColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasStateWith applies the HasEdge predicate on the "state" edge with a given conditions (other predicates).
+func HasStateWith(preds ...predicate.State) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(func(s *sql.Selector) {
+		step := newStateStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCountry applies the HasEdge predicate on the "country" edge.
+func HasCountry() predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, CountryTable, CountryColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCountryWith applies the HasEdge predicate on the "country" edge with a given conditions (other predicates).
+func HasCountryWith(preds ...predicate.Country) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(func(s *sql.Selector) {
+		step := newCountryStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasContinent applies the HasEdge predicate on the "continent" edge.
+func HasContinent() predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ContinentTable, ContinentColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasContinentWith applies the HasEdge predicate on the "continent" edge with a given conditions (other predicates).
+func HasContinentWith(preds ...predicate.Continent) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(func(s *sql.Selector) {
+		step := newContinentStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // HasDailyItinerary applies the HasEdge predicate on the "daily_itinerary" edge.

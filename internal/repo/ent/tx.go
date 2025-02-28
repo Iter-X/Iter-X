@@ -12,6 +12,12 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// City is the client for interacting with the City builders.
+	City *CityClient
+	// Continent is the client for interacting with the Continent builders.
+	Continent *ContinentClient
+	// Country is the client for interacting with the Country builders.
+	Country *CountryClient
 	// DailyItinerary is the client for interacting with the DailyItinerary builders.
 	DailyItinerary *DailyItineraryClient
 	// DailyTrip is the client for interacting with the DailyTrip builders.
@@ -22,6 +28,8 @@ type Tx struct {
 	PointsOfInterest *PointsOfInterestClient
 	// RefreshToken is the client for interacting with the RefreshToken builders.
 	RefreshToken *RefreshTokenClient
+	// State is the client for interacting with the State builders.
+	State *StateClient
 	// Trip is the client for interacting with the Trip builders.
 	Trip *TripClient
 	// User is the client for interacting with the User builders.
@@ -157,11 +165,15 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.City = NewCityClient(tx.config)
+	tx.Continent = NewContinentClient(tx.config)
+	tx.Country = NewCountryClient(tx.config)
 	tx.DailyItinerary = NewDailyItineraryClient(tx.config)
 	tx.DailyTrip = NewDailyTripClient(tx.config)
 	tx.Media = NewMediaClient(tx.config)
 	tx.PointsOfInterest = NewPointsOfInterestClient(tx.config)
 	tx.RefreshToken = NewRefreshTokenClient(tx.config)
+	tx.State = NewStateClient(tx.config)
 	tx.Trip = NewTripClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
@@ -173,7 +185,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: DailyItinerary.QueryXXX(), the query will be executed
+// applies a query, for example: City.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

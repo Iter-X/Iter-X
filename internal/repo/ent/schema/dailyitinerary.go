@@ -18,7 +18,7 @@ func (DailyItinerary) Fields() []ent.Field {
 		field.UUID("id", uuid.UUID{}).Unique().Default(uuid.New),
 		field.UUID("trip_id", uuid.UUID{}).Unique(),
 		field.UUID("daily_trip_id", uuid.UUID{}).Unique(),
-		field.UUID("poi_id", uuid.UUID{}).Unique(),
+		field.UUID("poi_id", uuid.UUID{}),
 		field.String("notes").MaxLen(255).Optional(),
 	}
 }

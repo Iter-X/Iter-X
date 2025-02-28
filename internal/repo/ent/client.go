@@ -16,11 +16,15 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/iter-x/iter-x/internal/repo/ent/city"
+	"github.com/iter-x/iter-x/internal/repo/ent/continent"
+	"github.com/iter-x/iter-x/internal/repo/ent/country"
 	"github.com/iter-x/iter-x/internal/repo/ent/dailyitinerary"
 	"github.com/iter-x/iter-x/internal/repo/ent/dailytrip"
 	"github.com/iter-x/iter-x/internal/repo/ent/media"
 	"github.com/iter-x/iter-x/internal/repo/ent/pointsofinterest"
 	"github.com/iter-x/iter-x/internal/repo/ent/refreshtoken"
+	"github.com/iter-x/iter-x/internal/repo/ent/state"
 	"github.com/iter-x/iter-x/internal/repo/ent/trip"
 	"github.com/iter-x/iter-x/internal/repo/ent/user"
 )
@@ -30,6 +34,12 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// City is the client for interacting with the City builders.
+	City *CityClient
+	// Continent is the client for interacting with the Continent builders.
+	Continent *ContinentClient
+	// Country is the client for interacting with the Country builders.
+	Country *CountryClient
 	// DailyItinerary is the client for interacting with the DailyItinerary builders.
 	DailyItinerary *DailyItineraryClient
 	// DailyTrip is the client for interacting with the DailyTrip builders.
@@ -40,6 +50,8 @@ type Client struct {
 	PointsOfInterest *PointsOfInterestClient
 	// RefreshToken is the client for interacting with the RefreshToken builders.
 	RefreshToken *RefreshTokenClient
+	// State is the client for interacting with the State builders.
+	State *StateClient
 	// Trip is the client for interacting with the Trip builders.
 	Trip *TripClient
 	// User is the client for interacting with the User builders.
@@ -55,11 +67,15 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.City = NewCityClient(c.config)
+	c.Continent = NewContinentClient(c.config)
+	c.Country = NewCountryClient(c.config)
 	c.DailyItinerary = NewDailyItineraryClient(c.config)
 	c.DailyTrip = NewDailyTripClient(c.config)
 	c.Media = NewMediaClient(c.config)
 	c.PointsOfInterest = NewPointsOfInterestClient(c.config)
 	c.RefreshToken = NewRefreshTokenClient(c.config)
+	c.State = NewStateClient(c.config)
 	c.Trip = NewTripClient(c.config)
 	c.User = NewUserClient(c.config)
 }
@@ -154,11 +170,15 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:              ctx,
 		config:           cfg,
+		City:             NewCityClient(cfg),
+		Continent:        NewContinentClient(cfg),
+		Country:          NewCountryClient(cfg),
 		DailyItinerary:   NewDailyItineraryClient(cfg),
 		DailyTrip:        NewDailyTripClient(cfg),
 		Media:            NewMediaClient(cfg),
 		PointsOfInterest: NewPointsOfInterestClient(cfg),
 		RefreshToken:     NewRefreshTokenClient(cfg),
+		State:            NewStateClient(cfg),
 		Trip:             NewTripClient(cfg),
 		User:             NewUserClient(cfg),
 	}, nil
@@ -180,11 +200,15 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:              ctx,
 		config:           cfg,
+		City:             NewCityClient(cfg),
+		Continent:        NewContinentClient(cfg),
+		Country:          NewCountryClient(cfg),
 		DailyItinerary:   NewDailyItineraryClient(cfg),
 		DailyTrip:        NewDailyTripClient(cfg),
 		Media:            NewMediaClient(cfg),
 		PointsOfInterest: NewPointsOfInterestClient(cfg),
 		RefreshToken:     NewRefreshTokenClient(cfg),
+		State:            NewStateClient(cfg),
 		Trip:             NewTripClient(cfg),
 		User:             NewUserClient(cfg),
 	}, nil
@@ -193,7 +217,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		DailyItinerary.
+//		City.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -216,8 +240,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.DailyItinerary, c.DailyTrip, c.Media, c.PointsOfInterest, c.RefreshToken,
-		c.Trip, c.User,
+		c.City, c.Continent, c.Country, c.DailyItinerary, c.DailyTrip, c.Media,
+		c.PointsOfInterest, c.RefreshToken, c.State, c.Trip, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -227,8 +251,8 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.DailyItinerary, c.DailyTrip, c.Media, c.PointsOfInterest, c.RefreshToken,
-		c.Trip, c.User,
+		c.City, c.Continent, c.Country, c.DailyItinerary, c.DailyTrip, c.Media,
+		c.PointsOfInterest, c.RefreshToken, c.State, c.Trip, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -237,6 +261,12 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *CityMutation:
+		return c.City.mutate(ctx, m)
+	case *ContinentMutation:
+		return c.Continent.mutate(ctx, m)
+	case *CountryMutation:
+		return c.Country.mutate(ctx, m)
 	case *DailyItineraryMutation:
 		return c.DailyItinerary.mutate(ctx, m)
 	case *DailyTripMutation:
@@ -247,12 +277,461 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.PointsOfInterest.mutate(ctx, m)
 	case *RefreshTokenMutation:
 		return c.RefreshToken.mutate(ctx, m)
+	case *StateMutation:
+		return c.State.mutate(ctx, m)
 	case *TripMutation:
 		return c.Trip.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// CityClient is a client for the City schema.
+type CityClient struct {
+	config
+}
+
+// NewCityClient returns a client for the City from the given config.
+func NewCityClient(c config) *CityClient {
+	return &CityClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `city.Hooks(f(g(h())))`.
+func (c *CityClient) Use(hooks ...Hook) {
+	c.hooks.City = append(c.hooks.City, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `city.Intercept(f(g(h())))`.
+func (c *CityClient) Intercept(interceptors ...Interceptor) {
+	c.inters.City = append(c.inters.City, interceptors...)
+}
+
+// Create returns a builder for creating a City entity.
+func (c *CityClient) Create() *CityCreate {
+	mutation := newCityMutation(c.config, OpCreate)
+	return &CityCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of City entities.
+func (c *CityClient) CreateBulk(builders ...*CityCreate) *CityCreateBulk {
+	return &CityCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CityClient) MapCreateBulk(slice any, setFunc func(*CityCreate, int)) *CityCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CityCreateBulk{err: fmt.Errorf("calling to CityClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CityCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CityCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for City.
+func (c *CityClient) Update() *CityUpdate {
+	mutation := newCityMutation(c.config, OpUpdate)
+	return &CityUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CityClient) UpdateOne(ci *City) *CityUpdateOne {
+	mutation := newCityMutation(c.config, OpUpdateOne, withCity(ci))
+	return &CityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CityClient) UpdateOneID(id uuid.UUID) *CityUpdateOne {
+	mutation := newCityMutation(c.config, OpUpdateOne, withCityID(id))
+	return &CityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for City.
+func (c *CityClient) Delete() *CityDelete {
+	mutation := newCityMutation(c.config, OpDelete)
+	return &CityDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CityClient) DeleteOne(ci *City) *CityDeleteOne {
+	return c.DeleteOneID(ci.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CityClient) DeleteOneID(id uuid.UUID) *CityDeleteOne {
+	builder := c.Delete().Where(city.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CityDeleteOne{builder}
+}
+
+// Query returns a query builder for City.
+func (c *CityClient) Query() *CityQuery {
+	return &CityQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCity},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a City entity by its id.
+func (c *CityClient) Get(ctx context.Context, id uuid.UUID) (*City, error) {
+	return c.Query().Where(city.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CityClient) GetX(ctx context.Context, id uuid.UUID) *City {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPoi queries the poi edge of a City.
+func (c *CityClient) QueryPoi(ci *City) *PointsOfInterestQuery {
+	query := (&PointsOfInterestClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ci.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(city.Table, city.FieldID, id),
+			sqlgraph.To(pointsofinterest.Table, pointsofinterest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, city.PoiTable, city.PoiColumn),
+		)
+		fromV = sqlgraph.Neighbors(ci.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CityClient) Hooks() []Hook {
+	return c.hooks.City
+}
+
+// Interceptors returns the client interceptors.
+func (c *CityClient) Interceptors() []Interceptor {
+	return c.inters.City
+}
+
+func (c *CityClient) mutate(ctx context.Context, m *CityMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CityCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CityUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CityDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown City mutation op: %q", m.Op())
+	}
+}
+
+// ContinentClient is a client for the Continent schema.
+type ContinentClient struct {
+	config
+}
+
+// NewContinentClient returns a client for the Continent from the given config.
+func NewContinentClient(c config) *ContinentClient {
+	return &ContinentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `continent.Hooks(f(g(h())))`.
+func (c *ContinentClient) Use(hooks ...Hook) {
+	c.hooks.Continent = append(c.hooks.Continent, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `continent.Intercept(f(g(h())))`.
+func (c *ContinentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Continent = append(c.inters.Continent, interceptors...)
+}
+
+// Create returns a builder for creating a Continent entity.
+func (c *ContinentClient) Create() *ContinentCreate {
+	mutation := newContinentMutation(c.config, OpCreate)
+	return &ContinentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Continent entities.
+func (c *ContinentClient) CreateBulk(builders ...*ContinentCreate) *ContinentCreateBulk {
+	return &ContinentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ContinentClient) MapCreateBulk(slice any, setFunc func(*ContinentCreate, int)) *ContinentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ContinentCreateBulk{err: fmt.Errorf("calling to ContinentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ContinentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ContinentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Continent.
+func (c *ContinentClient) Update() *ContinentUpdate {
+	mutation := newContinentMutation(c.config, OpUpdate)
+	return &ContinentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ContinentClient) UpdateOne(co *Continent) *ContinentUpdateOne {
+	mutation := newContinentMutation(c.config, OpUpdateOne, withContinent(co))
+	return &ContinentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ContinentClient) UpdateOneID(id uuid.UUID) *ContinentUpdateOne {
+	mutation := newContinentMutation(c.config, OpUpdateOne, withContinentID(id))
+	return &ContinentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Continent.
+func (c *ContinentClient) Delete() *ContinentDelete {
+	mutation := newContinentMutation(c.config, OpDelete)
+	return &ContinentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ContinentClient) DeleteOne(co *Continent) *ContinentDeleteOne {
+	return c.DeleteOneID(co.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ContinentClient) DeleteOneID(id uuid.UUID) *ContinentDeleteOne {
+	builder := c.Delete().Where(continent.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ContinentDeleteOne{builder}
+}
+
+// Query returns a query builder for Continent.
+func (c *ContinentClient) Query() *ContinentQuery {
+	return &ContinentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeContinent},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Continent entity by its id.
+func (c *ContinentClient) Get(ctx context.Context, id uuid.UUID) (*Continent, error) {
+	return c.Query().Where(continent.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ContinentClient) GetX(ctx context.Context, id uuid.UUID) *Continent {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPoi queries the poi edge of a Continent.
+func (c *ContinentClient) QueryPoi(co *Continent) *PointsOfInterestQuery {
+	query := (&PointsOfInterestClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := co.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(continent.Table, continent.FieldID, id),
+			sqlgraph.To(pointsofinterest.Table, pointsofinterest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, continent.PoiTable, continent.PoiColumn),
+		)
+		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ContinentClient) Hooks() []Hook {
+	return c.hooks.Continent
+}
+
+// Interceptors returns the client interceptors.
+func (c *ContinentClient) Interceptors() []Interceptor {
+	return c.inters.Continent
+}
+
+func (c *ContinentClient) mutate(ctx context.Context, m *ContinentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ContinentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ContinentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ContinentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ContinentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Continent mutation op: %q", m.Op())
+	}
+}
+
+// CountryClient is a client for the Country schema.
+type CountryClient struct {
+	config
+}
+
+// NewCountryClient returns a client for the Country from the given config.
+func NewCountryClient(c config) *CountryClient {
+	return &CountryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `country.Hooks(f(g(h())))`.
+func (c *CountryClient) Use(hooks ...Hook) {
+	c.hooks.Country = append(c.hooks.Country, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `country.Intercept(f(g(h())))`.
+func (c *CountryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Country = append(c.inters.Country, interceptors...)
+}
+
+// Create returns a builder for creating a Country entity.
+func (c *CountryClient) Create() *CountryCreate {
+	mutation := newCountryMutation(c.config, OpCreate)
+	return &CountryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Country entities.
+func (c *CountryClient) CreateBulk(builders ...*CountryCreate) *CountryCreateBulk {
+	return &CountryCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CountryClient) MapCreateBulk(slice any, setFunc func(*CountryCreate, int)) *CountryCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CountryCreateBulk{err: fmt.Errorf("calling to CountryClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CountryCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CountryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Country.
+func (c *CountryClient) Update() *CountryUpdate {
+	mutation := newCountryMutation(c.config, OpUpdate)
+	return &CountryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CountryClient) UpdateOne(co *Country) *CountryUpdateOne {
+	mutation := newCountryMutation(c.config, OpUpdateOne, withCountry(co))
+	return &CountryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CountryClient) UpdateOneID(id uuid.UUID) *CountryUpdateOne {
+	mutation := newCountryMutation(c.config, OpUpdateOne, withCountryID(id))
+	return &CountryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Country.
+func (c *CountryClient) Delete() *CountryDelete {
+	mutation := newCountryMutation(c.config, OpDelete)
+	return &CountryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CountryClient) DeleteOne(co *Country) *CountryDeleteOne {
+	return c.DeleteOneID(co.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CountryClient) DeleteOneID(id uuid.UUID) *CountryDeleteOne {
+	builder := c.Delete().Where(country.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CountryDeleteOne{builder}
+}
+
+// Query returns a query builder for Country.
+func (c *CountryClient) Query() *CountryQuery {
+	return &CountryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCountry},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Country entity by its id.
+func (c *CountryClient) Get(ctx context.Context, id uuid.UUID) (*Country, error) {
+	return c.Query().Where(country.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CountryClient) GetX(ctx context.Context, id uuid.UUID) *Country {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPoi queries the poi edge of a Country.
+func (c *CountryClient) QueryPoi(co *Country) *PointsOfInterestQuery {
+	query := (&PointsOfInterestClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := co.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(country.Table, country.FieldID, id),
+			sqlgraph.To(pointsofinterest.Table, pointsofinterest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, country.PoiTable, country.PoiColumn),
+		)
+		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CountryClient) Hooks() []Hook {
+	return c.hooks.Country
+}
+
+// Interceptors returns the client interceptors.
+func (c *CountryClient) Interceptors() []Interceptor {
+	return c.inters.Country
+}
+
+func (c *CountryClient) mutate(ctx context.Context, m *CountryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CountryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CountryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CountryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CountryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Country mutation op: %q", m.Op())
 	}
 }
 
@@ -843,6 +1322,70 @@ func (c *PointsOfInterestClient) GetX(ctx context.Context, id uuid.UUID) *Points
 	return obj
 }
 
+// QueryCity queries the city edge of a PointsOfInterest.
+func (c *PointsOfInterestClient) QueryCity(poi *PointsOfInterest) *CityQuery {
+	query := (&CityClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := poi.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pointsofinterest.Table, pointsofinterest.FieldID, id),
+			sqlgraph.To(city.Table, city.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, pointsofinterest.CityTable, pointsofinterest.CityColumn),
+		)
+		fromV = sqlgraph.Neighbors(poi.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryState queries the state edge of a PointsOfInterest.
+func (c *PointsOfInterestClient) QueryState(poi *PointsOfInterest) *StateQuery {
+	query := (&StateClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := poi.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pointsofinterest.Table, pointsofinterest.FieldID, id),
+			sqlgraph.To(state.Table, state.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, pointsofinterest.StateTable, pointsofinterest.StateColumn),
+		)
+		fromV = sqlgraph.Neighbors(poi.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCountry queries the country edge of a PointsOfInterest.
+func (c *PointsOfInterestClient) QueryCountry(poi *PointsOfInterest) *CountryQuery {
+	query := (&CountryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := poi.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pointsofinterest.Table, pointsofinterest.FieldID, id),
+			sqlgraph.To(country.Table, country.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, pointsofinterest.CountryTable, pointsofinterest.CountryColumn),
+		)
+		fromV = sqlgraph.Neighbors(poi.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryContinent queries the continent edge of a PointsOfInterest.
+func (c *PointsOfInterestClient) QueryContinent(poi *PointsOfInterest) *ContinentQuery {
+	query := (&ContinentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := poi.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pointsofinterest.Table, pointsofinterest.FieldID, id),
+			sqlgraph.To(continent.Table, continent.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, pointsofinterest.ContinentTable, pointsofinterest.ContinentColumn),
+		)
+		fromV = sqlgraph.Neighbors(poi.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryDailyItinerary queries the daily_itinerary edge of a PointsOfInterest.
 func (c *PointsOfInterestClient) QueryDailyItinerary(poi *PointsOfInterest) *DailyItineraryQuery {
 	query := (&DailyItineraryClient{config: c.config}).Query()
@@ -1030,6 +1573,155 @@ func (c *RefreshTokenClient) mutate(ctx context.Context, m *RefreshTokenMutation
 		return (&RefreshTokenDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown RefreshToken mutation op: %q", m.Op())
+	}
+}
+
+// StateClient is a client for the State schema.
+type StateClient struct {
+	config
+}
+
+// NewStateClient returns a client for the State from the given config.
+func NewStateClient(c config) *StateClient {
+	return &StateClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `state.Hooks(f(g(h())))`.
+func (c *StateClient) Use(hooks ...Hook) {
+	c.hooks.State = append(c.hooks.State, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `state.Intercept(f(g(h())))`.
+func (c *StateClient) Intercept(interceptors ...Interceptor) {
+	c.inters.State = append(c.inters.State, interceptors...)
+}
+
+// Create returns a builder for creating a State entity.
+func (c *StateClient) Create() *StateCreate {
+	mutation := newStateMutation(c.config, OpCreate)
+	return &StateCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of State entities.
+func (c *StateClient) CreateBulk(builders ...*StateCreate) *StateCreateBulk {
+	return &StateCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StateClient) MapCreateBulk(slice any, setFunc func(*StateCreate, int)) *StateCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StateCreateBulk{err: fmt.Errorf("calling to StateClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StateCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StateCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for State.
+func (c *StateClient) Update() *StateUpdate {
+	mutation := newStateMutation(c.config, OpUpdate)
+	return &StateUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StateClient) UpdateOne(s *State) *StateUpdateOne {
+	mutation := newStateMutation(c.config, OpUpdateOne, withState(s))
+	return &StateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StateClient) UpdateOneID(id uuid.UUID) *StateUpdateOne {
+	mutation := newStateMutation(c.config, OpUpdateOne, withStateID(id))
+	return &StateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for State.
+func (c *StateClient) Delete() *StateDelete {
+	mutation := newStateMutation(c.config, OpDelete)
+	return &StateDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StateClient) DeleteOne(s *State) *StateDeleteOne {
+	return c.DeleteOneID(s.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StateClient) DeleteOneID(id uuid.UUID) *StateDeleteOne {
+	builder := c.Delete().Where(state.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StateDeleteOne{builder}
+}
+
+// Query returns a query builder for State.
+func (c *StateClient) Query() *StateQuery {
+	return &StateQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeState},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a State entity by its id.
+func (c *StateClient) Get(ctx context.Context, id uuid.UUID) (*State, error) {
+	return c.Query().Where(state.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StateClient) GetX(ctx context.Context, id uuid.UUID) *State {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPoi queries the poi edge of a State.
+func (c *StateClient) QueryPoi(s *State) *PointsOfInterestQuery {
+	query := (&PointsOfInterestClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(state.Table, state.FieldID, id),
+			sqlgraph.To(pointsofinterest.Table, pointsofinterest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, state.PoiTable, state.PoiColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *StateClient) Hooks() []Hook {
+	return c.hooks.State
+}
+
+// Interceptors returns the client interceptors.
+func (c *StateClient) Interceptors() []Interceptor {
+	return c.inters.State
+}
+
+func (c *StateClient) mutate(ctx context.Context, m *StateMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StateCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StateUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StateDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown State mutation op: %q", m.Op())
 	}
 }
 
@@ -1382,11 +2074,11 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		DailyItinerary, DailyTrip, Media, PointsOfInterest, RefreshToken, Trip,
-		User []ent.Hook
+		City, Continent, Country, DailyItinerary, DailyTrip, Media, PointsOfInterest,
+		RefreshToken, State, Trip, User []ent.Hook
 	}
 	inters struct {
-		DailyItinerary, DailyTrip, Media, PointsOfInterest, RefreshToken, Trip,
-		User []ent.Interceptor
+		City, Continent, Country, DailyItinerary, DailyTrip, Media, PointsOfInterest,
+		RefreshToken, State, Trip, User []ent.Interceptor
 	}
 )

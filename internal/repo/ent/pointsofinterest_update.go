@@ -12,9 +12,13 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/iter-x/iter-x/internal/repo/ent/city"
+	"github.com/iter-x/iter-x/internal/repo/ent/continent"
+	"github.com/iter-x/iter-x/internal/repo/ent/country"
 	"github.com/iter-x/iter-x/internal/repo/ent/dailyitinerary"
 	"github.com/iter-x/iter-x/internal/repo/ent/pointsofinterest"
 	"github.com/iter-x/iter-x/internal/repo/ent/predicate"
+	"github.com/iter-x/iter-x/internal/repo/ent/state"
 )
 
 // PointsOfInterestUpdate is the builder for updating PointsOfInterest entities.
@@ -88,48 +92,6 @@ func (poiu *PointsOfInterestUpdate) SetDescription(s string) *PointsOfInterestUp
 func (poiu *PointsOfInterestUpdate) SetNillableDescription(s *string) *PointsOfInterestUpdate {
 	if s != nil {
 		poiu.SetDescription(*s)
-	}
-	return poiu
-}
-
-// SetCity sets the "city" field.
-func (poiu *PointsOfInterestUpdate) SetCity(s string) *PointsOfInterestUpdate {
-	poiu.mutation.SetCity(s)
-	return poiu
-}
-
-// SetNillableCity sets the "city" field if the given value is not nil.
-func (poiu *PointsOfInterestUpdate) SetNillableCity(s *string) *PointsOfInterestUpdate {
-	if s != nil {
-		poiu.SetCity(*s)
-	}
-	return poiu
-}
-
-// SetState sets the "state" field.
-func (poiu *PointsOfInterestUpdate) SetState(s string) *PointsOfInterestUpdate {
-	poiu.mutation.SetState(s)
-	return poiu
-}
-
-// SetNillableState sets the "state" field if the given value is not nil.
-func (poiu *PointsOfInterestUpdate) SetNillableState(s *string) *PointsOfInterestUpdate {
-	if s != nil {
-		poiu.SetState(*s)
-	}
-	return poiu
-}
-
-// SetCountry sets the "country" field.
-func (poiu *PointsOfInterestUpdate) SetCountry(s string) *PointsOfInterestUpdate {
-	poiu.mutation.SetCountry(s)
-	return poiu
-}
-
-// SetNillableCountry sets the "country" field if the given value is not nil.
-func (poiu *PointsOfInterestUpdate) SetNillableCountry(s *string) *PointsOfInterestUpdate {
-	if s != nil {
-		poiu.SetCountry(*s)
 	}
 	return poiu
 }
@@ -239,25 +201,101 @@ func (poiu *PointsOfInterestUpdate) AddRating(f float32) *PointsOfInterestUpdate
 	return poiu
 }
 
-// SetRecommendedDurationSeconds sets the "recommended_duration_seconds" field.
-func (poiu *PointsOfInterestUpdate) SetRecommendedDurationSeconds(i int64) *PointsOfInterestUpdate {
-	poiu.mutation.ResetRecommendedDurationSeconds()
-	poiu.mutation.SetRecommendedDurationSeconds(i)
+// SetRecommendedDurationMinutes sets the "recommended_duration_minutes" field.
+func (poiu *PointsOfInterestUpdate) SetRecommendedDurationMinutes(i int64) *PointsOfInterestUpdate {
+	poiu.mutation.ResetRecommendedDurationMinutes()
+	poiu.mutation.SetRecommendedDurationMinutes(i)
 	return poiu
 }
 
-// SetNillableRecommendedDurationSeconds sets the "recommended_duration_seconds" field if the given value is not nil.
-func (poiu *PointsOfInterestUpdate) SetNillableRecommendedDurationSeconds(i *int64) *PointsOfInterestUpdate {
+// SetNillableRecommendedDurationMinutes sets the "recommended_duration_minutes" field if the given value is not nil.
+func (poiu *PointsOfInterestUpdate) SetNillableRecommendedDurationMinutes(i *int64) *PointsOfInterestUpdate {
 	if i != nil {
-		poiu.SetRecommendedDurationSeconds(*i)
+		poiu.SetRecommendedDurationMinutes(*i)
 	}
 	return poiu
 }
 
-// AddRecommendedDurationSeconds adds i to the "recommended_duration_seconds" field.
-func (poiu *PointsOfInterestUpdate) AddRecommendedDurationSeconds(i int64) *PointsOfInterestUpdate {
-	poiu.mutation.AddRecommendedDurationSeconds(i)
+// AddRecommendedDurationMinutes adds i to the "recommended_duration_minutes" field.
+func (poiu *PointsOfInterestUpdate) AddRecommendedDurationMinutes(i int64) *PointsOfInterestUpdate {
+	poiu.mutation.AddRecommendedDurationMinutes(i)
 	return poiu
+}
+
+// SetCityID sets the "city" edge to the City entity by ID.
+func (poiu *PointsOfInterestUpdate) SetCityID(id uuid.UUID) *PointsOfInterestUpdate {
+	poiu.mutation.SetCityID(id)
+	return poiu
+}
+
+// SetNillableCityID sets the "city" edge to the City entity by ID if the given value is not nil.
+func (poiu *PointsOfInterestUpdate) SetNillableCityID(id *uuid.UUID) *PointsOfInterestUpdate {
+	if id != nil {
+		poiu = poiu.SetCityID(*id)
+	}
+	return poiu
+}
+
+// SetCity sets the "city" edge to the City entity.
+func (poiu *PointsOfInterestUpdate) SetCity(c *City) *PointsOfInterestUpdate {
+	return poiu.SetCityID(c.ID)
+}
+
+// SetStateID sets the "state" edge to the State entity by ID.
+func (poiu *PointsOfInterestUpdate) SetStateID(id uuid.UUID) *PointsOfInterestUpdate {
+	poiu.mutation.SetStateID(id)
+	return poiu
+}
+
+// SetNillableStateID sets the "state" edge to the State entity by ID if the given value is not nil.
+func (poiu *PointsOfInterestUpdate) SetNillableStateID(id *uuid.UUID) *PointsOfInterestUpdate {
+	if id != nil {
+		poiu = poiu.SetStateID(*id)
+	}
+	return poiu
+}
+
+// SetState sets the "state" edge to the State entity.
+func (poiu *PointsOfInterestUpdate) SetState(s *State) *PointsOfInterestUpdate {
+	return poiu.SetStateID(s.ID)
+}
+
+// SetCountryID sets the "country" edge to the Country entity by ID.
+func (poiu *PointsOfInterestUpdate) SetCountryID(id uuid.UUID) *PointsOfInterestUpdate {
+	poiu.mutation.SetCountryID(id)
+	return poiu
+}
+
+// SetNillableCountryID sets the "country" edge to the Country entity by ID if the given value is not nil.
+func (poiu *PointsOfInterestUpdate) SetNillableCountryID(id *uuid.UUID) *PointsOfInterestUpdate {
+	if id != nil {
+		poiu = poiu.SetCountryID(*id)
+	}
+	return poiu
+}
+
+// SetCountry sets the "country" edge to the Country entity.
+func (poiu *PointsOfInterestUpdate) SetCountry(c *Country) *PointsOfInterestUpdate {
+	return poiu.SetCountryID(c.ID)
+}
+
+// SetContinentID sets the "continent" edge to the Continent entity by ID.
+func (poiu *PointsOfInterestUpdate) SetContinentID(id uuid.UUID) *PointsOfInterestUpdate {
+	poiu.mutation.SetContinentID(id)
+	return poiu
+}
+
+// SetNillableContinentID sets the "continent" edge to the Continent entity by ID if the given value is not nil.
+func (poiu *PointsOfInterestUpdate) SetNillableContinentID(id *uuid.UUID) *PointsOfInterestUpdate {
+	if id != nil {
+		poiu = poiu.SetContinentID(*id)
+	}
+	return poiu
+}
+
+// SetContinent sets the "continent" edge to the Continent entity.
+func (poiu *PointsOfInterestUpdate) SetContinent(c *Continent) *PointsOfInterestUpdate {
+	return poiu.SetContinentID(c.ID)
 }
 
 // AddDailyItineraryIDs adds the "daily_itinerary" edge to the DailyItinerary entity by IDs.
@@ -278,6 +316,30 @@ func (poiu *PointsOfInterestUpdate) AddDailyItinerary(d ...*DailyItinerary) *Poi
 // Mutation returns the PointsOfInterestMutation object of the builder.
 func (poiu *PointsOfInterestUpdate) Mutation() *PointsOfInterestMutation {
 	return poiu.mutation
+}
+
+// ClearCity clears the "city" edge to the City entity.
+func (poiu *PointsOfInterestUpdate) ClearCity() *PointsOfInterestUpdate {
+	poiu.mutation.ClearCity()
+	return poiu
+}
+
+// ClearState clears the "state" edge to the State entity.
+func (poiu *PointsOfInterestUpdate) ClearState() *PointsOfInterestUpdate {
+	poiu.mutation.ClearState()
+	return poiu
+}
+
+// ClearCountry clears the "country" edge to the Country entity.
+func (poiu *PointsOfInterestUpdate) ClearCountry() *PointsOfInterestUpdate {
+	poiu.mutation.ClearCountry()
+	return poiu
+}
+
+// ClearContinent clears the "continent" edge to the Continent entity.
+func (poiu *PointsOfInterestUpdate) ClearContinent() *PointsOfInterestUpdate {
+	poiu.mutation.ClearContinent()
+	return poiu
 }
 
 // ClearDailyItinerary clears all "daily_itinerary" edges to the DailyItinerary entity.
@@ -359,21 +421,6 @@ func (poiu *PointsOfInterestUpdate) check() error {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.description": %w`, err)}
 		}
 	}
-	if v, ok := poiu.mutation.City(); ok {
-		if err := pointsofinterest.CityValidator(v); err != nil {
-			return &ValidationError{Name: "city", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.city": %w`, err)}
-		}
-	}
-	if v, ok := poiu.mutation.State(); ok {
-		if err := pointsofinterest.StateValidator(v); err != nil {
-			return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.state": %w`, err)}
-		}
-	}
-	if v, ok := poiu.mutation.Country(); ok {
-		if err := pointsofinterest.CountryValidator(v); err != nil {
-			return &ValidationError{Name: "country", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.country": %w`, err)}
-		}
-	}
 	if v, ok := poiu.mutation.Address(); ok {
 		if err := pointsofinterest.AddressValidator(v); err != nil {
 			return &ValidationError{Name: "address", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.address": %w`, err)}
@@ -394,9 +441,9 @@ func (poiu *PointsOfInterestUpdate) check() error {
 			return &ValidationError{Name: "rating", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.rating": %w`, err)}
 		}
 	}
-	if v, ok := poiu.mutation.RecommendedDurationSeconds(); ok {
-		if err := pointsofinterest.RecommendedDurationSecondsValidator(v); err != nil {
-			return &ValidationError{Name: "recommended_duration_seconds", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.recommended_duration_seconds": %w`, err)}
+	if v, ok := poiu.mutation.RecommendedDurationMinutes(); ok {
+		if err := pointsofinterest.RecommendedDurationMinutesValidator(v); err != nil {
+			return &ValidationError{Name: "recommended_duration_minutes", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.recommended_duration_minutes": %w`, err)}
 		}
 	}
 	return nil
@@ -429,15 +476,6 @@ func (poiu *PointsOfInterestUpdate) sqlSave(ctx context.Context) (n int, err err
 	if value, ok := poiu.mutation.Description(); ok {
 		_spec.SetField(pointsofinterest.FieldDescription, field.TypeString, value)
 	}
-	if value, ok := poiu.mutation.City(); ok {
-		_spec.SetField(pointsofinterest.FieldCity, field.TypeString, value)
-	}
-	if value, ok := poiu.mutation.State(); ok {
-		_spec.SetField(pointsofinterest.FieldState, field.TypeString, value)
-	}
-	if value, ok := poiu.mutation.Country(); ok {
-		_spec.SetField(pointsofinterest.FieldCountry, field.TypeString, value)
-	}
 	if value, ok := poiu.mutation.Address(); ok {
 		_spec.SetField(pointsofinterest.FieldAddress, field.TypeString, value)
 	}
@@ -465,11 +503,127 @@ func (poiu *PointsOfInterestUpdate) sqlSave(ctx context.Context) (n int, err err
 	if value, ok := poiu.mutation.AddedRating(); ok {
 		_spec.AddField(pointsofinterest.FieldRating, field.TypeFloat32, value)
 	}
-	if value, ok := poiu.mutation.RecommendedDurationSeconds(); ok {
-		_spec.SetField(pointsofinterest.FieldRecommendedDurationSeconds, field.TypeInt64, value)
+	if value, ok := poiu.mutation.RecommendedDurationMinutes(); ok {
+		_spec.SetField(pointsofinterest.FieldRecommendedDurationMinutes, field.TypeInt64, value)
 	}
-	if value, ok := poiu.mutation.AddedRecommendedDurationSeconds(); ok {
-		_spec.AddField(pointsofinterest.FieldRecommendedDurationSeconds, field.TypeInt64, value)
+	if value, ok := poiu.mutation.AddedRecommendedDurationMinutes(); ok {
+		_spec.AddField(pointsofinterest.FieldRecommendedDurationMinutes, field.TypeInt64, value)
+	}
+	if poiu.mutation.CityCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pointsofinterest.CityTable,
+			Columns: []string{pointsofinterest.CityColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(city.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := poiu.mutation.CityIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pointsofinterest.CityTable,
+			Columns: []string{pointsofinterest.CityColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(city.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if poiu.mutation.StateCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pointsofinterest.StateTable,
+			Columns: []string{pointsofinterest.StateColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(state.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := poiu.mutation.StateIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pointsofinterest.StateTable,
+			Columns: []string{pointsofinterest.StateColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(state.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if poiu.mutation.CountryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pointsofinterest.CountryTable,
+			Columns: []string{pointsofinterest.CountryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := poiu.mutation.CountryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pointsofinterest.CountryTable,
+			Columns: []string{pointsofinterest.CountryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if poiu.mutation.ContinentCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pointsofinterest.ContinentTable,
+			Columns: []string{pointsofinterest.ContinentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(continent.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := poiu.mutation.ContinentIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pointsofinterest.ContinentTable,
+			Columns: []string{pointsofinterest.ContinentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(continent.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if poiu.mutation.DailyItineraryCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -598,48 +752,6 @@ func (poiuo *PointsOfInterestUpdateOne) SetNillableDescription(s *string) *Point
 	return poiuo
 }
 
-// SetCity sets the "city" field.
-func (poiuo *PointsOfInterestUpdateOne) SetCity(s string) *PointsOfInterestUpdateOne {
-	poiuo.mutation.SetCity(s)
-	return poiuo
-}
-
-// SetNillableCity sets the "city" field if the given value is not nil.
-func (poiuo *PointsOfInterestUpdateOne) SetNillableCity(s *string) *PointsOfInterestUpdateOne {
-	if s != nil {
-		poiuo.SetCity(*s)
-	}
-	return poiuo
-}
-
-// SetState sets the "state" field.
-func (poiuo *PointsOfInterestUpdateOne) SetState(s string) *PointsOfInterestUpdateOne {
-	poiuo.mutation.SetState(s)
-	return poiuo
-}
-
-// SetNillableState sets the "state" field if the given value is not nil.
-func (poiuo *PointsOfInterestUpdateOne) SetNillableState(s *string) *PointsOfInterestUpdateOne {
-	if s != nil {
-		poiuo.SetState(*s)
-	}
-	return poiuo
-}
-
-// SetCountry sets the "country" field.
-func (poiuo *PointsOfInterestUpdateOne) SetCountry(s string) *PointsOfInterestUpdateOne {
-	poiuo.mutation.SetCountry(s)
-	return poiuo
-}
-
-// SetNillableCountry sets the "country" field if the given value is not nil.
-func (poiuo *PointsOfInterestUpdateOne) SetNillableCountry(s *string) *PointsOfInterestUpdateOne {
-	if s != nil {
-		poiuo.SetCountry(*s)
-	}
-	return poiuo
-}
-
 // SetAddress sets the "address" field.
 func (poiuo *PointsOfInterestUpdateOne) SetAddress(s string) *PointsOfInterestUpdateOne {
 	poiuo.mutation.SetAddress(s)
@@ -745,25 +857,101 @@ func (poiuo *PointsOfInterestUpdateOne) AddRating(f float32) *PointsOfInterestUp
 	return poiuo
 }
 
-// SetRecommendedDurationSeconds sets the "recommended_duration_seconds" field.
-func (poiuo *PointsOfInterestUpdateOne) SetRecommendedDurationSeconds(i int64) *PointsOfInterestUpdateOne {
-	poiuo.mutation.ResetRecommendedDurationSeconds()
-	poiuo.mutation.SetRecommendedDurationSeconds(i)
+// SetRecommendedDurationMinutes sets the "recommended_duration_minutes" field.
+func (poiuo *PointsOfInterestUpdateOne) SetRecommendedDurationMinutes(i int64) *PointsOfInterestUpdateOne {
+	poiuo.mutation.ResetRecommendedDurationMinutes()
+	poiuo.mutation.SetRecommendedDurationMinutes(i)
 	return poiuo
 }
 
-// SetNillableRecommendedDurationSeconds sets the "recommended_duration_seconds" field if the given value is not nil.
-func (poiuo *PointsOfInterestUpdateOne) SetNillableRecommendedDurationSeconds(i *int64) *PointsOfInterestUpdateOne {
+// SetNillableRecommendedDurationMinutes sets the "recommended_duration_minutes" field if the given value is not nil.
+func (poiuo *PointsOfInterestUpdateOne) SetNillableRecommendedDurationMinutes(i *int64) *PointsOfInterestUpdateOne {
 	if i != nil {
-		poiuo.SetRecommendedDurationSeconds(*i)
+		poiuo.SetRecommendedDurationMinutes(*i)
 	}
 	return poiuo
 }
 
-// AddRecommendedDurationSeconds adds i to the "recommended_duration_seconds" field.
-func (poiuo *PointsOfInterestUpdateOne) AddRecommendedDurationSeconds(i int64) *PointsOfInterestUpdateOne {
-	poiuo.mutation.AddRecommendedDurationSeconds(i)
+// AddRecommendedDurationMinutes adds i to the "recommended_duration_minutes" field.
+func (poiuo *PointsOfInterestUpdateOne) AddRecommendedDurationMinutes(i int64) *PointsOfInterestUpdateOne {
+	poiuo.mutation.AddRecommendedDurationMinutes(i)
 	return poiuo
+}
+
+// SetCityID sets the "city" edge to the City entity by ID.
+func (poiuo *PointsOfInterestUpdateOne) SetCityID(id uuid.UUID) *PointsOfInterestUpdateOne {
+	poiuo.mutation.SetCityID(id)
+	return poiuo
+}
+
+// SetNillableCityID sets the "city" edge to the City entity by ID if the given value is not nil.
+func (poiuo *PointsOfInterestUpdateOne) SetNillableCityID(id *uuid.UUID) *PointsOfInterestUpdateOne {
+	if id != nil {
+		poiuo = poiuo.SetCityID(*id)
+	}
+	return poiuo
+}
+
+// SetCity sets the "city" edge to the City entity.
+func (poiuo *PointsOfInterestUpdateOne) SetCity(c *City) *PointsOfInterestUpdateOne {
+	return poiuo.SetCityID(c.ID)
+}
+
+// SetStateID sets the "state" edge to the State entity by ID.
+func (poiuo *PointsOfInterestUpdateOne) SetStateID(id uuid.UUID) *PointsOfInterestUpdateOne {
+	poiuo.mutation.SetStateID(id)
+	return poiuo
+}
+
+// SetNillableStateID sets the "state" edge to the State entity by ID if the given value is not nil.
+func (poiuo *PointsOfInterestUpdateOne) SetNillableStateID(id *uuid.UUID) *PointsOfInterestUpdateOne {
+	if id != nil {
+		poiuo = poiuo.SetStateID(*id)
+	}
+	return poiuo
+}
+
+// SetState sets the "state" edge to the State entity.
+func (poiuo *PointsOfInterestUpdateOne) SetState(s *State) *PointsOfInterestUpdateOne {
+	return poiuo.SetStateID(s.ID)
+}
+
+// SetCountryID sets the "country" edge to the Country entity by ID.
+func (poiuo *PointsOfInterestUpdateOne) SetCountryID(id uuid.UUID) *PointsOfInterestUpdateOne {
+	poiuo.mutation.SetCountryID(id)
+	return poiuo
+}
+
+// SetNillableCountryID sets the "country" edge to the Country entity by ID if the given value is not nil.
+func (poiuo *PointsOfInterestUpdateOne) SetNillableCountryID(id *uuid.UUID) *PointsOfInterestUpdateOne {
+	if id != nil {
+		poiuo = poiuo.SetCountryID(*id)
+	}
+	return poiuo
+}
+
+// SetCountry sets the "country" edge to the Country entity.
+func (poiuo *PointsOfInterestUpdateOne) SetCountry(c *Country) *PointsOfInterestUpdateOne {
+	return poiuo.SetCountryID(c.ID)
+}
+
+// SetContinentID sets the "continent" edge to the Continent entity by ID.
+func (poiuo *PointsOfInterestUpdateOne) SetContinentID(id uuid.UUID) *PointsOfInterestUpdateOne {
+	poiuo.mutation.SetContinentID(id)
+	return poiuo
+}
+
+// SetNillableContinentID sets the "continent" edge to the Continent entity by ID if the given value is not nil.
+func (poiuo *PointsOfInterestUpdateOne) SetNillableContinentID(id *uuid.UUID) *PointsOfInterestUpdateOne {
+	if id != nil {
+		poiuo = poiuo.SetContinentID(*id)
+	}
+	return poiuo
+}
+
+// SetContinent sets the "continent" edge to the Continent entity.
+func (poiuo *PointsOfInterestUpdateOne) SetContinent(c *Continent) *PointsOfInterestUpdateOne {
+	return poiuo.SetContinentID(c.ID)
 }
 
 // AddDailyItineraryIDs adds the "daily_itinerary" edge to the DailyItinerary entity by IDs.
@@ -784,6 +972,30 @@ func (poiuo *PointsOfInterestUpdateOne) AddDailyItinerary(d ...*DailyItinerary) 
 // Mutation returns the PointsOfInterestMutation object of the builder.
 func (poiuo *PointsOfInterestUpdateOne) Mutation() *PointsOfInterestMutation {
 	return poiuo.mutation
+}
+
+// ClearCity clears the "city" edge to the City entity.
+func (poiuo *PointsOfInterestUpdateOne) ClearCity() *PointsOfInterestUpdateOne {
+	poiuo.mutation.ClearCity()
+	return poiuo
+}
+
+// ClearState clears the "state" edge to the State entity.
+func (poiuo *PointsOfInterestUpdateOne) ClearState() *PointsOfInterestUpdateOne {
+	poiuo.mutation.ClearState()
+	return poiuo
+}
+
+// ClearCountry clears the "country" edge to the Country entity.
+func (poiuo *PointsOfInterestUpdateOne) ClearCountry() *PointsOfInterestUpdateOne {
+	poiuo.mutation.ClearCountry()
+	return poiuo
+}
+
+// ClearContinent clears the "continent" edge to the Continent entity.
+func (poiuo *PointsOfInterestUpdateOne) ClearContinent() *PointsOfInterestUpdateOne {
+	poiuo.mutation.ClearContinent()
+	return poiuo
 }
 
 // ClearDailyItinerary clears all "daily_itinerary" edges to the DailyItinerary entity.
@@ -878,21 +1090,6 @@ func (poiuo *PointsOfInterestUpdateOne) check() error {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.description": %w`, err)}
 		}
 	}
-	if v, ok := poiuo.mutation.City(); ok {
-		if err := pointsofinterest.CityValidator(v); err != nil {
-			return &ValidationError{Name: "city", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.city": %w`, err)}
-		}
-	}
-	if v, ok := poiuo.mutation.State(); ok {
-		if err := pointsofinterest.StateValidator(v); err != nil {
-			return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.state": %w`, err)}
-		}
-	}
-	if v, ok := poiuo.mutation.Country(); ok {
-		if err := pointsofinterest.CountryValidator(v); err != nil {
-			return &ValidationError{Name: "country", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.country": %w`, err)}
-		}
-	}
 	if v, ok := poiuo.mutation.Address(); ok {
 		if err := pointsofinterest.AddressValidator(v); err != nil {
 			return &ValidationError{Name: "address", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.address": %w`, err)}
@@ -913,9 +1110,9 @@ func (poiuo *PointsOfInterestUpdateOne) check() error {
 			return &ValidationError{Name: "rating", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.rating": %w`, err)}
 		}
 	}
-	if v, ok := poiuo.mutation.RecommendedDurationSeconds(); ok {
-		if err := pointsofinterest.RecommendedDurationSecondsValidator(v); err != nil {
-			return &ValidationError{Name: "recommended_duration_seconds", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.recommended_duration_seconds": %w`, err)}
+	if v, ok := poiuo.mutation.RecommendedDurationMinutes(); ok {
+		if err := pointsofinterest.RecommendedDurationMinutesValidator(v); err != nil {
+			return &ValidationError{Name: "recommended_duration_minutes", err: fmt.Errorf(`ent: validator failed for field "PointsOfInterest.recommended_duration_minutes": %w`, err)}
 		}
 	}
 	return nil
@@ -965,15 +1162,6 @@ func (poiuo *PointsOfInterestUpdateOne) sqlSave(ctx context.Context) (_node *Poi
 	if value, ok := poiuo.mutation.Description(); ok {
 		_spec.SetField(pointsofinterest.FieldDescription, field.TypeString, value)
 	}
-	if value, ok := poiuo.mutation.City(); ok {
-		_spec.SetField(pointsofinterest.FieldCity, field.TypeString, value)
-	}
-	if value, ok := poiuo.mutation.State(); ok {
-		_spec.SetField(pointsofinterest.FieldState, field.TypeString, value)
-	}
-	if value, ok := poiuo.mutation.Country(); ok {
-		_spec.SetField(pointsofinterest.FieldCountry, field.TypeString, value)
-	}
 	if value, ok := poiuo.mutation.Address(); ok {
 		_spec.SetField(pointsofinterest.FieldAddress, field.TypeString, value)
 	}
@@ -1001,11 +1189,127 @@ func (poiuo *PointsOfInterestUpdateOne) sqlSave(ctx context.Context) (_node *Poi
 	if value, ok := poiuo.mutation.AddedRating(); ok {
 		_spec.AddField(pointsofinterest.FieldRating, field.TypeFloat32, value)
 	}
-	if value, ok := poiuo.mutation.RecommendedDurationSeconds(); ok {
-		_spec.SetField(pointsofinterest.FieldRecommendedDurationSeconds, field.TypeInt64, value)
+	if value, ok := poiuo.mutation.RecommendedDurationMinutes(); ok {
+		_spec.SetField(pointsofinterest.FieldRecommendedDurationMinutes, field.TypeInt64, value)
 	}
-	if value, ok := poiuo.mutation.AddedRecommendedDurationSeconds(); ok {
-		_spec.AddField(pointsofinterest.FieldRecommendedDurationSeconds, field.TypeInt64, value)
+	if value, ok := poiuo.mutation.AddedRecommendedDurationMinutes(); ok {
+		_spec.AddField(pointsofinterest.FieldRecommendedDurationMinutes, field.TypeInt64, value)
+	}
+	if poiuo.mutation.CityCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pointsofinterest.CityTable,
+			Columns: []string{pointsofinterest.CityColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(city.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := poiuo.mutation.CityIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pointsofinterest.CityTable,
+			Columns: []string{pointsofinterest.CityColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(city.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if poiuo.mutation.StateCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pointsofinterest.StateTable,
+			Columns: []string{pointsofinterest.StateColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(state.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := poiuo.mutation.StateIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pointsofinterest.StateTable,
+			Columns: []string{pointsofinterest.StateColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(state.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if poiuo.mutation.CountryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pointsofinterest.CountryTable,
+			Columns: []string{pointsofinterest.CountryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := poiuo.mutation.CountryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pointsofinterest.CountryTable,
+			Columns: []string{pointsofinterest.CountryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if poiuo.mutation.ContinentCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pointsofinterest.ContinentTable,
+			Columns: []string{pointsofinterest.ContinentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(continent.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := poiuo.mutation.ContinentIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   pointsofinterest.ContinentTable,
+			Columns: []string{pointsofinterest.ContinentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(continent.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if poiuo.mutation.DailyItineraryCleared() {
 		edge := &sqlgraph.EdgeSpec{

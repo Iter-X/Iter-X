@@ -35,3 +35,15 @@ func (OperatorMixin) Fields() []ent.Field {
 		field.UUID("created_by", uuid.UUID{}),
 	}
 }
+
+type LocalizedNameMixin struct {
+	mixin.Schema
+}
+
+func (LocalizedNameMixin) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name").NotEmpty().MaxLen(255),
+		field.String("name_en").MaxLen(255),
+		field.String("name_cn").MaxLen(255),
+	}
+}

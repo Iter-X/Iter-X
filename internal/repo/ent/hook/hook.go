@@ -9,6 +9,42 @@ import (
 	"github.com/iter-x/iter-x/internal/repo/ent"
 )
 
+// The CityFunc type is an adapter to allow the use of ordinary
+// function as City mutator.
+type CityFunc func(context.Context, *ent.CityMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CityFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CityMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CityMutation", m)
+}
+
+// The ContinentFunc type is an adapter to allow the use of ordinary
+// function as Continent mutator.
+type ContinentFunc func(context.Context, *ent.ContinentMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ContinentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ContinentMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ContinentMutation", m)
+}
+
+// The CountryFunc type is an adapter to allow the use of ordinary
+// function as Country mutator.
+type CountryFunc func(context.Context, *ent.CountryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CountryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CountryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CountryMutation", m)
+}
+
 // The DailyItineraryFunc type is an adapter to allow the use of ordinary
 // function as DailyItinerary mutator.
 type DailyItineraryFunc func(context.Context, *ent.DailyItineraryMutation) (ent.Value, error)
@@ -67,6 +103,18 @@ func (f RefreshTokenFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RefreshTokenMutation", m)
+}
+
+// The StateFunc type is an adapter to allow the use of ordinary
+// function as State mutator.
+type StateFunc func(context.Context, *ent.StateMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StateFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.StateMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StateMutation", m)
 }
 
 // The TripFunc type is an adapter to allow the use of ordinary
