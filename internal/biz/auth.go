@@ -3,38 +3,41 @@ package biz
 import (
 	"context"
 	"errors"
+	"strings"
+	"time"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/ifuryst/lol"
+	"github.com/iter-x/iter-x/internal/biz/repository"
+	"github.com/iter-x/iter-x/internal/data/impl"
+	"go.uber.org/zap"
+
 	authV1 "github.com/iter-x/iter-x/internal/api/auth/v1"
 	"github.com/iter-x/iter-x/internal/biz/bo"
 	"github.com/iter-x/iter-x/internal/common/xerr"
 	"github.com/iter-x/iter-x/internal/conf"
+	"github.com/iter-x/iter-x/internal/data/ent"
 	"github.com/iter-x/iter-x/internal/helper/auth"
-	"github.com/iter-x/iter-x/internal/repo"
-	"github.com/iter-x/iter-x/internal/repo/ent"
 	"github.com/iter-x/iter-x/pkg/sms"
-	"go.uber.org/zap"
-	"strings"
-	"time"
 )
 
-type (
-	Auth struct {
-		cfg       *conf.Auth
-		repo      *repo.Auth
-		smsClient *sms.Client
-		logger    *zap.SugaredLogger
-	}
-)
+type Auth struct {
+	cfg *conf.Auth
+	repository.Transaction
+	authRepo  *impl.Auth
+	smsClient *sms.Client
+	logger    *zap.SugaredLogger
+}
 
-func NewAuth(c *conf.Auth, repo *repo.Auth, logger *zap.SugaredLogger) *Auth {
+func NewAuth(c *conf.Auth, transaction repository.Transaction, authRepo *impl.Auth, logger *zap.SugaredLogger) *Auth {
 	smsClient := sms.NewClient(sms.WithClientConfig(c.GetAliCloud()))
 	return &Auth{
-		cfg:       c,
-		repo:      repo,
-		smsClient: smsClient,
-		logger:    logger.Named("biz.auth"),
+		cfg:         c,
+		Transaction: transaction,
+		authRepo:    authRepo,
+		smsClient:   smsClient,
+		logger:      logger.Named("biz.auth"),
 	}
 }
 
@@ -54,26 +57,29 @@ func (b *Auth) getToken(ctx context.Context, user *ent.User, renew bool) (*bo.Si
 	if renew {
 		refreshToken = lol.RandomString(64)
 		now := time.Now()
-		err = b.repo.Tx.WithTx(ctx, func(tx *ent.Tx) error {
-			rt, err := b.repo.GetRefreshTokenByUserId(ctx, user.ID, tx)
+		err = b.Exec(ctx, func(ctx context.Context) error {
+			rt, err := b.authRepo.GetRefreshTokenByUserId(ctx, user.ID)
 			if err != nil && !ent.IsNotFound(err) {
 				return err
 			}
 
 			if ent.IsNotFound(err) {
-				return b.repo.SaveRefreshToken(ctx, &ent.RefreshToken{
+				return b.authRepo.SaveRefreshToken(ctx, &ent.RefreshToken{
 					Token:     refreshToken,
 					ExpiresAt: now.Add(b.cfg.Jwt.RefreshExpiration.AsDuration()),
 					CreatedAt: now,
 					UserID:    user.ID,
-				}, tx)
+				})
 			}
 
 			rt.Token = refreshToken
 			rt.ExpiresAt = now.Add(b.cfg.Jwt.RefreshExpiration.AsDuration())
 			rt.UpdatedAt = now
-			return b.repo.UpdateRefreshToken(ctx, rt, tx)
+			return b.authRepo.UpdateRefreshToken(ctx, rt)
 		})
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &bo.SignInResponse{
@@ -85,7 +91,7 @@ func (b *Auth) getToken(ctx context.Context, user *ent.User, renew bool) (*bo.Si
 
 // SignIn signs in and returns a token.
 func (b *Auth) SignIn(ctx context.Context, params *authV1.SignInRequest) (*authV1.SignInResponse, error) {
-	user, err := b.repo.FindByEmail(ctx, params.Email)
+	user, err := b.authRepo.FindByEmail(ctx, params.Email)
 	if err != nil || user == nil {
 		return nil, xerr.ErrorInvalidEmailOrPassword()
 	}
@@ -108,7 +114,7 @@ func (b *Auth) SignIn(ctx context.Context, params *authV1.SignInRequest) (*authV
 // SignUp creates a new user.
 func (b *Auth) SignUp(ctx context.Context, params *authV1.SignUpRequest) (*authV1.SignUpResponse, error) {
 	// confirm the user does not exist
-	usr, err := b.repo.FindByEmail(ctx, params.Email)
+	usr, err := b.authRepo.FindByEmail(ctx, params.Email)
 	if err != nil && !xerr.IsUserNotFound(err) {
 		return nil, err
 	}
@@ -127,7 +133,7 @@ func (b *Auth) SignUp(ctx context.Context, params *authV1.SignUpRequest) (*authV
 		Email:    params.Email,
 		Password: hashedPass,
 	}
-	user, err := b.repo.Create(ctx, data)
+	user, err := b.authRepo.Create(ctx, data)
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +185,7 @@ func (b *Auth) SignInWithOAuth(ctx context.Context, params *authV1.SignInWithOAu
 		return "", xerr.ErrorProviderNotSupported()
 	}
 
-	usr, err := b.repo.FindByEmail(ctx, user.Email)
+	usr, err := b.authRepo.FindByEmail(ctx, user.Email)
 	if err != nil {
 		if !xerr.IsUserNotFound(err) {
 			return "", err
@@ -189,7 +195,7 @@ func (b *Auth) SignInWithOAuth(ctx context.Context, params *authV1.SignInWithOAu
 			return "", err
 		}
 		// create the user
-		user, err = b.repo.Create(ctx, user)
+		user, err = b.authRepo.Create(ctx, user)
 		if err != nil {
 			return "", err
 		}
@@ -197,7 +203,7 @@ func (b *Auth) SignInWithOAuth(ctx context.Context, params *authV1.SignInWithOAu
 		// update information
 		usr.Username = user.Username
 		usr.AvatarURL = user.AvatarURL
-		user, err = b.repo.Update(ctx, usr)
+		user, err = b.authRepo.Update(ctx, usr)
 		if err != nil {
 			return "", err
 		}
@@ -213,7 +219,7 @@ func (b *Auth) SignInWithOAuth(ctx context.Context, params *authV1.SignInWithOAu
 }
 
 func (b *Auth) RefreshToken(ctx context.Context, params *authV1.RefreshTokenRequest) (*authV1.RefreshTokenResponse, error) {
-	refreshToken, err := b.repo.GetRefreshToken(ctx, params.RefreshToken)
+	refreshToken, err := b.authRepo.GetRefreshToken(ctx, params.RefreshToken)
 	if err != nil {
 		return nil, xerr.ErrorUnauthorized()
 	}
@@ -221,7 +227,7 @@ func (b *Auth) RefreshToken(ctx context.Context, params *authV1.RefreshTokenRequ
 		return nil, xerr.ErrorTokenExpired()
 	}
 
-	user, err := b.repo.FindUserById(ctx, refreshToken.UserID)
+	user, err := b.authRepo.FindUserById(ctx, refreshToken.UserID)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, xerr.ErrorUnauthorized()

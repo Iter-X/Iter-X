@@ -2,25 +2,25 @@ package biz
 
 import (
 	"context"
+
 	v1 "github.com/iter-x/iter-x/internal/api/poi/v1"
 	"github.com/iter-x/iter-x/internal/common/xerr"
-
-	"github.com/iter-x/iter-x/internal/repo"
+	"github.com/iter-x/iter-x/internal/data/impl"
 )
 
 type PointsOfInterest struct {
-	repo *repo.PointsOfInterest
+	pointsOfInterestRepo *impl.PointsOfInterest
 }
 
-func NewPointsOfInterest(repo *repo.PointsOfInterest) *PointsOfInterest {
+func NewPointsOfInterest(pointsOfInterestRepo *impl.PointsOfInterest) *PointsOfInterest {
 	return &PointsOfInterest{
-		repo: repo,
+		pointsOfInterestRepo: pointsOfInterestRepo,
 	}
 }
 
 func (b *PointsOfInterest) SearchPointsOfInterest(ctx context.Context, keyword, initialCity string) ([]*v1.PointOfInterest, error) {
 	// TODO: Search points of interest by initial city at first, expand the search if no result found
-	pois, err := b.repo.SearchPointsOfInterest(ctx, keyword, 5)
+	pois, err := b.pointsOfInterestRepo.SearchPointsOfInterest(ctx, keyword, 5)
 	if err != nil {
 		return nil, xerr.ErrorSearchPoiFailed()
 	}

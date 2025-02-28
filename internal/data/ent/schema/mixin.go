@@ -1,11 +1,12 @@
 package schema
 
 import (
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/mixin"
 	"github.com/google/uuid"
-	"time"
 )
 
 // TimeMixin implements the ent.Mixin for sharing

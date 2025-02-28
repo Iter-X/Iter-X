@@ -1,10 +1,11 @@
 package auth
 
 import (
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/stretchr/testify/assert"
 )
 
 // Generates a valid JWT token with given payload and expiration

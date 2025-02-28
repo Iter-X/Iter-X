@@ -2,73 +2,75 @@ package service
 
 import (
 	"context"
+
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/iter-x/iter-x/internal/api/auth/v1"
+
+	authV1 "github.com/iter-x/iter-x/internal/api/auth/v1"
 	"github.com/iter-x/iter-x/internal/biz"
 )
 
 type Auth struct {
-	v1.UnimplementedAuthServiceServer
-	auth *biz.Auth
+	authV1.UnimplementedAuthServiceServer
+	authBiz *biz.Auth
 }
 
-func NewAuth(biz *biz.Auth) *Auth {
+func NewAuth(authBiz *biz.Auth) *Auth {
 	return &Auth{
-		auth: biz,
+		authBiz: authBiz,
 	}
 }
 
-func (s *Auth) SignIn(ctx context.Context, req *v1.SignInRequest) (*v1.SignInResponse, error) {
-	return s.auth.SignIn(ctx, req)
+func (s *Auth) SignIn(ctx context.Context, req *authV1.SignInRequest) (*authV1.SignInResponse, error) {
+	return s.authBiz.SignIn(ctx, req)
 }
 
-func (s *Auth) SignInWithOAuth(ctx context.Context, req *v1.SignInWithOAuthRequest) (*v1.SignInWithOAuthResponse, error) {
-	token, err := s.auth.SignInWithOAuth(ctx, req)
+func (s *Auth) SignInWithOAuth(ctx context.Context, req *authV1.SignInWithOAuthRequest) (*authV1.SignInWithOAuthResponse, error) {
+	token, err := s.authBiz.SignInWithOAuth(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return &v1.SignInWithOAuthResponse{
+	return &authV1.SignInWithOAuthResponse{
 		Token: token,
 	}, nil
 }
 
-func (s *Auth) SignUp(ctx context.Context, req *v1.SignUpRequest) (*v1.SignUpResponse, error) {
-	return s.auth.SignUp(ctx, req)
+func (s *Auth) SignUp(ctx context.Context, req *authV1.SignUpRequest) (*authV1.SignUpResponse, error) {
+	return s.authBiz.SignUp(ctx, req)
 }
 
-func (s *Auth) RequestPasswordReset(ctx context.Context, req *v1.RequestPasswordResetRequest) (*v1.RequestPasswordResetResponse, error) {
+func (s *Auth) RequestPasswordReset(ctx context.Context, req *authV1.RequestPasswordResetRequest) (*authV1.RequestPasswordResetResponse, error) {
 	// TODO: Implement logic for requesting a password reset
-	return &v1.RequestPasswordResetResponse{
+	return &authV1.RequestPasswordResetResponse{
 		Status: "password reset request sent",
 	}, nil
 }
 
-func (s *Auth) VerifyPasswordResetToken(ctx context.Context, req *v1.VerifyPasswordResetTokenRequest) (*v1.VerifyPasswordResetTokenResponse, error) {
+func (s *Auth) VerifyPasswordResetToken(ctx context.Context, req *authV1.VerifyPasswordResetTokenRequest) (*authV1.VerifyPasswordResetTokenResponse, error) {
 	// TODO: Implement logic for verifying the password reset token
-	return &v1.VerifyPasswordResetTokenResponse{
+	return &authV1.VerifyPasswordResetTokenResponse{
 		Valid: true,
 	}, nil
 }
 
-func (s *Auth) ResetPassword(ctx context.Context, req *v1.ResetPasswordRequest) (*v1.ResetPasswordResponse, error) {
+func (s *Auth) ResetPassword(ctx context.Context, req *authV1.ResetPasswordRequest) (*authV1.ResetPasswordResponse, error) {
 	// TODO: Implement logic for resetting the password
-	return &v1.ResetPasswordResponse{
+	return &authV1.ResetPasswordResponse{
 		Status: "password reset successful",
 	}, nil
 }
 
-func (s *Auth) RefreshToken(ctx context.Context, req *v1.RefreshTokenRequest) (*v1.RefreshTokenResponse, error) {
-	return s.auth.RefreshToken(ctx, req)
+func (s *Auth) RefreshToken(ctx context.Context, req *authV1.RefreshTokenRequest) (*authV1.RefreshTokenResponse, error) {
+	return s.authBiz.RefreshToken(ctx, req)
 }
 
 func (s *Auth) ValidateToken(ctx context.Context, token string) (jwt.Claims, error) {
-	return s.auth.ValidateToken(ctx, token)
+	return s.authBiz.ValidateToken(ctx, token)
 }
 
-func (s *Auth) GetSmsAuthTokens(ctx context.Context, req *v1.GetSmsAuthTokensRequest) (*v1.GetSmsAuthTokensResponse, error) {
-	return s.auth.GetSmsAuthTokens(ctx, req)
+func (s *Auth) GetSmsAuthTokens(ctx context.Context, _ *authV1.GetSmsAuthTokensRequest) (*authV1.GetSmsAuthTokensResponse, error) {
+	return s.authBiz.GetSmsAuthTokens(ctx)
 }
 
-func (s *Auth) VerifySmsCode(ctx context.Context, req *v1.VerifySmsCodeRequest) (*v1.VerifySmsCodeResponse, error) {
-	return s.auth.VerifySmsCode(ctx, req)
+func (s *Auth) VerifySmsCode(ctx context.Context, req *authV1.VerifySmsCodeRequest) (*authV1.VerifySmsCodeResponse, error) {
+	return s.authBiz.VerifySmsCode(ctx, req)
 }

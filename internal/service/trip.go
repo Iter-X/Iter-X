@@ -2,25 +2,26 @@ package service
 
 import (
 	"context"
+
 	"github.com/google/uuid"
-	"github.com/iter-x/iter-x/internal/api/trip/v1"
+	v1 "github.com/iter-x/iter-x/internal/api/trip/v1"
 	"github.com/iter-x/iter-x/internal/biz"
 	"github.com/iter-x/iter-x/internal/common/xerr"
 )
 
 type Trip struct {
 	v1.UnimplementedTripServiceServer
-	biz *biz.Trip
+	tripBiz *biz.Trip
 }
 
-func NewTrip(biz *biz.Trip) *Trip {
+func NewTrip(tripBiz *biz.Trip) *Trip {
 	return &Trip{
-		biz: biz,
+		tripBiz: tripBiz,
 	}
 }
 
 func (s *Trip) CreateTrip(ctx context.Context, req *v1.CreateTripRequest) (*v1.CreateTripResponse, error) {
-	trip, err := s.biz.CreateTrip(ctx, req)
+	trip, err := s.tripBiz.CreateTrip(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +33,7 @@ func (s *Trip) GetTrip(ctx context.Context, req *v1.GetTripRequest) (*v1.GetTrip
 	if err != nil {
 		return nil, xerr.ErrorInvalidTripId()
 	}
-	trip, err := s.biz.GetTrip(ctx, tripId)
+	trip, err := s.tripBiz.GetTrip(ctx, tripId)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +41,7 @@ func (s *Trip) GetTrip(ctx context.Context, req *v1.GetTripRequest) (*v1.GetTrip
 }
 
 func (s *Trip) UpdateTrip(ctx context.Context, req *v1.UpdateTripRequest) (*v1.UpdateTripResponse, error) {
-	trip, err := s.biz.UpdateTrip(ctx, req)
+	trip, err := s.tripBiz.UpdateTrip(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +53,7 @@ func (s *Trip) DeleteTrip(ctx context.Context, req *v1.DeleteTripRequest) (*v1.D
 	if err != nil {
 		return nil, xerr.ErrorInvalidTripId()
 	}
-	err = s.biz.DeleteTrip(ctx, tripId)
+	err = s.tripBiz.DeleteTrip(ctx, tripId)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +61,7 @@ func (s *Trip) DeleteTrip(ctx context.Context, req *v1.DeleteTripRequest) (*v1.D
 }
 
 func (s *Trip) ListTrips(ctx context.Context, _ *v1.ListTripsRequest) (*v1.ListTripsResponse, error) {
-	trips, err := s.biz.ListTrips(ctx)
+	trips, err := s.tripBiz.ListTrips(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +69,7 @@ func (s *Trip) ListTrips(ctx context.Context, _ *v1.ListTripsRequest) (*v1.ListT
 }
 
 func (s *Trip) CreateDailyTrip(ctx context.Context, req *v1.CreateDailyTripRequest) (*v1.CreateDailyTripResponse, error) {
-	dailyTrip, err := s.biz.CreateDailyTrip(ctx, req)
+	dailyTrip, err := s.tripBiz.CreateDailyTrip(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +77,7 @@ func (s *Trip) CreateDailyTrip(ctx context.Context, req *v1.CreateDailyTripReque
 }
 
 func (s *Trip) GetDailyTrip(ctx context.Context, req *v1.GetDailyTripRequest) (*v1.GetDailyTripResponse, error) {
-	dailyTrip, err := s.biz.GetDailyTrip(ctx, req)
+	dailyTrip, err := s.tripBiz.GetDailyTrip(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +85,7 @@ func (s *Trip) GetDailyTrip(ctx context.Context, req *v1.GetDailyTripRequest) (*
 }
 
 func (s *Trip) UpdateDailyTrip(ctx context.Context, req *v1.UpdateDailyTripRequest) (*v1.UpdateDailyTripResponse, error) {
-	dailyTrip, err := s.biz.UpdateDailyTrip(ctx, req)
+	dailyTrip, err := s.tripBiz.UpdateDailyTrip(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +93,7 @@ func (s *Trip) UpdateDailyTrip(ctx context.Context, req *v1.UpdateDailyTripReque
 }
 
 func (s *Trip) DeleteDailyTrip(ctx context.Context, req *v1.DeleteDailyTripRequest) (*v1.DeleteDailyTripResponse, error) {
-	err := s.biz.DeleteDailyTrip(ctx, req)
+	err := s.tripBiz.DeleteDailyTrip(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +101,7 @@ func (s *Trip) DeleteDailyTrip(ctx context.Context, req *v1.DeleteDailyTripReque
 }
 
 func (s *Trip) ListDailyTrips(ctx context.Context, req *v1.ListDailyTripsRequest) (*v1.ListDailyTripsResponse, error) {
-	dailyTrips, err := s.biz.ListDailyTrips(ctx, req)
+	dailyTrips, err := s.tripBiz.ListDailyTrips(ctx, req)
 	if err != nil {
 		return nil, err
 	}

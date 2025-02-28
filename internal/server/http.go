@@ -2,6 +2,8 @@ package server
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	authV1 "github.com/iter-x/iter-x/internal/api/auth/v1"
 	poiV1 "github.com/iter-x/iter-x/internal/api/poi/v1"
@@ -11,7 +13,6 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"net/http"
 )
 
 type HTTPServer struct {

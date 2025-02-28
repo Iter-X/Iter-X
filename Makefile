@@ -18,6 +18,7 @@ init:
 	go install github.com/protoc-gen/protoc-gen-go-errors@v0.3.0
 	go install github.com/google/wire/cmd/wire@v0.6.0
 	go install github.com/google/gnostic/cmd/protoc-gen-openapi@v0.7.0
+	go install mvdan.cc/gofumpt@latest
 
 .PHONY: config
 # generate internal proto
@@ -85,3 +86,14 @@ all:
 # run all tests
 test:
 	go test -v ./...
+
+.PHONY: format
+format:
+	gofmt -s -w .
+	golint ./...
+	go vet ./...
+	go mod tidy
+	go mod verify
+	goimports -w .
+	golangci-lint run ./...
+	gofumpt -l -w .

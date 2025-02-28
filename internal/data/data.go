@@ -1,20 +1,25 @@
-package repo
+package data
 
 import (
+	_ "github.com/lib/pq"
+
 	"context"
 	"fmt"
-	"github.com/google/wire"
-	"github.com/iter-x/iter-x/internal/conf"
-	"github.com/iter-x/iter-x/internal/repo/ent"
-	_ "github.com/lib/pq"
+
 	"go.uber.org/zap"
+
+	"github.com/iter-x/iter-x/internal/conf"
+	"github.com/iter-x/iter-x/internal/data/ent"
 )
 
 type Tx struct {
-	cli *ent.Client
+	Cli *ent.Client
 }
 
-var ProviderSet = wire.NewSet(NewConnection, NewAuth, NewTrip, NewPointsOfInterest, NewTransactionRepository)
+// NewTx create a new tx
+func NewTx(cli *ent.Client) *Tx {
+	return &Tx{Cli: cli}
+}
 
 func NewConnection(c *conf.Data, logger *zap.SugaredLogger) (*ent.Client, func(), error) {
 	logger = logger.Named("repo")
@@ -37,8 +42,17 @@ func NewConnection(c *conf.Data, logger *zap.SugaredLogger) (*ent.Client, func()
 	return client, cleanup, nil
 }
 
+// GetTx This method checks if there is a transaction in the context, and if so returns the client with the transaction
+func (t *Tx) GetTx(ctx context.Context) *ent.Client {
+	tx, ok := ctx.Value(contextTxKey{}).(*ent.Tx)
+	if ok {
+		return tx.Client()
+	}
+	return t.Cli
+}
+
 func (t *Tx) WithTx(ctx context.Context, fn func(tx *ent.Tx) error) error {
-	tx, err := t.cli.Tx(ctx)
+	tx, err := t.Cli.Tx(ctx)
 	if err != nil {
 		return err
 	}

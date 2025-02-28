@@ -1,4 +1,4 @@
-package repo
+package data
 
 import (
 	"context"
@@ -6,11 +6,11 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/iter-x/iter-x/internal/biz/repository"
-	"github.com/iter-x/iter-x/internal/repo/ent"
+	"github.com/iter-x/iter-x/internal/data/ent"
 )
 
-type TransactionRepoImpl struct {
-	cli    *ent.Client
+type transactionRepoImpl struct {
+	tx     *Tx
 	logger *zap.SugaredLogger
 }
 
@@ -18,20 +18,20 @@ type TransactionRepoImpl struct {
 type contextTxKey struct{}
 
 // NewTransactionRepository .
-func NewTransactionRepository(cli *ent.Client, logger *zap.SugaredLogger) repository.Transaction {
-	return &TransactionRepoImpl{
-		cli:    cli,
+func NewTransactionRepository(tx *Tx, logger *zap.SugaredLogger) repository.Transaction {
+	return &transactionRepoImpl{
+		tx:     tx,
 		logger: logger,
 	}
 }
 
-func (t *TransactionRepoImpl) Exec(ctx context.Context, fn func(ctx context.Context) error) error {
+func (t *transactionRepoImpl) Exec(ctx context.Context, fn func(ctx context.Context) error) error {
 	tx, ok := ctx.Value(contextTxKey{}).(*ent.Tx)
 	if ok {
 		return fn(ctx)
 	}
 	// start transaction
-	tx, err := t.cli.Tx(ctx)
+	tx, err := t.tx.GetTx(ctx).Tx(ctx)
 	if err != nil {
 		return err
 	}

@@ -2,27 +2,28 @@ package biz
 
 import (
 	"context"
+	"time"
+
 	"github.com/iter-x/iter-x/internal/common/xerr"
+	"github.com/iter-x/iter-x/internal/data/impl"
 	"github.com/iter-x/iter-x/internal/helper/auth"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"time"
 
 	"github.com/google/uuid"
 	v1 "github.com/iter-x/iter-x/internal/api/trip/v1"
-	"github.com/iter-x/iter-x/internal/repo"
-	"github.com/iter-x/iter-x/internal/repo/ent"
+	"github.com/iter-x/iter-x/internal/data/ent"
 	"go.uber.org/zap"
 )
 
 type Trip struct {
-	repo   *repo.Trip
-	logger *zap.SugaredLogger
+	tripRepo *impl.Trip
+	logger   *zap.SugaredLogger
 }
 
-func NewTrip(repo *repo.Trip, logger *zap.SugaredLogger) *Trip {
+func NewTrip(tripRepo *impl.Trip, logger *zap.SugaredLogger) *Trip {
 	return &Trip{
-		repo:   repo,
-		logger: logger.Named("biz.trip"),
+		tripRepo: tripRepo,
+		logger:   logger.Named("biz.tripRepo"),
 	}
 }
 
@@ -40,9 +41,9 @@ func (b *Trip) CreateTrip(ctx context.Context, req *v1.CreateTripRequest) (*v1.T
 		EndDate:     req.EndTs.AsTime(),
 	}
 
-	createdTrip, err := b.repo.CreateTrip(ctx, trip)
+	createdTrip, err := b.tripRepo.CreateTrip(ctx, trip)
 	if err != nil {
-		b.logger.Errorw("failed to create trip", "err", err)
+		b.logger.Errorw("failed to create tripRepo", "err", err)
 		return nil, xerr.ErrorCreateTripFailed()
 	}
 
@@ -50,9 +51,9 @@ func (b *Trip) CreateTrip(ctx context.Context, req *v1.CreateTripRequest) (*v1.T
 }
 
 func (b *Trip) GetTrip(ctx context.Context, id uuid.UUID) (*v1.Trip, error) {
-	trip, err := b.repo.GetTrip(ctx, id)
+	trip, err := b.tripRepo.GetTrip(ctx, id)
 	if err != nil {
-		b.logger.Errorw("failed to get trip", "err", err)
+		b.logger.Errorw("failed to get tripRepo", "err", err)
 		return nil, xerr.ErrorGetTripFailed()
 	}
 	return toTripProto(trip), nil
@@ -61,16 +62,16 @@ func (b *Trip) GetTrip(ctx context.Context, id uuid.UUID) (*v1.Trip, error) {
 func (b *Trip) UpdateTrip(ctx context.Context, req *v1.UpdateTripRequest) (*v1.Trip, error) {
 	tripId, err := uuid.Parse(req.Id)
 	if err != nil {
-		b.logger.Errorw("failed to parse trip id", "err", err)
+		b.logger.Errorw("failed to parse tripRepo id", "err", err)
 		return nil, xerr.ErrorInvalidTripId()
 	}
 
-	trip, err := b.repo.GetTrip(ctx, tripId)
+	trip, err := b.tripRepo.GetTrip(ctx, tripId)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, xerr.ErrorTripNotFound()
 		}
-		b.logger.Errorw("failed to get trip", "err", err)
+		b.logger.Errorw("failed to get tripRepo", "err", err)
 		return nil, xerr.ErrorGetTripFailed()
 	}
 
@@ -79,9 +80,9 @@ func (b *Trip) UpdateTrip(ctx context.Context, req *v1.UpdateTripRequest) (*v1.T
 	trip.EndDate = req.EndTs.AsTime()
 	trip.UpdatedAt = time.Now()
 
-	updatedTrip, err := b.repo.UpdateTrip(ctx, trip)
+	updatedTrip, err := b.tripRepo.UpdateTrip(ctx, trip)
 	if err != nil {
-		b.logger.Errorw("failed to update trip", "err", err)
+		b.logger.Errorw("failed to update tripRepo", "err", err)
 		return nil, xerr.ErrorUpdateTripFailed()
 	}
 
@@ -89,8 +90,8 @@ func (b *Trip) UpdateTrip(ctx context.Context, req *v1.UpdateTripRequest) (*v1.T
 }
 
 func (b *Trip) DeleteTrip(ctx context.Context, id uuid.UUID) error {
-	if err := b.repo.DeleteTrip(ctx, id); err != nil {
-		b.logger.Errorw("failed to delete trip", "err", err)
+	if err := b.tripRepo.DeleteTrip(ctx, id); err != nil {
+		b.logger.Errorw("failed to delete tripRepo", "err", err)
 		return xerr.ErrorDeleteTripFailed()
 	}
 	return nil
@@ -102,7 +103,7 @@ func (b *Trip) ListTrips(ctx context.Context) ([]*v1.Trip, error) {
 		return nil, xerr.ErrorUnauthorized()
 	}
 
-	trips, err := b.repo.ListTrips(ctx, claims.UID)
+	trips, err := b.tripRepo.ListTrips(ctx, claims.UID)
 	if err != nil {
 		b.logger.Errorw("failed to list trips", "err", err)
 		return nil, xerr.ErrorGetTripListFailed()
@@ -119,16 +120,16 @@ func (b *Trip) ListTrips(ctx context.Context) ([]*v1.Trip, error) {
 func (b *Trip) CreateDailyTrip(ctx context.Context, req *v1.CreateDailyTripRequest) (*v1.DailyTrip, error) {
 	tripId, err := uuid.Parse(req.TripId)
 	if err != nil {
-		b.logger.Errorw("failed to parse trip id", "err", err)
+		b.logger.Errorw("failed to parse tripRepo id", "err", err)
 		return nil, xerr.ErrorInvalidTripId()
 	}
 
-	_, err = b.repo.GetTrip(ctx, tripId)
+	_, err = b.tripRepo.GetTrip(ctx, tripId)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, xerr.ErrorTripNotFound()
 		}
-		b.logger.Errorw("failed to get trip", "err", err)
+		b.logger.Errorw("failed to get tripRepo", "err", err)
 		return nil, xerr.ErrorGetTripFailed()
 	}
 
@@ -139,9 +140,9 @@ func (b *Trip) CreateDailyTrip(ctx context.Context, req *v1.CreateDailyTripReque
 		Notes:  req.Notes,
 	}
 
-	createdDailyTrip, err := b.repo.CreateDailyTrip(ctx, dailyTrip)
+	createdDailyTrip, err := b.tripRepo.CreateDailyTrip(ctx, dailyTrip)
 	if err != nil {
-		b.logger.Errorw("failed to create daily trip", "err", err)
+		b.logger.Errorw("failed to create daily tripRepo", "err", err)
 		return nil, xerr.ErrorCreateDailyTripFailed()
 	}
 
@@ -158,9 +159,9 @@ func (b *Trip) GetDailyTrip(ctx context.Context, req *v1.GetDailyTripRequest) (*
 		return nil, xerr.ErrorInvalidDailyTripId()
 	}
 
-	dailyTrip, err := b.repo.GetDailyTrip(ctx, tripId, dailyId)
+	dailyTrip, err := b.tripRepo.GetDailyTrip(ctx, tripId, dailyId)
 	if err != nil {
-		b.logger.Errorw("failed to get daily trip", "err", err)
+		b.logger.Errorw("failed to get daily tripRepo", "err", err)
 		return nil, xerr.ErrorGetDailyTripFailed()
 	}
 	return toDailyTripProto(dailyTrip), nil
@@ -176,12 +177,12 @@ func (b *Trip) UpdateDailyTrip(ctx context.Context, req *v1.UpdateDailyTripReque
 		return nil, xerr.ErrorInvalidDailyTripId()
 	}
 
-	dailyTrip, err := b.repo.GetDailyTrip(ctx, tripId, dailyId)
+	dailyTrip, err := b.tripRepo.GetDailyTrip(ctx, tripId, dailyId)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, xerr.ErrorDailyTripNotFound()
 		}
-		b.logger.Errorw("daily trip not found", "err", err)
+		b.logger.Errorw("daily tripRepo not found", "err", err)
 		return nil, xerr.ErrorGetDailyTripFailed()
 	}
 
@@ -190,9 +191,9 @@ func (b *Trip) UpdateDailyTrip(ctx context.Context, req *v1.UpdateDailyTripReque
 	dailyTrip.Notes = req.Notes
 	dailyTrip.UpdatedAt = time.Now()
 
-	updatedDailyTrip, err := b.repo.UpdateDailyTrip(ctx, dailyTrip)
+	updatedDailyTrip, err := b.tripRepo.UpdateDailyTrip(ctx, dailyTrip)
 	if err != nil {
-		b.logger.Errorw("failed to update daily trip", "err", err)
+		b.logger.Errorw("failed to update daily tripRepo", "err", err)
 		return nil, xerr.ErrorUpdateDailyTripFailed()
 	}
 
@@ -205,8 +206,8 @@ func (b *Trip) DeleteDailyTrip(ctx context.Context, req *v1.DeleteDailyTripReque
 		return xerr.ErrorInvalidDailyTripId()
 	}
 
-	if err := b.repo.DeleteDailyTrip(ctx, dailyId); err != nil {
-		b.logger.Errorw("failed to delete daily trip", "err", err)
+	if err := b.tripRepo.DeleteDailyTrip(ctx, dailyId); err != nil {
+		b.logger.Errorw("failed to delete daily tripRepo", "err", err)
 		return xerr.ErrorDeleteDailyTripFailed()
 	}
 	return nil
@@ -218,7 +219,7 @@ func (b *Trip) ListDailyTrips(ctx context.Context, req *v1.ListDailyTripsRequest
 		return nil, xerr.ErrorInvalidTripId()
 	}
 
-	dailyTrips, err := b.repo.ListDailyTrips(ctx, tripId)
+	dailyTrips, err := b.tripRepo.ListDailyTrips(ctx, tripId)
 	if err != nil {
 		b.logger.Errorw("failed to list daily trips", "err", err)
 		return nil, xerr.ErrorGetDailyTripListFailed()

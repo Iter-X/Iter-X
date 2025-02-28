@@ -2,13 +2,14 @@ package i18n
 
 import (
 	"encoding/json"
+	"os"
+	"path"
+
 	"github.com/BurntSushi/toml"
 	"github.com/google/wire"
 	"github.com/iter-x/iter-x/internal/conf"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
-	"os"
-	"path"
 )
 
 var ProviderSet = wire.NewSet(New)

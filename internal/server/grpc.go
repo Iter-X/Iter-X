@@ -1,6 +1,9 @@
 package server
 
 import (
+	"net"
+	"time"
+
 	authV1 "github.com/iter-x/iter-x/internal/api/auth/v1"
 	poiV1 "github.com/iter-x/iter-x/internal/api/poi/v1"
 	tripV1 "github.com/iter-x/iter-x/internal/api/trip/v1"
@@ -10,8 +13,6 @@ import (
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"net"
-	"time"
 )
 
 type GRPCServer struct {
@@ -22,9 +23,14 @@ type GRPCServer struct {
 	logger  *zap.SugaredLogger
 }
 
-func NewGRPCServer(c *conf.Server_GRPC, i18nBundle *i18n.Bundle,
-	auth *service.Auth, trip *service.Trip, poi *service.PointsOfInterestService,
-	logger *zap.SugaredLogger) *GRPCServer {
+func NewGRPCServer(
+	c *conf.Server_GRPC,
+	i18nBundle *i18n.Bundle,
+	auth *service.Auth,
+	trip *service.Trip,
+	poi *service.PointsOfInterestService,
+	logger *zap.SugaredLogger,
+) *GRPCServer {
 	server := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			interceptor.I18n(i18nBundle),
