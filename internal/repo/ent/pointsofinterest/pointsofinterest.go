@@ -41,6 +41,14 @@ const (
 	FieldRating = "rating"
 	// FieldRecommendedDurationMinutes holds the string denoting the recommended_duration_minutes field in the database.
 	FieldRecommendedDurationMinutes = "recommended_duration_minutes"
+	// FieldCityID holds the string denoting the city_id field in the database.
+	FieldCityID = "city_id"
+	// FieldStateID holds the string denoting the state_id field in the database.
+	FieldStateID = "state_id"
+	// FieldCountryID holds the string denoting the country_id field in the database.
+	FieldCountryID = "country_id"
+	// FieldContinentID holds the string denoting the continent_id field in the database.
+	FieldContinentID = "continent_id"
 	// EdgeCity holds the string denoting the city edge name in mutations.
 	EdgeCity = "city"
 	// EdgeState holds the string denoting the state edge name in mutations.
@@ -59,28 +67,28 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "city" package.
 	CityInverseTable = "cities"
 	// CityColumn is the table column denoting the city relation/edge.
-	CityColumn = "city_poi"
+	CityColumn = "city_id"
 	// StateTable is the table that holds the state relation/edge.
 	StateTable = "points_of_interest"
 	// StateInverseTable is the table name for the State entity.
 	// It exists in this package in order to avoid circular dependency with the "state" package.
 	StateInverseTable = "states"
 	// StateColumn is the table column denoting the state relation/edge.
-	StateColumn = "state_poi"
+	StateColumn = "state_id"
 	// CountryTable is the table that holds the country relation/edge.
 	CountryTable = "points_of_interest"
 	// CountryInverseTable is the table name for the Country entity.
 	// It exists in this package in order to avoid circular dependency with the "country" package.
 	CountryInverseTable = "countries"
 	// CountryColumn is the table column denoting the country relation/edge.
-	CountryColumn = "country_poi"
+	CountryColumn = "country_id"
 	// ContinentTable is the table that holds the continent relation/edge.
 	ContinentTable = "points_of_interest"
 	// ContinentInverseTable is the table name for the Continent entity.
 	// It exists in this package in order to avoid circular dependency with the "continent" package.
 	ContinentInverseTable = "continents"
 	// ContinentColumn is the table column denoting the continent relation/edge.
-	ContinentColumn = "continent_poi"
+	ContinentColumn = "continent_id"
 	// DailyItineraryTable is the table that holds the daily_itinerary relation/edge.
 	DailyItineraryTable = "daily_itineraries"
 	// DailyItineraryInverseTable is the table name for the DailyItinerary entity.
@@ -106,26 +114,16 @@ var Columns = []string{
 	FieldCategory,
 	FieldRating,
 	FieldRecommendedDurationMinutes,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "points_of_interest"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"city_poi",
-	"continent_poi",
-	"country_poi",
-	"state_poi",
+	FieldCityID,
+	FieldStateID,
+	FieldCountryID,
+	FieldContinentID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -232,6 +230,26 @@ func ByRating(opts ...sql.OrderTermOption) OrderOption {
 // ByRecommendedDurationMinutes orders the results by the recommended_duration_minutes field.
 func ByRecommendedDurationMinutes(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRecommendedDurationMinutes, opts...).ToFunc()
+}
+
+// ByCityID orders the results by the city_id field.
+func ByCityID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCityID, opts...).ToFunc()
+}
+
+// ByStateID orders the results by the state_id field.
+func ByStateID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStateID, opts...).ToFunc()
+}
+
+// ByCountryID orders the results by the country_id field.
+func ByCountryID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCountryID, opts...).ToFunc()
+}
+
+// ByContinentID orders the results by the continent_id field.
+func ByContinentID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldContinentID, opts...).ToFunc()
 }
 
 // ByCityField orders the results by city field.

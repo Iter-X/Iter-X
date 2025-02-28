@@ -48,14 +48,18 @@ type PointsOfInterest struct {
 	Rating float32 `json:"rating,omitempty"`
 	// RecommendedDurationMinutes holds the value of the "recommended_duration_minutes" field.
 	RecommendedDurationMinutes int64 `json:"recommended_duration_minutes,omitempty"`
+	// CityID holds the value of the "city_id" field.
+	CityID uuid.UUID `json:"city_id,omitempty"`
+	// StateID holds the value of the "state_id" field.
+	StateID uuid.UUID `json:"state_id,omitempty"`
+	// CountryID holds the value of the "country_id" field.
+	CountryID uuid.UUID `json:"country_id,omitempty"`
+	// ContinentID holds the value of the "continent_id" field.
+	ContinentID uuid.UUID `json:"continent_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PointsOfInterestQuery when eager-loading is set.
-	Edges         PointsOfInterestEdges `json:"edges"`
-	city_poi      *uuid.UUID
-	continent_poi *uuid.UUID
-	country_poi   *uuid.UUID
-	state_poi     *uuid.UUID
-	selectValues  sql.SelectValues
+	Edges        PointsOfInterestEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // PointsOfInterestEdges holds the relations/edges for other nodes in the graph.
@@ -141,16 +145,8 @@ func (*PointsOfInterest) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case pointsofinterest.FieldCreatedAt, pointsofinterest.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case pointsofinterest.FieldID:
+		case pointsofinterest.FieldID, pointsofinterest.FieldCityID, pointsofinterest.FieldStateID, pointsofinterest.FieldCountryID, pointsofinterest.FieldContinentID:
 			values[i] = new(uuid.UUID)
-		case pointsofinterest.ForeignKeys[0]: // city_poi
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case pointsofinterest.ForeignKeys[1]: // continent_poi
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case pointsofinterest.ForeignKeys[2]: // country_poi
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case pointsofinterest.ForeignKeys[3]: // state_poi
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -250,33 +246,29 @@ func (poi *PointsOfInterest) assignValues(columns []string, values []any) error 
 			} else if value.Valid {
 				poi.RecommendedDurationMinutes = value.Int64
 			}
-		case pointsofinterest.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field city_poi", values[i])
-			} else if value.Valid {
-				poi.city_poi = new(uuid.UUID)
-				*poi.city_poi = *value.S.(*uuid.UUID)
+		case pointsofinterest.FieldCityID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field city_id", values[i])
+			} else if value != nil {
+				poi.CityID = *value
 			}
-		case pointsofinterest.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field continent_poi", values[i])
-			} else if value.Valid {
-				poi.continent_poi = new(uuid.UUID)
-				*poi.continent_poi = *value.S.(*uuid.UUID)
+		case pointsofinterest.FieldStateID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field state_id", values[i])
+			} else if value != nil {
+				poi.StateID = *value
 			}
-		case pointsofinterest.ForeignKeys[2]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field country_poi", values[i])
-			} else if value.Valid {
-				poi.country_poi = new(uuid.UUID)
-				*poi.country_poi = *value.S.(*uuid.UUID)
+		case pointsofinterest.FieldCountryID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field country_id", values[i])
+			} else if value != nil {
+				poi.CountryID = *value
 			}
-		case pointsofinterest.ForeignKeys[3]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field state_poi", values[i])
-			} else if value.Valid {
-				poi.state_poi = new(uuid.UUID)
-				*poi.state_poi = *value.S.(*uuid.UUID)
+		case pointsofinterest.FieldContinentID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field continent_id", values[i])
+			} else if value != nil {
+				poi.ContinentID = *value
 			}
 		default:
 			poi.selectValues.Set(columns[i], values[i])
@@ -377,6 +369,18 @@ func (poi *PointsOfInterest) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("recommended_duration_minutes=")
 	builder.WriteString(fmt.Sprintf("%v", poi.RecommendedDurationMinutes))
+	builder.WriteString(", ")
+	builder.WriteString("city_id=")
+	builder.WriteString(fmt.Sprintf("%v", poi.CityID))
+	builder.WriteString(", ")
+	builder.WriteString("state_id=")
+	builder.WriteString(fmt.Sprintf("%v", poi.StateID))
+	builder.WriteString(", ")
+	builder.WriteString("country_id=")
+	builder.WriteString(fmt.Sprintf("%v", poi.CountryID))
+	builder.WriteString(", ")
+	builder.WriteString("continent_id=")
+	builder.WriteString(fmt.Sprintf("%v", poi.ContinentID))
 	builder.WriteByte(')')
 	return builder.String()
 }

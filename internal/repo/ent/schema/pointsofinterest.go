@@ -32,16 +32,20 @@ func (PointsOfInterest) Fields() []ent.Field {
 		field.String("category").MaxLen(50), // Historical, Modern, Natural, etc.
 		field.Float32("rating").Positive(),
 		field.Int64("recommended_duration_minutes").Positive(),
+		field.UUID("city_id", uuid.UUID{}).Optional(),
+		field.UUID("state_id", uuid.UUID{}).Optional(),
+		field.UUID("country_id", uuid.UUID{}).Optional(),
+		field.UUID("continent_id", uuid.UUID{}).Optional(),
 	}
 }
 
 // Edges of the PointsOfInterest.
 func (PointsOfInterest) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("city", City.Type).Ref("poi").Unique(),
-		edge.From("state", State.Type).Ref("poi").Unique(),
-		edge.From("country", Country.Type).Ref("poi").Unique(),
-		edge.From("continent", Continent.Type).Ref("poi").Unique(),
+		edge.From("city", City.Type).Ref("poi").Field("city_id").Unique(),
+		edge.From("state", State.Type).Ref("poi").Field("state_id").Unique(),
+		edge.From("country", Country.Type).Ref("poi").Field("country_id").Unique(),
+		edge.From("continent", Continent.Type).Ref("poi").Field("continent_id").Unique(),
 		edge.To("daily_itinerary", DailyItinerary.Type),
 	}
 }

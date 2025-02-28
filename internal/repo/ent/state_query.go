@@ -414,7 +414,9 @@ func (sq *StateQuery) loadPoi(ctx context.Context, query *PointsOfInterestQuery,
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(pointsofinterest.FieldStateID)
+	}
 	query.Where(predicate.PointsOfInterest(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(state.PoiColumn), fks...))
 	}))
@@ -423,13 +425,10 @@ func (sq *StateQuery) loadPoi(ctx context.Context, query *PointsOfInterestQuery,
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.state_poi
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "state_poi" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.StateID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "state_poi" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "state_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

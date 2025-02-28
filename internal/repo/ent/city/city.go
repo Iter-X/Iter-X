@@ -35,7 +35,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "pointsofinterest" package.
 	PoiInverseTable = "points_of_interest"
 	// PoiColumn is the table column denoting the poi relation/edge.
-	PoiColumn = "city_poi"
+	PoiColumn = "city_id"
 )
 
 // Columns holds all SQL columns for city fields.

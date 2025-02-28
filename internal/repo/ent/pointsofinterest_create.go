@@ -120,6 +120,62 @@ func (poic *PointsOfInterestCreate) SetRecommendedDurationMinutes(i int64) *Poin
 	return poic
 }
 
+// SetCityID sets the "city_id" field.
+func (poic *PointsOfInterestCreate) SetCityID(u uuid.UUID) *PointsOfInterestCreate {
+	poic.mutation.SetCityID(u)
+	return poic
+}
+
+// SetNillableCityID sets the "city_id" field if the given value is not nil.
+func (poic *PointsOfInterestCreate) SetNillableCityID(u *uuid.UUID) *PointsOfInterestCreate {
+	if u != nil {
+		poic.SetCityID(*u)
+	}
+	return poic
+}
+
+// SetStateID sets the "state_id" field.
+func (poic *PointsOfInterestCreate) SetStateID(u uuid.UUID) *PointsOfInterestCreate {
+	poic.mutation.SetStateID(u)
+	return poic
+}
+
+// SetNillableStateID sets the "state_id" field if the given value is not nil.
+func (poic *PointsOfInterestCreate) SetNillableStateID(u *uuid.UUID) *PointsOfInterestCreate {
+	if u != nil {
+		poic.SetStateID(*u)
+	}
+	return poic
+}
+
+// SetCountryID sets the "country_id" field.
+func (poic *PointsOfInterestCreate) SetCountryID(u uuid.UUID) *PointsOfInterestCreate {
+	poic.mutation.SetCountryID(u)
+	return poic
+}
+
+// SetNillableCountryID sets the "country_id" field if the given value is not nil.
+func (poic *PointsOfInterestCreate) SetNillableCountryID(u *uuid.UUID) *PointsOfInterestCreate {
+	if u != nil {
+		poic.SetCountryID(*u)
+	}
+	return poic
+}
+
+// SetContinentID sets the "continent_id" field.
+func (poic *PointsOfInterestCreate) SetContinentID(u uuid.UUID) *PointsOfInterestCreate {
+	poic.mutation.SetContinentID(u)
+	return poic
+}
+
+// SetNillableContinentID sets the "continent_id" field if the given value is not nil.
+func (poic *PointsOfInterestCreate) SetNillableContinentID(u *uuid.UUID) *PointsOfInterestCreate {
+	if u != nil {
+		poic.SetContinentID(*u)
+	}
+	return poic
+}
+
 // SetID sets the "id" field.
 func (poic *PointsOfInterestCreate) SetID(u uuid.UUID) *PointsOfInterestCreate {
 	poic.mutation.SetID(u)
@@ -134,37 +190,9 @@ func (poic *PointsOfInterestCreate) SetNillableID(u *uuid.UUID) *PointsOfInteres
 	return poic
 }
 
-// SetCityID sets the "city" edge to the City entity by ID.
-func (poic *PointsOfInterestCreate) SetCityID(id uuid.UUID) *PointsOfInterestCreate {
-	poic.mutation.SetCityID(id)
-	return poic
-}
-
-// SetNillableCityID sets the "city" edge to the City entity by ID if the given value is not nil.
-func (poic *PointsOfInterestCreate) SetNillableCityID(id *uuid.UUID) *PointsOfInterestCreate {
-	if id != nil {
-		poic = poic.SetCityID(*id)
-	}
-	return poic
-}
-
 // SetCity sets the "city" edge to the City entity.
 func (poic *PointsOfInterestCreate) SetCity(c *City) *PointsOfInterestCreate {
 	return poic.SetCityID(c.ID)
-}
-
-// SetStateID sets the "state" edge to the State entity by ID.
-func (poic *PointsOfInterestCreate) SetStateID(id uuid.UUID) *PointsOfInterestCreate {
-	poic.mutation.SetStateID(id)
-	return poic
-}
-
-// SetNillableStateID sets the "state" edge to the State entity by ID if the given value is not nil.
-func (poic *PointsOfInterestCreate) SetNillableStateID(id *uuid.UUID) *PointsOfInterestCreate {
-	if id != nil {
-		poic = poic.SetStateID(*id)
-	}
-	return poic
 }
 
 // SetState sets the "state" edge to the State entity.
@@ -172,37 +200,9 @@ func (poic *PointsOfInterestCreate) SetState(s *State) *PointsOfInterestCreate {
 	return poic.SetStateID(s.ID)
 }
 
-// SetCountryID sets the "country" edge to the Country entity by ID.
-func (poic *PointsOfInterestCreate) SetCountryID(id uuid.UUID) *PointsOfInterestCreate {
-	poic.mutation.SetCountryID(id)
-	return poic
-}
-
-// SetNillableCountryID sets the "country" edge to the Country entity by ID if the given value is not nil.
-func (poic *PointsOfInterestCreate) SetNillableCountryID(id *uuid.UUID) *PointsOfInterestCreate {
-	if id != nil {
-		poic = poic.SetCountryID(*id)
-	}
-	return poic
-}
-
 // SetCountry sets the "country" edge to the Country entity.
 func (poic *PointsOfInterestCreate) SetCountry(c *Country) *PointsOfInterestCreate {
 	return poic.SetCountryID(c.ID)
-}
-
-// SetContinentID sets the "continent" edge to the Continent entity by ID.
-func (poic *PointsOfInterestCreate) SetContinentID(id uuid.UUID) *PointsOfInterestCreate {
-	poic.mutation.SetContinentID(id)
-	return poic
-}
-
-// SetNillableContinentID sets the "continent" edge to the Continent entity by ID if the given value is not nil.
-func (poic *PointsOfInterestCreate) SetNillableContinentID(id *uuid.UUID) *PointsOfInterestCreate {
-	if id != nil {
-		poic = poic.SetContinentID(*id)
-	}
-	return poic
 }
 
 // SetContinent sets the "continent" edge to the Continent entity.
@@ -461,7 +461,7 @@ func (poic *PointsOfInterestCreate) createSpec() (*PointsOfInterest, *sqlgraph.C
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.city_poi = &nodes[0]
+		_node.CityID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := poic.mutation.StateIDs(); len(nodes) > 0 {
@@ -478,7 +478,7 @@ func (poic *PointsOfInterestCreate) createSpec() (*PointsOfInterest, *sqlgraph.C
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.state_poi = &nodes[0]
+		_node.StateID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := poic.mutation.CountryIDs(); len(nodes) > 0 {
@@ -495,7 +495,7 @@ func (poic *PointsOfInterestCreate) createSpec() (*PointsOfInterest, *sqlgraph.C
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.country_poi = &nodes[0]
+		_node.CountryID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := poic.mutation.ContinentIDs(); len(nodes) > 0 {
@@ -512,7 +512,7 @@ func (poic *PointsOfInterestCreate) createSpec() (*PointsOfInterest, *sqlgraph.C
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.continent_poi = &nodes[0]
+		_node.ContinentID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := poic.mutation.DailyItineraryIDs(); len(nodes) > 0 {

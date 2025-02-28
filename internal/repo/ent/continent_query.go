@@ -414,7 +414,9 @@ func (cq *ContinentQuery) loadPoi(ctx context.Context, query *PointsOfInterestQu
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(pointsofinterest.FieldContinentID)
+	}
 	query.Where(predicate.PointsOfInterest(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(continent.PoiColumn), fks...))
 	}))
@@ -423,13 +425,10 @@ func (cq *ContinentQuery) loadPoi(ctx context.Context, query *PointsOfInterestQu
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.continent_poi
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "continent_poi" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.ContinentID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "continent_poi" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "continent_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

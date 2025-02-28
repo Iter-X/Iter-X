@@ -4871,27 +4871,211 @@ func (m *PointsOfInterestMutation) ResetRecommendedDurationMinutes() {
 	m.addrecommended_duration_minutes = nil
 }
 
-// SetCityID sets the "city" edge to the City entity by id.
-func (m *PointsOfInterestMutation) SetCityID(id uuid.UUID) {
-	m.city = &id
+// SetCityID sets the "city_id" field.
+func (m *PointsOfInterestMutation) SetCityID(u uuid.UUID) {
+	m.city = &u
+}
+
+// CityID returns the value of the "city_id" field in the mutation.
+func (m *PointsOfInterestMutation) CityID() (r uuid.UUID, exists bool) {
+	v := m.city
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCityID returns the old "city_id" field's value of the PointsOfInterest entity.
+// If the PointsOfInterest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PointsOfInterestMutation) OldCityID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCityID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCityID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCityID: %w", err)
+	}
+	return oldValue.CityID, nil
+}
+
+// ClearCityID clears the value of the "city_id" field.
+func (m *PointsOfInterestMutation) ClearCityID() {
+	m.city = nil
+	m.clearedFields[pointsofinterest.FieldCityID] = struct{}{}
+}
+
+// CityIDCleared returns if the "city_id" field was cleared in this mutation.
+func (m *PointsOfInterestMutation) CityIDCleared() bool {
+	_, ok := m.clearedFields[pointsofinterest.FieldCityID]
+	return ok
+}
+
+// ResetCityID resets all changes to the "city_id" field.
+func (m *PointsOfInterestMutation) ResetCityID() {
+	m.city = nil
+	delete(m.clearedFields, pointsofinterest.FieldCityID)
+}
+
+// SetStateID sets the "state_id" field.
+func (m *PointsOfInterestMutation) SetStateID(u uuid.UUID) {
+	m.state = &u
+}
+
+// StateID returns the value of the "state_id" field in the mutation.
+func (m *PointsOfInterestMutation) StateID() (r uuid.UUID, exists bool) {
+	v := m.state
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStateID returns the old "state_id" field's value of the PointsOfInterest entity.
+// If the PointsOfInterest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PointsOfInterestMutation) OldStateID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStateID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStateID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStateID: %w", err)
+	}
+	return oldValue.StateID, nil
+}
+
+// ClearStateID clears the value of the "state_id" field.
+func (m *PointsOfInterestMutation) ClearStateID() {
+	m.state = nil
+	m.clearedFields[pointsofinterest.FieldStateID] = struct{}{}
+}
+
+// StateIDCleared returns if the "state_id" field was cleared in this mutation.
+func (m *PointsOfInterestMutation) StateIDCleared() bool {
+	_, ok := m.clearedFields[pointsofinterest.FieldStateID]
+	return ok
+}
+
+// ResetStateID resets all changes to the "state_id" field.
+func (m *PointsOfInterestMutation) ResetStateID() {
+	m.state = nil
+	delete(m.clearedFields, pointsofinterest.FieldStateID)
+}
+
+// SetCountryID sets the "country_id" field.
+func (m *PointsOfInterestMutation) SetCountryID(u uuid.UUID) {
+	m.country = &u
+}
+
+// CountryID returns the value of the "country_id" field in the mutation.
+func (m *PointsOfInterestMutation) CountryID() (r uuid.UUID, exists bool) {
+	v := m.country
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCountryID returns the old "country_id" field's value of the PointsOfInterest entity.
+// If the PointsOfInterest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PointsOfInterestMutation) OldCountryID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCountryID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCountryID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCountryID: %w", err)
+	}
+	return oldValue.CountryID, nil
+}
+
+// ClearCountryID clears the value of the "country_id" field.
+func (m *PointsOfInterestMutation) ClearCountryID() {
+	m.country = nil
+	m.clearedFields[pointsofinterest.FieldCountryID] = struct{}{}
+}
+
+// CountryIDCleared returns if the "country_id" field was cleared in this mutation.
+func (m *PointsOfInterestMutation) CountryIDCleared() bool {
+	_, ok := m.clearedFields[pointsofinterest.FieldCountryID]
+	return ok
+}
+
+// ResetCountryID resets all changes to the "country_id" field.
+func (m *PointsOfInterestMutation) ResetCountryID() {
+	m.country = nil
+	delete(m.clearedFields, pointsofinterest.FieldCountryID)
+}
+
+// SetContinentID sets the "continent_id" field.
+func (m *PointsOfInterestMutation) SetContinentID(u uuid.UUID) {
+	m.continent = &u
+}
+
+// ContinentID returns the value of the "continent_id" field in the mutation.
+func (m *PointsOfInterestMutation) ContinentID() (r uuid.UUID, exists bool) {
+	v := m.continent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContinentID returns the old "continent_id" field's value of the PointsOfInterest entity.
+// If the PointsOfInterest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PointsOfInterestMutation) OldContinentID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContinentID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContinentID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContinentID: %w", err)
+	}
+	return oldValue.ContinentID, nil
+}
+
+// ClearContinentID clears the value of the "continent_id" field.
+func (m *PointsOfInterestMutation) ClearContinentID() {
+	m.continent = nil
+	m.clearedFields[pointsofinterest.FieldContinentID] = struct{}{}
+}
+
+// ContinentIDCleared returns if the "continent_id" field was cleared in this mutation.
+func (m *PointsOfInterestMutation) ContinentIDCleared() bool {
+	_, ok := m.clearedFields[pointsofinterest.FieldContinentID]
+	return ok
+}
+
+// ResetContinentID resets all changes to the "continent_id" field.
+func (m *PointsOfInterestMutation) ResetContinentID() {
+	m.continent = nil
+	delete(m.clearedFields, pointsofinterest.FieldContinentID)
 }
 
 // ClearCity clears the "city" edge to the City entity.
 func (m *PointsOfInterestMutation) ClearCity() {
 	m.clearedcity = true
+	m.clearedFields[pointsofinterest.FieldCityID] = struct{}{}
 }
 
 // CityCleared reports if the "city" edge to the City entity was cleared.
 func (m *PointsOfInterestMutation) CityCleared() bool {
-	return m.clearedcity
-}
-
-// CityID returns the "city" edge ID in the mutation.
-func (m *PointsOfInterestMutation) CityID() (id uuid.UUID, exists bool) {
-	if m.city != nil {
-		return *m.city, true
-	}
-	return
+	return m.CityIDCleared() || m.clearedcity
 }
 
 // CityIDs returns the "city" edge IDs in the mutation.
@@ -4910,27 +5094,15 @@ func (m *PointsOfInterestMutation) ResetCity() {
 	m.clearedcity = false
 }
 
-// SetStateID sets the "state" edge to the State entity by id.
-func (m *PointsOfInterestMutation) SetStateID(id uuid.UUID) {
-	m.state = &id
-}
-
 // ClearState clears the "state" edge to the State entity.
 func (m *PointsOfInterestMutation) ClearState() {
 	m.clearedstate = true
+	m.clearedFields[pointsofinterest.FieldStateID] = struct{}{}
 }
 
 // StateCleared reports if the "state" edge to the State entity was cleared.
 func (m *PointsOfInterestMutation) StateCleared() bool {
-	return m.clearedstate
-}
-
-// StateID returns the "state" edge ID in the mutation.
-func (m *PointsOfInterestMutation) StateID() (id uuid.UUID, exists bool) {
-	if m.state != nil {
-		return *m.state, true
-	}
-	return
+	return m.StateIDCleared() || m.clearedstate
 }
 
 // StateIDs returns the "state" edge IDs in the mutation.
@@ -4949,27 +5121,15 @@ func (m *PointsOfInterestMutation) ResetState() {
 	m.clearedstate = false
 }
 
-// SetCountryID sets the "country" edge to the Country entity by id.
-func (m *PointsOfInterestMutation) SetCountryID(id uuid.UUID) {
-	m.country = &id
-}
-
 // ClearCountry clears the "country" edge to the Country entity.
 func (m *PointsOfInterestMutation) ClearCountry() {
 	m.clearedcountry = true
+	m.clearedFields[pointsofinterest.FieldCountryID] = struct{}{}
 }
 
 // CountryCleared reports if the "country" edge to the Country entity was cleared.
 func (m *PointsOfInterestMutation) CountryCleared() bool {
-	return m.clearedcountry
-}
-
-// CountryID returns the "country" edge ID in the mutation.
-func (m *PointsOfInterestMutation) CountryID() (id uuid.UUID, exists bool) {
-	if m.country != nil {
-		return *m.country, true
-	}
-	return
+	return m.CountryIDCleared() || m.clearedcountry
 }
 
 // CountryIDs returns the "country" edge IDs in the mutation.
@@ -4988,27 +5148,15 @@ func (m *PointsOfInterestMutation) ResetCountry() {
 	m.clearedcountry = false
 }
 
-// SetContinentID sets the "continent" edge to the Continent entity by id.
-func (m *PointsOfInterestMutation) SetContinentID(id uuid.UUID) {
-	m.continent = &id
-}
-
 // ClearContinent clears the "continent" edge to the Continent entity.
 func (m *PointsOfInterestMutation) ClearContinent() {
 	m.clearedcontinent = true
+	m.clearedFields[pointsofinterest.FieldContinentID] = struct{}{}
 }
 
 // ContinentCleared reports if the "continent" edge to the Continent entity was cleared.
 func (m *PointsOfInterestMutation) ContinentCleared() bool {
-	return m.clearedcontinent
-}
-
-// ContinentID returns the "continent" edge ID in the mutation.
-func (m *PointsOfInterestMutation) ContinentID() (id uuid.UUID, exists bool) {
-	if m.continent != nil {
-		return *m.continent, true
-	}
-	return
+	return m.ContinentIDCleared() || m.clearedcontinent
 }
 
 // ContinentIDs returns the "continent" edge IDs in the mutation.
@@ -5115,7 +5263,7 @@ func (m *PointsOfInterestMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PointsOfInterestMutation) Fields() []string {
-	fields := make([]string, 0, 13)
+	fields := make([]string, 0, 17)
 	if m.created_at != nil {
 		fields = append(fields, pointsofinterest.FieldCreatedAt)
 	}
@@ -5155,6 +5303,18 @@ func (m *PointsOfInterestMutation) Fields() []string {
 	if m.recommended_duration_minutes != nil {
 		fields = append(fields, pointsofinterest.FieldRecommendedDurationMinutes)
 	}
+	if m.city != nil {
+		fields = append(fields, pointsofinterest.FieldCityID)
+	}
+	if m.state != nil {
+		fields = append(fields, pointsofinterest.FieldStateID)
+	}
+	if m.country != nil {
+		fields = append(fields, pointsofinterest.FieldCountryID)
+	}
+	if m.continent != nil {
+		fields = append(fields, pointsofinterest.FieldContinentID)
+	}
 	return fields
 }
 
@@ -5189,6 +5349,14 @@ func (m *PointsOfInterestMutation) Field(name string) (ent.Value, bool) {
 		return m.Rating()
 	case pointsofinterest.FieldRecommendedDurationMinutes:
 		return m.RecommendedDurationMinutes()
+	case pointsofinterest.FieldCityID:
+		return m.CityID()
+	case pointsofinterest.FieldStateID:
+		return m.StateID()
+	case pointsofinterest.FieldCountryID:
+		return m.CountryID()
+	case pointsofinterest.FieldContinentID:
+		return m.ContinentID()
 	}
 	return nil, false
 }
@@ -5224,6 +5392,14 @@ func (m *PointsOfInterestMutation) OldField(ctx context.Context, name string) (e
 		return m.OldRating(ctx)
 	case pointsofinterest.FieldRecommendedDurationMinutes:
 		return m.OldRecommendedDurationMinutes(ctx)
+	case pointsofinterest.FieldCityID:
+		return m.OldCityID(ctx)
+	case pointsofinterest.FieldStateID:
+		return m.OldStateID(ctx)
+	case pointsofinterest.FieldCountryID:
+		return m.OldCountryID(ctx)
+	case pointsofinterest.FieldContinentID:
+		return m.OldContinentID(ctx)
 	}
 	return nil, fmt.Errorf("unknown PointsOfInterest field %s", name)
 }
@@ -5324,6 +5500,34 @@ func (m *PointsOfInterestMutation) SetField(name string, value ent.Value) error 
 		}
 		m.SetRecommendedDurationMinutes(v)
 		return nil
+	case pointsofinterest.FieldCityID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCityID(v)
+		return nil
+	case pointsofinterest.FieldStateID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStateID(v)
+		return nil
+	case pointsofinterest.FieldCountryID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCountryID(v)
+		return nil
+	case pointsofinterest.FieldContinentID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContinentID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown PointsOfInterest field %s", name)
 }
@@ -5404,7 +5608,20 @@ func (m *PointsOfInterestMutation) AddField(name string, value ent.Value) error 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *PointsOfInterestMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(pointsofinterest.FieldCityID) {
+		fields = append(fields, pointsofinterest.FieldCityID)
+	}
+	if m.FieldCleared(pointsofinterest.FieldStateID) {
+		fields = append(fields, pointsofinterest.FieldStateID)
+	}
+	if m.FieldCleared(pointsofinterest.FieldCountryID) {
+		fields = append(fields, pointsofinterest.FieldCountryID)
+	}
+	if m.FieldCleared(pointsofinterest.FieldContinentID) {
+		fields = append(fields, pointsofinterest.FieldContinentID)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -5417,6 +5634,20 @@ func (m *PointsOfInterestMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *PointsOfInterestMutation) ClearField(name string) error {
+	switch name {
+	case pointsofinterest.FieldCityID:
+		m.ClearCityID()
+		return nil
+	case pointsofinterest.FieldStateID:
+		m.ClearStateID()
+		return nil
+	case pointsofinterest.FieldCountryID:
+		m.ClearCountryID()
+		return nil
+	case pointsofinterest.FieldContinentID:
+		m.ClearContinentID()
+		return nil
+	}
 	return fmt.Errorf("unknown PointsOfInterest nullable field %s", name)
 }
 
@@ -5462,6 +5693,18 @@ func (m *PointsOfInterestMutation) ResetField(name string) error {
 		return nil
 	case pointsofinterest.FieldRecommendedDurationMinutes:
 		m.ResetRecommendedDurationMinutes()
+		return nil
+	case pointsofinterest.FieldCityID:
+		m.ResetCityID()
+		return nil
+	case pointsofinterest.FieldStateID:
+		m.ResetStateID()
+		return nil
+	case pointsofinterest.FieldCountryID:
+		m.ResetCountryID()
+		return nil
+	case pointsofinterest.FieldContinentID:
+		m.ResetContinentID()
 		return nil
 	}
 	return fmt.Errorf("unknown PointsOfInterest field %s", name)

@@ -34,7 +34,6 @@ type PointsOfInterestQuery struct {
 	withCountry        *CountryQuery
 	withContinent      *ContinentQuery
 	withDailyItinerary *DailyItineraryQuery
-	withFKs            bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -516,7 +515,6 @@ func (poiq *PointsOfInterestQuery) prepareQuery(ctx context.Context) error {
 func (poiq *PointsOfInterestQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*PointsOfInterest, error) {
 	var (
 		nodes       = []*PointsOfInterest{}
-		withFKs     = poiq.withFKs
 		_spec       = poiq.querySpec()
 		loadedTypes = [5]bool{
 			poiq.withCity != nil,
@@ -526,12 +524,6 @@ func (poiq *PointsOfInterestQuery) sqlAll(ctx context.Context, hooks ...queryHoo
 			poiq.withDailyItinerary != nil,
 		}
 	)
-	if poiq.withCity != nil || poiq.withState != nil || poiq.withCountry != nil || poiq.withContinent != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, pointsofinterest.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*PointsOfInterest).scanValues(nil, columns)
 	}
@@ -590,10 +582,7 @@ func (poiq *PointsOfInterestQuery) loadCity(ctx context.Context, query *CityQuer
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*PointsOfInterest)
 	for i := range nodes {
-		if nodes[i].city_poi == nil {
-			continue
-		}
-		fk := *nodes[i].city_poi
+		fk := nodes[i].CityID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -610,7 +599,7 @@ func (poiq *PointsOfInterestQuery) loadCity(ctx context.Context, query *CityQuer
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "city_poi" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "city_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -622,10 +611,7 @@ func (poiq *PointsOfInterestQuery) loadState(ctx context.Context, query *StateQu
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*PointsOfInterest)
 	for i := range nodes {
-		if nodes[i].state_poi == nil {
-			continue
-		}
-		fk := *nodes[i].state_poi
+		fk := nodes[i].StateID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -642,7 +628,7 @@ func (poiq *PointsOfInterestQuery) loadState(ctx context.Context, query *StateQu
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "state_poi" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "state_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -654,10 +640,7 @@ func (poiq *PointsOfInterestQuery) loadCountry(ctx context.Context, query *Count
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*PointsOfInterest)
 	for i := range nodes {
-		if nodes[i].country_poi == nil {
-			continue
-		}
-		fk := *nodes[i].country_poi
+		fk := nodes[i].CountryID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -674,7 +657,7 @@ func (poiq *PointsOfInterestQuery) loadCountry(ctx context.Context, query *Count
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "country_poi" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "country_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -686,10 +669,7 @@ func (poiq *PointsOfInterestQuery) loadContinent(ctx context.Context, query *Con
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*PointsOfInterest)
 	for i := range nodes {
-		if nodes[i].continent_poi == nil {
-			continue
-		}
-		fk := *nodes[i].continent_poi
+		fk := nodes[i].ContinentID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -706,7 +686,7 @@ func (poiq *PointsOfInterestQuery) loadContinent(ctx context.Context, query *Con
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "continent_poi" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "continent_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -769,6 +749,18 @@ func (poiq *PointsOfInterestQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != pointsofinterest.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if poiq.withCity != nil {
+			_spec.Node.AddColumnOnce(pointsofinterest.FieldCityID)
+		}
+		if poiq.withState != nil {
+			_spec.Node.AddColumnOnce(pointsofinterest.FieldStateID)
+		}
+		if poiq.withCountry != nil {
+			_spec.Node.AddColumnOnce(pointsofinterest.FieldCountryID)
+		}
+		if poiq.withContinent != nil {
+			_spec.Node.AddColumnOnce(pointsofinterest.FieldContinentID)
 		}
 	}
 	if ps := poiq.predicates; len(ps) > 0 {

@@ -121,6 +121,26 @@ func RecommendedDurationMinutes(v int64) predicate.PointsOfInterest {
 	return predicate.PointsOfInterest(sql.FieldEQ(FieldRecommendedDurationMinutes, v))
 }
 
+// CityID applies equality check predicate on the "city_id" field. It's identical to CityIDEQ.
+func CityID(v uuid.UUID) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldEQ(FieldCityID, v))
+}
+
+// StateID applies equality check predicate on the "state_id" field. It's identical to StateIDEQ.
+func StateID(v uuid.UUID) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldEQ(FieldStateID, v))
+}
+
+// CountryID applies equality check predicate on the "country_id" field. It's identical to CountryIDEQ.
+func CountryID(v uuid.UUID) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldEQ(FieldCountryID, v))
+}
+
+// ContinentID applies equality check predicate on the "continent_id" field. It's identical to ContinentIDEQ.
+func ContinentID(v uuid.UUID) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldEQ(FieldContinentID, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.PointsOfInterest {
 	return predicate.PointsOfInterest(sql.FieldEQ(FieldCreatedAt, v))
@@ -814,6 +834,126 @@ func RecommendedDurationMinutesLT(v int64) predicate.PointsOfInterest {
 // RecommendedDurationMinutesLTE applies the LTE predicate on the "recommended_duration_minutes" field.
 func RecommendedDurationMinutesLTE(v int64) predicate.PointsOfInterest {
 	return predicate.PointsOfInterest(sql.FieldLTE(FieldRecommendedDurationMinutes, v))
+}
+
+// CityIDEQ applies the EQ predicate on the "city_id" field.
+func CityIDEQ(v uuid.UUID) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldEQ(FieldCityID, v))
+}
+
+// CityIDNEQ applies the NEQ predicate on the "city_id" field.
+func CityIDNEQ(v uuid.UUID) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldNEQ(FieldCityID, v))
+}
+
+// CityIDIn applies the In predicate on the "city_id" field.
+func CityIDIn(vs ...uuid.UUID) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldIn(FieldCityID, vs...))
+}
+
+// CityIDNotIn applies the NotIn predicate on the "city_id" field.
+func CityIDNotIn(vs ...uuid.UUID) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldNotIn(FieldCityID, vs...))
+}
+
+// CityIDIsNil applies the IsNil predicate on the "city_id" field.
+func CityIDIsNil() predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldIsNull(FieldCityID))
+}
+
+// CityIDNotNil applies the NotNil predicate on the "city_id" field.
+func CityIDNotNil() predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldNotNull(FieldCityID))
+}
+
+// StateIDEQ applies the EQ predicate on the "state_id" field.
+func StateIDEQ(v uuid.UUID) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldEQ(FieldStateID, v))
+}
+
+// StateIDNEQ applies the NEQ predicate on the "state_id" field.
+func StateIDNEQ(v uuid.UUID) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldNEQ(FieldStateID, v))
+}
+
+// StateIDIn applies the In predicate on the "state_id" field.
+func StateIDIn(vs ...uuid.UUID) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldIn(FieldStateID, vs...))
+}
+
+// StateIDNotIn applies the NotIn predicate on the "state_id" field.
+func StateIDNotIn(vs ...uuid.UUID) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldNotIn(FieldStateID, vs...))
+}
+
+// StateIDIsNil applies the IsNil predicate on the "state_id" field.
+func StateIDIsNil() predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldIsNull(FieldStateID))
+}
+
+// StateIDNotNil applies the NotNil predicate on the "state_id" field.
+func StateIDNotNil() predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldNotNull(FieldStateID))
+}
+
+// CountryIDEQ applies the EQ predicate on the "country_id" field.
+func CountryIDEQ(v uuid.UUID) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldEQ(FieldCountryID, v))
+}
+
+// CountryIDNEQ applies the NEQ predicate on the "country_id" field.
+func CountryIDNEQ(v uuid.UUID) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldNEQ(FieldCountryID, v))
+}
+
+// CountryIDIn applies the In predicate on the "country_id" field.
+func CountryIDIn(vs ...uuid.UUID) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldIn(FieldCountryID, vs...))
+}
+
+// CountryIDNotIn applies the NotIn predicate on the "country_id" field.
+func CountryIDNotIn(vs ...uuid.UUID) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldNotIn(FieldCountryID, vs...))
+}
+
+// CountryIDIsNil applies the IsNil predicate on the "country_id" field.
+func CountryIDIsNil() predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldIsNull(FieldCountryID))
+}
+
+// CountryIDNotNil applies the NotNil predicate on the "country_id" field.
+func CountryIDNotNil() predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldNotNull(FieldCountryID))
+}
+
+// ContinentIDEQ applies the EQ predicate on the "continent_id" field.
+func ContinentIDEQ(v uuid.UUID) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldEQ(FieldContinentID, v))
+}
+
+// ContinentIDNEQ applies the NEQ predicate on the "continent_id" field.
+func ContinentIDNEQ(v uuid.UUID) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldNEQ(FieldContinentID, v))
+}
+
+// ContinentIDIn applies the In predicate on the "continent_id" field.
+func ContinentIDIn(vs ...uuid.UUID) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldIn(FieldContinentID, vs...))
+}
+
+// ContinentIDNotIn applies the NotIn predicate on the "continent_id" field.
+func ContinentIDNotIn(vs ...uuid.UUID) predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldNotIn(FieldContinentID, vs...))
+}
+
+// ContinentIDIsNil applies the IsNil predicate on the "continent_id" field.
+func ContinentIDIsNil() predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldIsNull(FieldContinentID))
+}
+
+// ContinentIDNotNil applies the NotNil predicate on the "continent_id" field.
+func ContinentIDNotNil() predicate.PointsOfInterest {
+	return predicate.PointsOfInterest(sql.FieldNotNull(FieldContinentID))
 }
 
 // HasCity applies the HasEdge predicate on the "city" edge.

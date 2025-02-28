@@ -222,17 +222,83 @@ func (poiu *PointsOfInterestUpdate) AddRecommendedDurationMinutes(i int64) *Poin
 	return poiu
 }
 
-// SetCityID sets the "city" edge to the City entity by ID.
-func (poiu *PointsOfInterestUpdate) SetCityID(id uuid.UUID) *PointsOfInterestUpdate {
-	poiu.mutation.SetCityID(id)
+// SetCityID sets the "city_id" field.
+func (poiu *PointsOfInterestUpdate) SetCityID(u uuid.UUID) *PointsOfInterestUpdate {
+	poiu.mutation.SetCityID(u)
 	return poiu
 }
 
-// SetNillableCityID sets the "city" edge to the City entity by ID if the given value is not nil.
-func (poiu *PointsOfInterestUpdate) SetNillableCityID(id *uuid.UUID) *PointsOfInterestUpdate {
-	if id != nil {
-		poiu = poiu.SetCityID(*id)
+// SetNillableCityID sets the "city_id" field if the given value is not nil.
+func (poiu *PointsOfInterestUpdate) SetNillableCityID(u *uuid.UUID) *PointsOfInterestUpdate {
+	if u != nil {
+		poiu.SetCityID(*u)
 	}
+	return poiu
+}
+
+// ClearCityID clears the value of the "city_id" field.
+func (poiu *PointsOfInterestUpdate) ClearCityID() *PointsOfInterestUpdate {
+	poiu.mutation.ClearCityID()
+	return poiu
+}
+
+// SetStateID sets the "state_id" field.
+func (poiu *PointsOfInterestUpdate) SetStateID(u uuid.UUID) *PointsOfInterestUpdate {
+	poiu.mutation.SetStateID(u)
+	return poiu
+}
+
+// SetNillableStateID sets the "state_id" field if the given value is not nil.
+func (poiu *PointsOfInterestUpdate) SetNillableStateID(u *uuid.UUID) *PointsOfInterestUpdate {
+	if u != nil {
+		poiu.SetStateID(*u)
+	}
+	return poiu
+}
+
+// ClearStateID clears the value of the "state_id" field.
+func (poiu *PointsOfInterestUpdate) ClearStateID() *PointsOfInterestUpdate {
+	poiu.mutation.ClearStateID()
+	return poiu
+}
+
+// SetCountryID sets the "country_id" field.
+func (poiu *PointsOfInterestUpdate) SetCountryID(u uuid.UUID) *PointsOfInterestUpdate {
+	poiu.mutation.SetCountryID(u)
+	return poiu
+}
+
+// SetNillableCountryID sets the "country_id" field if the given value is not nil.
+func (poiu *PointsOfInterestUpdate) SetNillableCountryID(u *uuid.UUID) *PointsOfInterestUpdate {
+	if u != nil {
+		poiu.SetCountryID(*u)
+	}
+	return poiu
+}
+
+// ClearCountryID clears the value of the "country_id" field.
+func (poiu *PointsOfInterestUpdate) ClearCountryID() *PointsOfInterestUpdate {
+	poiu.mutation.ClearCountryID()
+	return poiu
+}
+
+// SetContinentID sets the "continent_id" field.
+func (poiu *PointsOfInterestUpdate) SetContinentID(u uuid.UUID) *PointsOfInterestUpdate {
+	poiu.mutation.SetContinentID(u)
+	return poiu
+}
+
+// SetNillableContinentID sets the "continent_id" field if the given value is not nil.
+func (poiu *PointsOfInterestUpdate) SetNillableContinentID(u *uuid.UUID) *PointsOfInterestUpdate {
+	if u != nil {
+		poiu.SetContinentID(*u)
+	}
+	return poiu
+}
+
+// ClearContinentID clears the value of the "continent_id" field.
+func (poiu *PointsOfInterestUpdate) ClearContinentID() *PointsOfInterestUpdate {
+	poiu.mutation.ClearContinentID()
 	return poiu
 }
 
@@ -241,56 +307,14 @@ func (poiu *PointsOfInterestUpdate) SetCity(c *City) *PointsOfInterestUpdate {
 	return poiu.SetCityID(c.ID)
 }
 
-// SetStateID sets the "state" edge to the State entity by ID.
-func (poiu *PointsOfInterestUpdate) SetStateID(id uuid.UUID) *PointsOfInterestUpdate {
-	poiu.mutation.SetStateID(id)
-	return poiu
-}
-
-// SetNillableStateID sets the "state" edge to the State entity by ID if the given value is not nil.
-func (poiu *PointsOfInterestUpdate) SetNillableStateID(id *uuid.UUID) *PointsOfInterestUpdate {
-	if id != nil {
-		poiu = poiu.SetStateID(*id)
-	}
-	return poiu
-}
-
 // SetState sets the "state" edge to the State entity.
 func (poiu *PointsOfInterestUpdate) SetState(s *State) *PointsOfInterestUpdate {
 	return poiu.SetStateID(s.ID)
 }
 
-// SetCountryID sets the "country" edge to the Country entity by ID.
-func (poiu *PointsOfInterestUpdate) SetCountryID(id uuid.UUID) *PointsOfInterestUpdate {
-	poiu.mutation.SetCountryID(id)
-	return poiu
-}
-
-// SetNillableCountryID sets the "country" edge to the Country entity by ID if the given value is not nil.
-func (poiu *PointsOfInterestUpdate) SetNillableCountryID(id *uuid.UUID) *PointsOfInterestUpdate {
-	if id != nil {
-		poiu = poiu.SetCountryID(*id)
-	}
-	return poiu
-}
-
 // SetCountry sets the "country" edge to the Country entity.
 func (poiu *PointsOfInterestUpdate) SetCountry(c *Country) *PointsOfInterestUpdate {
 	return poiu.SetCountryID(c.ID)
-}
-
-// SetContinentID sets the "continent" edge to the Continent entity by ID.
-func (poiu *PointsOfInterestUpdate) SetContinentID(id uuid.UUID) *PointsOfInterestUpdate {
-	poiu.mutation.SetContinentID(id)
-	return poiu
-}
-
-// SetNillableContinentID sets the "continent" edge to the Continent entity by ID if the given value is not nil.
-func (poiu *PointsOfInterestUpdate) SetNillableContinentID(id *uuid.UUID) *PointsOfInterestUpdate {
-	if id != nil {
-		poiu = poiu.SetContinentID(*id)
-	}
-	return poiu
 }
 
 // SetContinent sets the "continent" edge to the Continent entity.
@@ -878,17 +902,83 @@ func (poiuo *PointsOfInterestUpdateOne) AddRecommendedDurationMinutes(i int64) *
 	return poiuo
 }
 
-// SetCityID sets the "city" edge to the City entity by ID.
-func (poiuo *PointsOfInterestUpdateOne) SetCityID(id uuid.UUID) *PointsOfInterestUpdateOne {
-	poiuo.mutation.SetCityID(id)
+// SetCityID sets the "city_id" field.
+func (poiuo *PointsOfInterestUpdateOne) SetCityID(u uuid.UUID) *PointsOfInterestUpdateOne {
+	poiuo.mutation.SetCityID(u)
 	return poiuo
 }
 
-// SetNillableCityID sets the "city" edge to the City entity by ID if the given value is not nil.
-func (poiuo *PointsOfInterestUpdateOne) SetNillableCityID(id *uuid.UUID) *PointsOfInterestUpdateOne {
-	if id != nil {
-		poiuo = poiuo.SetCityID(*id)
+// SetNillableCityID sets the "city_id" field if the given value is not nil.
+func (poiuo *PointsOfInterestUpdateOne) SetNillableCityID(u *uuid.UUID) *PointsOfInterestUpdateOne {
+	if u != nil {
+		poiuo.SetCityID(*u)
 	}
+	return poiuo
+}
+
+// ClearCityID clears the value of the "city_id" field.
+func (poiuo *PointsOfInterestUpdateOne) ClearCityID() *PointsOfInterestUpdateOne {
+	poiuo.mutation.ClearCityID()
+	return poiuo
+}
+
+// SetStateID sets the "state_id" field.
+func (poiuo *PointsOfInterestUpdateOne) SetStateID(u uuid.UUID) *PointsOfInterestUpdateOne {
+	poiuo.mutation.SetStateID(u)
+	return poiuo
+}
+
+// SetNillableStateID sets the "state_id" field if the given value is not nil.
+func (poiuo *PointsOfInterestUpdateOne) SetNillableStateID(u *uuid.UUID) *PointsOfInterestUpdateOne {
+	if u != nil {
+		poiuo.SetStateID(*u)
+	}
+	return poiuo
+}
+
+// ClearStateID clears the value of the "state_id" field.
+func (poiuo *PointsOfInterestUpdateOne) ClearStateID() *PointsOfInterestUpdateOne {
+	poiuo.mutation.ClearStateID()
+	return poiuo
+}
+
+// SetCountryID sets the "country_id" field.
+func (poiuo *PointsOfInterestUpdateOne) SetCountryID(u uuid.UUID) *PointsOfInterestUpdateOne {
+	poiuo.mutation.SetCountryID(u)
+	return poiuo
+}
+
+// SetNillableCountryID sets the "country_id" field if the given value is not nil.
+func (poiuo *PointsOfInterestUpdateOne) SetNillableCountryID(u *uuid.UUID) *PointsOfInterestUpdateOne {
+	if u != nil {
+		poiuo.SetCountryID(*u)
+	}
+	return poiuo
+}
+
+// ClearCountryID clears the value of the "country_id" field.
+func (poiuo *PointsOfInterestUpdateOne) ClearCountryID() *PointsOfInterestUpdateOne {
+	poiuo.mutation.ClearCountryID()
+	return poiuo
+}
+
+// SetContinentID sets the "continent_id" field.
+func (poiuo *PointsOfInterestUpdateOne) SetContinentID(u uuid.UUID) *PointsOfInterestUpdateOne {
+	poiuo.mutation.SetContinentID(u)
+	return poiuo
+}
+
+// SetNillableContinentID sets the "continent_id" field if the given value is not nil.
+func (poiuo *PointsOfInterestUpdateOne) SetNillableContinentID(u *uuid.UUID) *PointsOfInterestUpdateOne {
+	if u != nil {
+		poiuo.SetContinentID(*u)
+	}
+	return poiuo
+}
+
+// ClearContinentID clears the value of the "continent_id" field.
+func (poiuo *PointsOfInterestUpdateOne) ClearContinentID() *PointsOfInterestUpdateOne {
+	poiuo.mutation.ClearContinentID()
 	return poiuo
 }
 
@@ -897,56 +987,14 @@ func (poiuo *PointsOfInterestUpdateOne) SetCity(c *City) *PointsOfInterestUpdate
 	return poiuo.SetCityID(c.ID)
 }
 
-// SetStateID sets the "state" edge to the State entity by ID.
-func (poiuo *PointsOfInterestUpdateOne) SetStateID(id uuid.UUID) *PointsOfInterestUpdateOne {
-	poiuo.mutation.SetStateID(id)
-	return poiuo
-}
-
-// SetNillableStateID sets the "state" edge to the State entity by ID if the given value is not nil.
-func (poiuo *PointsOfInterestUpdateOne) SetNillableStateID(id *uuid.UUID) *PointsOfInterestUpdateOne {
-	if id != nil {
-		poiuo = poiuo.SetStateID(*id)
-	}
-	return poiuo
-}
-
 // SetState sets the "state" edge to the State entity.
 func (poiuo *PointsOfInterestUpdateOne) SetState(s *State) *PointsOfInterestUpdateOne {
 	return poiuo.SetStateID(s.ID)
 }
 
-// SetCountryID sets the "country" edge to the Country entity by ID.
-func (poiuo *PointsOfInterestUpdateOne) SetCountryID(id uuid.UUID) *PointsOfInterestUpdateOne {
-	poiuo.mutation.SetCountryID(id)
-	return poiuo
-}
-
-// SetNillableCountryID sets the "country" edge to the Country entity by ID if the given value is not nil.
-func (poiuo *PointsOfInterestUpdateOne) SetNillableCountryID(id *uuid.UUID) *PointsOfInterestUpdateOne {
-	if id != nil {
-		poiuo = poiuo.SetCountryID(*id)
-	}
-	return poiuo
-}
-
 // SetCountry sets the "country" edge to the Country entity.
 func (poiuo *PointsOfInterestUpdateOne) SetCountry(c *Country) *PointsOfInterestUpdateOne {
 	return poiuo.SetCountryID(c.ID)
-}
-
-// SetContinentID sets the "continent" edge to the Continent entity by ID.
-func (poiuo *PointsOfInterestUpdateOne) SetContinentID(id uuid.UUID) *PointsOfInterestUpdateOne {
-	poiuo.mutation.SetContinentID(id)
-	return poiuo
-}
-
-// SetNillableContinentID sets the "continent" edge to the Continent entity by ID if the given value is not nil.
-func (poiuo *PointsOfInterestUpdateOne) SetNillableContinentID(id *uuid.UUID) *PointsOfInterestUpdateOne {
-	if id != nil {
-		poiuo = poiuo.SetContinentID(*id)
-	}
-	return poiuo
 }
 
 // SetContinent sets the "continent" edge to the Continent entity.

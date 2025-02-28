@@ -146,10 +146,10 @@ var (
 		{Name: "category", Type: field.TypeString, Size: 50},
 		{Name: "rating", Type: field.TypeFloat32},
 		{Name: "recommended_duration_minutes", Type: field.TypeInt64},
-		{Name: "city_poi", Type: field.TypeUUID, Nullable: true},
-		{Name: "continent_poi", Type: field.TypeUUID, Nullable: true},
-		{Name: "country_poi", Type: field.TypeUUID, Nullable: true},
-		{Name: "state_poi", Type: field.TypeUUID, Nullable: true},
+		{Name: "city_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "continent_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "country_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "state_id", Type: field.TypeUUID, Nullable: true},
 	}
 	// PointsOfInterestTable holds the schema information for the "points_of_interest" table.
 	PointsOfInterestTable = &schema.Table{
