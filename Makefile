@@ -5,6 +5,8 @@ else
 	API_PROTO_FILES=$(shell find proto/api -name *.proto)
 endif
 
+path := $(shell pwd)
+
 .PHONY: init
 # init env
 init:
@@ -54,6 +56,10 @@ api:
 		   --validatex_opt=i18n_dir=./i18n/validatex,i18n_out_relative_dir=../../i18n/validatex \
 	       --openapi_out=fq_schema_naming=true,default_response=false:. \
 	       $(API_PROTO_FILES)
+
+.PHONY: stringer
+stringer:
+	go generate $(path)/pkg/vobj
 
 .PHONY: generate
 # generate

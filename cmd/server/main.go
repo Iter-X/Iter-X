@@ -2,14 +2,16 @@ package main
 
 import (
 	"context"
-	"github.com/iter-x/iter-x/internal/conf"
-	"github.com/iter-x/iter-x/internal/helper/log"
-	"github.com/iter-x/iter-x/internal/server"
-	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/spf13/cobra"
+	"go.uber.org/zap"
+
+	"github.com/iter-x/iter-x/internal/conf"
+	"github.com/iter-x/iter-x/internal/helper/log"
+	"github.com/iter-x/iter-x/internal/server"
 )
 
 func main() {

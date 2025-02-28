@@ -3,18 +3,20 @@ package biz
 import (
 	"context"
 	"errors"
+	"strings"
+	"time"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/ifuryst/lol"
+	"go.uber.org/zap"
+
 	v1 "github.com/iter-x/iter-x/internal/api/auth/v1"
 	"github.com/iter-x/iter-x/internal/common/xerr"
 	"github.com/iter-x/iter-x/internal/conf"
 	"github.com/iter-x/iter-x/internal/helper/auth"
 	"github.com/iter-x/iter-x/internal/repo"
 	"github.com/iter-x/iter-x/internal/repo/ent"
-	"go.uber.org/zap"
-	"strings"
-	"time"
 )
 
 type (

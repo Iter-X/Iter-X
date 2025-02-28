@@ -1,11 +1,12 @@
 package conf
 
 import (
-	"buf.build/go/protoyaml"
-	"github.com/joho/godotenv"
 	"os"
 	"path/filepath"
 	"regexp"
+
+	"buf.build/go/protoyaml"
+	"github.com/joho/godotenv"
 )
 
 func Load(cfgPath string) (*Bootstrap, error) {
