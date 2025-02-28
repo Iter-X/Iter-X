@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var _ repository.TransactionRepo = (*TransactionRepoImpl)(nil)
+var _ repository.Transaction = (*TransactionRepoImpl)(nil)
 
 type TransactionRepoImpl struct {
 	cli    *ent.Client
@@ -18,8 +18,8 @@ type TransactionRepoImpl struct {
 // contextTxKey The context used to host the transaction
 type contextTxKey struct{}
 
-// NewTransaction .
-func NewTransaction(cli *ent.Client, logger *zap.SugaredLogger) repository.TransactionRepo {
+// NewTransactionRepository .
+func NewTransactionRepository(cli *ent.Client, logger *zap.SugaredLogger) repository.Transaction {
 	return &TransactionRepoImpl{
 		cli:    cli,
 		logger: logger,

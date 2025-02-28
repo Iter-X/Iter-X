@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/golang-jwt/jwt/v5"
+
 	"github.com/iter-x/iter-x/internal/api/auth/v1"
 	"github.com/iter-x/iter-x/internal/biz"
 )
@@ -67,8 +68,8 @@ func (s *Auth) ValidateToken(ctx context.Context, token string) (jwt.Claims, err
 }
 
 // GetSmsAuthTokens get sms auth tokens
-func (s *Auth) GetSmsAuthTokens(ctx context.Context, req *v1.GetSmsAuthTokensRequest) (*v1.GetSmsAuthTokensResponse, error) {
-	return s.authBiz.GetSmsAuthTokens(ctx, req)
+func (s *Auth) GetSmsAuthTokens(ctx context.Context, _ *v1.GetSmsAuthTokensRequest) (*v1.GetSmsAuthTokensResponse, error) {
+	return s.authBiz.GetSmsAuthTokens(ctx)
 }
 
 // VerifySmsCode verify sms code

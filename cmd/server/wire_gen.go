@@ -24,12 +24,13 @@ func wireApp(i18nCfg *conf.I18N, grpcCfg *conf.Server_GRPC, httpCfg *conf.Server
 	if err != nil {
 		return nil, nil, err
 	}
-	auth := impl.NewAuth(client, logger)
-	bizAuth := biz.NewAuth(authCfg, auth, logger)
-	serviceAuth := service.NewAuth(bizAuth)
-	trip := impl.NewTrip(client, logger)
-	bizTrip := biz.NewTrip(trip, logger)
-	serviceTrip := service.NewTrip(bizTrip)
+	transaction := impl.NewTransactionRepository(client, logger)
+	v := impl.NewAuthRepository(client, logger)
+	auth := biz.NewAuth(authCfg, transaction, v, logger)
+	serviceAuth := service.NewAuth(auth)
+	v2 := impl.NewTripRepository(client, logger)
+	trip := biz.NewTrip(v2, logger)
+	serviceTrip := service.NewTrip(trip)
 	grpcServer := server.NewGRPCServer(grpcCfg, bundle, serviceAuth, serviceTrip, logger)
 	httpServer := server.NewHTTPServer(httpCfg, logger)
 	app := newApp(grpcServer, httpServer)

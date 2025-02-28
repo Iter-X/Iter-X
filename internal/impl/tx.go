@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/wire"
 	"github.com/iter-x/iter-x/internal/conf"
 	"github.com/iter-x/iter-x/internal/impl/ent"
 	_ "github.com/lib/pq"
@@ -14,8 +13,6 @@ import (
 type Tx struct {
 	cli *ent.Client
 }
-
-var ProviderSet = wire.NewSet(NewConnection, NewAuthRepository, NewTripRepository, NewTransaction)
 
 func NewConnection(c *conf.Data, logger *zap.SugaredLogger) (*ent.Client, func(), error) {
 	logger = logger.Named("repo")

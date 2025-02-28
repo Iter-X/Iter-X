@@ -92,10 +92,11 @@ func (r *tripRepositoryImpl) DeleteTrip(ctx context.Context, id uuid.UUID) error
 	return cli.DeleteOneID(id).Exec(ctx)
 }
 
-func (r *tripRepositoryImpl) ListTrips(ctx context.Context, userId uuid.UUID) ([]*ent.Trip, error) {
+func (r *tripRepositoryImpl) ListTrips(ctx context.Context, userId uuid.UUID) ([]*do.Trip, error) {
 	cli := r.GetTx(ctx).Trip
 
-	return cli.Query().Where(trip.UserID(userId)).All(ctx)
+	rows, err := cli.Query().Where(trip.UserID(userId)).All(ctx)
+	return r.ToEntities(rows), err
 }
 
 func (r *tripRepositoryImpl) CreateDailyTrip(ctx context.Context, dailyTrip *do.DailyTrip) (*do.DailyTrip, error) {

@@ -1,6 +1,8 @@
 package do
 
 import (
+	v1 "github.com/iter-x/iter-x/internal/api/trip/v1"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 
 	"github.com/google/uuid"
@@ -29,6 +31,22 @@ type Trip struct {
 	User *User `json:"user,omitempty"`
 }
 
+// ToTripProto converts Trip to TripProto.
+func (t *Trip) ToTripProto() *v1.Trip {
+	if t == nil {
+		return nil
+	}
+	return &v1.Trip{
+		Id:        t.ID.String(),
+		Status:    t.Status,
+		Title:     t.Title,
+		StartTs:   timestamppb.New(t.StartDate),
+		EndTs:     timestamppb.New(t.EndDate),
+		CreatedAt: timestamppb.New(t.CreatedAt),
+		UpdatedAt: timestamppb.New(t.UpdatedAt),
+	}
+}
+
 type DailyTrip struct {
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
@@ -49,6 +67,21 @@ type DailyTrip struct {
 	Trip *Trip `json:"trip,omitempty"`
 	// DailyTripItem holds the value of the daily_trip_item edge.
 	DailyTripItem []*DailyTripItem `json:"daily_trip_item,omitempty"`
+}
+
+func (dt *DailyTrip) ToDailyTripProto() *v1.DailyTrip {
+	if dt == nil {
+		return nil
+	}
+	return &v1.DailyTrip{
+		Id:        dt.ID.String(),
+		TripId:    dt.TripID.String(),
+		Day:       dt.Day,
+		Date:      timestamppb.New(dt.Date),
+		Notes:     dt.Notes,
+		CreatedAt: timestamppb.New(dt.CreatedAt),
+		UpdatedAt: timestamppb.New(dt.UpdatedAt),
+	}
 }
 
 type DailyTripItem struct {

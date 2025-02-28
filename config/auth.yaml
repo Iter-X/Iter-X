@@ -11,6 +11,9 @@ auth:
     github_client_id: "${X_GITHUB_CLIENT_ID:PlsChange}"
     github_client_secret: "${X_GITHUB_CLIENT_SECRET:PlsChange}"
     github_redirect_url: "${X_GITHUB_REDIRECT_URL:PlsChangeMe}"
+  ali_cloud:
+    access_key_id: "${X_ACCESS_KEY_ID:PlsChangeMe}"
+    access_key_secret: "${X_ACCESS_KEY_SECRET:PlsChangeMe}"
   auth_tokens:
     bundle_id: "${X_BUNDLE_ID:PlsChangeMe}"
     expire: 360s
