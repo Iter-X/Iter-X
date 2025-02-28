@@ -66,6 +66,10 @@ stringer:
 generate:
 	go generate ./...
 
+.PHONY: wire
+wire:
+	cd ./cmd/server && wire
+
 .PHONY: all
 # generate all
 all:
