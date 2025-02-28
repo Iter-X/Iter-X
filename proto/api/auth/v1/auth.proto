@@ -63,6 +63,24 @@ service AuthService {
 		};
 		option (common.cnst.skip_token) = true;
 	};
+
+	// GetSmsAuthTokens get sms auth tokens
+	rpc GetSmsAuthTokens (GetSmsAuthTokensRequest) returns (GetSmsAuthTokensResponse) {
+		option (google.api.http) = {
+			post: "/api/v1/auth/sms-auth-tokens"
+			body: "*"
+		};
+		option (common.cnst.skip_token) = true;
+	}
+
+	// VerifySmsCode verifies the SMS code
+	rpc VerifySmsCode (VerifySmsCodeRequest) returns (VerifySmsCodeResponse) {
+		option (google.api.http) = {
+			post: "/api/v1/auth/verify-sms-code"
+			body: "*"
+		};
+		option (common.cnst.skip_token) = true;
+	}
 }
 
 message SignInRequest {
@@ -131,6 +149,25 @@ message RefreshTokenRequest {
 }
 
 message RefreshTokenResponse {
+	string token = 1;
+	double expires_in = 2; // in seconds
+}
+
+message GetSmsAuthTokensRequest {}
+message GetSmsAuthTokensResponse {
+	string biz_token = 1;
+	int64 expire_time = 2;
+	string  sts_access_key_id = 3;
+	string sts_access_key_secret = 4;
+	string sts_token = 5;
+}
+
+message VerifySmsCodeRequest {
+	string phone_number = 1;
+	string sms_code = 2;
+	string sms_token = 3;
+}
+message VerifySmsCodeResponse {
 	string token = 1;
 	double expires_in = 2; // in seconds
 }

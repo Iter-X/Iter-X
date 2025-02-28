@@ -156,6 +156,30 @@ func (x *RefreshTokenResponse) Validate(ctx context.Context) error {
 	}
 	return nil
 }
+func (x *GetSmsAuthTokensRequest) Validate(ctx context.Context) error {
+	if x == nil {
+		return nil
+	}
+	return nil
+}
+func (x *GetSmsAuthTokensResponse) Validate(ctx context.Context) error {
+	if x == nil {
+		return nil
+	}
+	return nil
+}
+func (x *VerifySmsCodeRequest) Validate(ctx context.Context) error {
+	if x == nil {
+		return nil
+	}
+	return nil
+}
+func (x *VerifySmsCodeResponse) Validate(ctx context.Context) error {
+	if x == nil {
+		return nil
+	}
+	return nil
+}
 
 func init() {
 	validatex.Init18n("./i18n/validatex")

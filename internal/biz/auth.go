@@ -9,39 +9,39 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/ifuryst/lol"
+	"github.com/iter-x/iter-x/internal/biz/bo"
+	"github.com/iter-x/iter-x/internal/biz/do"
+	"github.com/iter-x/iter-x/internal/biz/repository"
 	"go.uber.org/zap"
 
 	v1 "github.com/iter-x/iter-x/internal/api/auth/v1"
 	"github.com/iter-x/iter-x/internal/common/xerr"
 	"github.com/iter-x/iter-x/internal/conf"
 	"github.com/iter-x/iter-x/internal/helper/auth"
-	"github.com/iter-x/iter-x/internal/repo"
-	"github.com/iter-x/iter-x/internal/repo/ent"
+	"github.com/iter-x/iter-x/internal/impl"
+	"github.com/iter-x/iter-x/internal/impl/ent"
 )
 
 type (
 	Auth struct {
 		cfg    *conf.Auth
-		repo   *repo.Auth
+		repo   *impl.Auth
 		logger *zap.SugaredLogger
-	}
 
-	SignInResponse struct {
-		Token        string
-		RefreshToken string
-		ExpiresIn    float64
+		repository.TransactionRepo
 	}
 )
 
-func NewAuth(c *conf.Auth, repo *repo.Auth, logger *zap.SugaredLogger) *Auth {
+func NewAuth(c *conf.Auth, transactionRepo repository.TransactionRepo, repo *impl.Auth, logger *zap.SugaredLogger) *Auth {
 	return &Auth{
-		cfg:    c,
-		repo:   repo,
-		logger: logger.Named("biz.auth"),
+		cfg:             c,
+		TransactionRepo: transactionRepo,
+		repo:            repo,
+		logger:          logger.Named("biz.auth"),
 	}
 }
 
-func (b *Auth) getToken(ctx context.Context, user *ent.User, renew bool) (*SignInResponse, error) {
+func (b *Auth) getToken(ctx context.Context, user *do.User, renew bool) (*bo.SignInResponse, error) {
 	token, err := auth.GenerateToken([]byte(b.cfg.Jwt.Secret), auth.Claims{
 		UID:       user.ID,
 		Username:  user.Username,
@@ -57,29 +57,32 @@ func (b *Auth) getToken(ctx context.Context, user *ent.User, renew bool) (*SignI
 	if renew {
 		refreshToken = lol.RandomString(64)
 		now := time.Now()
-		err = b.repo.Tx.WithTx(ctx, func(tx *ent.Tx) error {
-			rt, err := b.repo.GetRefreshTokenByUserId(ctx, user.ID, tx)
+		err = b.Exec(ctx, func(ctx context.Context) error {
+			rt, err := b.repo.GetRefreshTokenByUserId(ctx, user.ID)
 			if err != nil && !ent.IsNotFound(err) {
 				return err
 			}
 
 			if ent.IsNotFound(err) {
-				return b.repo.SaveRefreshToken(ctx, &ent.RefreshToken{
+				return b.repo.SaveRefreshToken(ctx, &do.RefreshToken{
 					Token:     refreshToken,
 					ExpiresAt: now.Add(b.cfg.Jwt.RefreshExpiration.AsDuration()),
 					CreatedAt: now,
 					UserID:    user.ID,
-				}, tx)
+				})
 			}
 
 			rt.Token = refreshToken
 			rt.ExpiresAt = now.Add(b.cfg.Jwt.RefreshExpiration.AsDuration())
 			rt.UpdatedAt = now
-			return b.repo.UpdateRefreshToken(ctx, rt, tx)
+			return b.repo.UpdateRefreshToken(ctx, rt)
 		})
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	return &SignInResponse{
+	return &bo.SignInResponse{
 		Token:        token,
 		RefreshToken: refreshToken,
 		ExpiresIn:    b.cfg.Jwt.Expiration.AsDuration().Seconds(),
@@ -125,7 +128,7 @@ func (b *Auth) SignUp(ctx context.Context, params *v1.SignUpRequest) (*v1.SignUp
 	}
 
 	// create the user
-	data := &ent.User{
+	data := &do.User{
 		Username: params.Email,
 		Email:    params.Email,
 		Password: hashedPass,
@@ -148,7 +151,7 @@ func (b *Auth) SignUp(ctx context.Context, params *v1.SignUpRequest) (*v1.SignUp
 
 // SignInWithOAuth signs in with oauth and returns a token.
 func (b *Auth) SignInWithOAuth(ctx context.Context, params *v1.SignInWithOAuthRequest) (string, error) {
-	var user = &ent.User{}
+	var user = &do.User{}
 
 	switch params.Provider {
 	case v1.OAuthProvider_GITHUB:

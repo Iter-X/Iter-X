@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/iter-x/iter-x/internal/api/auth/v1"
 	"github.com/iter-x/iter-x/internal/biz"
@@ -9,21 +10,21 @@ import (
 
 type Auth struct {
 	v1.UnimplementedAuthServiceServer
-	biz *biz.Auth
+	authBiz *biz.Auth
 }
 
-func NewAuth(biz *biz.Auth) *Auth {
+func NewAuth(authBiz *biz.Auth) *Auth {
 	return &Auth{
-		biz: biz,
+		authBiz: authBiz,
 	}
 }
 
 func (s *Auth) SignIn(ctx context.Context, req *v1.SignInRequest) (*v1.SignInResponse, error) {
-	return s.biz.SignIn(ctx, req)
+	return s.authBiz.SignIn(ctx, req)
 }
 
 func (s *Auth) SignInWithOAuth(ctx context.Context, req *v1.SignInWithOAuthRequest) (*v1.SignInWithOAuthResponse, error) {
-	token, err := s.biz.SignInWithOAuth(ctx, req)
+	token, err := s.authBiz.SignInWithOAuth(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +34,7 @@ func (s *Auth) SignInWithOAuth(ctx context.Context, req *v1.SignInWithOAuthReque
 }
 
 func (s *Auth) SignUp(ctx context.Context, req *v1.SignUpRequest) (*v1.SignUpResponse, error) {
-	return s.biz.SignUp(ctx, req)
+	return s.authBiz.SignUp(ctx, req)
 }
 
 func (s *Auth) RequestPasswordReset(ctx context.Context, req *v1.RequestPasswordResetRequest) (*v1.RequestPasswordResetResponse, error) {
@@ -58,9 +59,19 @@ func (s *Auth) ResetPassword(ctx context.Context, req *v1.ResetPasswordRequest) 
 }
 
 func (s *Auth) RefreshToken(ctx context.Context, req *v1.RefreshTokenRequest) (*v1.RefreshTokenResponse, error) {
-	return s.biz.RefreshToken(ctx, req)
+	return s.authBiz.RefreshToken(ctx, req)
 }
 
 func (s *Auth) ValidateToken(ctx context.Context, token string) (jwt.Claims, error) {
-	return s.biz.ValidateToken(ctx, token)
+	return s.authBiz.ValidateToken(ctx, token)
+}
+
+// GetSmsAuthTokens get sms auth tokens
+func (s *Auth) GetSmsAuthTokens(ctx context.Context, req *v1.GetSmsAuthTokensRequest) (*v1.GetSmsAuthTokensResponse, error) {
+	return s.authBiz.GetSmsAuthTokens(ctx, req)
+}
+
+// VerifySmsCode verify sms code
+func (s *Auth) VerifySmsCode(ctx context.Context, req *v1.VerifySmsCodeRequest) (*v1.VerifySmsCodeResponse, error) {
+	return s.authBiz.VerifySmsCode(ctx, req)
 }

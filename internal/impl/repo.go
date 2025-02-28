@@ -1,0 +1,79 @@
+package impl
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/google/wire"
+	"github.com/iter-x/iter-x/internal/conf"
+	"github.com/iter-x/iter-x/internal/impl/ent"
+	_ "github.com/lib/pq"
+	"go.uber.org/zap"
+)
+
+type Tx struct {
+	cli *ent.Client
+}
+
+var ProviderSet = wire.NewSet(NewConnection, NewAuthRepository, NewTripRepository, NewTransaction)
+
+func NewConnection(c *conf.Data, logger *zap.SugaredLogger) (*ent.Client, func(), error) {
+	logger = logger.Named("repo")
+
+	client, err := ent.Open(c.Database.Driver, c.Database.Source)
+	if err != nil {
+		logger.Error("failed opening connection to postgres: ", err)
+		return nil, nil, err
+	}
+
+	// Run the auto migration tool.
+	err = client.Schema.Create(context.Background())
+	if err != nil {
+		logger.Error("failed creating schema resources: ", err)
+		return nil, nil, err
+	}
+
+	cleanup := func() {
+		err = client.Close()
+		if err != nil {
+			logger.Error("failed closing connection: ", err)
+		} else {
+			logger.Info("closing the data resources")
+		}
+	}
+
+	return client, cleanup, nil
+}
+
+// GetTx This method checks if there is a transaction in the context, and if so returns the client with the transaction
+func (t *Tx) GetTx(ctx context.Context) *ent.Client {
+	tx, ok := ctx.Value(contextTxKey{}).(*ent.Tx)
+	if ok {
+		return tx.Client()
+	}
+	return t.cli
+}
+
+func (t *Tx) WithTx(ctx context.Context, fn func(tx *ent.Tx) error) error {
+	tx, err := t.cli.Tx(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if v := recover(); v != nil {
+			_ = tx.Rollback()
+		}
+	}()
+	err = fn(tx)
+	if err != nil {
+		if rErr := tx.Rollback(); rErr != nil {
+			err = fmt.Errorf("%w: rolling back transaction: %v", err, rErr)
+		}
+		return err
+	}
+	err = tx.Commit()
+	if err != nil {
+		return fmt.Errorf("committing transaction: %w", err)
+	}
+	return nil
+}

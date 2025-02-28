@@ -11,3 +11,11 @@ auth:
     github_client_id: "${X_GITHUB_CLIENT_ID:PlsChange}"
     github_client_secret: "${X_GITHUB_CLIENT_SECRET:PlsChange}"
     github_redirect_url: "${X_GITHUB_REDIRECT_URL:PlsChangeMe}"
+  auth_tokens:
+    bundle_id: "${X_BUNDLE_ID:PlsChangeMe}"
+    expire: 360s
+    package_name: "${X_PACKAGE_NAME:PlsChangeMe}"
+    sign_name: "${X_SIGN_NAME:PlsChangeMe}"
+    scene_code: "${X_SCENE_CODE:PlsChangeMe}"
+    sms_template_code: "${X_SMS_TEMPLATE_CODE:PlsChangeMe}"
+    sms_code_expire: 300s

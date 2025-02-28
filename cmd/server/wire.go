@@ -8,7 +8,7 @@ import (
 	"github.com/iter-x/iter-x/internal/biz"
 	"github.com/iter-x/iter-x/internal/conf"
 	"github.com/iter-x/iter-x/internal/helper/i18n"
-	"github.com/iter-x/iter-x/internal/repo"
+	"github.com/iter-x/iter-x/internal/impl"
 	"github.com/iter-x/iter-x/internal/server"
 	"github.com/iter-x/iter-x/internal/service"
 	"go.uber.org/zap"
@@ -20,6 +20,6 @@ func wireApp(i18nCfg *conf.I18N, grpcCfg *conf.Server_GRPC, httpCfg *conf.Server
 		server.ProviderSet,
 		service.ProviderSet,
 		biz.ProviderSet,
-		repo.ProviderSet,
+		impl.ProviderSet,
 		newApp))
 }

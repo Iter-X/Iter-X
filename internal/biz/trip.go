@@ -2,24 +2,25 @@ package biz
 
 import (
 	"context"
+	"time"
+
 	"github.com/iter-x/iter-x/internal/common/xerr"
 	"github.com/iter-x/iter-x/internal/helper/auth"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"time"
 
 	"github.com/google/uuid"
 	v1 "github.com/iter-x/iter-x/internal/api/trip/v1"
-	"github.com/iter-x/iter-x/internal/repo"
-	"github.com/iter-x/iter-x/internal/repo/ent"
+	"github.com/iter-x/iter-x/internal/impl"
+	"github.com/iter-x/iter-x/internal/impl/ent"
 	"go.uber.org/zap"
 )
 
 type Trip struct {
-	repo   *repo.Trip
+	repo   *impl.Trip
 	logger *zap.SugaredLogger
 }
 
-func NewTrip(repo *repo.Trip, logger *zap.SugaredLogger) *Trip {
+func NewTrip(repo *impl.Trip, logger *zap.SugaredLogger) *Trip {
 	return &Trip{
 		repo:   repo,
 		logger: logger.Named("biz.trip"),

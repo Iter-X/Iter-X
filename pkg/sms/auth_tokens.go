@@ -161,6 +161,7 @@ func (c *Client) GetSmsAuthTokens(ctx context.Context, cfg AuthTokensConfig, opt
 	for _, opt := range opts {
 		opt(authOptions)
 	}
+
 	getSmsAuthTokensResponse, err := c.client.GetSmsAuthTokensWithOptions(authOptions.req, authOptions.runtimeOption)
 	if err != nil {
 		c.logger.Errorw("Failed to get SMS authentication tokens", "error", err)
@@ -168,4 +169,99 @@ func (c *Client) GetSmsAuthTokens(ctx context.Context, cfg AuthTokensConfig, opt
 	}
 
 	return &GetSmsAuthTokensResponse{getSmsAuthTokensResponse}, nil
+}
+
+type (
+	VerifySmsCodeConfig interface {
+		GetPhoneNumber() string
+		GetSmsCode() string
+		GetSmsToken() string
+	}
+
+	verifySmsCodeConfigOptions struct {
+		req           *dysmsapi.VerifySmsCodeRequest
+		runtimeOption *util.RuntimeOptions
+	}
+
+	VerifySmsCodeResponse struct {
+		*dysmsapi.VerifySmsCodeResponse
+	}
+
+	VerifySmsCodeConfigOption func(*verifySmsCodeConfigOptions)
+)
+
+// IsOK checks if the response is OK
+func (r *VerifySmsCodeResponse) IsOK() bool {
+	if r == nil {
+		return false
+	}
+	return r.VerifySmsCodeResponse != nil &&
+		r.StatusCode != nil &&
+		*r.StatusCode == 200 &&
+		r.Body != nil &&
+		r.Body.Code != nil &&
+		*r.Body.Code == "OK" &&
+		r.Body.Data != nil &&
+		*r.Body.Data
+}
+
+// GetCode gets the code
+func (r *VerifySmsCodeResponse) GetCode() string {
+	if r == nil || r.VerifySmsCodeResponse == nil || r.VerifySmsCodeResponse.Body == nil || r.VerifySmsCodeResponse.Body.Code == nil {
+		return ""
+	}
+	return *r.VerifySmsCodeResponse.Body.Code
+}
+
+// GetData gets the data
+func (r *VerifySmsCodeResponse) GetData() bool {
+	if r == nil || r.VerifySmsCodeResponse == nil || r.VerifySmsCodeResponse.Body == nil || r.VerifySmsCodeResponse.Body.Data == nil {
+		return false
+	}
+	return *r.VerifySmsCodeResponse.Body.Data
+}
+
+// GetMessage gets the message
+func (r *VerifySmsCodeResponse) GetMessage() string {
+	if r == nil || r.VerifySmsCodeResponse == nil || r.VerifySmsCodeResponse.Body == nil || r.VerifySmsCodeResponse.Body.Message == nil {
+		return ""
+	}
+	return *r.VerifySmsCodeResponse.Body.Message
+}
+
+// GetRequestId gets the request ID
+func (r *VerifySmsCodeResponse) GetRequestId() string {
+	if r == nil || r.VerifySmsCodeResponse == nil || r.VerifySmsCodeResponse.Body == nil || r.VerifySmsCodeResponse.Body.RequestId == nil {
+		return ""
+	}
+	return *r.VerifySmsCodeResponse.Body.RequestId
+}
+
+// WithVerifySmsCodeConfigOptionRuntimeOptions sets the runtime options
+func WithVerifySmsCodeConfigOptionRuntimeOptions(r *util.RuntimeOptions) VerifySmsCodeConfigOption {
+	return func(opts *verifySmsCodeConfigOptions) {
+		opts.runtimeOption = r
+	}
+}
+
+// VerifySmsCode verifies the SMS code
+func (c *Client) VerifySmsCode(_ context.Context, cfg VerifySmsCodeConfig, opts ...VerifySmsCodeConfigOption) (*VerifySmsCodeResponse, error) {
+	verifyCodeRequest := &dysmsapi.VerifySmsCodeRequest{
+		PhoneNumber: pointer.Of(cfg.GetPhoneNumber()),
+		SmsCode:     pointer.Of(cfg.GetSmsCode()),
+		SmsToken:    pointer.Of(cfg.GetSmsToken()),
+	}
+	req := &verifySmsCodeConfigOptions{
+		req:           verifyCodeRequest,
+		runtimeOption: &util.RuntimeOptions{},
+	}
+	for _, opt := range opts {
+		opt(req)
+	}
+	result, err := c.client.VerifySmsCodeWithOptions(req.req, req.runtimeOption)
+	if err != nil {
+		c.logger.Errorw("Failed to verify SMS code", "error", err)
+		return nil, err
+	}
+	return &VerifySmsCodeResponse{result}, nil
 }
