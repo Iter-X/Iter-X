@@ -1,5 +1,5 @@
 <div align="center">
-    <h1>Iter-X</h1>
+  <img src="./docs/logo.png" alt="Logo" width="290" height="251" />
 </div>
 
 <div align="center">
