@@ -61,3 +61,4 @@ Temporary Items
 /internal/common/cnst/*.pb.go
 /internal/common/xerr/*
 /internal/conf/*
+!/internal/conf/conf.go

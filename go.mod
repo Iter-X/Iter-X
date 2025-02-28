@@ -3,6 +3,7 @@ module github.com/iter-x/iter-x
 go 1.23.4
 
 require (
+	buf.build/go/protoyaml v0.3.1
 	entgo.io/ent v0.14.3
 	github.com/BurntSushi/toml v1.4.0
 	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.10
@@ -17,6 +18,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.0
 	github.com/ifuryst/lol v1.3.0
 	github.com/jhump/protoreflect v1.17.0
+	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
 	github.com/nicksnyder/go-i18n/v2 v2.5.0
 	github.com/protoc-gen/protoc-gen-go-errors v0.3.0
@@ -35,6 +37,8 @@ require (
 
 require (
 	ariga.io/atlas v0.31.1-0.20250212144724-069be8033e83 // indirect
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.0-20241127180247-a33202765966.1 // indirect
+	cel.dev/expr v0.19.0 // indirect
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.5 // indirect
@@ -44,15 +48,18 @@ require (
 	github.com/alibabacloud-go/tea-utils v1.3.1 // indirect
 	github.com/alibabacloud-go/tea-xml v1.1.3 // indirect
 	github.com/aliyun/credentials-go v1.3.10 // indirect
+	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/bmatcuk/doublestar v1.3.4 // indirect
 	github.com/bufbuild/protocompile v0.14.1 // indirect
+	github.com/bufbuild/protovalidate-go v0.8.0 // indirect
 	github.com/bytedance/sonic/loader v0.2.3 // indirect
 	github.com/clbanning/mxj/v2 v2.7.0 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-openapi/inflect v0.21.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
+	github.com/google/cel-go v0.22.1 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.23.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
@@ -64,6 +71,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/stoewer/go-strcase v1.3.0 // indirect
 	github.com/tjfoc/gmsm v1.4.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/zclconf/go-cty v1.16.2 // indirect

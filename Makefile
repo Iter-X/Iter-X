@@ -66,8 +66,6 @@ stringer:
 generate:
 	go generate ./...
 
-
-
 .PHONY: all
 # generate all
 all:
