@@ -76,6 +76,9 @@ message Auth {
     string github_client_id = 4;
     string github_client_secret = 5;
     string github_redirect_url = 6;
+    string wechat_client_id = 7;
+    string wechat_client_secret = 8;
+    string wechat_redirect_url = 9;
   }
   Jwt jwt = 1;
   OAuth oauth = 2;
