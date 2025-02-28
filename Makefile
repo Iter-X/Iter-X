@@ -5,6 +5,8 @@ else
 	API_PROTO_FILES=$(shell find proto/api -name *.proto)
 endif
 
+path := $(shell pwd)
+
 .PHONY: init
 # init env
 init:
@@ -55,6 +57,10 @@ api:
 	       --openapi_out=fq_schema_naming=true,default_response=false:. \
 	       $(API_PROTO_FILES)
 
+.PHONY: stringer
+stringer:
+	go generate $(path)/pkg/vobj
+
 .PHONY: generate
 # generate
 generate:
@@ -68,6 +74,7 @@ all:
 	make common;
 	make errors;
 	make api;
+	make stringer;
 	go mod tidy;
 
 .PHONY: test

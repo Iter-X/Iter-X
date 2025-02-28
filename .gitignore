@@ -51,3 +51,12 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+.idea
+*.string.go
+ent/*
+!internal/repo/ent/schema
+/cmd/server/wire_gen.go
+/internal/api
+/internal/common/cnst/*.pb.go
+/internal/common/xerr
+/internal/conf

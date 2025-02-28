@@ -80,8 +80,23 @@ message Auth {
     string wechat_client_secret = 8;
     string wechat_redirect_url = 9;
   }
+  message AuthTokens {
+    string bundle_id = 1;
+    int64 expire = 2;
+    string package_name = 3;
+    string sign_name = 4;
+    string scene_code = 5;
+    string sms_template_code = 6;
+    int32 sms_code_expire = 7;
+  }
+  message AliCloud {
+    string access_key_id = 1;
+    string access_key_secret = 2;
+  }
   Jwt jwt = 1;
   OAuth oauth = 2;
+  AliCloud ali_cloud = 4;
+  AuthTokens auth_tokens = 3;
 }
 
 message I18n {
