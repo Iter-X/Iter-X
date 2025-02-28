@@ -53,8 +53,9 @@ Temporary Items
 .apdisk
 .idea
 *.string.go
-ent/*
-!internal/repo/ent/schema
+/internal/repo/ent/*
+!/internal/repo/ent/schema
+!/internal/repo/ent/template
 /cmd/server/wire_gen.go
 /internal/api
 /internal/common/cnst/*.pb.go

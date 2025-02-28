@@ -114,6 +114,25 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/auth.v1.SignUpResponse'
+    /api/v1/auth/sms-auth-tokens:
+        post:
+            tags:
+                - AuthService
+            description: GetSmsAuthTokens get sms auth tokens
+            operationId: AuthService_GetSmsAuthTokens
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth.v1.GetSmsAuthTokensRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/auth.v1.GetSmsAuthTokensResponse'
     /api/v1/auth/verify-password-reset-token:
         get:
             tags:
@@ -131,6 +150,25 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/auth.v1.VerifyPasswordResetTokenResponse'
+    /api/v1/auth/verify-sms-code:
+        post:
+            tags:
+                - AuthService
+            description: VerifySmsCode verifies the SMS code
+            operationId: AuthService_VerifySmsCode
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth.v1.VerifySmsCodeRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/auth.v1.VerifySmsCodeResponse'
     /api/v1/poi/search:
         get:
             tags:
@@ -355,6 +393,22 @@ paths:
                                 $ref: '#/components/schemas/trip.v1.DeleteDailyTripResponse'
 components:
     schemas:
+        auth.v1.GetSmsAuthTokensRequest:
+            type: object
+            properties: {}
+        auth.v1.GetSmsAuthTokensResponse:
+            type: object
+            properties:
+                bizToken:
+                    type: string
+                expireTime:
+                    type: string
+                stsAccessKeyId:
+                    type: string
+                stsAccessKeySecret:
+                    type: string
+                stsToken:
+                    type: string
         auth.v1.RefreshTokenRequest:
             type: object
             properties:
@@ -442,6 +496,23 @@ components:
             properties:
                 valid:
                     type: boolean
+        auth.v1.VerifySmsCodeRequest:
+            type: object
+            properties:
+                phoneNumber:
+                    type: string
+                smsCode:
+                    type: string
+                smsToken:
+                    type: string
+        auth.v1.VerifySmsCodeResponse:
+            type: object
+            properties:
+                token:
+                    type: string
+                expiresIn:
+                    type: number
+                    format: double
         poi.v1.PointOfInterest:
             type: object
             properties:
