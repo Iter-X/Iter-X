@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/iter-x/iter-x/internal/repo/ent/dailyitinerary"
 	"github.com/iter-x/iter-x/internal/repo/ent/dailytrip"
-	"github.com/iter-x/iter-x/internal/repo/ent/dailytripitem"
 	"github.com/iter-x/iter-x/internal/repo/ent/predicate"
 	"github.com/iter-x/iter-x/internal/repo/ent/trip"
 )
@@ -22,12 +22,12 @@ import (
 // DailyTripQuery is the builder for querying DailyTrip entities.
 type DailyTripQuery struct {
 	config
-	ctx               *QueryContext
-	order             []dailytrip.OrderOption
-	inters            []Interceptor
-	predicates        []predicate.DailyTrip
-	withTrip          *TripQuery
-	withDailyTripItem *DailyTripItemQuery
+	ctx                *QueryContext
+	order              []dailytrip.OrderOption
+	inters             []Interceptor
+	predicates         []predicate.DailyTrip
+	withTrip           *TripQuery
+	withDailyItinerary *DailyItineraryQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -86,9 +86,9 @@ func (dtq *DailyTripQuery) QueryTrip() *TripQuery {
 	return query
 }
 
-// QueryDailyTripItem chains the current query on the "daily_trip_item" edge.
-func (dtq *DailyTripQuery) QueryDailyTripItem() *DailyTripItemQuery {
-	query := (&DailyTripItemClient{config: dtq.config}).Query()
+// QueryDailyItinerary chains the current query on the "daily_itinerary" edge.
+func (dtq *DailyTripQuery) QueryDailyItinerary() *DailyItineraryQuery {
+	query := (&DailyItineraryClient{config: dtq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := dtq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -99,8 +99,8 @@ func (dtq *DailyTripQuery) QueryDailyTripItem() *DailyTripItemQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(dailytrip.Table, dailytrip.FieldID, selector),
-			sqlgraph.To(dailytripitem.Table, dailytripitem.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, dailytrip.DailyTripItemTable, dailytrip.DailyTripItemColumn),
+			sqlgraph.To(dailyitinerary.Table, dailyitinerary.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, dailytrip.DailyItineraryTable, dailytrip.DailyItineraryColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(dtq.driver.Dialect(), step)
 		return fromU, nil
@@ -295,13 +295,13 @@ func (dtq *DailyTripQuery) Clone() *DailyTripQuery {
 		return nil
 	}
 	return &DailyTripQuery{
-		config:            dtq.config,
-		ctx:               dtq.ctx.Clone(),
-		order:             append([]dailytrip.OrderOption{}, dtq.order...),
-		inters:            append([]Interceptor{}, dtq.inters...),
-		predicates:        append([]predicate.DailyTrip{}, dtq.predicates...),
-		withTrip:          dtq.withTrip.Clone(),
-		withDailyTripItem: dtq.withDailyTripItem.Clone(),
+		config:             dtq.config,
+		ctx:                dtq.ctx.Clone(),
+		order:              append([]dailytrip.OrderOption{}, dtq.order...),
+		inters:             append([]Interceptor{}, dtq.inters...),
+		predicates:         append([]predicate.DailyTrip{}, dtq.predicates...),
+		withTrip:           dtq.withTrip.Clone(),
+		withDailyItinerary: dtq.withDailyItinerary.Clone(),
 		// clone intermediate query.
 		sql:  dtq.sql.Clone(),
 		path: dtq.path,
@@ -319,14 +319,14 @@ func (dtq *DailyTripQuery) WithTrip(opts ...func(*TripQuery)) *DailyTripQuery {
 	return dtq
 }
 
-// WithDailyTripItem tells the query-builder to eager-load the nodes that are connected to
-// the "daily_trip_item" edge. The optional arguments are used to configure the query builder of the edge.
-func (dtq *DailyTripQuery) WithDailyTripItem(opts ...func(*DailyTripItemQuery)) *DailyTripQuery {
-	query := (&DailyTripItemClient{config: dtq.config}).Query()
+// WithDailyItinerary tells the query-builder to eager-load the nodes that are connected to
+// the "daily_itinerary" edge. The optional arguments are used to configure the query builder of the edge.
+func (dtq *DailyTripQuery) WithDailyItinerary(opts ...func(*DailyItineraryQuery)) *DailyTripQuery {
+	query := (&DailyItineraryClient{config: dtq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	dtq.withDailyTripItem = query
+	dtq.withDailyItinerary = query
 	return dtq
 }
 
@@ -410,7 +410,7 @@ func (dtq *DailyTripQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*D
 		_spec       = dtq.querySpec()
 		loadedTypes = [2]bool{
 			dtq.withTrip != nil,
-			dtq.withDailyTripItem != nil,
+			dtq.withDailyItinerary != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -437,10 +437,10 @@ func (dtq *DailyTripQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*D
 			return nil, err
 		}
 	}
-	if query := dtq.withDailyTripItem; query != nil {
-		if err := dtq.loadDailyTripItem(ctx, query, nodes,
-			func(n *DailyTrip) { n.Edges.DailyTripItem = []*DailyTripItem{} },
-			func(n *DailyTrip, e *DailyTripItem) { n.Edges.DailyTripItem = append(n.Edges.DailyTripItem, e) }); err != nil {
+	if query := dtq.withDailyItinerary; query != nil {
+		if err := dtq.loadDailyItinerary(ctx, query, nodes,
+			func(n *DailyTrip) { n.Edges.DailyItinerary = []*DailyItinerary{} },
+			func(n *DailyTrip, e *DailyItinerary) { n.Edges.DailyItinerary = append(n.Edges.DailyItinerary, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -476,7 +476,7 @@ func (dtq *DailyTripQuery) loadTrip(ctx context.Context, query *TripQuery, nodes
 	}
 	return nil
 }
-func (dtq *DailyTripQuery) loadDailyTripItem(ctx context.Context, query *DailyTripItemQuery, nodes []*DailyTrip, init func(*DailyTrip), assign func(*DailyTrip, *DailyTripItem)) error {
+func (dtq *DailyTripQuery) loadDailyItinerary(ctx context.Context, query *DailyItineraryQuery, nodes []*DailyTrip, init func(*DailyTrip), assign func(*DailyTrip, *DailyItinerary)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*DailyTrip)
 	for i := range nodes {
@@ -487,10 +487,10 @@ func (dtq *DailyTripQuery) loadDailyTripItem(ctx context.Context, query *DailyTr
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(dailytripitem.FieldDailyTripID)
+		query.ctx.AppendFieldOnce(dailyitinerary.FieldDailyTripID)
 	}
-	query.Where(predicate.DailyTripItem(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(dailytrip.DailyTripItemColumn), fks...))
+	query.Where(predicate.DailyItinerary(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(dailytrip.DailyItineraryColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

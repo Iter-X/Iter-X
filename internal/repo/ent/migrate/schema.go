@@ -3,11 +3,48 @@
 package migrate
 
 import (
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
 
 var (
+	// DailyItinerariesColumns holds the columns for the "daily_itineraries" table.
+	DailyItinerariesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "notes", Type: field.TypeString, Nullable: true, Size: 255},
+		{Name: "daily_trip_id", Type: field.TypeUUID},
+		{Name: "poi_id", Type: field.TypeUUID},
+		{Name: "trip_id", Type: field.TypeUUID},
+	}
+	// DailyItinerariesTable holds the schema information for the "daily_itineraries" table.
+	DailyItinerariesTable = &schema.Table{
+		Name:       "daily_itineraries",
+		Columns:    DailyItinerariesColumns,
+		PrimaryKey: []*schema.Column{DailyItinerariesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "daily_itineraries_daily_trips_daily_itinerary",
+				Columns:    []*schema.Column{DailyItinerariesColumns[4]},
+				RefColumns: []*schema.Column{DailyTripsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "daily_itineraries_points_of_interest_daily_itinerary",
+				Columns:    []*schema.Column{DailyItinerariesColumns[5]},
+				RefColumns: []*schema.Column{PointsOfInterestColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "daily_itineraries_trips_daily_itinerary",
+				Columns:    []*schema.Column{DailyItinerariesColumns[6]},
+				RefColumns: []*schema.Column{TripsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// DailyTripsColumns holds the columns for the "daily_trips" table.
 	DailyTripsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -32,35 +69,6 @@ var (
 			},
 		},
 	}
-	// DailyTripItemsColumns holds the columns for the "daily_trip_items" table.
-	DailyTripItemsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "notes", Type: field.TypeString, Nullable: true, Size: 255},
-		{Name: "daily_trip_id", Type: field.TypeUUID},
-		{Name: "trip_id", Type: field.TypeUUID},
-	}
-	// DailyTripItemsTable holds the schema information for the "daily_trip_items" table.
-	DailyTripItemsTable = &schema.Table{
-		Name:       "daily_trip_items",
-		Columns:    DailyTripItemsColumns,
-		PrimaryKey: []*schema.Column{DailyTripItemsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "daily_trip_items_daily_trips_daily_trip_item",
-				Columns:    []*schema.Column{DailyTripItemsColumns[4]},
-				RefColumns: []*schema.Column{DailyTripsColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "daily_trip_items_trips_daily_trip_item",
-				Columns:    []*schema.Column{DailyTripItemsColumns[5]},
-				RefColumns: []*schema.Column{TripsColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
-	}
 	// MediaColumns holds the columns for the "media" table.
 	MediaColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -76,6 +84,32 @@ var (
 		Name:       "media",
 		Columns:    MediaColumns,
 		PrimaryKey: []*schema.Column{MediaColumns[0]},
+	}
+	// PointsOfInterestColumns holds the columns for the "points_of_interest" table.
+	PointsOfInterestColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeString, Size: 255},
+		{Name: "name_en", Type: field.TypeString, Size: 255},
+		{Name: "name_cn", Type: field.TypeString, Size: 255},
+		{Name: "description", Type: field.TypeString, Size: 1000},
+		{Name: "city", Type: field.TypeString, Size: 255},
+		{Name: "state", Type: field.TypeString, Size: 255},
+		{Name: "country", Type: field.TypeString, Size: 255},
+		{Name: "address", Type: field.TypeString, Size: 255},
+		{Name: "latitude", Type: field.TypeFloat64},
+		{Name: "longitude", Type: field.TypeFloat64},
+		{Name: "type", Type: field.TypeString, Size: 50},
+		{Name: "category", Type: field.TypeString, Size: 50},
+		{Name: "rating", Type: field.TypeFloat32},
+		{Name: "recommended_duration_seconds", Type: field.TypeInt64},
+	}
+	// PointsOfInterestTable holds the schema information for the "points_of_interest" table.
+	PointsOfInterestTable = &schema.Table{
+		Name:       "points_of_interest",
+		Columns:    PointsOfInterestColumns,
+		PrimaryKey: []*schema.Column{PointsOfInterestColumns[0]},
 	}
 	// RefreshTokensColumns holds the columns for the "refresh_tokens" table.
 	RefreshTokensColumns = []*schema.Column{
@@ -145,9 +179,10 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		DailyItinerariesTable,
 		DailyTripsTable,
-		DailyTripItemsTable,
 		MediaTable,
+		PointsOfInterestTable,
 		RefreshTokensTable,
 		TripsTable,
 		UsersTable,
@@ -155,9 +190,13 @@ var (
 )
 
 func init() {
+	DailyItinerariesTable.ForeignKeys[0].RefTable = DailyTripsTable
+	DailyItinerariesTable.ForeignKeys[1].RefTable = PointsOfInterestTable
+	DailyItinerariesTable.ForeignKeys[2].RefTable = TripsTable
 	DailyTripsTable.ForeignKeys[0].RefTable = TripsTable
-	DailyTripItemsTable.ForeignKeys[0].RefTable = DailyTripsTable
-	DailyTripItemsTable.ForeignKeys[1].RefTable = TripsTable
+	PointsOfInterestTable.Annotation = &entsql.Annotation{
+		Table: "points_of_interest",
+	}
 	RefreshTokensTable.ForeignKeys[0].RefTable = UsersTable
 	TripsTable.ForeignKeys[0].RefTable = UsersTable
 }

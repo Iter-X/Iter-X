@@ -33,7 +33,7 @@ func (Trip) Edges() []ent.Edge {
 			Field("user_id").
 			Unique().Required(),
 		edge.To("daily_trip", DailyTrip.Type),
-		edge.To("daily_trip_item", DailyTripItem.Type),
+		edge.To("daily_itinerary", DailyItinerary.Type),
 	}
 }
 

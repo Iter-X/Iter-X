@@ -16,9 +16,10 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/iter-x/iter-x/internal/repo/ent/dailyitinerary"
 	"github.com/iter-x/iter-x/internal/repo/ent/dailytrip"
-	"github.com/iter-x/iter-x/internal/repo/ent/dailytripitem"
 	"github.com/iter-x/iter-x/internal/repo/ent/media"
+	"github.com/iter-x/iter-x/internal/repo/ent/pointsofinterest"
 	"github.com/iter-x/iter-x/internal/repo/ent/refreshtoken"
 	"github.com/iter-x/iter-x/internal/repo/ent/trip"
 	"github.com/iter-x/iter-x/internal/repo/ent/user"
@@ -29,12 +30,14 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// DailyItinerary is the client for interacting with the DailyItinerary builders.
+	DailyItinerary *DailyItineraryClient
 	// DailyTrip is the client for interacting with the DailyTrip builders.
 	DailyTrip *DailyTripClient
-	// DailyTripItem is the client for interacting with the DailyTripItem builders.
-	DailyTripItem *DailyTripItemClient
 	// Media is the client for interacting with the Media builders.
 	Media *MediaClient
+	// PointsOfInterest is the client for interacting with the PointsOfInterest builders.
+	PointsOfInterest *PointsOfInterestClient
 	// RefreshToken is the client for interacting with the RefreshToken builders.
 	RefreshToken *RefreshTokenClient
 	// Trip is the client for interacting with the Trip builders.
@@ -52,9 +55,10 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.DailyItinerary = NewDailyItineraryClient(c.config)
 	c.DailyTrip = NewDailyTripClient(c.config)
-	c.DailyTripItem = NewDailyTripItemClient(c.config)
 	c.Media = NewMediaClient(c.config)
+	c.PointsOfInterest = NewPointsOfInterestClient(c.config)
 	c.RefreshToken = NewRefreshTokenClient(c.config)
 	c.Trip = NewTripClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -148,14 +152,15 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:           ctx,
-		config:        cfg,
-		DailyTrip:     NewDailyTripClient(cfg),
-		DailyTripItem: NewDailyTripItemClient(cfg),
-		Media:         NewMediaClient(cfg),
-		RefreshToken:  NewRefreshTokenClient(cfg),
-		Trip:          NewTripClient(cfg),
-		User:          NewUserClient(cfg),
+		ctx:              ctx,
+		config:           cfg,
+		DailyItinerary:   NewDailyItineraryClient(cfg),
+		DailyTrip:        NewDailyTripClient(cfg),
+		Media:            NewMediaClient(cfg),
+		PointsOfInterest: NewPointsOfInterestClient(cfg),
+		RefreshToken:     NewRefreshTokenClient(cfg),
+		Trip:             NewTripClient(cfg),
+		User:             NewUserClient(cfg),
 	}, nil
 }
 
@@ -173,21 +178,22 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:           ctx,
-		config:        cfg,
-		DailyTrip:     NewDailyTripClient(cfg),
-		DailyTripItem: NewDailyTripItemClient(cfg),
-		Media:         NewMediaClient(cfg),
-		RefreshToken:  NewRefreshTokenClient(cfg),
-		Trip:          NewTripClient(cfg),
-		User:          NewUserClient(cfg),
+		ctx:              ctx,
+		config:           cfg,
+		DailyItinerary:   NewDailyItineraryClient(cfg),
+		DailyTrip:        NewDailyTripClient(cfg),
+		Media:            NewMediaClient(cfg),
+		PointsOfInterest: NewPointsOfInterestClient(cfg),
+		RefreshToken:     NewRefreshTokenClient(cfg),
+		Trip:             NewTripClient(cfg),
+		User:             NewUserClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		DailyTrip.
+//		DailyItinerary.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -210,7 +216,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.DailyTrip, c.DailyTripItem, c.Media, c.RefreshToken, c.Trip, c.User,
+		c.DailyItinerary, c.DailyTrip, c.Media, c.PointsOfInterest, c.RefreshToken,
+		c.Trip, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -220,7 +227,8 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.DailyTrip, c.DailyTripItem, c.Media, c.RefreshToken, c.Trip, c.User,
+		c.DailyItinerary, c.DailyTrip, c.Media, c.PointsOfInterest, c.RefreshToken,
+		c.Trip, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -229,12 +237,14 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *DailyItineraryMutation:
+		return c.DailyItinerary.mutate(ctx, m)
 	case *DailyTripMutation:
 		return c.DailyTrip.mutate(ctx, m)
-	case *DailyTripItemMutation:
-		return c.DailyTripItem.mutate(ctx, m)
 	case *MediaMutation:
 		return c.Media.mutate(ctx, m)
+	case *PointsOfInterestMutation:
+		return c.PointsOfInterest.mutate(ctx, m)
 	case *RefreshTokenMutation:
 		return c.RefreshToken.mutate(ctx, m)
 	case *TripMutation:
@@ -243,6 +253,187 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.User.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// DailyItineraryClient is a client for the DailyItinerary schema.
+type DailyItineraryClient struct {
+	config
+}
+
+// NewDailyItineraryClient returns a client for the DailyItinerary from the given config.
+func NewDailyItineraryClient(c config) *DailyItineraryClient {
+	return &DailyItineraryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `dailyitinerary.Hooks(f(g(h())))`.
+func (c *DailyItineraryClient) Use(hooks ...Hook) {
+	c.hooks.DailyItinerary = append(c.hooks.DailyItinerary, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `dailyitinerary.Intercept(f(g(h())))`.
+func (c *DailyItineraryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.DailyItinerary = append(c.inters.DailyItinerary, interceptors...)
+}
+
+// Create returns a builder for creating a DailyItinerary entity.
+func (c *DailyItineraryClient) Create() *DailyItineraryCreate {
+	mutation := newDailyItineraryMutation(c.config, OpCreate)
+	return &DailyItineraryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DailyItinerary entities.
+func (c *DailyItineraryClient) CreateBulk(builders ...*DailyItineraryCreate) *DailyItineraryCreateBulk {
+	return &DailyItineraryCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *DailyItineraryClient) MapCreateBulk(slice any, setFunc func(*DailyItineraryCreate, int)) *DailyItineraryCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &DailyItineraryCreateBulk{err: fmt.Errorf("calling to DailyItineraryClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*DailyItineraryCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &DailyItineraryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DailyItinerary.
+func (c *DailyItineraryClient) Update() *DailyItineraryUpdate {
+	mutation := newDailyItineraryMutation(c.config, OpUpdate)
+	return &DailyItineraryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DailyItineraryClient) UpdateOne(di *DailyItinerary) *DailyItineraryUpdateOne {
+	mutation := newDailyItineraryMutation(c.config, OpUpdateOne, withDailyItinerary(di))
+	return &DailyItineraryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DailyItineraryClient) UpdateOneID(id uuid.UUID) *DailyItineraryUpdateOne {
+	mutation := newDailyItineraryMutation(c.config, OpUpdateOne, withDailyItineraryID(id))
+	return &DailyItineraryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DailyItinerary.
+func (c *DailyItineraryClient) Delete() *DailyItineraryDelete {
+	mutation := newDailyItineraryMutation(c.config, OpDelete)
+	return &DailyItineraryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DailyItineraryClient) DeleteOne(di *DailyItinerary) *DailyItineraryDeleteOne {
+	return c.DeleteOneID(di.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *DailyItineraryClient) DeleteOneID(id uuid.UUID) *DailyItineraryDeleteOne {
+	builder := c.Delete().Where(dailyitinerary.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DailyItineraryDeleteOne{builder}
+}
+
+// Query returns a query builder for DailyItinerary.
+func (c *DailyItineraryClient) Query() *DailyItineraryQuery {
+	return &DailyItineraryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeDailyItinerary},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a DailyItinerary entity by its id.
+func (c *DailyItineraryClient) Get(ctx context.Context, id uuid.UUID) (*DailyItinerary, error) {
+	return c.Query().Where(dailyitinerary.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DailyItineraryClient) GetX(ctx context.Context, id uuid.UUID) *DailyItinerary {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTrip queries the trip edge of a DailyItinerary.
+func (c *DailyItineraryClient) QueryTrip(di *DailyItinerary) *TripQuery {
+	query := (&TripClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := di.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dailyitinerary.Table, dailyitinerary.FieldID, id),
+			sqlgraph.To(trip.Table, trip.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dailyitinerary.TripTable, dailyitinerary.TripColumn),
+		)
+		fromV = sqlgraph.Neighbors(di.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDailyTrip queries the daily_trip edge of a DailyItinerary.
+func (c *DailyItineraryClient) QueryDailyTrip(di *DailyItinerary) *DailyTripQuery {
+	query := (&DailyTripClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := di.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dailyitinerary.Table, dailyitinerary.FieldID, id),
+			sqlgraph.To(dailytrip.Table, dailytrip.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dailyitinerary.DailyTripTable, dailyitinerary.DailyTripColumn),
+		)
+		fromV = sqlgraph.Neighbors(di.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPoi queries the poi edge of a DailyItinerary.
+func (c *DailyItineraryClient) QueryPoi(di *DailyItinerary) *PointsOfInterestQuery {
+	query := (&PointsOfInterestClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := di.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dailyitinerary.Table, dailyitinerary.FieldID, id),
+			sqlgraph.To(pointsofinterest.Table, pointsofinterest.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dailyitinerary.PoiTable, dailyitinerary.PoiColumn),
+		)
+		fromV = sqlgraph.Neighbors(di.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *DailyItineraryClient) Hooks() []Hook {
+	return c.hooks.DailyItinerary
+}
+
+// Interceptors returns the client interceptors.
+func (c *DailyItineraryClient) Interceptors() []Interceptor {
+	return c.inters.DailyItinerary
+}
+
+func (c *DailyItineraryClient) mutate(ctx context.Context, m *DailyItineraryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DailyItineraryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DailyItineraryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DailyItineraryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DailyItineraryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown DailyItinerary mutation op: %q", m.Op())
 	}
 }
 
@@ -370,15 +561,15 @@ func (c *DailyTripClient) QueryTrip(dt *DailyTrip) *TripQuery {
 	return query
 }
 
-// QueryDailyTripItem queries the daily_trip_item edge of a DailyTrip.
-func (c *DailyTripClient) QueryDailyTripItem(dt *DailyTrip) *DailyTripItemQuery {
-	query := (&DailyTripItemClient{config: c.config}).Query()
+// QueryDailyItinerary queries the daily_itinerary edge of a DailyTrip.
+func (c *DailyTripClient) QueryDailyItinerary(dt *DailyTrip) *DailyItineraryQuery {
+	query := (&DailyItineraryClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := dt.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(dailytrip.Table, dailytrip.FieldID, id),
-			sqlgraph.To(dailytripitem.Table, dailytripitem.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, dailytrip.DailyTripItemTable, dailytrip.DailyTripItemColumn),
+			sqlgraph.To(dailyitinerary.Table, dailyitinerary.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, dailytrip.DailyItineraryTable, dailytrip.DailyItineraryColumn),
 		)
 		fromV = sqlgraph.Neighbors(dt.driver.Dialect(), step)
 		return fromV, nil
@@ -408,171 +599,6 @@ func (c *DailyTripClient) mutate(ctx context.Context, m *DailyTripMutation) (Val
 		return (&DailyTripDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown DailyTrip mutation op: %q", m.Op())
-	}
-}
-
-// DailyTripItemClient is a client for the DailyTripItem schema.
-type DailyTripItemClient struct {
-	config
-}
-
-// NewDailyTripItemClient returns a client for the DailyTripItem from the given config.
-func NewDailyTripItemClient(c config) *DailyTripItemClient {
-	return &DailyTripItemClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `dailytripitem.Hooks(f(g(h())))`.
-func (c *DailyTripItemClient) Use(hooks ...Hook) {
-	c.hooks.DailyTripItem = append(c.hooks.DailyTripItem, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `dailytripitem.Intercept(f(g(h())))`.
-func (c *DailyTripItemClient) Intercept(interceptors ...Interceptor) {
-	c.inters.DailyTripItem = append(c.inters.DailyTripItem, interceptors...)
-}
-
-// Create returns a builder for creating a DailyTripItem entity.
-func (c *DailyTripItemClient) Create() *DailyTripItemCreate {
-	mutation := newDailyTripItemMutation(c.config, OpCreate)
-	return &DailyTripItemCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of DailyTripItem entities.
-func (c *DailyTripItemClient) CreateBulk(builders ...*DailyTripItemCreate) *DailyTripItemCreateBulk {
-	return &DailyTripItemCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *DailyTripItemClient) MapCreateBulk(slice any, setFunc func(*DailyTripItemCreate, int)) *DailyTripItemCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &DailyTripItemCreateBulk{err: fmt.Errorf("calling to DailyTripItemClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*DailyTripItemCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &DailyTripItemCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for DailyTripItem.
-func (c *DailyTripItemClient) Update() *DailyTripItemUpdate {
-	mutation := newDailyTripItemMutation(c.config, OpUpdate)
-	return &DailyTripItemUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *DailyTripItemClient) UpdateOne(dti *DailyTripItem) *DailyTripItemUpdateOne {
-	mutation := newDailyTripItemMutation(c.config, OpUpdateOne, withDailyTripItem(dti))
-	return &DailyTripItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *DailyTripItemClient) UpdateOneID(id uuid.UUID) *DailyTripItemUpdateOne {
-	mutation := newDailyTripItemMutation(c.config, OpUpdateOne, withDailyTripItemID(id))
-	return &DailyTripItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for DailyTripItem.
-func (c *DailyTripItemClient) Delete() *DailyTripItemDelete {
-	mutation := newDailyTripItemMutation(c.config, OpDelete)
-	return &DailyTripItemDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *DailyTripItemClient) DeleteOne(dti *DailyTripItem) *DailyTripItemDeleteOne {
-	return c.DeleteOneID(dti.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *DailyTripItemClient) DeleteOneID(id uuid.UUID) *DailyTripItemDeleteOne {
-	builder := c.Delete().Where(dailytripitem.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &DailyTripItemDeleteOne{builder}
-}
-
-// Query returns a query builder for DailyTripItem.
-func (c *DailyTripItemClient) Query() *DailyTripItemQuery {
-	return &DailyTripItemQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeDailyTripItem},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a DailyTripItem entity by its id.
-func (c *DailyTripItemClient) Get(ctx context.Context, id uuid.UUID) (*DailyTripItem, error) {
-	return c.Query().Where(dailytripitem.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *DailyTripItemClient) GetX(ctx context.Context, id uuid.UUID) *DailyTripItem {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryTrip queries the trip edge of a DailyTripItem.
-func (c *DailyTripItemClient) QueryTrip(dti *DailyTripItem) *TripQuery {
-	query := (&TripClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := dti.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(dailytripitem.Table, dailytripitem.FieldID, id),
-			sqlgraph.To(trip.Table, trip.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, dailytripitem.TripTable, dailytripitem.TripColumn),
-		)
-		fromV = sqlgraph.Neighbors(dti.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryDailyTrip queries the daily_trip edge of a DailyTripItem.
-func (c *DailyTripItemClient) QueryDailyTrip(dti *DailyTripItem) *DailyTripQuery {
-	query := (&DailyTripClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := dti.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(dailytripitem.Table, dailytripitem.FieldID, id),
-			sqlgraph.To(dailytrip.Table, dailytrip.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, dailytripitem.DailyTripTable, dailytripitem.DailyTripColumn),
-		)
-		fromV = sqlgraph.Neighbors(dti.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *DailyTripItemClient) Hooks() []Hook {
-	return c.hooks.DailyTripItem
-}
-
-// Interceptors returns the client interceptors.
-func (c *DailyTripItemClient) Interceptors() []Interceptor {
-	return c.inters.DailyTripItem
-}
-
-func (c *DailyTripItemClient) mutate(ctx context.Context, m *DailyTripItemMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&DailyTripItemCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&DailyTripItemUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&DailyTripItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&DailyTripItemDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown DailyTripItem mutation op: %q", m.Op())
 	}
 }
 
@@ -706,6 +732,155 @@ func (c *MediaClient) mutate(ctx context.Context, m *MediaMutation) (Value, erro
 		return (&MediaDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Media mutation op: %q", m.Op())
+	}
+}
+
+// PointsOfInterestClient is a client for the PointsOfInterest schema.
+type PointsOfInterestClient struct {
+	config
+}
+
+// NewPointsOfInterestClient returns a client for the PointsOfInterest from the given config.
+func NewPointsOfInterestClient(c config) *PointsOfInterestClient {
+	return &PointsOfInterestClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `pointsofinterest.Hooks(f(g(h())))`.
+func (c *PointsOfInterestClient) Use(hooks ...Hook) {
+	c.hooks.PointsOfInterest = append(c.hooks.PointsOfInterest, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `pointsofinterest.Intercept(f(g(h())))`.
+func (c *PointsOfInterestClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PointsOfInterest = append(c.inters.PointsOfInterest, interceptors...)
+}
+
+// Create returns a builder for creating a PointsOfInterest entity.
+func (c *PointsOfInterestClient) Create() *PointsOfInterestCreate {
+	mutation := newPointsOfInterestMutation(c.config, OpCreate)
+	return &PointsOfInterestCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PointsOfInterest entities.
+func (c *PointsOfInterestClient) CreateBulk(builders ...*PointsOfInterestCreate) *PointsOfInterestCreateBulk {
+	return &PointsOfInterestCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PointsOfInterestClient) MapCreateBulk(slice any, setFunc func(*PointsOfInterestCreate, int)) *PointsOfInterestCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PointsOfInterestCreateBulk{err: fmt.Errorf("calling to PointsOfInterestClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PointsOfInterestCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PointsOfInterestCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PointsOfInterest.
+func (c *PointsOfInterestClient) Update() *PointsOfInterestUpdate {
+	mutation := newPointsOfInterestMutation(c.config, OpUpdate)
+	return &PointsOfInterestUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PointsOfInterestClient) UpdateOne(poi *PointsOfInterest) *PointsOfInterestUpdateOne {
+	mutation := newPointsOfInterestMutation(c.config, OpUpdateOne, withPointsOfInterest(poi))
+	return &PointsOfInterestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PointsOfInterestClient) UpdateOneID(id uuid.UUID) *PointsOfInterestUpdateOne {
+	mutation := newPointsOfInterestMutation(c.config, OpUpdateOne, withPointsOfInterestID(id))
+	return &PointsOfInterestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PointsOfInterest.
+func (c *PointsOfInterestClient) Delete() *PointsOfInterestDelete {
+	mutation := newPointsOfInterestMutation(c.config, OpDelete)
+	return &PointsOfInterestDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PointsOfInterestClient) DeleteOne(poi *PointsOfInterest) *PointsOfInterestDeleteOne {
+	return c.DeleteOneID(poi.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PointsOfInterestClient) DeleteOneID(id uuid.UUID) *PointsOfInterestDeleteOne {
+	builder := c.Delete().Where(pointsofinterest.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PointsOfInterestDeleteOne{builder}
+}
+
+// Query returns a query builder for PointsOfInterest.
+func (c *PointsOfInterestClient) Query() *PointsOfInterestQuery {
+	return &PointsOfInterestQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePointsOfInterest},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PointsOfInterest entity by its id.
+func (c *PointsOfInterestClient) Get(ctx context.Context, id uuid.UUID) (*PointsOfInterest, error) {
+	return c.Query().Where(pointsofinterest.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PointsOfInterestClient) GetX(ctx context.Context, id uuid.UUID) *PointsOfInterest {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryDailyItinerary queries the daily_itinerary edge of a PointsOfInterest.
+func (c *PointsOfInterestClient) QueryDailyItinerary(poi *PointsOfInterest) *DailyItineraryQuery {
+	query := (&DailyItineraryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := poi.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pointsofinterest.Table, pointsofinterest.FieldID, id),
+			sqlgraph.To(dailyitinerary.Table, dailyitinerary.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, pointsofinterest.DailyItineraryTable, pointsofinterest.DailyItineraryColumn),
+		)
+		fromV = sqlgraph.Neighbors(poi.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PointsOfInterestClient) Hooks() []Hook {
+	return c.hooks.PointsOfInterest
+}
+
+// Interceptors returns the client interceptors.
+func (c *PointsOfInterestClient) Interceptors() []Interceptor {
+	return c.inters.PointsOfInterest
+}
+
+func (c *PointsOfInterestClient) mutate(ctx context.Context, m *PointsOfInterestMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PointsOfInterestCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PointsOfInterestUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PointsOfInterestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PointsOfInterestDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PointsOfInterest mutation op: %q", m.Op())
 	}
 }
 
@@ -998,15 +1173,15 @@ func (c *TripClient) QueryDailyTrip(t *Trip) *DailyTripQuery {
 	return query
 }
 
-// QueryDailyTripItem queries the daily_trip_item edge of a Trip.
-func (c *TripClient) QueryDailyTripItem(t *Trip) *DailyTripItemQuery {
-	query := (&DailyTripItemClient{config: c.config}).Query()
+// QueryDailyItinerary queries the daily_itinerary edge of a Trip.
+func (c *TripClient) QueryDailyItinerary(t *Trip) *DailyItineraryQuery {
+	query := (&DailyItineraryClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(trip.Table, trip.FieldID, id),
-			sqlgraph.To(dailytripitem.Table, dailytripitem.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, trip.DailyTripItemTable, trip.DailyTripItemColumn),
+			sqlgraph.To(dailyitinerary.Table, dailyitinerary.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, trip.DailyItineraryTable, trip.DailyItineraryColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -1207,9 +1382,11 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		DailyTrip, DailyTripItem, Media, RefreshToken, Trip, User []ent.Hook
+		DailyItinerary, DailyTrip, Media, PointsOfInterest, RefreshToken, Trip,
+		User []ent.Hook
 	}
 	inters struct {
-		DailyTrip, DailyTripItem, Media, RefreshToken, Trip, User []ent.Interceptor
+		DailyItinerary, DailyTrip, Media, PointsOfInterest, RefreshToken, Trip,
+		User []ent.Interceptor
 	}
 )

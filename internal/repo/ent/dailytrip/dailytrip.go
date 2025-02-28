@@ -29,8 +29,8 @@ const (
 	FieldNotes = "notes"
 	// EdgeTrip holds the string denoting the trip edge name in mutations.
 	EdgeTrip = "trip"
-	// EdgeDailyTripItem holds the string denoting the daily_trip_item edge name in mutations.
-	EdgeDailyTripItem = "daily_trip_item"
+	// EdgeDailyItinerary holds the string denoting the daily_itinerary edge name in mutations.
+	EdgeDailyItinerary = "daily_itinerary"
 	// Table holds the table name of the dailytrip in the database.
 	Table = "daily_trips"
 	// TripTable is the table that holds the trip relation/edge.
@@ -40,13 +40,13 @@ const (
 	TripInverseTable = "trips"
 	// TripColumn is the table column denoting the trip relation/edge.
 	TripColumn = "trip_id"
-	// DailyTripItemTable is the table that holds the daily_trip_item relation/edge.
-	DailyTripItemTable = "daily_trip_items"
-	// DailyTripItemInverseTable is the table name for the DailyTripItem entity.
-	// It exists in this package in order to avoid circular dependency with the "dailytripitem" package.
-	DailyTripItemInverseTable = "daily_trip_items"
-	// DailyTripItemColumn is the table column denoting the daily_trip_item relation/edge.
-	DailyTripItemColumn = "daily_trip_id"
+	// DailyItineraryTable is the table that holds the daily_itinerary relation/edge.
+	DailyItineraryTable = "daily_itineraries"
+	// DailyItineraryInverseTable is the table name for the DailyItinerary entity.
+	// It exists in this package in order to avoid circular dependency with the "dailyitinerary" package.
+	DailyItineraryInverseTable = "daily_itineraries"
+	// DailyItineraryColumn is the table column denoting the daily_itinerary relation/edge.
+	DailyItineraryColumn = "daily_trip_id"
 )
 
 // Columns holds all SQL columns for dailytrip fields.
@@ -130,17 +130,17 @@ func ByTripField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByDailyTripItemCount orders the results by daily_trip_item count.
-func ByDailyTripItemCount(opts ...sql.OrderTermOption) OrderOption {
+// ByDailyItineraryCount orders the results by daily_itinerary count.
+func ByDailyItineraryCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newDailyTripItemStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newDailyItineraryStep(), opts...)
 	}
 }
 
-// ByDailyTripItem orders the results by daily_trip_item terms.
-func ByDailyTripItem(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByDailyItinerary orders the results by daily_itinerary terms.
+func ByDailyItinerary(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newDailyTripItemStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newDailyItineraryStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newTripStep() *sqlgraph.Step {
@@ -150,10 +150,10 @@ func newTripStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2O, true, TripTable, TripColumn),
 	)
 }
-func newDailyTripItemStep() *sqlgraph.Step {
+func newDailyItineraryStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(DailyTripItemInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, DailyTripItemTable, DailyTripItemColumn),
+		sqlgraph.To(DailyItineraryInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, DailyItineraryTable, DailyItineraryColumn),
 	)
 }

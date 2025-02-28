@@ -41,8 +41,8 @@ type DailyTrip struct {
 type DailyTripEdges struct {
 	// Trip holds the value of the trip edge.
 	Trip *Trip `json:"trip,omitempty"`
-	// DailyTripItem holds the value of the daily_trip_item edge.
-	DailyTripItem []*DailyTripItem `json:"daily_trip_item,omitempty"`
+	// DailyItinerary holds the value of the daily_itinerary edge.
+	DailyItinerary []*DailyItinerary `json:"daily_itinerary,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -59,13 +59,13 @@ func (e DailyTripEdges) TripOrErr() (*Trip, error) {
 	return nil, &NotLoadedError{edge: "trip"}
 }
 
-// DailyTripItemOrErr returns the DailyTripItem value or an error if the edge
+// DailyItineraryOrErr returns the DailyItinerary value or an error if the edge
 // was not loaded in eager-loading.
-func (e DailyTripEdges) DailyTripItemOrErr() ([]*DailyTripItem, error) {
+func (e DailyTripEdges) DailyItineraryOrErr() ([]*DailyItinerary, error) {
 	if e.loadedTypes[1] {
-		return e.DailyTripItem, nil
+		return e.DailyItinerary, nil
 	}
-	return nil, &NotLoadedError{edge: "daily_trip_item"}
+	return nil, &NotLoadedError{edge: "daily_itinerary"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -156,9 +156,9 @@ func (dt *DailyTrip) QueryTrip() *TripQuery {
 	return NewDailyTripClient(dt.config).QueryTrip(dt)
 }
 
-// QueryDailyTripItem queries the "daily_trip_item" edge of the DailyTrip entity.
-func (dt *DailyTrip) QueryDailyTripItem() *DailyTripItemQuery {
-	return NewDailyTripClient(dt.config).QueryDailyTripItem(dt)
+// QueryDailyItinerary queries the "daily_itinerary" edge of the DailyTrip entity.
+func (dt *DailyTrip) QueryDailyItinerary() *DailyItineraryQuery {
+	return NewDailyTripClient(dt.config).QueryDailyItinerary(dt)
 }
 
 // Update returns a builder for updating this DailyTrip.

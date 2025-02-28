@@ -462,21 +462,21 @@ func HasDailyTripWith(preds ...predicate.DailyTrip) predicate.Trip {
 	})
 }
 
-// HasDailyTripItem applies the HasEdge predicate on the "daily_trip_item" edge.
-func HasDailyTripItem() predicate.Trip {
+// HasDailyItinerary applies the HasEdge predicate on the "daily_itinerary" edge.
+func HasDailyItinerary() predicate.Trip {
 	return predicate.Trip(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, DailyTripItemTable, DailyTripItemColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, DailyItineraryTable, DailyItineraryColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasDailyTripItemWith applies the HasEdge predicate on the "daily_trip_item" edge with a given conditions (other predicates).
-func HasDailyTripItemWith(preds ...predicate.DailyTripItem) predicate.Trip {
+// HasDailyItineraryWith applies the HasEdge predicate on the "daily_itinerary" edge with a given conditions (other predicates).
+func HasDailyItineraryWith(preds ...predicate.DailyItinerary) predicate.Trip {
 	return predicate.Trip(func(s *sql.Selector) {
-		step := newDailyTripItemStep()
+		step := newDailyItineraryStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/iter-x/iter-x/internal/repo/ent/dailyitinerary"
 	"github.com/iter-x/iter-x/internal/repo/ent/dailytrip"
-	"github.com/iter-x/iter-x/internal/repo/ent/dailytripitem"
 	"github.com/iter-x/iter-x/internal/repo/ent/trip"
 	"github.com/iter-x/iter-x/internal/repo/ent/user"
 )
@@ -130,19 +130,19 @@ func (tc *TripCreate) AddDailyTrip(d ...*DailyTrip) *TripCreate {
 	return tc.AddDailyTripIDs(ids...)
 }
 
-// AddDailyTripItemIDs adds the "daily_trip_item" edge to the DailyTripItem entity by IDs.
-func (tc *TripCreate) AddDailyTripItemIDs(ids ...uuid.UUID) *TripCreate {
-	tc.mutation.AddDailyTripItemIDs(ids...)
+// AddDailyItineraryIDs adds the "daily_itinerary" edge to the DailyItinerary entity by IDs.
+func (tc *TripCreate) AddDailyItineraryIDs(ids ...uuid.UUID) *TripCreate {
+	tc.mutation.AddDailyItineraryIDs(ids...)
 	return tc
 }
 
-// AddDailyTripItem adds the "daily_trip_item" edges to the DailyTripItem entity.
-func (tc *TripCreate) AddDailyTripItem(d ...*DailyTripItem) *TripCreate {
+// AddDailyItinerary adds the "daily_itinerary" edges to the DailyItinerary entity.
+func (tc *TripCreate) AddDailyItinerary(d ...*DailyItinerary) *TripCreate {
 	ids := make([]uuid.UUID, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
-	return tc.AddDailyTripItemIDs(ids...)
+	return tc.AddDailyItineraryIDs(ids...)
 }
 
 // Mutation returns the TripMutation object of the builder.
@@ -333,15 +333,15 @@ func (tc *TripCreate) createSpec() (*Trip, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := tc.mutation.DailyTripItemIDs(); len(nodes) > 0 {
+	if nodes := tc.mutation.DailyItineraryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   trip.DailyTripItemTable,
-			Columns: []string{trip.DailyTripItemColumn},
+			Table:   trip.DailyItineraryTable,
+			Columns: []string{trip.DailyItineraryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(dailytripitem.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(dailyitinerary.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

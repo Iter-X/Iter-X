@@ -12,12 +12,14 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// DailyItinerary is the client for interacting with the DailyItinerary builders.
+	DailyItinerary *DailyItineraryClient
 	// DailyTrip is the client for interacting with the DailyTrip builders.
 	DailyTrip *DailyTripClient
-	// DailyTripItem is the client for interacting with the DailyTripItem builders.
-	DailyTripItem *DailyTripItemClient
 	// Media is the client for interacting with the Media builders.
 	Media *MediaClient
+	// PointsOfInterest is the client for interacting with the PointsOfInterest builders.
+	PointsOfInterest *PointsOfInterestClient
 	// RefreshToken is the client for interacting with the RefreshToken builders.
 	RefreshToken *RefreshTokenClient
 	// Trip is the client for interacting with the Trip builders.
@@ -155,9 +157,10 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.DailyItinerary = NewDailyItineraryClient(tx.config)
 	tx.DailyTrip = NewDailyTripClient(tx.config)
-	tx.DailyTripItem = NewDailyTripItemClient(tx.config)
 	tx.Media = NewMediaClient(tx.config)
+	tx.PointsOfInterest = NewPointsOfInterestClient(tx.config)
 	tx.RefreshToken = NewRefreshTokenClient(tx.config)
 	tx.Trip = NewTripClient(tx.config)
 	tx.User = NewUserClient(tx.config)
@@ -170,7 +173,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: DailyTrip.QueryXXX(), the query will be executed
+// applies a query, for example: DailyItinerary.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

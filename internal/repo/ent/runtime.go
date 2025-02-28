@@ -6,9 +6,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/iter-x/iter-x/internal/repo/ent/dailyitinerary"
 	"github.com/iter-x/iter-x/internal/repo/ent/dailytrip"
-	"github.com/iter-x/iter-x/internal/repo/ent/dailytripitem"
 	"github.com/iter-x/iter-x/internal/repo/ent/media"
+	"github.com/iter-x/iter-x/internal/repo/ent/pointsofinterest"
 	"github.com/iter-x/iter-x/internal/repo/ent/refreshtoken"
 	"github.com/iter-x/iter-x/internal/repo/ent/schema"
 	"github.com/iter-x/iter-x/internal/repo/ent/trip"
@@ -19,6 +20,29 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	dailyitineraryMixin := schema.DailyItinerary{}.Mixin()
+	dailyitineraryMixinFields0 := dailyitineraryMixin[0].Fields()
+	_ = dailyitineraryMixinFields0
+	dailyitineraryFields := schema.DailyItinerary{}.Fields()
+	_ = dailyitineraryFields
+	// dailyitineraryDescCreatedAt is the schema descriptor for created_at field.
+	dailyitineraryDescCreatedAt := dailyitineraryMixinFields0[0].Descriptor()
+	// dailyitinerary.DefaultCreatedAt holds the default value on creation for the created_at field.
+	dailyitinerary.DefaultCreatedAt = dailyitineraryDescCreatedAt.Default.(func() time.Time)
+	// dailyitineraryDescUpdatedAt is the schema descriptor for updated_at field.
+	dailyitineraryDescUpdatedAt := dailyitineraryMixinFields0[1].Descriptor()
+	// dailyitinerary.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	dailyitinerary.DefaultUpdatedAt = dailyitineraryDescUpdatedAt.Default.(func() time.Time)
+	// dailyitinerary.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	dailyitinerary.UpdateDefaultUpdatedAt = dailyitineraryDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// dailyitineraryDescNotes is the schema descriptor for notes field.
+	dailyitineraryDescNotes := dailyitineraryFields[4].Descriptor()
+	// dailyitinerary.NotesValidator is a validator for the "notes" field. It is called by the builders before save.
+	dailyitinerary.NotesValidator = dailyitineraryDescNotes.Validators[0].(func(string) error)
+	// dailyitineraryDescID is the schema descriptor for id field.
+	dailyitineraryDescID := dailyitineraryFields[0].Descriptor()
+	// dailyitinerary.DefaultID holds the default value on creation for the id field.
+	dailyitinerary.DefaultID = dailyitineraryDescID.Default.(func() uuid.UUID)
 	dailytripMixin := schema.DailyTrip{}.Mixin()
 	dailytripMixinFields0 := dailytripMixin[0].Fields()
 	_ = dailytripMixinFields0
@@ -46,29 +70,6 @@ func init() {
 	dailytripDescID := dailytripFields[0].Descriptor()
 	// dailytrip.DefaultID holds the default value on creation for the id field.
 	dailytrip.DefaultID = dailytripDescID.Default.(func() uuid.UUID)
-	dailytripitemMixin := schema.DailyTripItem{}.Mixin()
-	dailytripitemMixinFields0 := dailytripitemMixin[0].Fields()
-	_ = dailytripitemMixinFields0
-	dailytripitemFields := schema.DailyTripItem{}.Fields()
-	_ = dailytripitemFields
-	// dailytripitemDescCreatedAt is the schema descriptor for created_at field.
-	dailytripitemDescCreatedAt := dailytripitemMixinFields0[0].Descriptor()
-	// dailytripitem.DefaultCreatedAt holds the default value on creation for the created_at field.
-	dailytripitem.DefaultCreatedAt = dailytripitemDescCreatedAt.Default.(func() time.Time)
-	// dailytripitemDescUpdatedAt is the schema descriptor for updated_at field.
-	dailytripitemDescUpdatedAt := dailytripitemMixinFields0[1].Descriptor()
-	// dailytripitem.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	dailytripitem.DefaultUpdatedAt = dailytripitemDescUpdatedAt.Default.(func() time.Time)
-	// dailytripitem.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	dailytripitem.UpdateDefaultUpdatedAt = dailytripitemDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// dailytripitemDescNotes is the schema descriptor for notes field.
-	dailytripitemDescNotes := dailytripitemFields[3].Descriptor()
-	// dailytripitem.NotesValidator is a validator for the "notes" field. It is called by the builders before save.
-	dailytripitem.NotesValidator = dailytripitemDescNotes.Validators[0].(func(string) error)
-	// dailytripitemDescID is the schema descriptor for id field.
-	dailytripitemDescID := dailytripitemFields[0].Descriptor()
-	// dailytripitem.DefaultID holds the default value on creation for the id field.
-	dailytripitem.DefaultID = dailytripitemDescID.Default.(func() uuid.UUID)
 	mediaMixin := schema.Media{}.Mixin()
 	mediaMixinFields0 := mediaMixin[0].Fields()
 	_ = mediaMixinFields0
@@ -142,6 +143,87 @@ func init() {
 	mediaDescID := mediaFields[0].Descriptor()
 	// media.DefaultID holds the default value on creation for the id field.
 	media.DefaultID = mediaDescID.Default.(func() uuid.UUID)
+	pointsofinterestMixin := schema.PointsOfInterest{}.Mixin()
+	pointsofinterestMixinFields0 := pointsofinterestMixin[0].Fields()
+	_ = pointsofinterestMixinFields0
+	pointsofinterestFields := schema.PointsOfInterest{}.Fields()
+	_ = pointsofinterestFields
+	// pointsofinterestDescCreatedAt is the schema descriptor for created_at field.
+	pointsofinterestDescCreatedAt := pointsofinterestMixinFields0[0].Descriptor()
+	// pointsofinterest.DefaultCreatedAt holds the default value on creation for the created_at field.
+	pointsofinterest.DefaultCreatedAt = pointsofinterestDescCreatedAt.Default.(func() time.Time)
+	// pointsofinterestDescUpdatedAt is the schema descriptor for updated_at field.
+	pointsofinterestDescUpdatedAt := pointsofinterestMixinFields0[1].Descriptor()
+	// pointsofinterest.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	pointsofinterest.DefaultUpdatedAt = pointsofinterestDescUpdatedAt.Default.(func() time.Time)
+	// pointsofinterest.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	pointsofinterest.UpdateDefaultUpdatedAt = pointsofinterestDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// pointsofinterestDescName is the schema descriptor for name field.
+	pointsofinterestDescName := pointsofinterestFields[1].Descriptor()
+	// pointsofinterest.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	pointsofinterest.NameValidator = func() func(string) error {
+		validators := pointsofinterestDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// pointsofinterestDescNameEn is the schema descriptor for name_en field.
+	pointsofinterestDescNameEn := pointsofinterestFields[2].Descriptor()
+	// pointsofinterest.NameEnValidator is a validator for the "name_en" field. It is called by the builders before save.
+	pointsofinterest.NameEnValidator = pointsofinterestDescNameEn.Validators[0].(func(string) error)
+	// pointsofinterestDescNameCn is the schema descriptor for name_cn field.
+	pointsofinterestDescNameCn := pointsofinterestFields[3].Descriptor()
+	// pointsofinterest.NameCnValidator is a validator for the "name_cn" field. It is called by the builders before save.
+	pointsofinterest.NameCnValidator = pointsofinterestDescNameCn.Validators[0].(func(string) error)
+	// pointsofinterestDescDescription is the schema descriptor for description field.
+	pointsofinterestDescDescription := pointsofinterestFields[4].Descriptor()
+	// pointsofinterest.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	pointsofinterest.DescriptionValidator = pointsofinterestDescDescription.Validators[0].(func(string) error)
+	// pointsofinterestDescCity is the schema descriptor for city field.
+	pointsofinterestDescCity := pointsofinterestFields[5].Descriptor()
+	// pointsofinterest.CityValidator is a validator for the "city" field. It is called by the builders before save.
+	pointsofinterest.CityValidator = pointsofinterestDescCity.Validators[0].(func(string) error)
+	// pointsofinterestDescState is the schema descriptor for state field.
+	pointsofinterestDescState := pointsofinterestFields[6].Descriptor()
+	// pointsofinterest.StateValidator is a validator for the "state" field. It is called by the builders before save.
+	pointsofinterest.StateValidator = pointsofinterestDescState.Validators[0].(func(string) error)
+	// pointsofinterestDescCountry is the schema descriptor for country field.
+	pointsofinterestDescCountry := pointsofinterestFields[7].Descriptor()
+	// pointsofinterest.CountryValidator is a validator for the "country" field. It is called by the builders before save.
+	pointsofinterest.CountryValidator = pointsofinterestDescCountry.Validators[0].(func(string) error)
+	// pointsofinterestDescAddress is the schema descriptor for address field.
+	pointsofinterestDescAddress := pointsofinterestFields[8].Descriptor()
+	// pointsofinterest.AddressValidator is a validator for the "address" field. It is called by the builders before save.
+	pointsofinterest.AddressValidator = pointsofinterestDescAddress.Validators[0].(func(string) error)
+	// pointsofinterestDescType is the schema descriptor for type field.
+	pointsofinterestDescType := pointsofinterestFields[11].Descriptor()
+	// pointsofinterest.TypeValidator is a validator for the "type" field. It is called by the builders before save.
+	pointsofinterest.TypeValidator = pointsofinterestDescType.Validators[0].(func(string) error)
+	// pointsofinterestDescCategory is the schema descriptor for category field.
+	pointsofinterestDescCategory := pointsofinterestFields[12].Descriptor()
+	// pointsofinterest.CategoryValidator is a validator for the "category" field. It is called by the builders before save.
+	pointsofinterest.CategoryValidator = pointsofinterestDescCategory.Validators[0].(func(string) error)
+	// pointsofinterestDescRating is the schema descriptor for rating field.
+	pointsofinterestDescRating := pointsofinterestFields[13].Descriptor()
+	// pointsofinterest.RatingValidator is a validator for the "rating" field. It is called by the builders before save.
+	pointsofinterest.RatingValidator = pointsofinterestDescRating.Validators[0].(func(float32) error)
+	// pointsofinterestDescRecommendedDurationSeconds is the schema descriptor for recommended_duration_seconds field.
+	pointsofinterestDescRecommendedDurationSeconds := pointsofinterestFields[14].Descriptor()
+	// pointsofinterest.RecommendedDurationSecondsValidator is a validator for the "recommended_duration_seconds" field. It is called by the builders before save.
+	pointsofinterest.RecommendedDurationSecondsValidator = pointsofinterestDescRecommendedDurationSeconds.Validators[0].(func(int64) error)
+	// pointsofinterestDescID is the schema descriptor for id field.
+	pointsofinterestDescID := pointsofinterestFields[0].Descriptor()
+	// pointsofinterest.DefaultID holds the default value on creation for the id field.
+	pointsofinterest.DefaultID = pointsofinterestDescID.Default.(func() uuid.UUID)
 	refreshtokenMixin := schema.RefreshToken{}.Mixin()
 	refreshtokenMixinFields0 := refreshtokenMixin[0].Fields()
 	_ = refreshtokenMixinFields0

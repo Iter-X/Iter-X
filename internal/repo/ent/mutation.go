@@ -13,9 +13,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/iter-x/iter-x/internal/common/model"
+	"github.com/iter-x/iter-x/internal/repo/ent/dailyitinerary"
 	"github.com/iter-x/iter-x/internal/repo/ent/dailytrip"
-	"github.com/iter-x/iter-x/internal/repo/ent/dailytripitem"
 	"github.com/iter-x/iter-x/internal/repo/ent/media"
+	"github.com/iter-x/iter-x/internal/repo/ent/pointsofinterest"
 	"github.com/iter-x/iter-x/internal/repo/ent/predicate"
 	"github.com/iter-x/iter-x/internal/repo/ent/refreshtoken"
 	"github.com/iter-x/iter-x/internal/repo/ent/trip"
@@ -31,13 +32,784 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeDailyTrip     = "DailyTrip"
-	TypeDailyTripItem = "DailyTripItem"
-	TypeMedia         = "Media"
-	TypeRefreshToken  = "RefreshToken"
-	TypeTrip          = "Trip"
-	TypeUser          = "User"
+	TypeDailyItinerary   = "DailyItinerary"
+	TypeDailyTrip        = "DailyTrip"
+	TypeMedia            = "Media"
+	TypePointsOfInterest = "PointsOfInterest"
+	TypeRefreshToken     = "RefreshToken"
+	TypeTrip             = "Trip"
+	TypeUser             = "User"
 )
+
+// DailyItineraryMutation represents an operation that mutates the DailyItinerary nodes in the graph.
+type DailyItineraryMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *uuid.UUID
+	created_at        *time.Time
+	updated_at        *time.Time
+	notes             *string
+	clearedFields     map[string]struct{}
+	trip              *uuid.UUID
+	clearedtrip       bool
+	daily_trip        *uuid.UUID
+	cleareddaily_trip bool
+	poi               *uuid.UUID
+	clearedpoi        bool
+	done              bool
+	oldValue          func(context.Context) (*DailyItinerary, error)
+	predicates        []predicate.DailyItinerary
+}
+
+var _ ent.Mutation = (*DailyItineraryMutation)(nil)
+
+// dailyitineraryOption allows management of the mutation configuration using functional options.
+type dailyitineraryOption func(*DailyItineraryMutation)
+
+// newDailyItineraryMutation creates new mutation for the DailyItinerary entity.
+func newDailyItineraryMutation(c config, op Op, opts ...dailyitineraryOption) *DailyItineraryMutation {
+	m := &DailyItineraryMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeDailyItinerary,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withDailyItineraryID sets the ID field of the mutation.
+func withDailyItineraryID(id uuid.UUID) dailyitineraryOption {
+	return func(m *DailyItineraryMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *DailyItinerary
+		)
+		m.oldValue = func(ctx context.Context) (*DailyItinerary, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().DailyItinerary.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withDailyItinerary sets the old DailyItinerary of the mutation.
+func withDailyItinerary(node *DailyItinerary) dailyitineraryOption {
+	return func(m *DailyItineraryMutation) {
+		m.oldValue = func(context.Context) (*DailyItinerary, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m DailyItineraryMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m DailyItineraryMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of DailyItinerary entities.
+func (m *DailyItineraryMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *DailyItineraryMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *DailyItineraryMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().DailyItinerary.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *DailyItineraryMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *DailyItineraryMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the DailyItinerary entity.
+// If the DailyItinerary object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DailyItineraryMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *DailyItineraryMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *DailyItineraryMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *DailyItineraryMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the DailyItinerary entity.
+// If the DailyItinerary object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DailyItineraryMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *DailyItineraryMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetTripID sets the "trip_id" field.
+func (m *DailyItineraryMutation) SetTripID(u uuid.UUID) {
+	m.trip = &u
+}
+
+// TripID returns the value of the "trip_id" field in the mutation.
+func (m *DailyItineraryMutation) TripID() (r uuid.UUID, exists bool) {
+	v := m.trip
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTripID returns the old "trip_id" field's value of the DailyItinerary entity.
+// If the DailyItinerary object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DailyItineraryMutation) OldTripID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTripID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTripID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTripID: %w", err)
+	}
+	return oldValue.TripID, nil
+}
+
+// ResetTripID resets all changes to the "trip_id" field.
+func (m *DailyItineraryMutation) ResetTripID() {
+	m.trip = nil
+}
+
+// SetDailyTripID sets the "daily_trip_id" field.
+func (m *DailyItineraryMutation) SetDailyTripID(u uuid.UUID) {
+	m.daily_trip = &u
+}
+
+// DailyTripID returns the value of the "daily_trip_id" field in the mutation.
+func (m *DailyItineraryMutation) DailyTripID() (r uuid.UUID, exists bool) {
+	v := m.daily_trip
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDailyTripID returns the old "daily_trip_id" field's value of the DailyItinerary entity.
+// If the DailyItinerary object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DailyItineraryMutation) OldDailyTripID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDailyTripID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDailyTripID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDailyTripID: %w", err)
+	}
+	return oldValue.DailyTripID, nil
+}
+
+// ResetDailyTripID resets all changes to the "daily_trip_id" field.
+func (m *DailyItineraryMutation) ResetDailyTripID() {
+	m.daily_trip = nil
+}
+
+// SetPoiID sets the "poi_id" field.
+func (m *DailyItineraryMutation) SetPoiID(u uuid.UUID) {
+	m.poi = &u
+}
+
+// PoiID returns the value of the "poi_id" field in the mutation.
+func (m *DailyItineraryMutation) PoiID() (r uuid.UUID, exists bool) {
+	v := m.poi
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPoiID returns the old "poi_id" field's value of the DailyItinerary entity.
+// If the DailyItinerary object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DailyItineraryMutation) OldPoiID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPoiID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPoiID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPoiID: %w", err)
+	}
+	return oldValue.PoiID, nil
+}
+
+// ResetPoiID resets all changes to the "poi_id" field.
+func (m *DailyItineraryMutation) ResetPoiID() {
+	m.poi = nil
+}
+
+// SetNotes sets the "notes" field.
+func (m *DailyItineraryMutation) SetNotes(s string) {
+	m.notes = &s
+}
+
+// Notes returns the value of the "notes" field in the mutation.
+func (m *DailyItineraryMutation) Notes() (r string, exists bool) {
+	v := m.notes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNotes returns the old "notes" field's value of the DailyItinerary entity.
+// If the DailyItinerary object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DailyItineraryMutation) OldNotes(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNotes is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNotes requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNotes: %w", err)
+	}
+	return oldValue.Notes, nil
+}
+
+// ClearNotes clears the value of the "notes" field.
+func (m *DailyItineraryMutation) ClearNotes() {
+	m.notes = nil
+	m.clearedFields[dailyitinerary.FieldNotes] = struct{}{}
+}
+
+// NotesCleared returns if the "notes" field was cleared in this mutation.
+func (m *DailyItineraryMutation) NotesCleared() bool {
+	_, ok := m.clearedFields[dailyitinerary.FieldNotes]
+	return ok
+}
+
+// ResetNotes resets all changes to the "notes" field.
+func (m *DailyItineraryMutation) ResetNotes() {
+	m.notes = nil
+	delete(m.clearedFields, dailyitinerary.FieldNotes)
+}
+
+// ClearTrip clears the "trip" edge to the Trip entity.
+func (m *DailyItineraryMutation) ClearTrip() {
+	m.clearedtrip = true
+	m.clearedFields[dailyitinerary.FieldTripID] = struct{}{}
+}
+
+// TripCleared reports if the "trip" edge to the Trip entity was cleared.
+func (m *DailyItineraryMutation) TripCleared() bool {
+	return m.clearedtrip
+}
+
+// TripIDs returns the "trip" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TripID instead. It exists only for internal usage by the builders.
+func (m *DailyItineraryMutation) TripIDs() (ids []uuid.UUID) {
+	if id := m.trip; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTrip resets all changes to the "trip" edge.
+func (m *DailyItineraryMutation) ResetTrip() {
+	m.trip = nil
+	m.clearedtrip = false
+}
+
+// ClearDailyTrip clears the "daily_trip" edge to the DailyTrip entity.
+func (m *DailyItineraryMutation) ClearDailyTrip() {
+	m.cleareddaily_trip = true
+	m.clearedFields[dailyitinerary.FieldDailyTripID] = struct{}{}
+}
+
+// DailyTripCleared reports if the "daily_trip" edge to the DailyTrip entity was cleared.
+func (m *DailyItineraryMutation) DailyTripCleared() bool {
+	return m.cleareddaily_trip
+}
+
+// DailyTripIDs returns the "daily_trip" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// DailyTripID instead. It exists only for internal usage by the builders.
+func (m *DailyItineraryMutation) DailyTripIDs() (ids []uuid.UUID) {
+	if id := m.daily_trip; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetDailyTrip resets all changes to the "daily_trip" edge.
+func (m *DailyItineraryMutation) ResetDailyTrip() {
+	m.daily_trip = nil
+	m.cleareddaily_trip = false
+}
+
+// ClearPoi clears the "poi" edge to the PointsOfInterest entity.
+func (m *DailyItineraryMutation) ClearPoi() {
+	m.clearedpoi = true
+	m.clearedFields[dailyitinerary.FieldPoiID] = struct{}{}
+}
+
+// PoiCleared reports if the "poi" edge to the PointsOfInterest entity was cleared.
+func (m *DailyItineraryMutation) PoiCleared() bool {
+	return m.clearedpoi
+}
+
+// PoiIDs returns the "poi" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PoiID instead. It exists only for internal usage by the builders.
+func (m *DailyItineraryMutation) PoiIDs() (ids []uuid.UUID) {
+	if id := m.poi; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPoi resets all changes to the "poi" edge.
+func (m *DailyItineraryMutation) ResetPoi() {
+	m.poi = nil
+	m.clearedpoi = false
+}
+
+// Where appends a list predicates to the DailyItineraryMutation builder.
+func (m *DailyItineraryMutation) Where(ps ...predicate.DailyItinerary) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the DailyItineraryMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *DailyItineraryMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.DailyItinerary, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *DailyItineraryMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *DailyItineraryMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (DailyItinerary).
+func (m *DailyItineraryMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *DailyItineraryMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m.created_at != nil {
+		fields = append(fields, dailyitinerary.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, dailyitinerary.FieldUpdatedAt)
+	}
+	if m.trip != nil {
+		fields = append(fields, dailyitinerary.FieldTripID)
+	}
+	if m.daily_trip != nil {
+		fields = append(fields, dailyitinerary.FieldDailyTripID)
+	}
+	if m.poi != nil {
+		fields = append(fields, dailyitinerary.FieldPoiID)
+	}
+	if m.notes != nil {
+		fields = append(fields, dailyitinerary.FieldNotes)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *DailyItineraryMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case dailyitinerary.FieldCreatedAt:
+		return m.CreatedAt()
+	case dailyitinerary.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case dailyitinerary.FieldTripID:
+		return m.TripID()
+	case dailyitinerary.FieldDailyTripID:
+		return m.DailyTripID()
+	case dailyitinerary.FieldPoiID:
+		return m.PoiID()
+	case dailyitinerary.FieldNotes:
+		return m.Notes()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *DailyItineraryMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case dailyitinerary.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case dailyitinerary.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case dailyitinerary.FieldTripID:
+		return m.OldTripID(ctx)
+	case dailyitinerary.FieldDailyTripID:
+		return m.OldDailyTripID(ctx)
+	case dailyitinerary.FieldPoiID:
+		return m.OldPoiID(ctx)
+	case dailyitinerary.FieldNotes:
+		return m.OldNotes(ctx)
+	}
+	return nil, fmt.Errorf("unknown DailyItinerary field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DailyItineraryMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case dailyitinerary.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case dailyitinerary.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case dailyitinerary.FieldTripID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTripID(v)
+		return nil
+	case dailyitinerary.FieldDailyTripID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDailyTripID(v)
+		return nil
+	case dailyitinerary.FieldPoiID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPoiID(v)
+		return nil
+	case dailyitinerary.FieldNotes:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNotes(v)
+		return nil
+	}
+	return fmt.Errorf("unknown DailyItinerary field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *DailyItineraryMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *DailyItineraryMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DailyItineraryMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown DailyItinerary numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *DailyItineraryMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(dailyitinerary.FieldNotes) {
+		fields = append(fields, dailyitinerary.FieldNotes)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *DailyItineraryMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *DailyItineraryMutation) ClearField(name string) error {
+	switch name {
+	case dailyitinerary.FieldNotes:
+		m.ClearNotes()
+		return nil
+	}
+	return fmt.Errorf("unknown DailyItinerary nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *DailyItineraryMutation) ResetField(name string) error {
+	switch name {
+	case dailyitinerary.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case dailyitinerary.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case dailyitinerary.FieldTripID:
+		m.ResetTripID()
+		return nil
+	case dailyitinerary.FieldDailyTripID:
+		m.ResetDailyTripID()
+		return nil
+	case dailyitinerary.FieldPoiID:
+		m.ResetPoiID()
+		return nil
+	case dailyitinerary.FieldNotes:
+		m.ResetNotes()
+		return nil
+	}
+	return fmt.Errorf("unknown DailyItinerary field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *DailyItineraryMutation) AddedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.trip != nil {
+		edges = append(edges, dailyitinerary.EdgeTrip)
+	}
+	if m.daily_trip != nil {
+		edges = append(edges, dailyitinerary.EdgeDailyTrip)
+	}
+	if m.poi != nil {
+		edges = append(edges, dailyitinerary.EdgePoi)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *DailyItineraryMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case dailyitinerary.EdgeTrip:
+		if id := m.trip; id != nil {
+			return []ent.Value{*id}
+		}
+	case dailyitinerary.EdgeDailyTrip:
+		if id := m.daily_trip; id != nil {
+			return []ent.Value{*id}
+		}
+	case dailyitinerary.EdgePoi:
+		if id := m.poi; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *DailyItineraryMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 3)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *DailyItineraryMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *DailyItineraryMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.clearedtrip {
+		edges = append(edges, dailyitinerary.EdgeTrip)
+	}
+	if m.cleareddaily_trip {
+		edges = append(edges, dailyitinerary.EdgeDailyTrip)
+	}
+	if m.clearedpoi {
+		edges = append(edges, dailyitinerary.EdgePoi)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *DailyItineraryMutation) EdgeCleared(name string) bool {
+	switch name {
+	case dailyitinerary.EdgeTrip:
+		return m.clearedtrip
+	case dailyitinerary.EdgeDailyTrip:
+		return m.cleareddaily_trip
+	case dailyitinerary.EdgePoi:
+		return m.clearedpoi
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *DailyItineraryMutation) ClearEdge(name string) error {
+	switch name {
+	case dailyitinerary.EdgeTrip:
+		m.ClearTrip()
+		return nil
+	case dailyitinerary.EdgeDailyTrip:
+		m.ClearDailyTrip()
+		return nil
+	case dailyitinerary.EdgePoi:
+		m.ClearPoi()
+		return nil
+	}
+	return fmt.Errorf("unknown DailyItinerary unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *DailyItineraryMutation) ResetEdge(name string) error {
+	switch name {
+	case dailyitinerary.EdgeTrip:
+		m.ResetTrip()
+		return nil
+	case dailyitinerary.EdgeDailyTrip:
+		m.ResetDailyTrip()
+		return nil
+	case dailyitinerary.EdgePoi:
+		m.ResetPoi()
+		return nil
+	}
+	return fmt.Errorf("unknown DailyItinerary edge %s", name)
+}
 
 // DailyTripMutation represents an operation that mutates the DailyTrip nodes in the graph.
 type DailyTripMutation struct {
@@ -54,9 +826,9 @@ type DailyTripMutation struct {
 	clearedFields          map[string]struct{}
 	trip                   *uuid.UUID
 	clearedtrip            bool
-	daily_trip_item        map[uuid.UUID]struct{}
-	removeddaily_trip_item map[uuid.UUID]struct{}
-	cleareddaily_trip_item bool
+	daily_itinerary        map[uuid.UUID]struct{}
+	removeddaily_itinerary map[uuid.UUID]struct{}
+	cleareddaily_itinerary bool
 	done                   bool
 	oldValue               func(context.Context) (*DailyTrip, error)
 	predicates             []predicate.DailyTrip
@@ -442,58 +1214,58 @@ func (m *DailyTripMutation) ResetTrip() {
 	m.clearedtrip = false
 }
 
-// AddDailyTripItemIDs adds the "daily_trip_item" edge to the DailyTripItem entity by ids.
-func (m *DailyTripMutation) AddDailyTripItemIDs(ids ...uuid.UUID) {
-	if m.daily_trip_item == nil {
-		m.daily_trip_item = make(map[uuid.UUID]struct{})
+// AddDailyItineraryIDs adds the "daily_itinerary" edge to the DailyItinerary entity by ids.
+func (m *DailyTripMutation) AddDailyItineraryIDs(ids ...uuid.UUID) {
+	if m.daily_itinerary == nil {
+		m.daily_itinerary = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.daily_trip_item[ids[i]] = struct{}{}
+		m.daily_itinerary[ids[i]] = struct{}{}
 	}
 }
 
-// ClearDailyTripItem clears the "daily_trip_item" edge to the DailyTripItem entity.
-func (m *DailyTripMutation) ClearDailyTripItem() {
-	m.cleareddaily_trip_item = true
+// ClearDailyItinerary clears the "daily_itinerary" edge to the DailyItinerary entity.
+func (m *DailyTripMutation) ClearDailyItinerary() {
+	m.cleareddaily_itinerary = true
 }
 
-// DailyTripItemCleared reports if the "daily_trip_item" edge to the DailyTripItem entity was cleared.
-func (m *DailyTripMutation) DailyTripItemCleared() bool {
-	return m.cleareddaily_trip_item
+// DailyItineraryCleared reports if the "daily_itinerary" edge to the DailyItinerary entity was cleared.
+func (m *DailyTripMutation) DailyItineraryCleared() bool {
+	return m.cleareddaily_itinerary
 }
 
-// RemoveDailyTripItemIDs removes the "daily_trip_item" edge to the DailyTripItem entity by IDs.
-func (m *DailyTripMutation) RemoveDailyTripItemIDs(ids ...uuid.UUID) {
-	if m.removeddaily_trip_item == nil {
-		m.removeddaily_trip_item = make(map[uuid.UUID]struct{})
+// RemoveDailyItineraryIDs removes the "daily_itinerary" edge to the DailyItinerary entity by IDs.
+func (m *DailyTripMutation) RemoveDailyItineraryIDs(ids ...uuid.UUID) {
+	if m.removeddaily_itinerary == nil {
+		m.removeddaily_itinerary = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		delete(m.daily_trip_item, ids[i])
-		m.removeddaily_trip_item[ids[i]] = struct{}{}
+		delete(m.daily_itinerary, ids[i])
+		m.removeddaily_itinerary[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedDailyTripItem returns the removed IDs of the "daily_trip_item" edge to the DailyTripItem entity.
-func (m *DailyTripMutation) RemovedDailyTripItemIDs() (ids []uuid.UUID) {
-	for id := range m.removeddaily_trip_item {
+// RemovedDailyItinerary returns the removed IDs of the "daily_itinerary" edge to the DailyItinerary entity.
+func (m *DailyTripMutation) RemovedDailyItineraryIDs() (ids []uuid.UUID) {
+	for id := range m.removeddaily_itinerary {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// DailyTripItemIDs returns the "daily_trip_item" edge IDs in the mutation.
-func (m *DailyTripMutation) DailyTripItemIDs() (ids []uuid.UUID) {
-	for id := range m.daily_trip_item {
+// DailyItineraryIDs returns the "daily_itinerary" edge IDs in the mutation.
+func (m *DailyTripMutation) DailyItineraryIDs() (ids []uuid.UUID) {
+	for id := range m.daily_itinerary {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetDailyTripItem resets all changes to the "daily_trip_item" edge.
-func (m *DailyTripMutation) ResetDailyTripItem() {
-	m.daily_trip_item = nil
-	m.cleareddaily_trip_item = false
-	m.removeddaily_trip_item = nil
+// ResetDailyItinerary resets all changes to the "daily_itinerary" edge.
+func (m *DailyTripMutation) ResetDailyItinerary() {
+	m.daily_itinerary = nil
+	m.cleareddaily_itinerary = false
+	m.removeddaily_itinerary = nil
 }
 
 // Where appends a list predicates to the DailyTripMutation builder.
@@ -742,8 +1514,8 @@ func (m *DailyTripMutation) AddedEdges() []string {
 	if m.trip != nil {
 		edges = append(edges, dailytrip.EdgeTrip)
 	}
-	if m.daily_trip_item != nil {
-		edges = append(edges, dailytrip.EdgeDailyTripItem)
+	if m.daily_itinerary != nil {
+		edges = append(edges, dailytrip.EdgeDailyItinerary)
 	}
 	return edges
 }
@@ -756,9 +1528,9 @@ func (m *DailyTripMutation) AddedIDs(name string) []ent.Value {
 		if id := m.trip; id != nil {
 			return []ent.Value{*id}
 		}
-	case dailytrip.EdgeDailyTripItem:
-		ids := make([]ent.Value, 0, len(m.daily_trip_item))
-		for id := range m.daily_trip_item {
+	case dailytrip.EdgeDailyItinerary:
+		ids := make([]ent.Value, 0, len(m.daily_itinerary))
+		for id := range m.daily_itinerary {
 			ids = append(ids, id)
 		}
 		return ids
@@ -769,8 +1541,8 @@ func (m *DailyTripMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DailyTripMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.removeddaily_trip_item != nil {
-		edges = append(edges, dailytrip.EdgeDailyTripItem)
+	if m.removeddaily_itinerary != nil {
+		edges = append(edges, dailytrip.EdgeDailyItinerary)
 	}
 	return edges
 }
@@ -779,9 +1551,9 @@ func (m *DailyTripMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *DailyTripMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case dailytrip.EdgeDailyTripItem:
-		ids := make([]ent.Value, 0, len(m.removeddaily_trip_item))
-		for id := range m.removeddaily_trip_item {
+	case dailytrip.EdgeDailyItinerary:
+		ids := make([]ent.Value, 0, len(m.removeddaily_itinerary))
+		for id := range m.removeddaily_itinerary {
 			ids = append(ids, id)
 		}
 		return ids
@@ -795,8 +1567,8 @@ func (m *DailyTripMutation) ClearedEdges() []string {
 	if m.clearedtrip {
 		edges = append(edges, dailytrip.EdgeTrip)
 	}
-	if m.cleareddaily_trip_item {
-		edges = append(edges, dailytrip.EdgeDailyTripItem)
+	if m.cleareddaily_itinerary {
+		edges = append(edges, dailytrip.EdgeDailyItinerary)
 	}
 	return edges
 }
@@ -807,8 +1579,8 @@ func (m *DailyTripMutation) EdgeCleared(name string) bool {
 	switch name {
 	case dailytrip.EdgeTrip:
 		return m.clearedtrip
-	case dailytrip.EdgeDailyTripItem:
-		return m.cleareddaily_trip_item
+	case dailytrip.EdgeDailyItinerary:
+		return m.cleareddaily_itinerary
 	}
 	return false
 }
@@ -831,681 +1603,11 @@ func (m *DailyTripMutation) ResetEdge(name string) error {
 	case dailytrip.EdgeTrip:
 		m.ResetTrip()
 		return nil
-	case dailytrip.EdgeDailyTripItem:
-		m.ResetDailyTripItem()
+	case dailytrip.EdgeDailyItinerary:
+		m.ResetDailyItinerary()
 		return nil
 	}
 	return fmt.Errorf("unknown DailyTrip edge %s", name)
-}
-
-// DailyTripItemMutation represents an operation that mutates the DailyTripItem nodes in the graph.
-type DailyTripItemMutation struct {
-	config
-	op                Op
-	typ               string
-	id                *uuid.UUID
-	created_at        *time.Time
-	updated_at        *time.Time
-	notes             *string
-	clearedFields     map[string]struct{}
-	trip              *uuid.UUID
-	clearedtrip       bool
-	daily_trip        *uuid.UUID
-	cleareddaily_trip bool
-	done              bool
-	oldValue          func(context.Context) (*DailyTripItem, error)
-	predicates        []predicate.DailyTripItem
-}
-
-var _ ent.Mutation = (*DailyTripItemMutation)(nil)
-
-// dailytripitemOption allows management of the mutation configuration using functional options.
-type dailytripitemOption func(*DailyTripItemMutation)
-
-// newDailyTripItemMutation creates new mutation for the DailyTripItem entity.
-func newDailyTripItemMutation(c config, op Op, opts ...dailytripitemOption) *DailyTripItemMutation {
-	m := &DailyTripItemMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeDailyTripItem,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withDailyTripItemID sets the ID field of the mutation.
-func withDailyTripItemID(id uuid.UUID) dailytripitemOption {
-	return func(m *DailyTripItemMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *DailyTripItem
-		)
-		m.oldValue = func(ctx context.Context) (*DailyTripItem, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().DailyTripItem.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withDailyTripItem sets the old DailyTripItem of the mutation.
-func withDailyTripItem(node *DailyTripItem) dailytripitemOption {
-	return func(m *DailyTripItemMutation) {
-		m.oldValue = func(context.Context) (*DailyTripItem, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m DailyTripItemMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m DailyTripItemMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of DailyTripItem entities.
-func (m *DailyTripItemMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *DailyTripItemMutation) ID() (id uuid.UUID, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *DailyTripItemMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []uuid.UUID{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().DailyTripItem.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *DailyTripItemMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *DailyTripItemMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the DailyTripItem entity.
-// If the DailyTripItem object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DailyTripItemMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *DailyTripItemMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *DailyTripItemMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *DailyTripItemMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the DailyTripItem entity.
-// If the DailyTripItem object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DailyTripItemMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *DailyTripItemMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// SetTripID sets the "trip_id" field.
-func (m *DailyTripItemMutation) SetTripID(u uuid.UUID) {
-	m.trip = &u
-}
-
-// TripID returns the value of the "trip_id" field in the mutation.
-func (m *DailyTripItemMutation) TripID() (r uuid.UUID, exists bool) {
-	v := m.trip
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldTripID returns the old "trip_id" field's value of the DailyTripItem entity.
-// If the DailyTripItem object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DailyTripItemMutation) OldTripID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldTripID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldTripID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTripID: %w", err)
-	}
-	return oldValue.TripID, nil
-}
-
-// ResetTripID resets all changes to the "trip_id" field.
-func (m *DailyTripItemMutation) ResetTripID() {
-	m.trip = nil
-}
-
-// SetDailyTripID sets the "daily_trip_id" field.
-func (m *DailyTripItemMutation) SetDailyTripID(u uuid.UUID) {
-	m.daily_trip = &u
-}
-
-// DailyTripID returns the value of the "daily_trip_id" field in the mutation.
-func (m *DailyTripItemMutation) DailyTripID() (r uuid.UUID, exists bool) {
-	v := m.daily_trip
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDailyTripID returns the old "daily_trip_id" field's value of the DailyTripItem entity.
-// If the DailyTripItem object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DailyTripItemMutation) OldDailyTripID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDailyTripID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDailyTripID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDailyTripID: %w", err)
-	}
-	return oldValue.DailyTripID, nil
-}
-
-// ResetDailyTripID resets all changes to the "daily_trip_id" field.
-func (m *DailyTripItemMutation) ResetDailyTripID() {
-	m.daily_trip = nil
-}
-
-// SetNotes sets the "notes" field.
-func (m *DailyTripItemMutation) SetNotes(s string) {
-	m.notes = &s
-}
-
-// Notes returns the value of the "notes" field in the mutation.
-func (m *DailyTripItemMutation) Notes() (r string, exists bool) {
-	v := m.notes
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldNotes returns the old "notes" field's value of the DailyTripItem entity.
-// If the DailyTripItem object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DailyTripItemMutation) OldNotes(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldNotes is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldNotes requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldNotes: %w", err)
-	}
-	return oldValue.Notes, nil
-}
-
-// ClearNotes clears the value of the "notes" field.
-func (m *DailyTripItemMutation) ClearNotes() {
-	m.notes = nil
-	m.clearedFields[dailytripitem.FieldNotes] = struct{}{}
-}
-
-// NotesCleared returns if the "notes" field was cleared in this mutation.
-func (m *DailyTripItemMutation) NotesCleared() bool {
-	_, ok := m.clearedFields[dailytripitem.FieldNotes]
-	return ok
-}
-
-// ResetNotes resets all changes to the "notes" field.
-func (m *DailyTripItemMutation) ResetNotes() {
-	m.notes = nil
-	delete(m.clearedFields, dailytripitem.FieldNotes)
-}
-
-// ClearTrip clears the "trip" edge to the Trip entity.
-func (m *DailyTripItemMutation) ClearTrip() {
-	m.clearedtrip = true
-	m.clearedFields[dailytripitem.FieldTripID] = struct{}{}
-}
-
-// TripCleared reports if the "trip" edge to the Trip entity was cleared.
-func (m *DailyTripItemMutation) TripCleared() bool {
-	return m.clearedtrip
-}
-
-// TripIDs returns the "trip" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// TripID instead. It exists only for internal usage by the builders.
-func (m *DailyTripItemMutation) TripIDs() (ids []uuid.UUID) {
-	if id := m.trip; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetTrip resets all changes to the "trip" edge.
-func (m *DailyTripItemMutation) ResetTrip() {
-	m.trip = nil
-	m.clearedtrip = false
-}
-
-// ClearDailyTrip clears the "daily_trip" edge to the DailyTrip entity.
-func (m *DailyTripItemMutation) ClearDailyTrip() {
-	m.cleareddaily_trip = true
-	m.clearedFields[dailytripitem.FieldDailyTripID] = struct{}{}
-}
-
-// DailyTripCleared reports if the "daily_trip" edge to the DailyTrip entity was cleared.
-func (m *DailyTripItemMutation) DailyTripCleared() bool {
-	return m.cleareddaily_trip
-}
-
-// DailyTripIDs returns the "daily_trip" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// DailyTripID instead. It exists only for internal usage by the builders.
-func (m *DailyTripItemMutation) DailyTripIDs() (ids []uuid.UUID) {
-	if id := m.daily_trip; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetDailyTrip resets all changes to the "daily_trip" edge.
-func (m *DailyTripItemMutation) ResetDailyTrip() {
-	m.daily_trip = nil
-	m.cleareddaily_trip = false
-}
-
-// Where appends a list predicates to the DailyTripItemMutation builder.
-func (m *DailyTripItemMutation) Where(ps ...predicate.DailyTripItem) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the DailyTripItemMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *DailyTripItemMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.DailyTripItem, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *DailyTripItemMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *DailyTripItemMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (DailyTripItem).
-func (m *DailyTripItemMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *DailyTripItemMutation) Fields() []string {
-	fields := make([]string, 0, 5)
-	if m.created_at != nil {
-		fields = append(fields, dailytripitem.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, dailytripitem.FieldUpdatedAt)
-	}
-	if m.trip != nil {
-		fields = append(fields, dailytripitem.FieldTripID)
-	}
-	if m.daily_trip != nil {
-		fields = append(fields, dailytripitem.FieldDailyTripID)
-	}
-	if m.notes != nil {
-		fields = append(fields, dailytripitem.FieldNotes)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *DailyTripItemMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case dailytripitem.FieldCreatedAt:
-		return m.CreatedAt()
-	case dailytripitem.FieldUpdatedAt:
-		return m.UpdatedAt()
-	case dailytripitem.FieldTripID:
-		return m.TripID()
-	case dailytripitem.FieldDailyTripID:
-		return m.DailyTripID()
-	case dailytripitem.FieldNotes:
-		return m.Notes()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *DailyTripItemMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case dailytripitem.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case dailytripitem.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
-	case dailytripitem.FieldTripID:
-		return m.OldTripID(ctx)
-	case dailytripitem.FieldDailyTripID:
-		return m.OldDailyTripID(ctx)
-	case dailytripitem.FieldNotes:
-		return m.OldNotes(ctx)
-	}
-	return nil, fmt.Errorf("unknown DailyTripItem field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *DailyTripItemMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case dailytripitem.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case dailytripitem.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
-	case dailytripitem.FieldTripID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetTripID(v)
-		return nil
-	case dailytripitem.FieldDailyTripID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDailyTripID(v)
-		return nil
-	case dailytripitem.FieldNotes:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetNotes(v)
-		return nil
-	}
-	return fmt.Errorf("unknown DailyTripItem field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *DailyTripItemMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *DailyTripItemMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *DailyTripItemMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown DailyTripItem numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *DailyTripItemMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(dailytripitem.FieldNotes) {
-		fields = append(fields, dailytripitem.FieldNotes)
-	}
-	return fields
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *DailyTripItemMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *DailyTripItemMutation) ClearField(name string) error {
-	switch name {
-	case dailytripitem.FieldNotes:
-		m.ClearNotes()
-		return nil
-	}
-	return fmt.Errorf("unknown DailyTripItem nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *DailyTripItemMutation) ResetField(name string) error {
-	switch name {
-	case dailytripitem.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case dailytripitem.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
-	case dailytripitem.FieldTripID:
-		m.ResetTripID()
-		return nil
-	case dailytripitem.FieldDailyTripID:
-		m.ResetDailyTripID()
-		return nil
-	case dailytripitem.FieldNotes:
-		m.ResetNotes()
-		return nil
-	}
-	return fmt.Errorf("unknown DailyTripItem field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *DailyTripItemMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.trip != nil {
-		edges = append(edges, dailytripitem.EdgeTrip)
-	}
-	if m.daily_trip != nil {
-		edges = append(edges, dailytripitem.EdgeDailyTrip)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *DailyTripItemMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case dailytripitem.EdgeTrip:
-		if id := m.trip; id != nil {
-			return []ent.Value{*id}
-		}
-	case dailytripitem.EdgeDailyTrip:
-		if id := m.daily_trip; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *DailyTripItemMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *DailyTripItemMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *DailyTripItemMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedtrip {
-		edges = append(edges, dailytripitem.EdgeTrip)
-	}
-	if m.cleareddaily_trip {
-		edges = append(edges, dailytripitem.EdgeDailyTrip)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *DailyTripItemMutation) EdgeCleared(name string) bool {
-	switch name {
-	case dailytripitem.EdgeTrip:
-		return m.clearedtrip
-	case dailytripitem.EdgeDailyTrip:
-		return m.cleareddaily_trip
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *DailyTripItemMutation) ClearEdge(name string) error {
-	switch name {
-	case dailytripitem.EdgeTrip:
-		m.ClearTrip()
-		return nil
-	case dailytripitem.EdgeDailyTrip:
-		m.ClearDailyTrip()
-		return nil
-	}
-	return fmt.Errorf("unknown DailyTripItem unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *DailyTripItemMutation) ResetEdge(name string) error {
-	switch name {
-	case dailytripitem.EdgeTrip:
-		m.ResetTrip()
-		return nil
-	case dailytripitem.EdgeDailyTrip:
-		m.ResetDailyTrip()
-		return nil
-	}
-	return fmt.Errorf("unknown DailyTripItem edge %s", name)
 }
 
 // MediaMutation represents an operation that mutates the Media nodes in the graph.
@@ -2146,6 +2248,1376 @@ func (m *MediaMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Media edge %s", name)
 }
 
+// PointsOfInterestMutation represents an operation that mutates the PointsOfInterest nodes in the graph.
+type PointsOfInterestMutation struct {
+	config
+	op                              Op
+	typ                             string
+	id                              *uuid.UUID
+	created_at                      *time.Time
+	updated_at                      *time.Time
+	name                            *string
+	name_en                         *string
+	name_cn                         *string
+	description                     *string
+	city                            *string
+	state                           *string
+	country                         *string
+	address                         *string
+	latitude                        *float64
+	addlatitude                     *float64
+	longitude                       *float64
+	addlongitude                    *float64
+	_type                           *string
+	category                        *string
+	rating                          *float32
+	addrating                       *float32
+	recommended_duration_seconds    *int64
+	addrecommended_duration_seconds *int64
+	clearedFields                   map[string]struct{}
+	daily_itinerary                 map[uuid.UUID]struct{}
+	removeddaily_itinerary          map[uuid.UUID]struct{}
+	cleareddaily_itinerary          bool
+	done                            bool
+	oldValue                        func(context.Context) (*PointsOfInterest, error)
+	predicates                      []predicate.PointsOfInterest
+}
+
+var _ ent.Mutation = (*PointsOfInterestMutation)(nil)
+
+// pointsofinterestOption allows management of the mutation configuration using functional options.
+type pointsofinterestOption func(*PointsOfInterestMutation)
+
+// newPointsOfInterestMutation creates new mutation for the PointsOfInterest entity.
+func newPointsOfInterestMutation(c config, op Op, opts ...pointsofinterestOption) *PointsOfInterestMutation {
+	m := &PointsOfInterestMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePointsOfInterest,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPointsOfInterestID sets the ID field of the mutation.
+func withPointsOfInterestID(id uuid.UUID) pointsofinterestOption {
+	return func(m *PointsOfInterestMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PointsOfInterest
+		)
+		m.oldValue = func(ctx context.Context) (*PointsOfInterest, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PointsOfInterest.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPointsOfInterest sets the old PointsOfInterest of the mutation.
+func withPointsOfInterest(node *PointsOfInterest) pointsofinterestOption {
+	return func(m *PointsOfInterestMutation) {
+		m.oldValue = func(context.Context) (*PointsOfInterest, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PointsOfInterestMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PointsOfInterestMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of PointsOfInterest entities.
+func (m *PointsOfInterestMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PointsOfInterestMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PointsOfInterestMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PointsOfInterest.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *PointsOfInterestMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *PointsOfInterestMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the PointsOfInterest entity.
+// If the PointsOfInterest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PointsOfInterestMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *PointsOfInterestMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *PointsOfInterestMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *PointsOfInterestMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the PointsOfInterest entity.
+// If the PointsOfInterest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PointsOfInterestMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *PointsOfInterestMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetName sets the "name" field.
+func (m *PointsOfInterestMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *PointsOfInterestMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the PointsOfInterest entity.
+// If the PointsOfInterest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PointsOfInterestMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *PointsOfInterestMutation) ResetName() {
+	m.name = nil
+}
+
+// SetNameEn sets the "name_en" field.
+func (m *PointsOfInterestMutation) SetNameEn(s string) {
+	m.name_en = &s
+}
+
+// NameEn returns the value of the "name_en" field in the mutation.
+func (m *PointsOfInterestMutation) NameEn() (r string, exists bool) {
+	v := m.name_en
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNameEn returns the old "name_en" field's value of the PointsOfInterest entity.
+// If the PointsOfInterest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PointsOfInterestMutation) OldNameEn(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNameEn is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNameEn requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNameEn: %w", err)
+	}
+	return oldValue.NameEn, nil
+}
+
+// ResetNameEn resets all changes to the "name_en" field.
+func (m *PointsOfInterestMutation) ResetNameEn() {
+	m.name_en = nil
+}
+
+// SetNameCn sets the "name_cn" field.
+func (m *PointsOfInterestMutation) SetNameCn(s string) {
+	m.name_cn = &s
+}
+
+// NameCn returns the value of the "name_cn" field in the mutation.
+func (m *PointsOfInterestMutation) NameCn() (r string, exists bool) {
+	v := m.name_cn
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNameCn returns the old "name_cn" field's value of the PointsOfInterest entity.
+// If the PointsOfInterest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PointsOfInterestMutation) OldNameCn(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNameCn is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNameCn requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNameCn: %w", err)
+	}
+	return oldValue.NameCn, nil
+}
+
+// ResetNameCn resets all changes to the "name_cn" field.
+func (m *PointsOfInterestMutation) ResetNameCn() {
+	m.name_cn = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *PointsOfInterestMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *PointsOfInterestMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the PointsOfInterest entity.
+// If the PointsOfInterest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PointsOfInterestMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *PointsOfInterestMutation) ResetDescription() {
+	m.description = nil
+}
+
+// SetCity sets the "city" field.
+func (m *PointsOfInterestMutation) SetCity(s string) {
+	m.city = &s
+}
+
+// City returns the value of the "city" field in the mutation.
+func (m *PointsOfInterestMutation) City() (r string, exists bool) {
+	v := m.city
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCity returns the old "city" field's value of the PointsOfInterest entity.
+// If the PointsOfInterest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PointsOfInterestMutation) OldCity(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCity is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCity requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCity: %w", err)
+	}
+	return oldValue.City, nil
+}
+
+// ResetCity resets all changes to the "city" field.
+func (m *PointsOfInterestMutation) ResetCity() {
+	m.city = nil
+}
+
+// SetState sets the "state" field.
+func (m *PointsOfInterestMutation) SetState(s string) {
+	m.state = &s
+}
+
+// State returns the value of the "state" field in the mutation.
+func (m *PointsOfInterestMutation) State() (r string, exists bool) {
+	v := m.state
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldState returns the old "state" field's value of the PointsOfInterest entity.
+// If the PointsOfInterest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PointsOfInterestMutation) OldState(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldState is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldState requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldState: %w", err)
+	}
+	return oldValue.State, nil
+}
+
+// ResetState resets all changes to the "state" field.
+func (m *PointsOfInterestMutation) ResetState() {
+	m.state = nil
+}
+
+// SetCountry sets the "country" field.
+func (m *PointsOfInterestMutation) SetCountry(s string) {
+	m.country = &s
+}
+
+// Country returns the value of the "country" field in the mutation.
+func (m *PointsOfInterestMutation) Country() (r string, exists bool) {
+	v := m.country
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCountry returns the old "country" field's value of the PointsOfInterest entity.
+// If the PointsOfInterest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PointsOfInterestMutation) OldCountry(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCountry is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCountry requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCountry: %w", err)
+	}
+	return oldValue.Country, nil
+}
+
+// ResetCountry resets all changes to the "country" field.
+func (m *PointsOfInterestMutation) ResetCountry() {
+	m.country = nil
+}
+
+// SetAddress sets the "address" field.
+func (m *PointsOfInterestMutation) SetAddress(s string) {
+	m.address = &s
+}
+
+// Address returns the value of the "address" field in the mutation.
+func (m *PointsOfInterestMutation) Address() (r string, exists bool) {
+	v := m.address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAddress returns the old "address" field's value of the PointsOfInterest entity.
+// If the PointsOfInterest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PointsOfInterestMutation) OldAddress(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAddress: %w", err)
+	}
+	return oldValue.Address, nil
+}
+
+// ResetAddress resets all changes to the "address" field.
+func (m *PointsOfInterestMutation) ResetAddress() {
+	m.address = nil
+}
+
+// SetLatitude sets the "latitude" field.
+func (m *PointsOfInterestMutation) SetLatitude(f float64) {
+	m.latitude = &f
+	m.addlatitude = nil
+}
+
+// Latitude returns the value of the "latitude" field in the mutation.
+func (m *PointsOfInterestMutation) Latitude() (r float64, exists bool) {
+	v := m.latitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLatitude returns the old "latitude" field's value of the PointsOfInterest entity.
+// If the PointsOfInterest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PointsOfInterestMutation) OldLatitude(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLatitude is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLatitude requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLatitude: %w", err)
+	}
+	return oldValue.Latitude, nil
+}
+
+// AddLatitude adds f to the "latitude" field.
+func (m *PointsOfInterestMutation) AddLatitude(f float64) {
+	if m.addlatitude != nil {
+		*m.addlatitude += f
+	} else {
+		m.addlatitude = &f
+	}
+}
+
+// AddedLatitude returns the value that was added to the "latitude" field in this mutation.
+func (m *PointsOfInterestMutation) AddedLatitude() (r float64, exists bool) {
+	v := m.addlatitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetLatitude resets all changes to the "latitude" field.
+func (m *PointsOfInterestMutation) ResetLatitude() {
+	m.latitude = nil
+	m.addlatitude = nil
+}
+
+// SetLongitude sets the "longitude" field.
+func (m *PointsOfInterestMutation) SetLongitude(f float64) {
+	m.longitude = &f
+	m.addlongitude = nil
+}
+
+// Longitude returns the value of the "longitude" field in the mutation.
+func (m *PointsOfInterestMutation) Longitude() (r float64, exists bool) {
+	v := m.longitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLongitude returns the old "longitude" field's value of the PointsOfInterest entity.
+// If the PointsOfInterest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PointsOfInterestMutation) OldLongitude(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLongitude is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLongitude requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLongitude: %w", err)
+	}
+	return oldValue.Longitude, nil
+}
+
+// AddLongitude adds f to the "longitude" field.
+func (m *PointsOfInterestMutation) AddLongitude(f float64) {
+	if m.addlongitude != nil {
+		*m.addlongitude += f
+	} else {
+		m.addlongitude = &f
+	}
+}
+
+// AddedLongitude returns the value that was added to the "longitude" field in this mutation.
+func (m *PointsOfInterestMutation) AddedLongitude() (r float64, exists bool) {
+	v := m.addlongitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetLongitude resets all changes to the "longitude" field.
+func (m *PointsOfInterestMutation) ResetLongitude() {
+	m.longitude = nil
+	m.addlongitude = nil
+}
+
+// SetType sets the "type" field.
+func (m *PointsOfInterestMutation) SetType(s string) {
+	m._type = &s
+}
+
+// GetType returns the value of the "type" field in the mutation.
+func (m *PointsOfInterestMutation) GetType() (r string, exists bool) {
+	v := m._type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldType returns the old "type" field's value of the PointsOfInterest entity.
+// If the PointsOfInterest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PointsOfInterestMutation) OldType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
+	}
+	return oldValue.Type, nil
+}
+
+// ResetType resets all changes to the "type" field.
+func (m *PointsOfInterestMutation) ResetType() {
+	m._type = nil
+}
+
+// SetCategory sets the "category" field.
+func (m *PointsOfInterestMutation) SetCategory(s string) {
+	m.category = &s
+}
+
+// Category returns the value of the "category" field in the mutation.
+func (m *PointsOfInterestMutation) Category() (r string, exists bool) {
+	v := m.category
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCategory returns the old "category" field's value of the PointsOfInterest entity.
+// If the PointsOfInterest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PointsOfInterestMutation) OldCategory(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCategory is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCategory requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCategory: %w", err)
+	}
+	return oldValue.Category, nil
+}
+
+// ResetCategory resets all changes to the "category" field.
+func (m *PointsOfInterestMutation) ResetCategory() {
+	m.category = nil
+}
+
+// SetRating sets the "rating" field.
+func (m *PointsOfInterestMutation) SetRating(f float32) {
+	m.rating = &f
+	m.addrating = nil
+}
+
+// Rating returns the value of the "rating" field in the mutation.
+func (m *PointsOfInterestMutation) Rating() (r float32, exists bool) {
+	v := m.rating
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRating returns the old "rating" field's value of the PointsOfInterest entity.
+// If the PointsOfInterest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PointsOfInterestMutation) OldRating(ctx context.Context) (v float32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRating is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRating requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRating: %w", err)
+	}
+	return oldValue.Rating, nil
+}
+
+// AddRating adds f to the "rating" field.
+func (m *PointsOfInterestMutation) AddRating(f float32) {
+	if m.addrating != nil {
+		*m.addrating += f
+	} else {
+		m.addrating = &f
+	}
+}
+
+// AddedRating returns the value that was added to the "rating" field in this mutation.
+func (m *PointsOfInterestMutation) AddedRating() (r float32, exists bool) {
+	v := m.addrating
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetRating resets all changes to the "rating" field.
+func (m *PointsOfInterestMutation) ResetRating() {
+	m.rating = nil
+	m.addrating = nil
+}
+
+// SetRecommendedDurationSeconds sets the "recommended_duration_seconds" field.
+func (m *PointsOfInterestMutation) SetRecommendedDurationSeconds(i int64) {
+	m.recommended_duration_seconds = &i
+	m.addrecommended_duration_seconds = nil
+}
+
+// RecommendedDurationSeconds returns the value of the "recommended_duration_seconds" field in the mutation.
+func (m *PointsOfInterestMutation) RecommendedDurationSeconds() (r int64, exists bool) {
+	v := m.recommended_duration_seconds
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRecommendedDurationSeconds returns the old "recommended_duration_seconds" field's value of the PointsOfInterest entity.
+// If the PointsOfInterest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PointsOfInterestMutation) OldRecommendedDurationSeconds(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRecommendedDurationSeconds is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRecommendedDurationSeconds requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRecommendedDurationSeconds: %w", err)
+	}
+	return oldValue.RecommendedDurationSeconds, nil
+}
+
+// AddRecommendedDurationSeconds adds i to the "recommended_duration_seconds" field.
+func (m *PointsOfInterestMutation) AddRecommendedDurationSeconds(i int64) {
+	if m.addrecommended_duration_seconds != nil {
+		*m.addrecommended_duration_seconds += i
+	} else {
+		m.addrecommended_duration_seconds = &i
+	}
+}
+
+// AddedRecommendedDurationSeconds returns the value that was added to the "recommended_duration_seconds" field in this mutation.
+func (m *PointsOfInterestMutation) AddedRecommendedDurationSeconds() (r int64, exists bool) {
+	v := m.addrecommended_duration_seconds
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetRecommendedDurationSeconds resets all changes to the "recommended_duration_seconds" field.
+func (m *PointsOfInterestMutation) ResetRecommendedDurationSeconds() {
+	m.recommended_duration_seconds = nil
+	m.addrecommended_duration_seconds = nil
+}
+
+// AddDailyItineraryIDs adds the "daily_itinerary" edge to the DailyItinerary entity by ids.
+func (m *PointsOfInterestMutation) AddDailyItineraryIDs(ids ...uuid.UUID) {
+	if m.daily_itinerary == nil {
+		m.daily_itinerary = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.daily_itinerary[ids[i]] = struct{}{}
+	}
+}
+
+// ClearDailyItinerary clears the "daily_itinerary" edge to the DailyItinerary entity.
+func (m *PointsOfInterestMutation) ClearDailyItinerary() {
+	m.cleareddaily_itinerary = true
+}
+
+// DailyItineraryCleared reports if the "daily_itinerary" edge to the DailyItinerary entity was cleared.
+func (m *PointsOfInterestMutation) DailyItineraryCleared() bool {
+	return m.cleareddaily_itinerary
+}
+
+// RemoveDailyItineraryIDs removes the "daily_itinerary" edge to the DailyItinerary entity by IDs.
+func (m *PointsOfInterestMutation) RemoveDailyItineraryIDs(ids ...uuid.UUID) {
+	if m.removeddaily_itinerary == nil {
+		m.removeddaily_itinerary = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.daily_itinerary, ids[i])
+		m.removeddaily_itinerary[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDailyItinerary returns the removed IDs of the "daily_itinerary" edge to the DailyItinerary entity.
+func (m *PointsOfInterestMutation) RemovedDailyItineraryIDs() (ids []uuid.UUID) {
+	for id := range m.removeddaily_itinerary {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// DailyItineraryIDs returns the "daily_itinerary" edge IDs in the mutation.
+func (m *PointsOfInterestMutation) DailyItineraryIDs() (ids []uuid.UUID) {
+	for id := range m.daily_itinerary {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetDailyItinerary resets all changes to the "daily_itinerary" edge.
+func (m *PointsOfInterestMutation) ResetDailyItinerary() {
+	m.daily_itinerary = nil
+	m.cleareddaily_itinerary = false
+	m.removeddaily_itinerary = nil
+}
+
+// Where appends a list predicates to the PointsOfInterestMutation builder.
+func (m *PointsOfInterestMutation) Where(ps ...predicate.PointsOfInterest) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PointsOfInterestMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PointsOfInterestMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PointsOfInterest, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PointsOfInterestMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PointsOfInterestMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PointsOfInterest).
+func (m *PointsOfInterestMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PointsOfInterestMutation) Fields() []string {
+	fields := make([]string, 0, 16)
+	if m.created_at != nil {
+		fields = append(fields, pointsofinterest.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, pointsofinterest.FieldUpdatedAt)
+	}
+	if m.name != nil {
+		fields = append(fields, pointsofinterest.FieldName)
+	}
+	if m.name_en != nil {
+		fields = append(fields, pointsofinterest.FieldNameEn)
+	}
+	if m.name_cn != nil {
+		fields = append(fields, pointsofinterest.FieldNameCn)
+	}
+	if m.description != nil {
+		fields = append(fields, pointsofinterest.FieldDescription)
+	}
+	if m.city != nil {
+		fields = append(fields, pointsofinterest.FieldCity)
+	}
+	if m.state != nil {
+		fields = append(fields, pointsofinterest.FieldState)
+	}
+	if m.country != nil {
+		fields = append(fields, pointsofinterest.FieldCountry)
+	}
+	if m.address != nil {
+		fields = append(fields, pointsofinterest.FieldAddress)
+	}
+	if m.latitude != nil {
+		fields = append(fields, pointsofinterest.FieldLatitude)
+	}
+	if m.longitude != nil {
+		fields = append(fields, pointsofinterest.FieldLongitude)
+	}
+	if m._type != nil {
+		fields = append(fields, pointsofinterest.FieldType)
+	}
+	if m.category != nil {
+		fields = append(fields, pointsofinterest.FieldCategory)
+	}
+	if m.rating != nil {
+		fields = append(fields, pointsofinterest.FieldRating)
+	}
+	if m.recommended_duration_seconds != nil {
+		fields = append(fields, pointsofinterest.FieldRecommendedDurationSeconds)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PointsOfInterestMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case pointsofinterest.FieldCreatedAt:
+		return m.CreatedAt()
+	case pointsofinterest.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case pointsofinterest.FieldName:
+		return m.Name()
+	case pointsofinterest.FieldNameEn:
+		return m.NameEn()
+	case pointsofinterest.FieldNameCn:
+		return m.NameCn()
+	case pointsofinterest.FieldDescription:
+		return m.Description()
+	case pointsofinterest.FieldCity:
+		return m.City()
+	case pointsofinterest.FieldState:
+		return m.State()
+	case pointsofinterest.FieldCountry:
+		return m.Country()
+	case pointsofinterest.FieldAddress:
+		return m.Address()
+	case pointsofinterest.FieldLatitude:
+		return m.Latitude()
+	case pointsofinterest.FieldLongitude:
+		return m.Longitude()
+	case pointsofinterest.FieldType:
+		return m.GetType()
+	case pointsofinterest.FieldCategory:
+		return m.Category()
+	case pointsofinterest.FieldRating:
+		return m.Rating()
+	case pointsofinterest.FieldRecommendedDurationSeconds:
+		return m.RecommendedDurationSeconds()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PointsOfInterestMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case pointsofinterest.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case pointsofinterest.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case pointsofinterest.FieldName:
+		return m.OldName(ctx)
+	case pointsofinterest.FieldNameEn:
+		return m.OldNameEn(ctx)
+	case pointsofinterest.FieldNameCn:
+		return m.OldNameCn(ctx)
+	case pointsofinterest.FieldDescription:
+		return m.OldDescription(ctx)
+	case pointsofinterest.FieldCity:
+		return m.OldCity(ctx)
+	case pointsofinterest.FieldState:
+		return m.OldState(ctx)
+	case pointsofinterest.FieldCountry:
+		return m.OldCountry(ctx)
+	case pointsofinterest.FieldAddress:
+		return m.OldAddress(ctx)
+	case pointsofinterest.FieldLatitude:
+		return m.OldLatitude(ctx)
+	case pointsofinterest.FieldLongitude:
+		return m.OldLongitude(ctx)
+	case pointsofinterest.FieldType:
+		return m.OldType(ctx)
+	case pointsofinterest.FieldCategory:
+		return m.OldCategory(ctx)
+	case pointsofinterest.FieldRating:
+		return m.OldRating(ctx)
+	case pointsofinterest.FieldRecommendedDurationSeconds:
+		return m.OldRecommendedDurationSeconds(ctx)
+	}
+	return nil, fmt.Errorf("unknown PointsOfInterest field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PointsOfInterestMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case pointsofinterest.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case pointsofinterest.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case pointsofinterest.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case pointsofinterest.FieldNameEn:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNameEn(v)
+		return nil
+	case pointsofinterest.FieldNameCn:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNameCn(v)
+		return nil
+	case pointsofinterest.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case pointsofinterest.FieldCity:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCity(v)
+		return nil
+	case pointsofinterest.FieldState:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetState(v)
+		return nil
+	case pointsofinterest.FieldCountry:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCountry(v)
+		return nil
+	case pointsofinterest.FieldAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAddress(v)
+		return nil
+	case pointsofinterest.FieldLatitude:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLatitude(v)
+		return nil
+	case pointsofinterest.FieldLongitude:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLongitude(v)
+		return nil
+	case pointsofinterest.FieldType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetType(v)
+		return nil
+	case pointsofinterest.FieldCategory:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCategory(v)
+		return nil
+	case pointsofinterest.FieldRating:
+		v, ok := value.(float32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRating(v)
+		return nil
+	case pointsofinterest.FieldRecommendedDurationSeconds:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRecommendedDurationSeconds(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PointsOfInterest field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PointsOfInterestMutation) AddedFields() []string {
+	var fields []string
+	if m.addlatitude != nil {
+		fields = append(fields, pointsofinterest.FieldLatitude)
+	}
+	if m.addlongitude != nil {
+		fields = append(fields, pointsofinterest.FieldLongitude)
+	}
+	if m.addrating != nil {
+		fields = append(fields, pointsofinterest.FieldRating)
+	}
+	if m.addrecommended_duration_seconds != nil {
+		fields = append(fields, pointsofinterest.FieldRecommendedDurationSeconds)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PointsOfInterestMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case pointsofinterest.FieldLatitude:
+		return m.AddedLatitude()
+	case pointsofinterest.FieldLongitude:
+		return m.AddedLongitude()
+	case pointsofinterest.FieldRating:
+		return m.AddedRating()
+	case pointsofinterest.FieldRecommendedDurationSeconds:
+		return m.AddedRecommendedDurationSeconds()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PointsOfInterestMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case pointsofinterest.FieldLatitude:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLatitude(v)
+		return nil
+	case pointsofinterest.FieldLongitude:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLongitude(v)
+		return nil
+	case pointsofinterest.FieldRating:
+		v, ok := value.(float32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRating(v)
+		return nil
+	case pointsofinterest.FieldRecommendedDurationSeconds:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRecommendedDurationSeconds(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PointsOfInterest numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PointsOfInterestMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PointsOfInterestMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PointsOfInterestMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown PointsOfInterest nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PointsOfInterestMutation) ResetField(name string) error {
+	switch name {
+	case pointsofinterest.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case pointsofinterest.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case pointsofinterest.FieldName:
+		m.ResetName()
+		return nil
+	case pointsofinterest.FieldNameEn:
+		m.ResetNameEn()
+		return nil
+	case pointsofinterest.FieldNameCn:
+		m.ResetNameCn()
+		return nil
+	case pointsofinterest.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case pointsofinterest.FieldCity:
+		m.ResetCity()
+		return nil
+	case pointsofinterest.FieldState:
+		m.ResetState()
+		return nil
+	case pointsofinterest.FieldCountry:
+		m.ResetCountry()
+		return nil
+	case pointsofinterest.FieldAddress:
+		m.ResetAddress()
+		return nil
+	case pointsofinterest.FieldLatitude:
+		m.ResetLatitude()
+		return nil
+	case pointsofinterest.FieldLongitude:
+		m.ResetLongitude()
+		return nil
+	case pointsofinterest.FieldType:
+		m.ResetType()
+		return nil
+	case pointsofinterest.FieldCategory:
+		m.ResetCategory()
+		return nil
+	case pointsofinterest.FieldRating:
+		m.ResetRating()
+		return nil
+	case pointsofinterest.FieldRecommendedDurationSeconds:
+		m.ResetRecommendedDurationSeconds()
+		return nil
+	}
+	return fmt.Errorf("unknown PointsOfInterest field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PointsOfInterestMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.daily_itinerary != nil {
+		edges = append(edges, pointsofinterest.EdgeDailyItinerary)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PointsOfInterestMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case pointsofinterest.EdgeDailyItinerary:
+		ids := make([]ent.Value, 0, len(m.daily_itinerary))
+		for id := range m.daily_itinerary {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PointsOfInterestMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removeddaily_itinerary != nil {
+		edges = append(edges, pointsofinterest.EdgeDailyItinerary)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PointsOfInterestMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case pointsofinterest.EdgeDailyItinerary:
+		ids := make([]ent.Value, 0, len(m.removeddaily_itinerary))
+		for id := range m.removeddaily_itinerary {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PointsOfInterestMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareddaily_itinerary {
+		edges = append(edges, pointsofinterest.EdgeDailyItinerary)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PointsOfInterestMutation) EdgeCleared(name string) bool {
+	switch name {
+	case pointsofinterest.EdgeDailyItinerary:
+		return m.cleareddaily_itinerary
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PointsOfInterestMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown PointsOfInterest unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PointsOfInterestMutation) ResetEdge(name string) error {
+	switch name {
+	case pointsofinterest.EdgeDailyItinerary:
+		m.ResetDailyItinerary()
+		return nil
+	}
+	return fmt.Errorf("unknown PointsOfInterest edge %s", name)
+}
+
 // RefreshTokenMutation represents an operation that mutates the RefreshToken nodes in the graph.
 type RefreshTokenMutation struct {
 	config
@@ -2767,9 +4239,9 @@ type TripMutation struct {
 	daily_trip             map[uuid.UUID]struct{}
 	removeddaily_trip      map[uuid.UUID]struct{}
 	cleareddaily_trip      bool
-	daily_trip_item        map[uuid.UUID]struct{}
-	removeddaily_trip_item map[uuid.UUID]struct{}
-	cleareddaily_trip_item bool
+	daily_itinerary        map[uuid.UUID]struct{}
+	removeddaily_itinerary map[uuid.UUID]struct{}
+	cleareddaily_itinerary bool
 	done                   bool
 	oldValue               func(context.Context) (*Trip, error)
 	predicates             []predicate.Trip
@@ -3248,58 +4720,58 @@ func (m *TripMutation) ResetDailyTrip() {
 	m.removeddaily_trip = nil
 }
 
-// AddDailyTripItemIDs adds the "daily_trip_item" edge to the DailyTripItem entity by ids.
-func (m *TripMutation) AddDailyTripItemIDs(ids ...uuid.UUID) {
-	if m.daily_trip_item == nil {
-		m.daily_trip_item = make(map[uuid.UUID]struct{})
+// AddDailyItineraryIDs adds the "daily_itinerary" edge to the DailyItinerary entity by ids.
+func (m *TripMutation) AddDailyItineraryIDs(ids ...uuid.UUID) {
+	if m.daily_itinerary == nil {
+		m.daily_itinerary = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.daily_trip_item[ids[i]] = struct{}{}
+		m.daily_itinerary[ids[i]] = struct{}{}
 	}
 }
 
-// ClearDailyTripItem clears the "daily_trip_item" edge to the DailyTripItem entity.
-func (m *TripMutation) ClearDailyTripItem() {
-	m.cleareddaily_trip_item = true
+// ClearDailyItinerary clears the "daily_itinerary" edge to the DailyItinerary entity.
+func (m *TripMutation) ClearDailyItinerary() {
+	m.cleareddaily_itinerary = true
 }
 
-// DailyTripItemCleared reports if the "daily_trip_item" edge to the DailyTripItem entity was cleared.
-func (m *TripMutation) DailyTripItemCleared() bool {
-	return m.cleareddaily_trip_item
+// DailyItineraryCleared reports if the "daily_itinerary" edge to the DailyItinerary entity was cleared.
+func (m *TripMutation) DailyItineraryCleared() bool {
+	return m.cleareddaily_itinerary
 }
 
-// RemoveDailyTripItemIDs removes the "daily_trip_item" edge to the DailyTripItem entity by IDs.
-func (m *TripMutation) RemoveDailyTripItemIDs(ids ...uuid.UUID) {
-	if m.removeddaily_trip_item == nil {
-		m.removeddaily_trip_item = make(map[uuid.UUID]struct{})
+// RemoveDailyItineraryIDs removes the "daily_itinerary" edge to the DailyItinerary entity by IDs.
+func (m *TripMutation) RemoveDailyItineraryIDs(ids ...uuid.UUID) {
+	if m.removeddaily_itinerary == nil {
+		m.removeddaily_itinerary = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		delete(m.daily_trip_item, ids[i])
-		m.removeddaily_trip_item[ids[i]] = struct{}{}
+		delete(m.daily_itinerary, ids[i])
+		m.removeddaily_itinerary[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedDailyTripItem returns the removed IDs of the "daily_trip_item" edge to the DailyTripItem entity.
-func (m *TripMutation) RemovedDailyTripItemIDs() (ids []uuid.UUID) {
-	for id := range m.removeddaily_trip_item {
+// RemovedDailyItinerary returns the removed IDs of the "daily_itinerary" edge to the DailyItinerary entity.
+func (m *TripMutation) RemovedDailyItineraryIDs() (ids []uuid.UUID) {
+	for id := range m.removeddaily_itinerary {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// DailyTripItemIDs returns the "daily_trip_item" edge IDs in the mutation.
-func (m *TripMutation) DailyTripItemIDs() (ids []uuid.UUID) {
-	for id := range m.daily_trip_item {
+// DailyItineraryIDs returns the "daily_itinerary" edge IDs in the mutation.
+func (m *TripMutation) DailyItineraryIDs() (ids []uuid.UUID) {
+	for id := range m.daily_itinerary {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetDailyTripItem resets all changes to the "daily_trip_item" edge.
-func (m *TripMutation) ResetDailyTripItem() {
-	m.daily_trip_item = nil
-	m.cleareddaily_trip_item = false
-	m.removeddaily_trip_item = nil
+// ResetDailyItinerary resets all changes to the "daily_itinerary" edge.
+func (m *TripMutation) ResetDailyItinerary() {
+	m.daily_itinerary = nil
+	m.cleareddaily_itinerary = false
+	m.removeddaily_itinerary = nil
 }
 
 // Where appends a list predicates to the TripMutation builder.
@@ -3561,8 +5033,8 @@ func (m *TripMutation) AddedEdges() []string {
 	if m.daily_trip != nil {
 		edges = append(edges, trip.EdgeDailyTrip)
 	}
-	if m.daily_trip_item != nil {
-		edges = append(edges, trip.EdgeDailyTripItem)
+	if m.daily_itinerary != nil {
+		edges = append(edges, trip.EdgeDailyItinerary)
 	}
 	return edges
 }
@@ -3581,9 +5053,9 @@ func (m *TripMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case trip.EdgeDailyTripItem:
-		ids := make([]ent.Value, 0, len(m.daily_trip_item))
-		for id := range m.daily_trip_item {
+	case trip.EdgeDailyItinerary:
+		ids := make([]ent.Value, 0, len(m.daily_itinerary))
+		for id := range m.daily_itinerary {
 			ids = append(ids, id)
 		}
 		return ids
@@ -3597,8 +5069,8 @@ func (m *TripMutation) RemovedEdges() []string {
 	if m.removeddaily_trip != nil {
 		edges = append(edges, trip.EdgeDailyTrip)
 	}
-	if m.removeddaily_trip_item != nil {
-		edges = append(edges, trip.EdgeDailyTripItem)
+	if m.removeddaily_itinerary != nil {
+		edges = append(edges, trip.EdgeDailyItinerary)
 	}
 	return edges
 }
@@ -3613,9 +5085,9 @@ func (m *TripMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case trip.EdgeDailyTripItem:
-		ids := make([]ent.Value, 0, len(m.removeddaily_trip_item))
-		for id := range m.removeddaily_trip_item {
+	case trip.EdgeDailyItinerary:
+		ids := make([]ent.Value, 0, len(m.removeddaily_itinerary))
+		for id := range m.removeddaily_itinerary {
 			ids = append(ids, id)
 		}
 		return ids
@@ -3632,8 +5104,8 @@ func (m *TripMutation) ClearedEdges() []string {
 	if m.cleareddaily_trip {
 		edges = append(edges, trip.EdgeDailyTrip)
 	}
-	if m.cleareddaily_trip_item {
-		edges = append(edges, trip.EdgeDailyTripItem)
+	if m.cleareddaily_itinerary {
+		edges = append(edges, trip.EdgeDailyItinerary)
 	}
 	return edges
 }
@@ -3646,8 +5118,8 @@ func (m *TripMutation) EdgeCleared(name string) bool {
 		return m.cleareduser
 	case trip.EdgeDailyTrip:
 		return m.cleareddaily_trip
-	case trip.EdgeDailyTripItem:
-		return m.cleareddaily_trip_item
+	case trip.EdgeDailyItinerary:
+		return m.cleareddaily_itinerary
 	}
 	return false
 }
@@ -3673,8 +5145,8 @@ func (m *TripMutation) ResetEdge(name string) error {
 	case trip.EdgeDailyTrip:
 		m.ResetDailyTrip()
 		return nil
-	case trip.EdgeDailyTripItem:
-		m.ResetDailyTripItem()
+	case trip.EdgeDailyItinerary:
+		m.ResetDailyItinerary()
 		return nil
 	}
 	return fmt.Errorf("unknown Trip edge %s", name)

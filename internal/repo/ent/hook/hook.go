@@ -9,6 +9,18 @@ import (
 	"github.com/iter-x/iter-x/internal/repo/ent"
 )
 
+// The DailyItineraryFunc type is an adapter to allow the use of ordinary
+// function as DailyItinerary mutator.
+type DailyItineraryFunc func(context.Context, *ent.DailyItineraryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DailyItineraryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.DailyItineraryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DailyItineraryMutation", m)
+}
+
 // The DailyTripFunc type is an adapter to allow the use of ordinary
 // function as DailyTrip mutator.
 type DailyTripFunc func(context.Context, *ent.DailyTripMutation) (ent.Value, error)
@@ -21,18 +33,6 @@ func (f DailyTripFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DailyTripMutation", m)
 }
 
-// The DailyTripItemFunc type is an adapter to allow the use of ordinary
-// function as DailyTripItem mutator.
-type DailyTripItemFunc func(context.Context, *ent.DailyTripItemMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f DailyTripItemFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.DailyTripItemMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DailyTripItemMutation", m)
-}
-
 // The MediaFunc type is an adapter to allow the use of ordinary
 // function as Media mutator.
 type MediaFunc func(context.Context, *ent.MediaMutation) (ent.Value, error)
@@ -43,6 +43,18 @@ func (f MediaFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MediaMutation", m)
+}
+
+// The PointsOfInterestFunc type is an adapter to allow the use of ordinary
+// function as PointsOfInterest mutator.
+type PointsOfInterestFunc func(context.Context, *ent.PointsOfInterestMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PointsOfInterestFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PointsOfInterestMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PointsOfInterestMutation", m)
 }
 
 // The RefreshTokenFunc type is an adapter to allow the use of ordinary

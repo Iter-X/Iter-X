@@ -30,7 +30,7 @@ func (DailyTrip) Edges() []ent.Edge {
 			Ref("daily_trip").
 			Field("trip_id").
 			Unique().Required(),
-		edge.To("daily_trip_item", DailyTripItem.Type),
+		edge.To("daily_itinerary", DailyItinerary.Type),
 	}
 }
 

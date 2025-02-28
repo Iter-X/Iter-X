@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/iter-x/iter-x/internal/repo/ent/dailyitinerary"
 	"github.com/iter-x/iter-x/internal/repo/ent/dailytrip"
-	"github.com/iter-x/iter-x/internal/repo/ent/dailytripitem"
 	"github.com/iter-x/iter-x/internal/repo/ent/predicate"
 	"github.com/iter-x/iter-x/internal/repo/ent/trip"
 )
@@ -111,19 +111,19 @@ func (dtu *DailyTripUpdate) SetTrip(t *Trip) *DailyTripUpdate {
 	return dtu.SetTripID(t.ID)
 }
 
-// AddDailyTripItemIDs adds the "daily_trip_item" edge to the DailyTripItem entity by IDs.
-func (dtu *DailyTripUpdate) AddDailyTripItemIDs(ids ...uuid.UUID) *DailyTripUpdate {
-	dtu.mutation.AddDailyTripItemIDs(ids...)
+// AddDailyItineraryIDs adds the "daily_itinerary" edge to the DailyItinerary entity by IDs.
+func (dtu *DailyTripUpdate) AddDailyItineraryIDs(ids ...uuid.UUID) *DailyTripUpdate {
+	dtu.mutation.AddDailyItineraryIDs(ids...)
 	return dtu
 }
 
-// AddDailyTripItem adds the "daily_trip_item" edges to the DailyTripItem entity.
-func (dtu *DailyTripUpdate) AddDailyTripItem(d ...*DailyTripItem) *DailyTripUpdate {
+// AddDailyItinerary adds the "daily_itinerary" edges to the DailyItinerary entity.
+func (dtu *DailyTripUpdate) AddDailyItinerary(d ...*DailyItinerary) *DailyTripUpdate {
 	ids := make([]uuid.UUID, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
-	return dtu.AddDailyTripItemIDs(ids...)
+	return dtu.AddDailyItineraryIDs(ids...)
 }
 
 // Mutation returns the DailyTripMutation object of the builder.
@@ -137,25 +137,25 @@ func (dtu *DailyTripUpdate) ClearTrip() *DailyTripUpdate {
 	return dtu
 }
 
-// ClearDailyTripItem clears all "daily_trip_item" edges to the DailyTripItem entity.
-func (dtu *DailyTripUpdate) ClearDailyTripItem() *DailyTripUpdate {
-	dtu.mutation.ClearDailyTripItem()
+// ClearDailyItinerary clears all "daily_itinerary" edges to the DailyItinerary entity.
+func (dtu *DailyTripUpdate) ClearDailyItinerary() *DailyTripUpdate {
+	dtu.mutation.ClearDailyItinerary()
 	return dtu
 }
 
-// RemoveDailyTripItemIDs removes the "daily_trip_item" edge to DailyTripItem entities by IDs.
-func (dtu *DailyTripUpdate) RemoveDailyTripItemIDs(ids ...uuid.UUID) *DailyTripUpdate {
-	dtu.mutation.RemoveDailyTripItemIDs(ids...)
+// RemoveDailyItineraryIDs removes the "daily_itinerary" edge to DailyItinerary entities by IDs.
+func (dtu *DailyTripUpdate) RemoveDailyItineraryIDs(ids ...uuid.UUID) *DailyTripUpdate {
+	dtu.mutation.RemoveDailyItineraryIDs(ids...)
 	return dtu
 }
 
-// RemoveDailyTripItem removes "daily_trip_item" edges to DailyTripItem entities.
-func (dtu *DailyTripUpdate) RemoveDailyTripItem(d ...*DailyTripItem) *DailyTripUpdate {
+// RemoveDailyItinerary removes "daily_itinerary" edges to DailyItinerary entities.
+func (dtu *DailyTripUpdate) RemoveDailyItinerary(d ...*DailyItinerary) *DailyTripUpdate {
 	ids := make([]uuid.UUID, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
-	return dtu.RemoveDailyTripItemIDs(ids...)
+	return dtu.RemoveDailyItineraryIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -271,28 +271,28 @@ func (dtu *DailyTripUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if dtu.mutation.DailyTripItemCleared() {
+	if dtu.mutation.DailyItineraryCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   dailytrip.DailyTripItemTable,
-			Columns: []string{dailytrip.DailyTripItemColumn},
+			Table:   dailytrip.DailyItineraryTable,
+			Columns: []string{dailytrip.DailyItineraryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(dailytripitem.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(dailyitinerary.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := dtu.mutation.RemovedDailyTripItemIDs(); len(nodes) > 0 && !dtu.mutation.DailyTripItemCleared() {
+	if nodes := dtu.mutation.RemovedDailyItineraryIDs(); len(nodes) > 0 && !dtu.mutation.DailyItineraryCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   dailytrip.DailyTripItemTable,
-			Columns: []string{dailytrip.DailyTripItemColumn},
+			Table:   dailytrip.DailyItineraryTable,
+			Columns: []string{dailytrip.DailyItineraryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(dailytripitem.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(dailyitinerary.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -300,15 +300,15 @@ func (dtu *DailyTripUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := dtu.mutation.DailyTripItemIDs(); len(nodes) > 0 {
+	if nodes := dtu.mutation.DailyItineraryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   dailytrip.DailyTripItemTable,
-			Columns: []string{dailytrip.DailyTripItemColumn},
+			Table:   dailytrip.DailyItineraryTable,
+			Columns: []string{dailytrip.DailyItineraryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(dailytripitem.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(dailyitinerary.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -416,19 +416,19 @@ func (dtuo *DailyTripUpdateOne) SetTrip(t *Trip) *DailyTripUpdateOne {
 	return dtuo.SetTripID(t.ID)
 }
 
-// AddDailyTripItemIDs adds the "daily_trip_item" edge to the DailyTripItem entity by IDs.
-func (dtuo *DailyTripUpdateOne) AddDailyTripItemIDs(ids ...uuid.UUID) *DailyTripUpdateOne {
-	dtuo.mutation.AddDailyTripItemIDs(ids...)
+// AddDailyItineraryIDs adds the "daily_itinerary" edge to the DailyItinerary entity by IDs.
+func (dtuo *DailyTripUpdateOne) AddDailyItineraryIDs(ids ...uuid.UUID) *DailyTripUpdateOne {
+	dtuo.mutation.AddDailyItineraryIDs(ids...)
 	return dtuo
 }
 
-// AddDailyTripItem adds the "daily_trip_item" edges to the DailyTripItem entity.
-func (dtuo *DailyTripUpdateOne) AddDailyTripItem(d ...*DailyTripItem) *DailyTripUpdateOne {
+// AddDailyItinerary adds the "daily_itinerary" edges to the DailyItinerary entity.
+func (dtuo *DailyTripUpdateOne) AddDailyItinerary(d ...*DailyItinerary) *DailyTripUpdateOne {
 	ids := make([]uuid.UUID, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
-	return dtuo.AddDailyTripItemIDs(ids...)
+	return dtuo.AddDailyItineraryIDs(ids...)
 }
 
 // Mutation returns the DailyTripMutation object of the builder.
@@ -442,25 +442,25 @@ func (dtuo *DailyTripUpdateOne) ClearTrip() *DailyTripUpdateOne {
 	return dtuo
 }
 
-// ClearDailyTripItem clears all "daily_trip_item" edges to the DailyTripItem entity.
-func (dtuo *DailyTripUpdateOne) ClearDailyTripItem() *DailyTripUpdateOne {
-	dtuo.mutation.ClearDailyTripItem()
+// ClearDailyItinerary clears all "daily_itinerary" edges to the DailyItinerary entity.
+func (dtuo *DailyTripUpdateOne) ClearDailyItinerary() *DailyTripUpdateOne {
+	dtuo.mutation.ClearDailyItinerary()
 	return dtuo
 }
 
-// RemoveDailyTripItemIDs removes the "daily_trip_item" edge to DailyTripItem entities by IDs.
-func (dtuo *DailyTripUpdateOne) RemoveDailyTripItemIDs(ids ...uuid.UUID) *DailyTripUpdateOne {
-	dtuo.mutation.RemoveDailyTripItemIDs(ids...)
+// RemoveDailyItineraryIDs removes the "daily_itinerary" edge to DailyItinerary entities by IDs.
+func (dtuo *DailyTripUpdateOne) RemoveDailyItineraryIDs(ids ...uuid.UUID) *DailyTripUpdateOne {
+	dtuo.mutation.RemoveDailyItineraryIDs(ids...)
 	return dtuo
 }
 
-// RemoveDailyTripItem removes "daily_trip_item" edges to DailyTripItem entities.
-func (dtuo *DailyTripUpdateOne) RemoveDailyTripItem(d ...*DailyTripItem) *DailyTripUpdateOne {
+// RemoveDailyItinerary removes "daily_itinerary" edges to DailyItinerary entities.
+func (dtuo *DailyTripUpdateOne) RemoveDailyItinerary(d ...*DailyItinerary) *DailyTripUpdateOne {
 	ids := make([]uuid.UUID, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
-	return dtuo.RemoveDailyTripItemIDs(ids...)
+	return dtuo.RemoveDailyItineraryIDs(ids...)
 }
 
 // Where appends a list predicates to the DailyTripUpdate builder.
@@ -606,28 +606,28 @@ func (dtuo *DailyTripUpdateOne) sqlSave(ctx context.Context) (_node *DailyTrip, 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if dtuo.mutation.DailyTripItemCleared() {
+	if dtuo.mutation.DailyItineraryCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   dailytrip.DailyTripItemTable,
-			Columns: []string{dailytrip.DailyTripItemColumn},
+			Table:   dailytrip.DailyItineraryTable,
+			Columns: []string{dailytrip.DailyItineraryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(dailytripitem.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(dailyitinerary.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := dtuo.mutation.RemovedDailyTripItemIDs(); len(nodes) > 0 && !dtuo.mutation.DailyTripItemCleared() {
+	if nodes := dtuo.mutation.RemovedDailyItineraryIDs(); len(nodes) > 0 && !dtuo.mutation.DailyItineraryCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   dailytrip.DailyTripItemTable,
-			Columns: []string{dailytrip.DailyTripItemColumn},
+			Table:   dailytrip.DailyItineraryTable,
+			Columns: []string{dailytrip.DailyItineraryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(dailytripitem.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(dailyitinerary.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -635,15 +635,15 @@ func (dtuo *DailyTripUpdateOne) sqlSave(ctx context.Context) (_node *DailyTrip, 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := dtuo.mutation.DailyTripItemIDs(); len(nodes) > 0 {
+	if nodes := dtuo.mutation.DailyItineraryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   dailytrip.DailyTripItemTable,
-			Columns: []string{dailytrip.DailyTripItemColumn},
+			Table:   dailytrip.DailyItineraryTable,
+			Columns: []string{dailytrip.DailyItineraryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(dailytripitem.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(dailyitinerary.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
