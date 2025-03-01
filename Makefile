@@ -38,6 +38,7 @@ common:
 .PHONY: errors
 # generate errors
 errors:
+	mkdir -p ./internal/common/xerr
 	protoc --proto_path=./proto/xerr \
            --proto_path=./proto/third_party \
            --go_out=paths=source_relative:./internal/common/xerr \
@@ -47,6 +48,7 @@ errors:
 .PHONY: api
 # generate api proto
 api:
+	mkdir -p ./internal/api
 	protoc --proto_path=./proto/api \
  	       --proto_path=./proto/third_party \
  	       --proto_path=./proto/common \
