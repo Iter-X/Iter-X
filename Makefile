@@ -82,6 +82,7 @@ all:
 	make errors;
 	make api;
 	make stringer;
+	make wire;
 	go mod tidy;
 
 .PHONY: test

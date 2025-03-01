@@ -2,7 +2,6 @@ package sms
 
 import (
 	"context"
-
 	dysmsapi "github.com/alibabacloud-go/dypnsapi-20170525/v2/client"
 	util "github.com/alibabacloud-go/tea-utils/v2/service"
 
@@ -15,8 +14,8 @@ type (
 	AuthTokensConfig interface {
 		// GetBundleId iOS 应用 ID。OsType 为 iOS 时必传。
 		GetBundleId() string
-		// GetExpire Token 有效期（单位：秒），最小 900，最大 43200。
-		GetExpire() int64
+		// GetExpireSec Token 有效期（单位：秒），最小 900，最大 43200。
+		GetExpireSec() int64
 		// GetPackageName 包名。OsType 为 Android 时必传。
 		GetPackageName() string
 		// GetSignName 签名。OsType 为 Android 时必传。
@@ -25,8 +24,8 @@ type (
 		GetSceneCode() string
 		// GetSmsTemplateCode 短信模板 Code。
 		GetSmsTemplateCode() string
-		// GetSmsCodeExpire 短信验证码有效期（单位：秒）
-		GetSmsCodeExpire() int32
+		// GetSmsCodeExpireSec 短信验证码有效期（单位：秒）
+		GetSmsCodeExpireSec() int32
 	}
 
 	authTokensConfigOptions struct {
@@ -143,7 +142,7 @@ func (c *Client) GetSmsAuthTokens(ctx context.Context, cfg AuthTokensConfig, opt
 	}
 	getSmsAuthTokensRequest := &dysmsapi.GetSmsAuthTokensRequest{
 		BundleId:             pointer.Of(cfg.GetBundleId()),
-		Expire:               pointer.Of(cfg.GetExpire()),
+		Expire:               pointer.Of(cfg.GetExpireSec()),
 		OsType:               pointer.Of(osType),
 		OwnerId:              nil,
 		PackageName:          pointer.Of(cfg.GetPackageName()),
@@ -151,7 +150,7 @@ func (c *Client) GetSmsAuthTokens(ctx context.Context, cfg AuthTokensConfig, opt
 		ResourceOwnerId:      nil,
 		SceneCode:            pointer.Of(cfg.GetSceneCode()),
 		SignName:             pointer.Of(cfg.GetSignName()),
-		SmsCodeExpire:        pointer.Of(cfg.GetSmsCodeExpire()),
+		SmsCodeExpire:        pointer.Of(cfg.GetSmsCodeExpireSec()),
 		SmsTemplateCode:      pointer.Of(cfg.GetSmsTemplateCode()),
 	}
 	authOptions := &authTokensConfigOptions{

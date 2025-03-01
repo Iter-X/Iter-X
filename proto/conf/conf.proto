@@ -82,12 +82,12 @@ message Auth {
   }
   message AuthTokens {
     string bundle_id = 1;
-    int64 expire = 2;
+    google.protobuf.Duration expire = 2;
     string package_name = 3;
     string sign_name = 4;
     string scene_code = 5;
     string sms_template_code = 6;
-    int32 sms_code_expire = 7;
+    google.protobuf.Duration sms_code_expire = 7;
   }
   message AliCloud {
     string access_key_id = 1;
