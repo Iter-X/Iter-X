@@ -51,6 +51,7 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
 .idea
 *.string.go
 /internal/data/ent/*
@@ -61,3 +62,4 @@ Temporary Items
 /internal/common/cnst/*.pb.go
 /internal/common/xerr/*
 /internal/conf/*.pb*.go
+/bin

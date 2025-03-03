@@ -10,7 +10,6 @@ path := $(shell pwd)
 .PHONY: init
 # init env
 init:
-	go mod tidy
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.3
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
 	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.25.1
@@ -84,6 +83,11 @@ all:
 	make stringer;
 	make wire;
 	go mod tidy;
+
+.PHONY: build
+# build
+build:
+	go build -o ./bin/server ./cmd/server
 
 .PHONY: test
 # run all tests
