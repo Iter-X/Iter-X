@@ -96,7 +96,8 @@ func (b *Auth) SignIn(ctx context.Context, params *authV1.SignInRequest) (*authV
 		return nil, xerr.ErrorInvalidEmailOrPassword()
 	}
 
-	if !auth.CompareHashAndPassword(params.Password, user.Password) {
+	pass := password.New(params.Password, user.Salt)
+	if !pass.EQ(user.Password) {
 		return nil, xerr.ErrorInvalidEmailOrPassword()
 	}
 
