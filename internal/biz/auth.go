@@ -304,26 +304,29 @@ func (b *Auth) VerifySmsCode(ctx context.Context, params *authV1.VerifySmsCodeRe
 }
 
 // OneClickLogin one click login.
-func (b *Auth) OneClickLogin(ctx context.Context, params *authV1.OneClickLoginRequest) (string, error) {
+func (b *Auth) OneClickLogin(ctx context.Context, params *authV1.OneClickLoginRequest) (*authV1.OneClickLoginResponse, error) {
 	if params.GetToken() == "" {
-		return "", xerr.ErrorBadRequest()
+		return nil, xerr.ErrorBadRequest()
 	}
 
 	getMobileConfigParams := &bo.GetMobileConfigParams{Token: params.GetToken()}
 	// TODO logging request to sms service
 	mobileResponse, err := b.smsClient.GetMobile(ctx, getMobileConfigParams)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if !mobileResponse.IsOK() {
-		return "", xerr.ErrorBadRequest()
+		return nil, xerr.ErrorBadRequest()
 	}
 
 	res, err := b.loginByPhone(ctx, mobileResponse.GetBody().GetMobile())
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return res.Token, nil
+	return &authV1.OneClickLoginResponse{
+		Token:     res.Token,
+		ExpiresIn: res.ExpiresIn,
+	}, nil
 }
 
 // loginByPhone logs in by phone.
