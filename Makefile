@@ -75,12 +75,12 @@ wire:
 .PHONY: all
 # generate all
 all:
+	make stringer;
 	make generate;
 	make config;
 	make common;
 	make errors;
 	make api;
-	make stringer;
 	make wire;
 	go mod tidy;
 
