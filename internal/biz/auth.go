@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 	"github.com/ifuryst/lol"
 	"go.uber.org/zap"
 
@@ -20,6 +19,7 @@ import (
 	"github.com/iter-x/iter-x/internal/data/ent"
 	"github.com/iter-x/iter-x/internal/helper/auth"
 	"github.com/iter-x/iter-x/pkg/sms"
+	"github.com/iter-x/iter-x/pkg/util/password"
 )
 
 type Auth struct {
@@ -122,16 +122,13 @@ func (b *Auth) SignUp(ctx context.Context, params *authV1.SignUpRequest) (*authV
 		return nil, xerr.ErrorUserAlreadyExists()
 	}
 
-	hashedPass, err := auth.HashPassword(params.Password)
-	if err != nil {
-		return nil, err
-	}
-
+	pass := password.New(params.Password)
 	// create the user
 	data := &do.User{
 		Username: params.Email,
 		Email:    params.Email,
-		Password: hashedPass,
+		Password: pass.EnValueX(),
+		Salt:     pass.Salt(),
 	}
 	user, err := b.authRepo.Create(ctx, data)
 	if err != nil {
@@ -190,7 +187,9 @@ func (b *Auth) SignInWithOAuth(ctx context.Context, params *authV1.SignInWithOAu
 		if !xerr.IsUserNotFound(err) {
 			return "", err
 		}
-		user.Password, err = auth.HashPassword(uuid.New().String())
+		pass := password.New(password.GenerateRandomPassword(8))
+		user.Salt = pass.Salt()
+		user.Password, err = pass.EnValue()
 		if err != nil {
 			return "", err
 		}

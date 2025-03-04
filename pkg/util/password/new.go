@@ -19,6 +19,7 @@ type (
 		EQ(hashedPassword string) bool
 		PValue() string
 		EnValue() (string, error)
+		EnValueX() string
 		Salt() string
 	}
 )
@@ -40,6 +41,17 @@ func (p *password) EnValue() (string, error) {
 		p.enP, err = HashPassword(ObfuscatePassword(p.PValue(), p.Salt()))
 	}
 	return p.enP, err
+}
+
+func (p *password) EnValueX() string {
+	if p.enP == "" {
+		var err error
+		p.enP, err = HashPassword(ObfuscatePassword(p.PValue(), p.Salt()))
+		if err != nil {
+			panic(err)
+		}
+	}
+	return p.enP
 }
 
 func (p *password) Salt() string {
