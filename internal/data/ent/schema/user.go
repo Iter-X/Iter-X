@@ -19,6 +19,10 @@ func (User) Fields() []ent.Field {
 		field.Bool("status").Default(true),
 		field.String("username").NotEmpty().MaxLen(50),
 		field.String("password").NotEmpty().MaxLen(255),
+		field.String("salt").NotEmpty().MaxLen(255),
+		field.String("nickname").Optional().MaxLen(50),
+		field.String("remark").Optional().MaxLen(50),
+		field.String("phone").NotEmpty().MaxLen(11),
 		field.String("email").NotEmpty().MaxLen(255),
 		field.String("avatar_url").MaxLen(255).Optional(),
 	}
