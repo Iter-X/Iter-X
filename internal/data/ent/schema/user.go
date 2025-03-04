@@ -5,6 +5,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/iter-x/iter-x/pkg/vobj"
 )
 
 // User holds the schema definition for the User entity.
@@ -16,7 +17,7 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Unique().Default(uuid.New),
-		field.Bool("status").Default(true),
+		field.Int("status").Default(vobj.UserStatusActive.GetValue()),
 		field.String("username").NotEmpty().MaxLen(50),
 		field.String("password").NotEmpty().MaxLen(255),
 		field.String("salt").NotEmpty().MaxLen(255),

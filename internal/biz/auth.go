@@ -46,7 +46,7 @@ func (b *Auth) getToken(ctx context.Context, user *do.User, renew bool) (*bo.Sig
 		UID:       user.ID,
 		Username:  user.Username,
 		Email:     user.Email,
-		Status:    user.Status,
+		Status:    user.Status.IsActive(),
 		AvatarURL: user.AvatarURL,
 	}, b.cfg.Jwt.Issuer, b.cfg.Jwt.Expiration.AsDuration())
 	if err != nil {
@@ -213,7 +213,7 @@ func (b *Auth) SignInWithOAuth(ctx context.Context, params *authV1.SignInWithOAu
 		UID:       user.ID,
 		Username:  user.Username,
 		Email:     user.Email,
-		Status:    user.Status,
+		Status:    user.Status.IsActive(),
 		AvatarURL: user.AvatarURL,
 	}, b.cfg.Jwt.Issuer, b.cfg.Jwt.Expiration.AsDuration())
 }
@@ -293,10 +293,26 @@ func (b *Auth) VerifySmsCode(ctx context.Context, params *authV1.VerifySmsCodeRe
 	if !verifySmsCode.IsOK() {
 		return nil, xerr.ErrorBadRequest()
 	}
-	// TODO generate token
-	response := &authV1.VerifySmsCodeResponse{
-		Token:     "",
-		ExpiresIn: 0,
+	createParams := &bo.CreateUserByPhoneParam{
+		PhoneNumber: params.GetPhoneNumber(),
 	}
-	return response, nil
+	user, err := b.authRepo.FindByPhone(ctx, createParams.PhoneNumber)
+	if err != nil {
+		if !xerr.IsUserNotFound(err) {
+			return nil, err
+		}
+		user, err = b.authRepo.Create(ctx, createParams.GenerateUserDo())
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	res, err := b.getToken(ctx, user, false)
+	if err != nil {
+		return nil, err
+	}
+	return &authV1.VerifySmsCodeResponse{
+		Token:     res.Token,
+		ExpiresIn: res.ExpiresIn,
+	}, nil
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/iter-x/iter-x/internal/data/ent"
 	"github.com/iter-x/iter-x/internal/data/ent/refreshtoken"
 	"github.com/iter-x/iter-x/internal/data/ent/user"
+	"github.com/iter-x/iter-x/pkg/vobj"
 )
 
 func NewAuth(tx *data.Tx, logger *zap.SugaredLogger) repository.AuthRepo {
@@ -40,13 +41,17 @@ func (r *authRepositoryImpl) ToEntity(po *ent.User) *do.User {
 		ID:            po.ID,
 		CreatedAt:     po.CreatedAt,
 		UpdatedAt:     po.UpdatedAt,
-		Status:        po.Status,
+		Status:        vobj.UserStatus(po.Status),
 		Username:      po.Username,
 		Password:      po.Password,
+		Salt:          po.Salt,
+		Nickname:      po.Nickname,
+		Remark:        po.Remark,
+		Phone:         po.Phone,
 		Email:         po.Email,
 		AvatarURL:     po.AvatarURL,
-		Trips:         r.tripRepositoryImpl.ToEntities(po.Edges.Trip),
 		RefreshTokens: r.refreshTokenImpl.ToEntities(po.Edges.RefreshToken),
+		Trips:         r.tripRepositoryImpl.ToEntities(po.Edges.Trip),
 	}
 }
 
@@ -81,7 +86,15 @@ func (r *authRepositoryImpl) Create(ctx context.Context, user *do.User) (*do.Use
 	cli := r.GetTx(ctx).User
 
 	row, err := cli.Create().
-		SetUsername(user.Username).SetEmail(user.Email).SetPassword(user.Password).
+		SetUsername(user.Username).
+		SetPassword(user.Password).
+		SetSalt(user.Salt).
+		SetNickname(user.Nickname).
+		SetRemark(user.Remark).
+		SetPhone(user.Phone).
+		SetAvatarURL(user.AvatarURL).
+		SetEmail(user.Email).
+		SetStatus(user.Status.GetValue()).
 		Save(ctx)
 	return r.ToEntity(row), err
 }
@@ -125,4 +138,14 @@ func (r *authRepositoryImpl) UpdateRefreshToken(ctx context.Context, val *do.Ref
 		SetToken(val.Token).SetExpiresAt(val.ExpiresAt).SetUpdatedAt(val.UpdatedAt).
 		Save(ctx)
 	return err
+}
+
+func (r *authRepositoryImpl) FindByPhone(ctx context.Context, phone string) (*do.User, error) {
+	cli := r.GetTx(ctx).User
+
+	usr, err := cli.Query().Where(user.PhoneEQ(phone)).Only(ctx)
+	if err != nil && ent.IsNotFound(err) {
+		return nil, xerr.ErrorUserNotFound()
+	}
+	return r.ToEntity(usr), err
 }
