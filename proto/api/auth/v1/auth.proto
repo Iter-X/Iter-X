@@ -9,176 +9,185 @@ import "cnst/constant.proto";
 option go_package = "github.com/iter-x/server/internal/api/auth/v1;v1";
 
 service AuthService {
-	rpc SignIn (SignInRequest) returns (SignInResponse) {
-		option (google.api.http) = {
-			post: "/api/v1/auth/sign-in/password"
-			body: "*"
-		};
-		option (common.cnst.skip_token) = true;
-	};
-	rpc SignInWithOAuth (SignInWithOAuthRequest) returns (SignInWithOAuthResponse) {
-		option (google.api.http) = {
-			post: "/api/v1/auth/sign-in/oauth"
-			body: "*"
-		};
-		option (common.cnst.skip_token) = true;
-	};
-	rpc SignUp (SignUpRequest) returns (SignUpResponse) {
-		option (google.api.http) = {
-			post: "/api/v1/auth/sign-up"
-			body: "*"
-		};
-		option (common.cnst.skip_token) = true;
-	};
-	rpc RequestPasswordReset (RequestPasswordResetRequest) returns (RequestPasswordResetResponse) {
-		option (google.api.http) = {
-			post: "/api/v1/auth/request-password-reset"
-			body: "*"
-		};
-		option (common.cnst.skip_token) = true;
-	}
-	rpc VerifyPasswordResetToken (VerifyPasswordResetTokenRequest) returns (VerifyPasswordResetTokenResponse) {
-		option (google.api.http) = {
-			get: "/api/v1/auth/verify-password-reset-token"
-		};
-		option (common.cnst.skip_token) = true;
-	}
-	rpc ResetPassword (ResetPasswordRequest) returns (ResetPasswordResponse) {
-		option (google.api.http) = {
-			post: "/api/v1/auth/reset-password"
-			body: "*"
-		};
-		option (common.cnst.skip_token) = true;
-	}
-	rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse) {
-		option (google.api.http) = {
-			post: "/api/v1/auth/refresh-token"
-			body: "*"
-		};
-		option (common.cnst.skip_token) = true;
-	};
-	// GetSmsAuthTokens get sms auth tokens
-	rpc GetSmsAuthTokens (GetSmsAuthTokensRequest) returns (GetSmsAuthTokensResponse) {
-		option (google.api.http) = {
-			post: "/api/v1/auth/sms-auth-tokens"
-			body: "*"
-		};
-		option (common.cnst.skip_token) = true;
-	}
+  rpc SignIn (SignInRequest) returns (SignInResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/sign-in/password"
+      body: "*"
+    };
+    option (common.cnst.skip_token) = true;
+  };
+  rpc SignInWithOAuth (SignInWithOAuthRequest) returns (SignInWithOAuthResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/sign-in/oauth"
+      body: "*"
+    };
+    option (common.cnst.skip_token) = true;
+  };
+  rpc SignUp (SignUpRequest) returns (SignUpResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/sign-up"
+      body: "*"
+    };
+    option (common.cnst.skip_token) = true;
+  };
+  rpc RequestPasswordReset (RequestPasswordResetRequest) returns (RequestPasswordResetResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/request-password-reset"
+      body: "*"
+    };
+    option (common.cnst.skip_token) = true;
+  }
+  rpc VerifyPasswordResetToken (VerifyPasswordResetTokenRequest) returns (VerifyPasswordResetTokenResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/auth/verify-password-reset-token"
+    };
+    option (common.cnst.skip_token) = true;
+  }
+  rpc ResetPassword (ResetPasswordRequest) returns (ResetPasswordResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/reset-password"
+      body: "*"
+    };
+    option (common.cnst.skip_token) = true;
+  }
+  rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/refresh-token"
+      body: "*"
+    };
+    option (common.cnst.skip_token) = true;
+  };
+  // GetSmsAuthTokens get sms auth tokens
+  rpc GetSmsAuthTokens (GetSmsAuthTokensRequest) returns (GetSmsAuthTokensResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/sms-auth-tokens"
+      body: "*"
+    };
+    option (common.cnst.skip_token) = true;
+  }
 
-	// VerifySmsCode verifies the SMS code
-	rpc VerifySmsCode (VerifySmsCodeRequest) returns (VerifySmsCodeResponse) {
-		option (google.api.http) = {
-			post: "/api/v1/auth/verify-sms-code"
-			body: "*"
-		};
-		option (common.cnst.skip_token) = true;
-	}
+  // VerifySmsCode verifies the SMS code
+  rpc VerifySmsCode (VerifySmsCodeRequest) returns (VerifySmsCodeResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/verify-sms-code"
+      body: "*"
+    };
+    option (common.cnst.skip_token) = true;
+  }
 
-	// OneClickLogin one click login
-	rpc OneClickLogin (OneClickLoginRequest) returns (OneClickLoginResponse) {
-		option (google.api.http) = {
-			post: "/api/v1/auth/one-click-login"
-			body: "*"
-		};
-		option (common.cnst.skip_token) = true;
-	}
+  // OneClickLogin one click login
+  rpc OneClickLogin (OneClickLoginRequest) returns (OneClickLoginResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/one-click-login"
+      body: "*"
+    };
+    option (common.cnst.skip_token) = true;
+  }
 }
 
 message SignInRequest {
-	string email = 1 [(validatex.rules).string.email = true];
-	string password = 2 [(validatex.rules).string = {min_len: 5, max_len: 50}];
+  string email = 1 [(validatex.rules).string.email = true];
+  string password = 2 [(validatex.rules).string = {min_len: 5, max_len: 50}];
 }
 
 message SignInResponse {
-	string token = 1;
-	string refresh_token = 2;
-	double expires_in = 3; // in seconds
+  string token = 1;
+  string refresh_token = 2;
+  double expires_in = 3; // in seconds
 }
 
 enum OAuthProvider {
-	GOOGLE = 0;
-	GITHUB = 1;
-	WECHAT = 2;
+  GOOGLE = 0;
+  GITHUB = 1;
+  WECHAT = 2;
 }
 
 message SignInWithOAuthRequest {
-	OAuthProvider provider = 1;
-	string code = 2 [(validatex.rules).string = {min_len: 1, max_len: 256}];
+  OAuthProvider provider = 1;
+  string code = 2 [(validatex.rules).string = {min_len: 1, max_len: 256}];
 }
 
 message SignInWithOAuthResponse {
-	string token = 1;
+  string token = 1;
 }
 
 message SignUpRequest {
-	string email = 1 [(validatex.rules).string.email = true];
-	string password = 2 [(validatex.rules).string = {min_len: 5, max_len: 50}];
+  string email = 1 [(validatex.rules).string.email = true];
+  string password = 2 [(validatex.rules).string = {min_len: 5, max_len: 50}];
 }
 
 message SignUpResponse {
-	string token = 1;
-	string refresh_token = 2;
-	double expires_in = 3; // in seconds
+  string token = 1;
+  string refresh_token = 2;
+  double expires_in = 3; // in seconds
 }
 
 message RequestPasswordResetRequest {
-	string email = 1;
+  string email = 1;
 }
 
 message RequestPasswordResetResponse {
-	string status = 1;
+  string status = 1;
 }
 
 message VerifyPasswordResetTokenRequest {
-	string token = 1;
+  string token = 1;
 }
 
 message VerifyPasswordResetTokenResponse {
-	bool valid = 1;
+  bool valid = 1;
 }
 
 message ResetPasswordRequest {
-	string token = 1;
-	string new_password = 2;
+  string token = 1;
+  string new_password = 2;
 }
 
 message ResetPasswordResponse {
-	string status = 1;
+  string status = 1;
 }
 
 message RefreshTokenRequest {
-	string refresh_token = 1 [(validatex.rules).string = {non_empty: true}];
+  string refresh_token = 1 [(validatex.rules).string = {non_empty: true}];
 }
 
 message RefreshTokenResponse {
-	string token = 1;
-	double expires_in = 2; // in seconds
+  string token = 1;
+  double expires_in = 2; // in seconds
 }
 
 message GetSmsAuthTokensRequest {}
 message GetSmsAuthTokensResponse {
-	string biz_token = 1;
-	int64 expire_time = 2;
-	string  sts_access_key_id = 3;
-	string sts_access_key_secret = 4;
-	string sts_token = 5;
+  string biz_token = 1;
+  int64 expire_time = 2;
+  string  sts_access_key_id = 3;
+  string sts_access_key_secret = 4;
+  string sts_token = 5;
 }
 
 message VerifySmsCodeRequest {
-	string phone_number = 1;
-	string sms_code = 2;
-	string sms_token = 3;
+  string phone_number = 1 [(validatex.rules).string = {
+    min_len: 11,
+    non_empty: true,
+  }];
+  string sms_code = 2 [(validatex.rules).string = {
+    non_empty: true,
+  }];
+  string sms_token = 3 [(validatex.rules).string = {
+    non_empty: true,
+  }];
 }
 message VerifySmsCodeResponse {
-	string token = 1;
-	double expires_in = 2; // in seconds
+  string token = 1;
+  double expires_in = 2; // in seconds
 }
 
 message OneClickLoginRequest {
-	string token = 1;
+  string token = 1  [(validatex.rules).string = {
+    non_empty: true,
+  }];
 }
 message OneClickLoginResponse {
-	string token = 1;
-	double expires_in = 2; // in seconds
+  string token = 1;
+  double expires_in = 2; // in seconds
 }
