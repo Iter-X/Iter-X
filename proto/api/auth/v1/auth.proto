@@ -74,6 +74,15 @@ service AuthService {
 		};
 		option (common.cnst.skip_token) = true;
 	}
+
+	// OneClickLogin one click login
+	rpc OneClickLogin (OneClickLoginRequest) returns (OneClickLoginResponse) {
+		option (google.api.http) = {
+			post: "/api/v1/auth/one-click-login"
+			body: "*"
+		};
+		option (common.cnst.skip_token) = true;
+	}
 }
 
 message SignInRequest {
@@ -162,6 +171,14 @@ message VerifySmsCodeRequest {
 	string sms_token = 3;
 }
 message VerifySmsCodeResponse {
+	string token = 1;
+	double expires_in = 2; // in seconds
+}
+
+message OneClickLoginRequest {
+	string token = 1;
+}
+message OneClickLoginResponse {
 	string token = 1;
 	double expires_in = 2; // in seconds
 }

@@ -16,7 +16,33 @@ type (
 	CreateUserByPhoneParam struct {
 		PhoneNumber string
 	}
+
+	GetMobileConfigParams struct {
+		Token string
+	}
 )
+
+func (g *GetMobileConfigParams) GetAccessToken() string {
+	return g.Token
+}
+
+func (g *GetMobileConfigParams) GetOutId() string {
+	// TODO generate outId
+	return ""
+}
+
+func (g *GetMobileConfigParams) GetOwnerId() int64 {
+	return 0
+}
+
+func (g *GetMobileConfigParams) GetResourceOwnerAccount() string {
+	// TODO generate resourceOwnerAccount
+	return ""
+}
+
+func (g *GetMobileConfigParams) GetResourceOwnerId() int64 {
+	return 0
+}
 
 // GenerateUserDo generate user do
 func (c *CreateUserByPhoneParam) GenerateUserDo() *do.User {

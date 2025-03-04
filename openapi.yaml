@@ -6,6 +6,25 @@ info:
     title: ""
     version: 0.0.1
 paths:
+    /api/v1/auth/one-click-login:
+        post:
+            tags:
+                - AuthService
+            description: OneClickLogin one click login
+            operationId: AuthService_OneClickLogin
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth.v1.OneClickLoginRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/auth.v1.OneClickLoginResponse'
     /api/v1/auth/refresh-token:
         post:
             tags:
@@ -409,6 +428,19 @@ components:
                     type: string
                 stsToken:
                     type: string
+        auth.v1.OneClickLoginRequest:
+            type: object
+            properties:
+                token:
+                    type: string
+        auth.v1.OneClickLoginResponse:
+            type: object
+            properties:
+                token:
+                    type: string
+                expiresIn:
+                    type: number
+                    format: double
         auth.v1.RefreshTokenRequest:
             type: object
             properties:

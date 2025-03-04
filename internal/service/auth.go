@@ -74,3 +74,7 @@ func (s *Auth) GetSmsAuthTokens(ctx context.Context, _ *authV1.GetSmsAuthTokensR
 func (s *Auth) VerifySmsCode(ctx context.Context, req *authV1.VerifySmsCodeRequest) (*authV1.VerifySmsCodeResponse, error) {
 	return s.authBiz.VerifySmsCode(ctx, req)
 }
+
+func (s *Auth) OneClickLogin(ctx context.Context, req *authV1.OneClickLoginRequest) (*authV1.OneClickLoginResponse, error) {
+	return s.authBiz.OneClickLogin(ctx, req)
+}

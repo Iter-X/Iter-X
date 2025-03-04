@@ -292,8 +292,44 @@ func (b *Auth) VerifySmsCode(ctx context.Context, params *authV1.VerifySmsCodeRe
 	if !verifySmsCode.IsOK() {
 		return nil, xerr.ErrorBadRequest()
 	}
+
+	res, err := b.loginByPhone(ctx, params.GetPhoneNumber())
+	if err != nil {
+		return nil, err
+	}
+	return &authV1.VerifySmsCodeResponse{
+		Token:     res.Token,
+		ExpiresIn: res.ExpiresIn,
+	}, nil
+}
+
+// OneClickLogin one click login.
+func (b *Auth) OneClickLogin(ctx context.Context, params *authV1.OneClickLoginRequest) (string, error) {
+	if params.GetToken() == "" {
+		return "", xerr.ErrorBadRequest()
+	}
+
+	getMobileConfigParams := &bo.GetMobileConfigParams{Token: params.GetToken()}
+	// TODO logging request to sms service
+	mobileResponse, err := b.smsClient.GetMobile(ctx, getMobileConfigParams)
+	if err != nil {
+		return "", err
+	}
+	if !mobileResponse.IsOK() {
+		return "", xerr.ErrorBadRequest()
+	}
+
+	res, err := b.loginByPhone(ctx, mobileResponse.GetBody().GetMobile())
+	if err != nil {
+		return "", err
+	}
+	return res.Token, nil
+}
+
+// loginByPhone logs in by phone.
+func (b *Auth) loginByPhone(ctx context.Context, phone string) (*bo.SignInResponse, error) {
 	createParams := &bo.CreateUserByPhoneParam{
-		PhoneNumber: params.GetPhoneNumber(),
+		PhoneNumber: phone,
 	}
 	user, err := b.authRepo.FindByPhone(ctx, createParams.PhoneNumber)
 	if err != nil {
@@ -306,12 +342,5 @@ func (b *Auth) VerifySmsCode(ctx context.Context, params *authV1.VerifySmsCodeRe
 		}
 	}
 
-	res, err := b.getToken(ctx, user, false)
-	if err != nil {
-		return nil, err
-	}
-	return &authV1.VerifySmsCodeResponse{
-		Token:     res.Token,
-		ExpiresIn: res.ExpiresIn,
-	}, nil
+	return b.getToken(ctx, user, false)
 }
