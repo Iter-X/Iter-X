@@ -38,7 +38,7 @@ func (r *GetMobileResponse) IsOK() bool {
 	if r == nil || r.GetMobileResponse == nil || r.GetMobileResponse.Body == nil || r.GetMobileResponse.Body.Code == nil {
 		return false
 	}
-	return *r.GetMobileResponse.Body.Code == "OK"
+	return r.StatusCode != nil && *r.StatusCode == 200 && *r.GetMobileResponse.Body.Code == "OK"
 }
 
 // GetMobile get mobile
