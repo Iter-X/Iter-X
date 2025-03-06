@@ -1,6 +1,6 @@
 module github.com/iter-x/iter-x
 
-go 1.23.4
+go 1.24
 
 require (
 	buf.build/go/protoyaml v0.3.1
