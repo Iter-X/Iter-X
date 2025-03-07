@@ -93,3 +93,12 @@ var runtimeOptions = &util.RuntimeOptions{
 	MaxAttempts: tea.Int(3),
 	IgnoreSSL:   tea.Bool(true),
 }
+
+// SetRuntimeOptions sets the runtime options
+func SetRuntimeOptions(opts ...func(options *util.RuntimeOptions)) func(c *Client) {
+	return func(c *Client) {
+		for _, opt := range opts {
+			opt(runtimeOptions)
+		}
+	}
+}

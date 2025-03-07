@@ -58,7 +58,15 @@ service AuthService {
     option (common.cnst.skip_token) = true;
   };
 
-  // GetSmsAuthTokens get sms auth tokens
+  rpc RefreshTokenX (RefreshTokenRequest) returns (RefreshTokenResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/auth/refresh-token"
+    };
+    option (common.cnst.skip_token) = true;
+  };
+
+  // 获取短信验证码发送Tokens
+  // 用于通过阿里云接口发送短信验证码
   rpc GetSmsAuthTokens (GetSmsAuthTokensRequest) returns (GetSmsAuthTokensResponse) {
     option (google.api.http) = {
       post: "/api/v1/auth/sms-auth-tokens"
@@ -67,7 +75,8 @@ service AuthService {
     option (common.cnst.skip_token) = true;
   }
 
-  // SendSmsCode sends the SMS code
+  // 发送短信验证码
+  // 调用阿里云接口直接发送短信验证码，并返回biz_token和expire_time，用于后续验证短信验证码
   rpc SendSmsCode (SendSmsCodeRequest) returns (SendSmsCodeResponse) {
     option (google.api.http) = {
       post: "/api/v1/auth/send-sms-code"
@@ -76,7 +85,8 @@ service AuthService {
     option (common.cnst.skip_token) = true;
   }
 
-  // VerifySmsCode verifies the SMS code
+  // 验证短信验证码
+  // 如果包含sms_token, 则调用阿里云接口验证， 否则走本地短信验证
   rpc VerifySmsCode (VerifySmsCodeRequest) returns (VerifySmsCodeResponse) {
     option (google.api.http) = {
       post: "/api/v1/auth/verify-sms-code"
@@ -85,7 +95,7 @@ service AuthService {
     option (common.cnst.skip_token) = true;
   }
 
-  // OneClickLogin one click login
+  // 一键登陆
   rpc OneClickLogin (OneClickLoginRequest) returns (OneClickLoginResponse) {
     option (google.api.http) = {
       post: "/api/v1/auth/one-click-login"

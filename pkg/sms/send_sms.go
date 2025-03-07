@@ -71,6 +71,76 @@ type (
 	QuerySendDetailsConfigOption func(opts *QuerySendDetailsConfigOptions)
 )
 
+// WithSendSmsConfigOptionsOutId set out id
+func WithSendSmsConfigOptionsOutId(outId string) SendSmsConfigOption {
+	return func(opts *SendSmsConfigOptions) {
+		opts.req.OutId = pointer.Of(outId)
+	}
+}
+
+// WithSendSmsConfigOptionsOwnerId set owner id
+func WithSendSmsConfigOptionsOwnerId(ownerId int64) SendSmsConfigOption {
+	return func(opts *SendSmsConfigOptions) {
+		opts.req.OwnerId = pointer.Of(ownerId)
+	}
+}
+
+// WithSendSmsConfigOptionsResourceOwnerAccount set owner account
+func WithSendSmsConfigOptionsResourceOwnerAccount(resourceOwnerAccount string) SendSmsConfigOption {
+	return func(opts *SendSmsConfigOptions) {
+		opts.req.ResourceOwnerAccount = pointer.Of(resourceOwnerAccount)
+	}
+}
+
+// WithSendSmsConfigOptionsResourceOwnerId set resource owner id
+func WithSendSmsConfigOptionsResourceOwnerId(resourceOwnerId int64) SendSmsConfigOption {
+	return func(opts *SendSmsConfigOptions) {
+		opts.req.ResourceOwnerId = pointer.Of(resourceOwnerId)
+	}
+}
+
+// WithSendSmsConfigOptionsSmsUpExtendCode set sms up extend code
+func WithSendSmsConfigOptionsSmsUpExtendCode(smsUpExtendCode string) SendSmsConfigOption {
+	return func(opts *SendSmsConfigOptions) {
+		opts.req.SmsUpExtendCode = pointer.Of(smsUpExtendCode)
+	}
+}
+
+// WithSendSmsConfigOptionsRuntimeOptions set runtime options
+func WithSendSmsConfigOptionsRuntimeOptions(r *util.RuntimeOptions) SendSmsConfigOption {
+	return func(opts *SendSmsConfigOptions) {
+		opts.runtimeOption = r
+	}
+}
+
+// WithQuerySendDetailsConfigOptionsOwnerId set owner id
+func WithQuerySendDetailsConfigOptionsOwnerId(ownerId int64) QuerySendDetailsConfigOption {
+	return func(opts *QuerySendDetailsConfigOptions) {
+		opts.req.OwnerId = pointer.Of(ownerId)
+	}
+}
+
+// WithQuerySendDetailsConfigOptionsResourceOwnerId set resource owner id
+func WithQuerySendDetailsConfigOptionsResourceOwnerId(resourceOwnerId int64) QuerySendDetailsConfigOption {
+	return func(opts *QuerySendDetailsConfigOptions) {
+		opts.req.ResourceOwnerId = pointer.Of(resourceOwnerId)
+	}
+}
+
+// WithQuerySendDetailsConfigOptionsResourceOwnerAccount set resource owner account
+func WithQuerySendDetailsConfigOptionsResourceOwnerAccount(resourceOwnerAccount string) QuerySendDetailsConfigOption {
+	return func(opts *QuerySendDetailsConfigOptions) {
+		opts.req.ResourceOwnerAccount = pointer.Of(resourceOwnerAccount)
+	}
+}
+
+// WithQuerySendDetailsConfigOptionsRuntimeOptions set runtime options
+func WithQuerySendDetailsConfigOptionsRuntimeOptions(r *util.RuntimeOptions) QuerySendDetailsConfigOption {
+	return func(opts *QuerySendDetailsConfigOptions) {
+		opts.runtimeOption = r
+	}
+}
+
 // IsOK check response is ok
 func (r *SendSmsResponse) IsOK() bool {
 	if r == nil {

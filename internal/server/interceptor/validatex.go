@@ -4,18 +4,19 @@ import (
 	"context"
 	"errors"
 
-	"github.com/iter-x/iter-x/internal/common/xerr"
 	errors1 "github.com/protoc-gen/protoc-gen-go-errors/errors"
 	"google.golang.org/grpc"
+
+	"github.com/iter-x/iter-x/internal/common/xerr"
 )
 
-type validatex interface {
+type validateX interface {
 	Validate(context.Context) error
 }
 
-func Validatex() grpc.UnaryServerInterceptor {
+func ValidateX() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		if v, ok := req.(validatex); ok {
+		if v, ok := req.(validateX); ok {
 			if err := v.Validate(ctx); err != nil {
 				var xErr *errors1.Error
 				if errors.As(err, &xErr) {

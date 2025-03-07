@@ -4,15 +4,16 @@ import (
 	"net"
 	"time"
 
+	"github.com/nicksnyder/go-i18n/v2/i18n"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
+
 	authV1 "github.com/iter-x/iter-x/internal/api/auth/v1"
 	poiV1 "github.com/iter-x/iter-x/internal/api/poi/v1"
 	tripV1 "github.com/iter-x/iter-x/internal/api/trip/v1"
 	"github.com/iter-x/iter-x/internal/conf"
 	"github.com/iter-x/iter-x/internal/server/interceptor"
 	"github.com/iter-x/iter-x/internal/service"
-	"github.com/nicksnyder/go-i18n/v2/i18n"
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
 )
 
 type GRPCServer struct {
@@ -35,7 +36,7 @@ func NewGRPCServer(
 		grpc.ChainUnaryInterceptor(
 			interceptor.I18n(i18nBundle),
 			interceptor.TokenValidation(auth),
-			interceptor.Validatex(),
+			interceptor.ValidateX(),
 		),
 	)
 	authV1.RegisterAuthServiceServer(server, auth)

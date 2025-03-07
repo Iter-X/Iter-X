@@ -10,7 +10,7 @@ paths:
         post:
             tags:
                 - AuthService
-            description: OneClickLogin one click login
+            description: 一键登陆
             operationId: AuthService_OneClickLogin
             requestBody:
                 content:
@@ -26,6 +26,22 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/auth.v1.OneClickLoginResponse'
     /api/v1/auth/refresh-token:
+        get:
+            tags:
+                - AuthService
+            operationId: AuthService_RefreshTokenX
+            parameters:
+                - name: refreshToken
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/auth.v1.RefreshTokenResponse'
         post:
             tags:
                 - AuthService
@@ -83,7 +99,9 @@ paths:
         post:
             tags:
                 - AuthService
-            description: SendSmsCode sends the SMS code
+            description: |-
+                发送短信验证码
+                 调用阿里云接口直接发送短信验证码，并返回biz_token和expire_time，用于后续验证短信验证码
             operationId: AuthService_SendSmsCode
             requestBody:
                 content:
@@ -156,7 +174,9 @@ paths:
         post:
             tags:
                 - AuthService
-            description: GetSmsAuthTokens get sms auth tokens
+            description: |-
+                获取短信验证码发送Tokens
+                 用于通过阿里云接口发送短信验证码
             operationId: AuthService_GetSmsAuthTokens
             requestBody:
                 content:
@@ -192,7 +212,9 @@ paths:
         post:
             tags:
                 - AuthService
-            description: VerifySmsCode verifies the SMS code
+            description: |-
+                验证短信验证码
+                 如果包含sms_token, 则调用阿里云接口验证， 否则走本地短信验证
             operationId: AuthService_VerifySmsCode
             requestBody:
                 content:
