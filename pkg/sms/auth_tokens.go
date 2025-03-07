@@ -3,7 +3,7 @@ package sms
 import (
 	"context"
 
-	dysmsapi "github.com/alibabacloud-go/dypnsapi-20170525/v2/client"
+	dysmsapiV2 "github.com/alibabacloud-go/dypnsapi-20170525/v2/client"
 	util "github.com/alibabacloud-go/tea-utils/v2/service"
 
 	"github.com/iter-x/iter-x/internal/common/xerr"
@@ -30,18 +30,18 @@ type (
 	}
 
 	authTokensConfigOptions struct {
-		req           *dysmsapi.GetSmsAuthTokensRequest
+		req           *dysmsapiV2.GetSmsAuthTokensRequest
 		runtimeOption *util.RuntimeOptions
 	}
 
 	AuthTokensConfigOption func(opts *authTokensConfigOptions)
 
 	GetSmsAuthTokensResponse struct {
-		*dysmsapi.GetSmsAuthTokensResponse
+		*dysmsapiV2.GetSmsAuthTokensResponse
 	}
 
 	GetSmsAuthTokensResponseBodyData struct {
-		*dysmsapi.GetSmsAuthTokensResponseBodyData
+		*dysmsapiV2.GetSmsAuthTokensResponseBodyData
 	}
 )
 
@@ -50,12 +50,8 @@ func (r *GetSmsAuthTokensResponse) IsRequestOK() bool {
 	if r == nil {
 		return false
 	}
-	return r.GetSmsAuthTokensResponse != nil &&
-		r.StatusCode != nil &&
-		*r.StatusCode == 200 &&
-		r.Body != nil &&
-		r.Body.Code != nil &&
-		*r.Body.Code == "OK"
+	return r.GetSmsAuthTokensResponse != nil && pointer.Get(r.StatusCode) == 200 &&
+		r.Body != nil && pointer.Get(r.Body.Code) == "OK"
 }
 
 // GetBizToken gets the biz token
@@ -141,7 +137,7 @@ func (c *Client) GetSmsAuthTokens(ctx context.Context, cfg AuthTokensConfig, opt
 		c.logger.Errorw("Failed to get client type from context")
 		return nil, xerr.ErrorInternalServerError()
 	}
-	getSmsAuthTokensRequest := &dysmsapi.GetSmsAuthTokensRequest{
+	getSmsAuthTokensRequest := &dysmsapiV2.GetSmsAuthTokensRequest{
 		BundleId:             pointer.Of(cfg.GetBundleId()),
 		Expire:               pointer.Of(cfg.GetExpireSec()),
 		OsType:               pointer.Of(osType),
@@ -156,13 +152,13 @@ func (c *Client) GetSmsAuthTokens(ctx context.Context, cfg AuthTokensConfig, opt
 	}
 	authOptions := &authTokensConfigOptions{
 		req:           getSmsAuthTokensRequest,
-		runtimeOption: &util.RuntimeOptions{},
+		runtimeOption: runtimeOptions,
 	}
 	for _, opt := range opts {
 		opt(authOptions)
 	}
 
-	getSmsAuthTokensResponse, err := c.client.GetSmsAuthTokensWithOptions(authOptions.req, authOptions.runtimeOption)
+	getSmsAuthTokensResponse, err := c.clientV2.GetSmsAuthTokensWithOptions(authOptions.req, authOptions.runtimeOption)
 	if err != nil {
 		c.logger.Errorw("Failed to get SMS authentication tokens", "error", err)
 		return nil, err
@@ -179,12 +175,12 @@ type (
 	}
 
 	verifySmsCodeConfigOptions struct {
-		req           *dysmsapi.VerifySmsCodeRequest
+		req           *dysmsapiV2.VerifySmsCodeRequest
 		runtimeOption *util.RuntimeOptions
 	}
 
 	VerifySmsCodeResponse struct {
-		*dysmsapi.VerifySmsCodeResponse
+		*dysmsapiV2.VerifySmsCodeResponse
 	}
 
 	VerifySmsCodeConfigOption func(*verifySmsCodeConfigOptions)
@@ -195,14 +191,8 @@ func (r *VerifySmsCodeResponse) IsOK() bool {
 	if r == nil {
 		return false
 	}
-	return r.VerifySmsCodeResponse != nil &&
-		r.StatusCode != nil &&
-		*r.StatusCode == 200 &&
-		r.Body != nil &&
-		r.Body.Code != nil &&
-		*r.Body.Code == "OK" &&
-		r.Body.Data != nil &&
-		*r.Body.Data
+	return r.VerifySmsCodeResponse != nil && pointer.Get(r.StatusCode) == 200 &&
+		r.Body != nil && pointer.Get(r.Body.Code) == "OK" && pointer.Get(r.Body.Data)
 }
 
 // GetCode gets the code
@@ -246,19 +236,19 @@ func WithVerifySmsCodeConfigOptionRuntimeOptions(r *util.RuntimeOptions) VerifyS
 
 // VerifySmsCode verifies the SMS code
 func (c *Client) VerifySmsCode(_ context.Context, cfg VerifySmsCodeConfig, opts ...VerifySmsCodeConfigOption) (*VerifySmsCodeResponse, error) {
-	verifyCodeRequest := &dysmsapi.VerifySmsCodeRequest{
+	verifyCodeRequest := &dysmsapiV2.VerifySmsCodeRequest{
 		PhoneNumber: pointer.Of(cfg.GetPhoneNumber()),
 		SmsCode:     pointer.Of(cfg.GetSmsCode()),
 		SmsToken:    pointer.Of(cfg.GetSmsToken()),
 	}
 	req := &verifySmsCodeConfigOptions{
 		req:           verifyCodeRequest,
-		runtimeOption: &util.RuntimeOptions{},
+		runtimeOption: runtimeOptions,
 	}
 	for _, opt := range opts {
 		opt(req)
 	}
-	result, err := c.client.VerifySmsCodeWithOptions(req.req, req.runtimeOption)
+	result, err := c.clientV2.VerifySmsCodeWithOptions(req.req, req.runtimeOption)
 	if err != nil {
 		c.logger.Errorw("Failed to verify SMS code", "error", err)
 		return nil, err

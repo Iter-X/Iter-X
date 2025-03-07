@@ -3,7 +3,7 @@ package sms
 import (
 	"context"
 
-	dysmsapi "github.com/alibabacloud-go/dypnsapi-20170525/v2/client"
+	dysmsapiV2 "github.com/alibabacloud-go/dypnsapi-20170525/v2/client"
 	"github.com/iter-x/iter-x/pkg/util/pointer"
 )
 
@@ -17,11 +17,11 @@ type (
 	}
 
 	GetMobileResponse struct {
-		*dysmsapi.GetMobileResponse
+		*dysmsapiV2.GetMobileResponse
 	}
 
 	GetMobileResponseBody struct {
-		*dysmsapi.GetMobileResponseBody
+		*dysmsapiV2.GetMobileResponseBody
 	}
 )
 
@@ -38,7 +38,7 @@ func (r *GetMobileResponse) IsOK() bool {
 	if r == nil || r.GetMobileResponse == nil || r.GetMobileResponse.Body == nil || r.GetMobileResponse.Body.Code == nil {
 		return false
 	}
-	return r.StatusCode != nil && *r.StatusCode == 200 && *r.GetMobileResponse.Body.Code == "OK"
+	return r.StatusCode != nil && pointer.Get(r.StatusCode) == 200 && pointer.Get(r.GetMobileResponse.Body.Code) == "OK"
 }
 
 // GetMobile get mobile
@@ -51,14 +51,14 @@ func (r *GetMobileResponseBody) GetMobile() string {
 
 // GetMobile get mobile
 func (c *Client) GetMobile(_ context.Context, cfg GetMobileConfig) (*GetMobileResponse, error) {
-	getMobileRequest := &dysmsapi.GetMobileRequest{
+	getMobileRequest := &dysmsapiV2.GetMobileRequest{
 		AccessToken:          pointer.Of(cfg.GetAccessToken()),
 		OutId:                pointer.Of(cfg.GetOutId()),
 		OwnerId:              pointer.Of(cfg.GetOwnerId()),
 		ResourceOwnerAccount: pointer.Of(cfg.GetResourceOwnerAccount()),
 		ResourceOwnerId:      pointer.Of(cfg.GetResourceOwnerId()),
 	}
-	getMobileResponse, err := c.client.GetMobile(getMobileRequest)
+	getMobileResponse, err := c.clientV2.GetMobile(getMobileRequest)
 	if err != nil {
 		c.logger.Errorw("Failed to get mobile", "error", err)
 		return nil, err
