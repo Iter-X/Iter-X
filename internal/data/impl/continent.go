@@ -9,10 +9,10 @@ import (
 	"github.com/iter-x/iter-x/internal/data/ent"
 )
 
-func NewContinent(tx *data.Tx, logger *zap.SugaredLogger) repository.ContinentRepo {
+func NewContinent(d *data.Data, logger *zap.SugaredLogger) repository.ContinentRepo {
 	return &continentRepositoryImpl{
-		Tx:                             tx,
-		logger:                         logger,
+		Tx:                             d.Tx,
+		logger:                         logger.Named("repo.continent"),
 		pointsOfInterestRepositoryImpl: new(pointsOfInterestRepositoryImpl),
 	}
 }

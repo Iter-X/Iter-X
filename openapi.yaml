@@ -79,6 +79,25 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/auth.v1.ResetPasswordResponse'
+    /api/v1/auth/send-sms-code:
+        post:
+            tags:
+                - AuthService
+            description: SendSmsCode sends the SMS code
+            operationId: AuthService_SendSmsCode
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth.v1.SendSmsCodeRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/auth.v1.SendSmsCodeResponse'
     /api/v1/auth/sign-in/oauth:
         post:
             tags:
@@ -476,6 +495,23 @@ components:
             properties:
                 status:
                     type: string
+        auth.v1.SendSmsCodeRequest:
+            type: object
+            properties:
+                phoneNumber:
+                    type: string
+                clientToken:
+                    type: string
+                    description: client token is a token issued by the client itself
+        auth.v1.SendSmsCodeResponse:
+            type: object
+            properties:
+                bizToken:
+                    type: string
+                    description: biz token is a token issued by the server itself
+                expireTime:
+                    type: string
+                    description: expire time is the time when the biz token expires, in seconds
         auth.v1.SignInRequest:
             type: object
             properties:
@@ -536,6 +572,12 @@ components:
                 smsCode:
                     type: string
                 smsToken:
+                    type: string
+                    description: sms token is Aliyun validation parameter
+                bizToken:
+                    type: string
+                    description: biz_token and client_token are internal system validation parameters, one of which must be chosen from sms_token
+                clientToken:
                     type: string
         auth.v1.VerifySmsCodeResponse:
             type: object

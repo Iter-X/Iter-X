@@ -9,10 +9,10 @@ import (
 	"github.com/iter-x/iter-x/internal/data/ent"
 )
 
-func NewCountry(tx *data.Tx, logger *zap.SugaredLogger) repository.CountryRepo {
+func NewCountry(d *data.Data, logger *zap.SugaredLogger) repository.CountryRepo {
 	return &countryRepositoryImpl{
-		Tx:                             tx,
-		logger:                         logger,
+		Tx:                             d.Tx,
+		logger:                         logger.Named("repo.country"),
 		pointsOfInterestRepositoryImpl: new(pointsOfInterestRepositoryImpl),
 	}
 }

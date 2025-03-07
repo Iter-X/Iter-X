@@ -57,10 +57,20 @@ service AuthService {
     };
     option (common.cnst.skip_token) = true;
   };
+
   // GetSmsAuthTokens get sms auth tokens
   rpc GetSmsAuthTokens (GetSmsAuthTokensRequest) returns (GetSmsAuthTokensResponse) {
     option (google.api.http) = {
       post: "/api/v1/auth/sms-auth-tokens"
+      body: "*"
+    };
+    option (common.cnst.skip_token) = true;
+  }
+
+  // SendSmsCode sends the SMS code
+  rpc SendSmsCode (SendSmsCodeRequest) returns (SendSmsCodeResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/send-sms-code"
       body: "*"
     };
     option (common.cnst.skip_token) = true;
@@ -165,6 +175,23 @@ message GetSmsAuthTokensResponse {
   string sts_token = 5;
 }
 
+message SendSmsCodeRequest {
+  string phone_number = 1 [(validatex.rules).string = {
+    min_len: 11,
+    non_empty: true,
+  }];
+  // client token is a token issued by the client itself
+  string client_token = 2 [(validatex.rules).string = {
+    non_empty: true,
+  }];
+}
+message SendSmsCodeResponse {
+  // biz token is a token issued by the server itself
+  string biz_token = 1;
+  // expire time is the time when the biz token expires, in seconds
+  int64 expire_time = 2;
+}
+
 message VerifySmsCodeRequest {
   string phone_number = 1 [(validatex.rules).string = {
     min_len: 11,
@@ -173,9 +200,11 @@ message VerifySmsCodeRequest {
   string sms_code = 2 [(validatex.rules).string = {
     non_empty: true,
   }];
-  string sms_token = 3 [(validatex.rules).string = {
-    non_empty: true,
-  }];
+  // sms token is Aliyun validation parameter
+  string sms_token = 3;
+  // biz_token and client_token are internal system validation parameters, one of which must be chosen from sms_token
+  string biz_token = 4;
+  string client_token = 5;
 }
 message VerifySmsCodeResponse {
   string token = 1;

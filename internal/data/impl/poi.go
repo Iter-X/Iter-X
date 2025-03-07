@@ -12,9 +12,9 @@ import (
 	"github.com/iter-x/iter-x/internal/data/ent/pointsofinterest"
 )
 
-func NewPointsOfInterest(tx *data.Tx, logger *zap.SugaredLogger) repository.PointsOfInterestRepo {
+func NewPointsOfInterest(d *data.Data, logger *zap.SugaredLogger) repository.PointsOfInterestRepo {
 	return &pointsOfInterestRepositoryImpl{
-		Tx:                           tx,
+		Tx:                           d.Tx,
 		logger:                       logger.Named("repo.poi"),
 		cityRepositoryImpl:           new(cityRepositoryImpl),
 		stateRepositoryImpl:          new(stateRepositoryImpl),

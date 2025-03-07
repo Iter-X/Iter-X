@@ -53,12 +53,38 @@ message Server {
   GRPC grpc = 2;
 }
 
+// redis配置
+message Redis {
+  // 网络类型
+  string network = 1;
+  // 地址
+  string addr = 2;
+  // 读写超时
+  google.protobuf.Duration read_timeout = 3;
+  google.protobuf.Duration write_timeout = 4;
+  // 密码
+  string password = 5;
+  // 数据库
+  uint32 db = 6;
+  // 连接超时
+  google.protobuf.Duration dial_timeout = 7;
+}
+
 message Data {
   message Database {
     string driver = 1;
     string source = 2;
   }
+  message Cache {
+    enum CacheDriver {
+      REDIS = 0;
+      MEMORY = 1;
+    }
+    CacheDriver driver = 1; // redis or memory
+    Redis redis = 2;
+  }
   Database database = 1;
+  Cache cache = 2;
 }
 
 message Jwt {
@@ -89,6 +115,11 @@ message Auth {
     string sms_template_code = 6;
     google.protobuf.Duration sms_code_expire = 7;
   }
+  message SmsCode {
+    string sign_name = 1;
+    string template_code = 2;
+    google.protobuf.Duration expire = 3;
+  }
   message AliCloud {
     string access_key_id = 1;
     string access_key_secret = 2;
@@ -97,6 +128,7 @@ message Auth {
   OAuth oauth = 2;
   AliCloud ali_cloud = 4;
   AuthTokens auth_tokens = 3;
+  SmsCode sms_code = 5;
 }
 
 message I18n {

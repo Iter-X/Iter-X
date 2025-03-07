@@ -9,10 +9,10 @@ import (
 	"github.com/iter-x/iter-x/internal/data/ent"
 )
 
-func NewCity(tx *data.Tx, logger *zap.SugaredLogger) repository.CityRepo {
+func NewCity(d *data.Data, logger *zap.SugaredLogger) repository.CityRepo {
 	return &cityRepositoryImpl{
-		Tx:                             tx,
-		logger:                         logger,
+		Tx:                             d.Tx,
+		logger:                         logger.Named("repo.city"),
 		pointsOfInterestRepositoryImpl: new(pointsOfInterestRepositoryImpl),
 	}
 }

@@ -9,10 +9,10 @@ import (
 	"github.com/iter-x/iter-x/internal/data/ent"
 )
 
-func NewDailyTrip(tx *data.Tx, logger *zap.SugaredLogger) repository.DailyTripRepo {
+func NewDailyTrip(d *data.Data, logger *zap.SugaredLogger) repository.DailyTripRepo {
 	return &dailyTripRepositoryImpl{
-		Tx:     tx,
-		logger: logger,
+		Tx:     d.Tx,
+		logger: logger.Named("repo.daily_trip"),
 	}
 }
 

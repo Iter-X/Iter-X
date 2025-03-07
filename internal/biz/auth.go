@@ -3,6 +3,7 @@ package biz
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -284,14 +285,57 @@ func (b *Auth) GetSmsAuthTokens(ctx context.Context) (*authV1.GetSmsAuthTokensRe
 	return response, nil
 }
 
-// VerifySmsCode verifies sms code.
-func (b *Auth) VerifySmsCode(ctx context.Context, params *authV1.VerifySmsCodeRequest) (*authV1.VerifySmsCodeResponse, error) {
-	verifySmsCode, err := b.smsClient.VerifySmsCode(ctx, params)
+// SendSmsCode sends sms code.
+func (b *Auth) SendSmsCode(ctx context.Context, params *authV1.SendSmsCodeRequest) (*authV1.SendSmsCodeResponse, error) {
+	sendSmsConfigParams := &bo.SendSmsConfigParams{
+		PhoneNumber: params.GetPhoneNumber(),
+		ClientToken: params.GetClientToken(),
+	}
+	// generate sms code
+	smsCodeItem, err := b.authRepo.GetSmsCode(ctx, sendSmsConfigParams)
 	if err != nil {
 		return nil, err
 	}
-	if !verifySmsCode.IsOK() {
+	smsCodeConf := b.cfg.GetSmsCode()
+	sendParams := sendSmsConfigParams.WithSmsConfig(
+		smsCodeConf.GetSignName(),
+		smsCodeConf.GetTemplateCode(),
+		fmt.Sprintf(`{"code":"%s"}`, smsCodeItem.SmsCode),
+	)
+	// TODO logging request to sms service
+	sendSmsResponse, err := b.smsClient.SendSms(ctx, sendParams)
+	if err != nil {
+		return nil, err
+	}
+	if !sendSmsResponse.IsOK() {
 		return nil, xerr.ErrorBadRequest()
+	}
+	return &authV1.SendSmsCodeResponse{
+		BizToken:   smsCodeItem.BizToken,
+		ExpireTime: int64(smsCodeItem.Expire.Seconds()),
+	}, nil
+}
+
+// VerifySmsCode verifies sms code.
+func (b *Auth) VerifySmsCode(ctx context.Context, params *authV1.VerifySmsCodeRequest) (*authV1.VerifySmsCodeResponse, error) {
+	if params.GetSmsToken() != "" {
+		verifySmsCode, err := b.smsClient.VerifySmsCode(ctx, params)
+		if err != nil {
+			return nil, err
+		}
+		if !verifySmsCode.IsOK() {
+			return nil, xerr.ErrorBadRequest()
+		}
+	} else {
+		verifySmsCodeParams := &bo.VerifySmsCodeParams{
+			BizToken:    params.GetBizToken(),
+			ClientToken: params.GetClientToken(),
+			PhoneNumber: params.GetPhoneNumber(),
+			SmsCode:     params.GetSmsCode(),
+		}
+		if err := b.authRepo.VerifySmsCode(ctx, verifySmsCodeParams); err != nil {
+			return nil, err
+		}
 	}
 
 	res, err := b.loginByPhone(ctx, params.GetPhoneNumber())

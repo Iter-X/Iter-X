@@ -2,7 +2,10 @@ package sms
 
 import (
 	"context"
+	"crypto/rand"
+	"math/big"
 	"strconv"
+	"strings"
 
 	dysmsapiV3 "github.com/alibabacloud-go/dysmsapi-20170525/v3/client"
 	util "github.com/alibabacloud-go/tea-utils/v2/service"
@@ -227,4 +230,22 @@ func (c *Client) QuerySendDetails(_ context.Context, config QuerySendDetailsConf
 	return &QuerySendDetailsResponse{
 		response,
 	}, nil
+}
+
+const numberCharset = "0123456789"
+
+// GenerateRandomNumberCode generate random number code
+func GenerateRandomNumberCode(length int) string {
+	if length <= 0 {
+		return ""
+	}
+	var code strings.Builder
+	for i := 0; i < length; i++ {
+		index, err := rand.Int(rand.Reader, big.NewInt(int64(len(numberCharset))))
+		if err != nil {
+			panic(err)
+		}
+		code.WriteByte(numberCharset[index.Int64()])
+	}
+	return code.String()
 }

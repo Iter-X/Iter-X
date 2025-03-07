@@ -25,3 +25,7 @@ auth:
     scene_code: "${X_SCENE_CODE:PlsChangeMe}"
     sms_template_code: "${X_SMS_TEMPLATE_CODE:PlsChangeMe}"
     sms_code_expire: 300s
+  sms_code:
+    expire: 300s
+    sign_name: "${X_SMS_SIGN_NAME:PlsChangeMe}"
+    template_code: "${X_SMS_TEMPLATE_CODE:PlsChangeMe}"

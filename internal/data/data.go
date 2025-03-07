@@ -1,6 +1,7 @@
 package data
 
 import (
+	"github.com/iter-x/iter-x/internal/data/cache"
 	_ "github.com/lib/pq"
 
 	"context"
@@ -12,16 +13,23 @@ import (
 	"github.com/iter-x/iter-x/internal/data/ent"
 )
 
-type Tx struct {
-	Cli *ent.Client
-}
+type (
+	Tx struct {
+		Cli *ent.Client
+	}
+
+	Data struct {
+		Tx    *Tx
+		Cache cache.Cacher
+	}
+)
 
 // newTx create a new tx
 func newTx(cli *ent.Client) *Tx {
 	return &Tx{Cli: cli}
 }
 
-func NewConnection(c *conf.Data, logger *zap.SugaredLogger) (*Tx, func(), error) {
+func NewConnection(c *conf.Data, logger *zap.SugaredLogger) (*Data, func(), error) {
 	logger = logger.Named("repo")
 
 	client, err := ent.Open(c.Database.Driver, c.Database.Source)
@@ -29,17 +37,25 @@ func NewConnection(c *conf.Data, logger *zap.SugaredLogger) (*Tx, func(), error)
 		logger.Error("failed opening connection to postgres: ", err)
 		return nil, nil, err
 	}
+	d := &Data{
+		Tx:    newTx(client),
+		Cache: cache.NewCache(c),
+	}
 
 	cleanup := func() {
-		err = client.Close()
-		if err != nil {
+		if err = d.Tx.Cli.Close(); err != nil {
+			logger.Error("failed closing connection: ", err)
+		} else {
+			logger.Info("closing the data resources")
+		}
+		if err = d.Cache.Close(); err != nil {
 			logger.Error("failed closing connection: ", err)
 		} else {
 			logger.Info("closing the data resources")
 		}
 	}
 
-	return newTx(client), cleanup, nil
+	return d, cleanup, nil
 }
 
 // GetTx This method checks if there is a transaction in the context, and if so returns the client with the transaction

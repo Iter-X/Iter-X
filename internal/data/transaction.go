@@ -18,9 +18,9 @@ type transactionRepoImpl struct {
 type contextTxKey struct{}
 
 // NewTransactionRepository .
-func NewTransactionRepository(tx *Tx, logger *zap.SugaredLogger) repository.Transaction {
+func NewTransactionRepository(data *Data, logger *zap.SugaredLogger) repository.Transaction {
 	return &transactionRepoImpl{
-		tx:     tx,
+		tx:     data.Tx,
 		logger: logger,
 	}
 }

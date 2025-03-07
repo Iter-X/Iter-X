@@ -9,10 +9,10 @@ import (
 	"github.com/iter-x/iter-x/internal/data/ent"
 )
 
-func NewRefreshToken(tx *data.Tx, logger *zap.SugaredLogger) repository.TokenRepo {
+func NewRefreshToken(d *data.Data, logger *zap.SugaredLogger) repository.TokenRepo {
 	return &refreshTokenImpl{
-		Tx:                 tx,
-		logger:             logger,
+		Tx:                 d.Tx,
+		logger:             logger.Named("repo.refresh_token"),
 		authRepositoryImpl: new(authRepositoryImpl),
 	}
 }

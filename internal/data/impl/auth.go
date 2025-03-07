@@ -2,8 +2,15 @@ package impl
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
+	"github.com/iter-x/iter-x/internal/biz/bo"
+	"github.com/iter-x/iter-x/internal/conf"
+	"github.com/iter-x/iter-x/internal/data/cache"
+	"github.com/iter-x/iter-x/pkg/sms"
+	"github.com/iter-x/iter-x/pkg/util/password"
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 
 	"github.com/iter-x/iter-x/internal/biz/do"
@@ -16,9 +23,11 @@ import (
 	"github.com/iter-x/iter-x/pkg/vobj"
 )
 
-func NewAuth(tx *data.Tx, logger *zap.SugaredLogger) repository.AuthRepo {
+func NewAuth(c *conf.Auth, d *data.Data, logger *zap.SugaredLogger) repository.AuthRepo {
 	return &authRepositoryImpl{
-		Tx:                 tx,
+		smsConf:            c.GetSmsCode(),
+		Tx:                 d.Tx,
+		Cacher:             d.Cache,
 		logger:             logger.Named("repo.auth"),
 		refreshTokenImpl:   new(refreshTokenImpl),
 		tripRepositoryImpl: new(tripRepositoryImpl),
@@ -26,7 +35,9 @@ func NewAuth(tx *data.Tx, logger *zap.SugaredLogger) repository.AuthRepo {
 }
 
 type authRepositoryImpl struct {
+	smsConf *conf.Auth_SmsCode
 	*data.Tx
+	cache.Cacher
 	logger *zap.SugaredLogger
 
 	refreshTokenImpl   repository.BaseRepo[*ent.RefreshToken, *do.RefreshToken]
@@ -64,6 +75,41 @@ func (r *authRepositoryImpl) ToEntities(pos []*ent.User) []*do.User {
 		list = append(list, r.ToEntity(v))
 	}
 	return list
+}
+
+func (r *authRepositoryImpl) GetSmsCode(ctx context.Context, params *bo.SendSmsConfigParams) (*bo.SmsCodeItem, error) {
+	// generate sms code
+	smsCode := sms.GenerateRandomNumberCode(6)
+	hash := password.MD5(params.ClientToken)
+	expire := r.smsConf.GetExpire().AsDuration()
+	bizToken := password.GenerateRandomPassword(32)
+	cacheResponse := &bo.SmsCodeItem{
+		PhoneNumber: params.PhoneNumber,
+		ClientToken: params.ClientToken,
+		BizToken:    bizToken,
+		Expire:      expire,
+		SmsCode:     smsCode,
+	}
+	// cache sms code
+	if err := r.Client().Set(ctx, cache.SmsCodeKey.Key(params.PhoneNumber, "md5", hash), cacheResponse, expire).Err(); err != nil {
+		return nil, err
+	}
+	return cacheResponse, nil
+}
+
+func (r *authRepositoryImpl) VerifySmsCode(ctx context.Context, params *bo.VerifySmsCodeParams) error {
+	hash := password.MD5(params.ClientToken)
+	var cacheResponse bo.SmsCodeItem
+	if err := r.Client().Get(ctx, cache.SmsCodeKey.Key(params.PhoneNumber, "md5", hash)).Scan(&cacheResponse); err != nil {
+		if errors.Is(err, redis.Nil) {
+			return xerr.ErrorSmsCodeExpired()
+		}
+		return err
+	}
+	if err := params.Validate(&cacheResponse); err != nil {
+		return xerr.ErrorSmsCodeInvalid()
+	}
+	return nil
 }
 
 func (r *authRepositoryImpl) FindByEmail(ctx context.Context, email string) (*do.User, error) {

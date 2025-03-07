@@ -14,9 +14,9 @@ import (
 	"github.com/iter-x/iter-x/internal/data/ent/trip"
 )
 
-func NewTrip(tx *data.Tx, logger *zap.SugaredLogger) repository.TripRepo {
+func NewTrip(d *data.Data, logger *zap.SugaredLogger) repository.TripRepo {
 	return &tripRepositoryImpl{
-		Tx:                           tx,
+		Tx:                           d.Tx,
 		logger:                       logger.Named("repo.trip"),
 		authRepositoryImpl:           new(authRepositoryImpl),
 		dailyTripRepositoryImpl:      new(dailyTripRepositoryImpl),
