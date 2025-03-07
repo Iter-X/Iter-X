@@ -25,6 +25,12 @@ other = "Daily trip not found"
 [INVALID_DAILY_TRIP_ID]
 other = "Invalid daily trip ID"
 
+[SMS_CODE_EXPIRED]
+other = "SMS code expired"
+
+[SMS_CODE_INVALID]
+other = "SMS code invalid"
+
 [UNAUTHORIZED]
 other = "Unauthorized"
 

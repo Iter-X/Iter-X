@@ -25,6 +25,12 @@ other = "每日行程未找到"
 [INVALID_DAILY_TRIP_ID]
 other = "无效的每日行程ID"
 
+[SMS_CODE_EXPIRED]
+other = "短信验证码已过期"
+
+[SMS_CODE_INVALID]
+other = "短信验证码无效"
+
 [UNAUTHORIZED]
 other = "未授权"
 
