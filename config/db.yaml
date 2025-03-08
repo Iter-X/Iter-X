@@ -3,3 +3,13 @@ data:
     driver: postgres
     source: "host=${X_DB_HOST:localhost} port=${X_DB_PORT:5432} 
     user=${X_DB_USER:postgres} dbname=${X_DB_NAME:postgres} password=${X_DB_PASS:example} sslmode=disable"
+  cache:
+    driver: MEMORY
+    redis:
+      network: tcp
+      addr: "${X_REDIS_HOST:localhost}:${X_REDIS_PORT:6379}"
+      read_timeout: 10s
+      write_timeout: 10s
+      dial_timeout: 10s
+      password: "${X_REDIS_PASSWORD:}"
+      db: 0
