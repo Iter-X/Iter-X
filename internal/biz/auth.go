@@ -284,7 +284,10 @@ func (b *Auth) SendSmsCode(ctx context.Context, params *authV1.SendSmsCodeReques
 	if !sendSmsResponse.IsOK() {
 		return nil, xerr.ErrorBadRequest()
 	}
-	return &authV1.SendSmsCodeResponse{}, nil
+	return &authV1.SendSmsCodeResponse{
+		ExpireTime: smsCodeConf.GetValidTime().GetSeconds(),
+		Interval:   smsCodeConf.GetInterval().GetSeconds(),
+	}, nil
 }
 
 // VerifySmsCode verifies sms code.

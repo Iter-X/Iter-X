@@ -172,7 +172,10 @@ message SendSmsCodeRequest {
     non_empty: true,
   }];
 }
-message SendSmsCodeResponse {}
+message SendSmsCodeResponse {
+  int64 expire_time = 1; // in seconds
+  int64 interval = 2; // in seconds
+}
 
 message VerifySmsCodeRequest {
   string phone_number = 1 [(validatex.rules).string = {

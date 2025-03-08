@@ -487,7 +487,11 @@ components:
                     type: string
         auth.v1.SendSmsCodeResponse:
             type: object
-            properties: {}
+            properties:
+                expireTime:
+                    type: string
+                interval:
+                    type: string
         auth.v1.SignInRequest:
             type: object
             properties:
