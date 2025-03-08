@@ -67,10 +67,6 @@ func (s *Auth) ValidateToken(ctx context.Context, token string) (jwt.Claims, err
 	return s.authBiz.ValidateToken(ctx, token)
 }
 
-func (s *Auth) GetSmsAuthTokens(ctx context.Context, _ *authV1.GetSmsAuthTokensRequest) (*authV1.GetSmsAuthTokensResponse, error) {
-	return s.authBiz.GetSmsAuthTokens(ctx)
-}
-
 func (s *Auth) SendSmsCode(ctx context.Context, req *authV1.SendSmsCodeRequest) (*authV1.SendSmsCodeResponse, error) {
 	return s.authBiz.SendSmsCode(ctx, req)
 }

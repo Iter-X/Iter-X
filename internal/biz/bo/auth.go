@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/iter-x/iter-x/internal/biz/do"
-	"github.com/iter-x/iter-x/internal/common/xerr"
+	"github.com/iter-x/iter-x/internal/conf"
 	"github.com/iter-x/iter-x/pkg/sms"
 	"github.com/iter-x/iter-x/pkg/util/password"
 	"github.com/iter-x/iter-x/pkg/vobj"
@@ -32,12 +32,10 @@ type (
 
 	SendSmsConfigParams struct {
 		PhoneNumber string
-		ClientToken string
 	}
 
 	SmsCodeItem struct {
 		PhoneNumber string
-		ClientToken string
 		BizToken    string
 		Expire      time.Duration
 		SmsCode     string
@@ -48,33 +46,12 @@ type (
 		signName      string
 		templateCode  string
 		templateParam string
-	}
-
-	VerifySmsCodeParams struct {
-		PhoneNumber string
-		ClientToken string
-		BizToken    string
-		SmsCode     string
+		validTime     int64
+		codeLength    int64
+		interval      int64
+		codeType      int64
 	}
 )
-
-// Validate validate sms code
-func (s *VerifySmsCodeParams) Validate(p *SmsCodeItem) error {
-	if p == nil {
-		return xerr.ErrorSmsCodeExpired()
-	}
-	if s.PhoneNumber != p.PhoneNumber {
-		return xerr.ErrorSmsCodeInvalid()
-	}
-	if s.SmsCode != p.SmsCode {
-		return xerr.ErrorSmsCodeInvalid()
-	}
-	if p.BizToken != s.BizToken {
-		return xerr.ErrorSmsCodeInvalid()
-	}
-
-	return nil
-}
 
 // MarshalBinary marshal binary
 func (s *SmsCodeItem) MarshalBinary() (data []byte, err error) {
@@ -86,13 +63,37 @@ func (s *SmsCodeItem) UnmarshalBinary(data []byte) error {
 	return json.Unmarshal(data, s)
 }
 
-func (s *SendSmsConfigParams) WithSmsConfig(signName, templateCode, templateParam string) sms.SendSmsConfig {
+func (s *SendSmsConfigParams) WithSmsConfig(smsCodeConf *conf.Auth_SmsCode, templateParam string) sms.SendSmsVerifyCodeParams {
 	return &sendSmsConfigParams{
 		SendSmsConfigParams: s,
-		signName:            signName,
-		templateCode:        templateCode,
+		signName:            smsCodeConf.GetSignName(),
+		templateCode:        smsCodeConf.GetTemplateCode(),
 		templateParam:       templateParam,
+		validTime:           smsCodeConf.GetValidTime().GetSeconds(),
+		codeLength:          smsCodeConf.GetCodeLength(),
+		interval:            smsCodeConf.GetInterval().GetSeconds(),
+		codeType:            1,
 	}
+}
+
+func (s *sendSmsConfigParams) GetValidTime() int64 {
+	return s.validTime
+}
+
+func (s *sendSmsConfigParams) GetCodeLength() int64 {
+	return s.codeLength
+}
+
+func (s *sendSmsConfigParams) GetInterval() int64 {
+	return s.interval
+}
+
+func (s *sendSmsConfigParams) GetCodeType() int64 {
+	return s.codeType
+}
+
+func (s *sendSmsConfigParams) GetPhoneNumber() string {
+	return s.PhoneNumber
 }
 
 func (s *sendSmsConfigParams) GetSignName() string {
@@ -105,10 +106,6 @@ func (s *sendSmsConfigParams) GetTemplateCode() string {
 
 func (s *sendSmsConfigParams) GetTemplateParam() string {
 	return s.templateParam
-}
-
-func (s *sendSmsConfigParams) GetPhoneNumbers() string {
-	return s.PhoneNumber
 }
 
 func (g *GetMobileConfigParams) GetAccessToken() string {

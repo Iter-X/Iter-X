@@ -4,22 +4,12 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/iter-x/iter-x/internal/biz/bo"
-
 	"github.com/iter-x/iter-x/internal/biz/do"
 	"github.com/iter-x/iter-x/internal/data/ent"
 )
 
-type SmsCoder interface {
-	GetSmsCode(ctx context.Context, params *bo.SendSmsConfigParams) (*bo.SmsCodeItem, error)
-
-	VerifySmsCode(ctx context.Context, params *bo.VerifySmsCodeParams) error
-}
-
 type Auth[T *ent.User, R *do.User] interface {
 	BaseRepo[T, R]
-
-	SmsCoder
 
 	FindByEmail(ctx context.Context, email string) (*do.User, error)
 

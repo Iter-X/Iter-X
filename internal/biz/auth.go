@@ -268,74 +268,34 @@ func (b *Auth) ValidateToken(_ context.Context, s string) (jwt.Claims, error) {
 	return claims, nil
 }
 
-// GetSmsAuthTokens gets sms auth tokens.
-func (b *Auth) GetSmsAuthTokens(ctx context.Context) (*authV1.GetSmsAuthTokensResponse, error) {
-	authTokens, err := b.smsClient.GetSmsAuthTokens(ctx, b.cfg.AuthTokens)
-	if err != nil {
-		return nil, err
-	}
-	authData := authTokens.GetData()
-	response := &authV1.GetSmsAuthTokensResponse{
-		BizToken:           authData.GetBizToken(),
-		ExpireTime:         authData.GetExpireTime(),
-		StsAccessKeyId:     authData.GetStsAccessKeyId(),
-		StsAccessKeySecret: authData.GetStsAccessKeySecret(),
-		StsToken:           authData.GetStsToken(),
-	}
-	return response, nil
-}
-
 // SendSmsCode sends sms code.
 func (b *Auth) SendSmsCode(ctx context.Context, params *authV1.SendSmsCodeRequest) (*authV1.SendSmsCodeResponse, error) {
 	sendSmsConfigParams := &bo.SendSmsConfigParams{
 		PhoneNumber: params.GetPhoneNumber(),
-		ClientToken: params.GetClientToken(),
-	}
-	// generate sms code
-	smsCodeItem, err := b.authRepo.GetSmsCode(ctx, sendSmsConfigParams)
-	if err != nil {
-		return nil, err
 	}
 	smsCodeConf := b.cfg.GetSmsCode()
-	sendParams := sendSmsConfigParams.WithSmsConfig(
-		smsCodeConf.GetSignName(),
-		smsCodeConf.GetTemplateCode(),
-		fmt.Sprintf(`{"code":"%s"}`, smsCodeItem.SmsCode),
-	)
+	smsCode := sms.GenerateRandomNumberCode(int(smsCodeConf.GetCodeLength()))
+	sendParams := sendSmsConfigParams.WithSmsConfig(smsCodeConf, fmt.Sprintf(`{"code":"%s"}`, smsCode))
 	// TODO logging request to sms service
-	sendSmsResponse, err := b.smsClient.SendSms(ctx, sendParams)
+	sendSmsResponse, err := b.smsClient.SendSmsVerifyCode(ctx, sendParams)
 	if err != nil {
 		return nil, err
 	}
 	if !sendSmsResponse.IsOK() {
 		return nil, xerr.ErrorBadRequest()
 	}
-	return &authV1.SendSmsCodeResponse{
-		BizToken:   smsCodeItem.BizToken,
-		ExpireTime: int64(smsCodeItem.Expire.Seconds()),
-	}, nil
+	return &authV1.SendSmsCodeResponse{}, nil
 }
 
 // VerifySmsCode verifies sms code.
 func (b *Auth) VerifySmsCode(ctx context.Context, params *authV1.VerifySmsCodeRequest) (*authV1.VerifySmsCodeResponse, error) {
-	if params.GetSmsToken() != "" {
-		verifySmsCode, err := b.smsClient.VerifySmsCode(ctx, params)
-		if err != nil {
-			return nil, err
-		}
-		if !verifySmsCode.IsOK() {
-			return nil, xerr.ErrorBadRequest()
-		}
-	} else {
-		verifySmsCodeParams := &bo.VerifySmsCodeParams{
-			BizToken:    params.GetBizToken(),
-			ClientToken: params.GetClientToken(),
-			PhoneNumber: params.GetPhoneNumber(),
-			SmsCode:     params.GetSmsCode(),
-		}
-		if err := b.authRepo.VerifySmsCode(ctx, verifySmsCodeParams); err != nil {
-			return nil, err
-		}
+	verifySmsCode, err := b.smsClient.CheckSmsVerifyCode(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+
+	if !verifySmsCode.IsOK() {
+		return nil, xerr.ErrorBadRequest()
 	}
 
 	res, err := b.loginByPhone(ctx, params.GetPhoneNumber())

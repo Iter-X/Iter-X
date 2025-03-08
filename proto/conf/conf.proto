@@ -118,7 +118,9 @@ message Auth {
   message SmsCode {
     string sign_name = 1;
     string template_code = 2;
-    google.protobuf.Duration expire = 3;
+    google.protobuf.Duration valid_time = 3;
+    int64 code_length = 4;
+    google.protobuf.Duration interval = 5;
   }
   message AliCloud {
     string access_key_id = 1;
