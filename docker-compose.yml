@@ -1,0 +1,30 @@
+services:
+  iterx:
+    image: registry.ap-southeast-1.aliyuncs.com/iter-x/iter-x:latest
+    container_name: iterx
+    pull_policy: always
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+      - "9000:9000"
+    env_file:
+      - .env
+
+  db:
+    image: registry.ap-southeast-1.aliyuncs.com/iter-x/postgres:16
+    container_name: iterx-postgres
+    restart: always
+    shm_size: 128mb
+    ports:
+      - "54321:5432"
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    environment:
+      - PGDATA=/var/lib/postgresql/data
+      - POSTGRES_DB=${X_DB_NAME}
+      - POSTGRES_USER=${X_DB_USER}
+      - POSTGRES_PASSWORD=${X_DB_PASS}
+    env_file:
+      - .env
