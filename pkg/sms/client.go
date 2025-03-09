@@ -13,6 +13,7 @@ type (
 	Client struct {
 		accessKeyId     string
 		accessKeySecret string
+		endpoint        string
 
 		clientV2 *dysmsapiV2.Client
 		clientV3 *dysmsapiV3.Client
@@ -23,6 +24,7 @@ type (
 	ClientConfig interface {
 		GetAccessKeyId() string
 		GetAccessKeySecret() string
+		GetEndpoint() string
 	}
 
 	ClientOption func(c *Client)
@@ -44,6 +46,7 @@ func WithClientConfig(cfg ClientConfig) ClientOption {
 	return func(c *Client) {
 		c.accessKeyId = cfg.GetAccessKeyId()
 		c.accessKeySecret = cfg.GetAccessKeySecret()
+		c.endpoint = cfg.GetEndpoint()
 	}
 }
 
@@ -63,7 +66,7 @@ func (c *Client) initClientV2() *dysmsapiV2.Client {
 		AccessKeyId:     &c.accessKeyId,
 		AccessKeySecret: &c.accessKeySecret,
 	}
-	config.Endpoint = tea.String("dysmsapi.aliyuncs.com")
+	config.Endpoint = tea.String(c.endpoint)
 	client, err := dysmsapiV2.NewClient(config)
 	if err != nil {
 		panic(err)

@@ -14,20 +14,20 @@ auth:
     wechat_client_id: "${X_WECHAT_CLIENT_ID:PlsChangeMe}"
     wechat_client_secret: "${X_WECHAT_CLIENT_SECRET:PlsChangeMe}"
     wechat_redirect_url: "${X_WECHAT_REDIRECT_URL:PlsChangeMe}"
-  ali_cloud:
-    access_key_id: "${X_ACCESS_KEY_ID:PlsChangeMe}"
-    access_key_secret: "${X_ACCESS_KEY_SECRET:PlsChangeMe}"
   auth_tokens:
-    bundle_id: "${X_BUNDLE_ID:PlsChangeMe}"
+    bundle_id: "${X_BUNDLE_ID}"
     expire: 360s
-    package_name: "${X_PACKAGE_NAME:PlsChangeMe}"
-    sign_name: "${X_SIGN_NAME:PlsChangeMe}"
-    scene_code: "${X_SCENE_CODE:PlsChangeMe}"
-    sms_template_code: "${X_SMS_TEMPLATE_CODE:PlsChangeMe}"
+    package_name: "${X_PACKAGE_NAME}"
+    sign_name: "${X_SIGN_NAME}"
+    scene_code: "${X_SCENE_CODE}"
+    sms_template_code: "${X_SMS_TEMPLATE_CODE}"
     sms_code_expire: 300s
   sms_code:
+    access_key_id: "${X_SMS_ACCESS_KEY_ID}"
+    access_key_secret: "${X_SMS_ACCESS_KEY_SECRET}"
+    endpoint: "${X_SMS_ENDPOINT}"
     valid_time: 300s
     code_length: 6
     interval: 60s
-    sign_name: "${X_SMS_SIGN_NAME:PlsChangeMe}"
-    template_code: "${X_SMS_TEMPLATE_CODE:PlsChangeMe}"
+    sign_name: "${X_SMS_SIGN_NAME}"
+    template_code: "${X_SMS_TEMPLATE_CODE}"

@@ -32,7 +32,7 @@ type Auth struct {
 }
 
 func NewAuth(c *conf.Auth, transaction repository.Transaction, authRepo repository.AuthRepo, logger *zap.SugaredLogger) *Auth {
-	smsClient := sms.NewClient(sms.WithClientConfig(c.GetAliCloud()))
+	smsClient := sms.NewClient(sms.WithClientConfig(c.GetSmsCode()))
 	return &Auth{
 		cfg:         c,
 		Transaction: transaction,
