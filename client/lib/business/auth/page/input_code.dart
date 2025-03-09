@@ -1,11 +1,18 @@
 import 'dart:async';
 
+import 'package:client/app/routes.dart';
+import 'package:client/business/auth/entity/user_info_entity.dart';
+import 'package:client/common/material/loading.dart';
 import 'package:client/common/utils/color.dart';
+import 'package:client/common/utils/shared_preference_util.dart';
 import 'package:client/common/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:gap/gap.dart';
+
+import '../../../common/material/state.dart';
+import '../service/auth_service.dart';
 
 class InputCodeArgument {
   final String phone;
@@ -27,15 +34,21 @@ class InputCodePage extends StatefulWidget {
   State<InputCodePage> createState() => _InputCodePageState();
 }
 
-class _InputCodePageState extends State<InputCodePage> {
+class _InputCodePageState extends BaseState<InputCodePage> {
   late TextEditingController _codeController;
   String timeStr = '重新发送';
   Timer? _timer;
   int time = 60;
+  bool isLoading = false;
 
   @override
   void initState() {
     _codeController = TextEditingController();
+    _codeController.addListener(() {
+      if (_codeController.text.length == 6) {
+        verifyLogin();
+      }
+    });
     super.initState();
     startTimer();
   }
@@ -132,13 +145,15 @@ class _InputCodePageState extends State<InputCodePage> {
                   color: BaseColor.c_1D1F1E,
                 ),
                 alignment: Alignment.center,
-                child: Text(
-                  '登录',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20.sp,
-                  ),
-                ),
+                child: isLoading
+                    ? const LoadingWidget()
+                    : Text(
+                        '登录',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20.sp,
+                        ),
+                      ),
               ),
             ),
           ],
@@ -171,5 +186,26 @@ class _InputCodePageState extends State<InputCodePage> {
   void cancelTimer() {
     _timer?.cancel();
     _timer = null;
+  }
+
+  void verifyLogin() async {
+    if (isLoading) {
+      return;
+    }
+    setState(() {
+      isLoading = true;
+    });
+    UserInfoEntity? result = await AuthService.verifyLogin(
+      widget.argument.phone,
+      _codeController.text,
+    );
+    setState(() {
+      isLoading = false;
+    });
+    if (result != null) {
+      await BaseSpUtil.setJSON(SpKeys.TOKEN, result.token);
+      await BaseSpUtil.setJSON(SpKeys.USER_INFO, result);
+      go(Routes.home, clearStack: true);
+    }
   }
 }

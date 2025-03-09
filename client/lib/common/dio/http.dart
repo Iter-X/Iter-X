@@ -73,13 +73,13 @@ class Http {
   // 传入AppNetworkConfig的构造方法
   Http._internal(AppNetworkConfig config) {
     dio.options = BaseOptions(
-        connectTimeout: Duration(milliseconds: config.connectTimeout),
-        receiveTimeout: Duration(milliseconds: config.receiveTimeout),
-        sendTimeout: Duration(milliseconds: config.sendTimeout),
-        // baseUrl: ApiUtil.apiModel.baseUrl ?? '',
-        baseUrl: ApiUtil.apiModel.baseUrl ?? '',
-        validateStatus: (int? status) => status != null && status > 0,
-        headers: config.headers ?? {});
+      connectTimeout: Duration(milliseconds: config.connectTimeout),
+      receiveTimeout: Duration(milliseconds: config.receiveTimeout),
+      sendTimeout: Duration(milliseconds: config.sendTimeout),
+      baseUrl: ApiUtil.apiModel.baseUrl ?? '',
+      validateStatus: (int? status) => status != null && status > 0,
+      headers: config.headers ?? {},
+    );
     if (BaseLogger.enable) {
       dio.interceptors.add(LogInterceptor());
     }

@@ -1,5 +1,7 @@
 import 'package:client/app/routes.dart';
 import 'package:client/business/auth/page/input_code.dart';
+import 'package:client/business/auth/service/auth_service.dart';
+import 'package:client/common/material/loading.dart';
 import 'package:client/common/material/text_field.dart';
 import 'package:client/common/utils/color.dart';
 import 'package:client/common/utils/toast.dart';
@@ -19,6 +21,7 @@ class PhoneLoginPage extends StatefulWidget {
 
 class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
   late TextEditingController _controller;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -112,13 +115,15 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
                   color: BaseColor.c_1D1F1E,
                 ),
                 alignment: Alignment.center,
-                child: Text(
-                  '发送短信验证码',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20.sp,
-                  ),
-                ),
+                child: isLoading
+                    ? const LoadingWidget()
+                    : Text(
+                        '发送短信验证码',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20.sp,
+                        ),
+                      ),
               ),
             ),
           ],
@@ -127,18 +132,31 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
     );
   }
 
-  void codeLogin() {
-    if (BaseUtil.isEmpty(_controller.text)) {
+  Future<void> codeLogin() async {
+    if (isLoading) {
+      return;
+    }
+    String phoneNumber = _controller.text.trim();
+    if (BaseUtil.isEmpty(phoneNumber)) {
       Toast.show('请输入手机号');
       return;
     }
-    if (_controller.text.length != 11) {
+    if (phoneNumber.length != 11) {
       Toast.show('请输入正确的手机号');
       return;
     }
-    go(
-      Routes.inputCode,
-      arguments: InputCodeArgument(phone: _controller.text.trim()),
-    );
+    setState(() {
+      isLoading = true;
+    });
+    bool result = await AuthService.getSendSmsCode(phoneNumber);
+    setState(() {
+      isLoading = false;
+    });
+    if (result) {
+      go(
+        Routes.inputCode,
+        arguments: InputCodeArgument(phone: phoneNumber),
+      );
+    }
   }
 }
