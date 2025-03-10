@@ -40,6 +40,5 @@ func ObfuscatePassword(password, salt string) string {
 	h.Write([]byte(password))
 	hashed := h.Sum(nil)
 
-	// 返回 Base64 编码结果，避免存储二进制数据
 	return base64.StdEncoding.EncodeToString(hashed)
 }

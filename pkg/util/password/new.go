@@ -1,9 +1,11 @@
 package password
 
+import "encoding/base64"
+
 // New Create a new password object
 func New(p string, salts ...string) Password {
 	saltBytes, _ := GenerateSalt(16)
-	salt := string(saltBytes)
+	salt := base64.StdEncoding.EncodeToString(saltBytes)
 	if len(salts) > 0 {
 		salt = salts[0]
 	}
@@ -19,7 +21,6 @@ type (
 		EQ(hashedPassword string) bool
 		PValue() string
 		EnValue() (string, error)
-		EnValueX() string
 		Salt() string
 	}
 )
@@ -41,17 +42,6 @@ func (p *password) EnValue() (string, error) {
 		p.enP, err = HashPassword(ObfuscatePassword(p.PValue(), p.Salt()))
 	}
 	return p.enP, err
-}
-
-func (p *password) EnValueX() string {
-	if p.enP == "" {
-		var err error
-		p.enP, err = HashPassword(ObfuscatePassword(p.PValue(), p.Salt()))
-		if err != nil {
-			panic(err)
-		}
-	}
-	return p.enP
 }
 
 func (p *password) Salt() string {

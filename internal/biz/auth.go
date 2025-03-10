@@ -126,11 +126,15 @@ func (b *Auth) SignUp(ctx context.Context, params *authV1.SignUpRequest) (*authV
 	}
 
 	pass := password.New(params.Password)
+	passwd, err := pass.EnValue()
+	if err != nil {
+		return nil, xerr.ErrorInternalServerError()
+	}
 	// create the user
 	data := &do.User{
 		Username: params.Email,
 		Email:    params.Email,
-		Password: pass.EnValueX(),
+		Password: passwd,
 		Salt:     pass.Salt(),
 	}
 	user, err := b.authRepo.Create(ctx, data)

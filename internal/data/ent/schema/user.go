@@ -23,8 +23,8 @@ func (User) Fields() []ent.Field {
 		field.String("salt").NotEmpty().MaxLen(255),
 		field.String("nickname").Optional().MaxLen(50),
 		field.String("remark").Optional().MaxLen(50),
-		field.String("phone").NotEmpty().MaxLen(11),
-		field.String("email").NotEmpty().MaxLen(255),
+		field.String("phone").MaxLen(11),
+		field.String("email").MaxLen(255),
 		field.String("avatar_url").MaxLen(255).Optional(),
 	}
 }
