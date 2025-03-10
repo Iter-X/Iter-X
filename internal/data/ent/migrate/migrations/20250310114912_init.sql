@@ -1,7 +1,7 @@
 -- Create "media" table
 CREATE TABLE "media" ("id" uuid NOT NULL, "created_at" timestamptz NOT NULL, "updated_at" timestamptz NOT NULL, "filename" character varying NOT NULL, "file_type" character varying NOT NULL, "storage_type" smallint NOT NULL, "path" character varying NOT NULL, PRIMARY KEY ("id"));
 -- Create "users" table
-CREATE TABLE "users" ("id" uuid NOT NULL, "created_at" timestamptz NOT NULL, "updated_at" timestamptz NOT NULL, "status" boolean NOT NULL DEFAULT true, "username" character varying NOT NULL, "password" character varying NOT NULL, "email" character varying NOT NULL, "avatar_url" character varying NULL, PRIMARY KEY ("id"));
+CREATE TABLE "users" ("id" uuid NOT NULL, "created_at" timestamptz NOT NULL, "updated_at" timestamptz NOT NULL, "status" smallint NOT NULL DEFAULT 1, "username" character varying NOT NULL, "password" character varying NOT NULL, "salt" character varying NOT NULL, "nickname" character varying NULL, "remark" character varying NULL, "phone" character varying NOT NULL, "email" character varying NOT NULL, "avatar_url" character varying NULL, PRIMARY KEY ("id"));
 -- Create "trips" table
 CREATE TABLE "trips" ("id" uuid NOT NULL, "created_at" timestamptz NOT NULL, "updated_at" timestamptz NOT NULL, "status" boolean NOT NULL DEFAULT true, "title" character varying NOT NULL, "description" character varying NOT NULL, "start_date" timestamptz NOT NULL, "end_date" timestamptz NOT NULL, "user_id" uuid NOT NULL, PRIMARY KEY ("id"), CONSTRAINT "trips_users_trip" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION);
 -- Create "daily_trips" table

@@ -72,6 +72,11 @@ generate:
 wire:
 	cd ./cmd/server && wire
 
+.PHONY: migrate
+# migrate
+migrate:
+	atlas migrate --env local diff diff
+
 .PHONY: all
 # generate all
 all:

@@ -17,7 +17,7 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Unique().Default(uuid.New),
-		field.Int("status").Default(vobj.UserStatusActive.GetValue()),
+		field.Int8("status").Default(vobj.UserStatusActive.GetValue()),
 		field.String("username").NotEmpty().MaxLen(50),
 		field.String("password").NotEmpty().MaxLen(255),
 		field.String("salt").NotEmpty().MaxLen(255),
