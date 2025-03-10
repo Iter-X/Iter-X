@@ -105,9 +105,11 @@ func (c *Client) SendSmsVerifyCode(_ context.Context, params SendSmsVerifyCodePa
 		CodeType:      pointer.Of(params.GetCodeType()),
 		Interval:      pointer.Of(params.GetInterval()),
 	}
+	c.logger.Debugw("SendSmsVerifyCode", "req", req)
 	resp, err := c.clientV2.SendSmsVerifyCode(req)
 	if err != nil {
 		return nil, err
 	}
+	c.logger.Debugw("SendSmsVerifyCode", "resp", resp)
 	return &SendSmsVerifyCodeResponse{resp}, nil
 }

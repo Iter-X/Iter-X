@@ -293,10 +293,12 @@ func (c *Client) QuerySendDetails(_ context.Context, config QuerySendDetailsConf
 	for _, opt := range opts {
 		opt(req)
 	}
+	c.logger.Debugw("QuerySendDetails", "req", req)
 	response, err := c.clientV3.QuerySendDetailsWithOptions(req.req, req.runtimeOption)
 	if err != nil {
 		return nil, err
 	}
+	c.logger.Debugw("QuerySendDetails", "resp", response)
 	return &QuerySendDetailsResponse{
 		response,
 	}, nil

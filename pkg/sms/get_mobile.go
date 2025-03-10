@@ -58,10 +58,12 @@ func (c *Client) GetMobile(_ context.Context, cfg GetMobileConfig) (*GetMobileRe
 		ResourceOwnerAccount: pointer.Of(cfg.GetResourceOwnerAccount()),
 		ResourceOwnerId:      pointer.Of(cfg.GetResourceOwnerId()),
 	}
+	c.logger.Debugw("GetMobile", "req", getMobileRequest)
 	getMobileResponse, err := c.clientV2.GetMobile(getMobileRequest)
 	if err != nil {
 		c.logger.Errorw("Failed to get mobile", "error", err)
 		return nil, err
 	}
+	c.logger.Debugw("GetMobile", "resp", getMobileResponse)
 	return &GetMobileResponse{getMobileResponse}, nil
 }

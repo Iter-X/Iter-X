@@ -158,11 +158,13 @@ func (c *Client) GetSmsAuthTokens(ctx context.Context, cfg AuthTokensConfig, opt
 		opt(authOptions)
 	}
 
+	c.logger.Debugw("GetSmsAuthTokens", "req", authOptions)
 	getSmsAuthTokensResponse, err := c.clientV2.GetSmsAuthTokensWithOptions(authOptions.req, authOptions.runtimeOption)
 	if err != nil {
 		c.logger.Errorw("Failed to get SMS authentication tokens", "error", err)
 		return nil, err
 	}
+	c.logger.Debugw("GetSmsAuthTokens", "resp", getSmsAuthTokensResponse)
 
 	return &GetSmsAuthTokensResponse{getSmsAuthTokensResponse}, nil
 }

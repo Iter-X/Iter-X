@@ -62,9 +62,11 @@ func (c *Client) CheckSmsVerifyCode(_ context.Context, params CheckSmsVerifyCode
 		PhoneNumber: pointer.Of(params.GetPhoneNumber()),
 		VerifyCode:  pointer.Of(params.GetVerifyCode()),
 	}
+	c.logger.Debugw("CheckSmsVerifyCode", "req", request)
 	response, err := c.clientV2.CheckSmsVerifyCode(request)
 	if err != nil {
 		return nil, err
 	}
+	c.logger.Debugw("CheckSmsVerifyCode", "resp", response)
 	return &CheckSmsVerifyCodeResponse{response}, nil
 }
