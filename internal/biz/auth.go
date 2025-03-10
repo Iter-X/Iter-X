@@ -32,7 +32,7 @@ type Auth struct {
 }
 
 func NewAuth(c *conf.Auth, transaction repository.Transaction, authRepo repository.AuthRepo, logger *zap.SugaredLogger) *Auth {
-	logger.Debug("NewAuth", "conf", c)
+	logger.Debugw("NewAuth", "conf", c)
 	smsClient := sms.NewClient(sms.WithClientConfig(c.GetSmsCode()), sms.WithLogger(logger))
 	return &Auth{
 		cfg:         c,
@@ -277,7 +277,6 @@ func (b *Auth) SendSmsCode(ctx context.Context, params *authV1.SendSmsCodeReques
 	smsCodeConf := b.cfg.GetSmsCode()
 	smsCode := sms.GenerateRandomNumberCode(int(smsCodeConf.GetCodeLength()))
 	sendParams := sendSmsConfigParams.WithSmsConfig(smsCodeConf, fmt.Sprintf(`{"code":"%s"}`, smsCode))
-	// TODO logging request to sms service
 	sendSmsResponse, err := b.smsClient.SendSmsVerifyCode(ctx, sendParams)
 	if err != nil {
 		return nil, err
@@ -299,7 +298,7 @@ func (b *Auth) VerifySmsCode(ctx context.Context, params *authV1.VerifySmsCodeRe
 	}
 
 	if !verifySmsCode.IsOK() {
-		return nil, xerr.ErrorBadRequest()
+		return nil, xerr.ErrorSmsCodeInvalid()
 	}
 
 	res, err := b.loginByPhone(ctx, params.GetPhoneNumber())
