@@ -13,7 +13,7 @@ init:
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.3
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
 	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.25.1
-	go install github.com/protoc-gen/protoc-gen-validatex@v0.7.0
+	go install github.com/protoc-gen/protoc-gen-validatex@v0.8.0
 	go install github.com/protoc-gen/protoc-gen-go-errors@v0.3.0
 	go install github.com/google/wire/cmd/wire@v0.6.0
 	go install github.com/google/gnostic/cmd/protoc-gen-openapi@v0.7.0
@@ -55,7 +55,7 @@ api:
  	       --go-grpc_out=paths=source_relative:./internal/api \
  	       --grpc-gateway_out=paths=source_relative:./internal/api \
 		   --validatex_out=paths=source_relative:./internal/api \
-		   --validatex_opt=i18n_dir=./i18n/validatex,i18n_out_relative_dir=../../i18n/validatex \
+		   --validatex_opt=i18n_dir=./i18n/validatex,i18n_out_relative_dir=../../i18n/validatex,json_name=true \
 	       --openapi_out=fq_schema_naming=true,default_response=false:./swagger_ui \
 	       $(API_PROTO_FILES)
 
