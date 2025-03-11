@@ -99,9 +99,7 @@ paths:
         post:
             tags:
                 - AuthService
-            description: |-
-                发送短信验证码
-                 调用阿里云接口直接发送短信验证码，并返回biz_token和expire_time，用于后续验证短信验证码
+            description: 发送短信验证码
             operationId: AuthService_SendSmsCode
             requestBody:
                 content:
@@ -191,9 +189,7 @@ paths:
         post:
             tags:
                 - AuthService
-            description: |-
-                验证短信验证码
-                 如果包含sms_token, 则调用阿里云接口验证， 否则走本地短信验证
+            description: 验证短信验证码
             operationId: AuthService_VerifySmsCode
             requestBody:
                 content:
