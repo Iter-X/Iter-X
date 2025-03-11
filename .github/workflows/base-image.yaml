@@ -2,7 +2,7 @@ name: Build and Push Base Builder Image
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "base-image" ]
 
 jobs:
   build-and-push:
