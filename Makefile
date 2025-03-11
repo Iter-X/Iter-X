@@ -56,7 +56,7 @@ api:
  	       --grpc-gateway_out=paths=source_relative:./internal/api \
 		   --validatex_out=paths=source_relative:./internal/api \
 		   --validatex_opt=i18n_dir=./i18n/validatex,i18n_out_relative_dir=../../i18n/validatex,json_name=true \
-	       --openapi_out=fq_schema_naming=true,default_response=false:./swagger_ui \
+	       --openapi_out=fq_schema_naming=true,default_response=false:./swagger \
 	       $(API_PROTO_FILES)
 
 .PHONY: stringer

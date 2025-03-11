@@ -67,13 +67,13 @@ func registerDoc(env conf.Environment, mux *runtime.ServeMux) error {
 		return nil
 	}
 	err := mux.HandlePath(http.MethodGet, "/doc/*", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-		http.StripPrefix("/doc/", http.FileServer(http.Dir("./swagger_ui"))).ServeHTTP(w, r)
+		http.StripPrefix("/doc/", http.FileServer(http.Dir("./swagger"))).ServeHTTP(w, r)
 	})
 	if err != nil {
 		return err
 	}
 	err = mux.HandlePath(http.MethodPost, "/doc/*", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-		http.StripPrefix("/doc/", http.FileServer(http.Dir("./swagger_ui"))).ServeHTTP(w, r)
+		http.StripPrefix("/doc/", http.FileServer(http.Dir("./swagger"))).ServeHTTP(w, r)
 	})
 	if err != nil {
 		return err
