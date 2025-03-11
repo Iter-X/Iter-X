@@ -1,9 +1,10 @@
-FROM registry.ap-southeast-1.aliyuncs.com/iter-x/iter-x-builder:latest AS builder
+FROM registry.ap-southeast-1.aliyuncs.com/iter-x/iter-x:builder AS builder
 
 COPY . /iterx
 
 WORKDIR /iterx
 
+RUN make init
 RUN make all
 RUN make build
 
