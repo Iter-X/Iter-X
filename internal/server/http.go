@@ -17,12 +17,13 @@ import (
 )
 
 type HTTPServer struct {
+	env    conf.Environment
 	cfg    *conf.Server_HTTP
 	mux    *runtime.ServeMux
 	logger *zap.SugaredLogger
 }
 
-func NewHTTPServer(c *conf.Server_HTTP, logger *zap.SugaredLogger) *HTTPServer {
+func NewHTTPServer(env conf.Environment, c *conf.Server_HTTP, logger *zap.SugaredLogger) *HTTPServer {
 	mux := runtime.NewServeMux(
 		runtime.WithIncomingHeaderMatcher(func(key string) (string, bool) {
 			switch key {
@@ -34,6 +35,7 @@ func NewHTTPServer(c *conf.Server_HTTP, logger *zap.SugaredLogger) *HTTPServer {
 		}),
 	)
 	return &HTTPServer{
+		env:    env,
 		cfg:    c,
 		mux:    mux,
 		logger: logger.Named("http"),
@@ -41,6 +43,9 @@ func NewHTTPServer(c *conf.Server_HTTP, logger *zap.SugaredLogger) *HTTPServer {
 }
 
 func (s *HTTPServer) Start(ctx context.Context) error {
+	if err := registerDoc(s.env, s.mux); err != nil {
+		return err
+	}
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	for _, fn := range []func(context.Context, *runtime.ServeMux, string, []grpc.DialOption) error{
 		authV1.RegisterAuthServiceHandlerFromEndpoint,
@@ -52,6 +57,26 @@ func (s *HTTPServer) Start(ctx context.Context) error {
 			return err
 		}
 	}
+
 	s.logger.Infof("http server listening on %s", s.cfg.Addr)
 	return http.ListenAndServe(s.cfg.Addr, s.mux)
+}
+
+func registerDoc(env conf.Environment, mux *runtime.ServeMux) error {
+	if env != conf.Environment_DEV && env != conf.Environment_TEST {
+		return nil
+	}
+	err := mux.HandlePath(http.MethodGet, "/doc/*", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+		http.StripPrefix("/doc/", http.FileServer(http.Dir("./swagger_ui"))).ServeHTTP(w, r)
+	})
+	if err != nil {
+		return err
+	}
+	err = mux.HandlePath(http.MethodPost, "/doc/*", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+		http.StripPrefix("/doc/", http.FileServer(http.Dir("./swagger_ui"))).ServeHTTP(w, r)
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }

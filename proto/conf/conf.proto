@@ -106,15 +106,6 @@ message Auth {
     string wechat_client_secret = 8;
     string wechat_redirect_url = 9;
   }
-  message AuthTokens {
-    string bundle_id = 1;
-    google.protobuf.Duration expire = 2;
-    string package_name = 3;
-    string sign_name = 4;
-    string scene_code = 5;
-    string sms_template_code = 6;
-    google.protobuf.Duration sms_code_expire = 7;
-  }
   message SmsCode {
     string sign_name = 1;
     string template_code = 2;
@@ -127,8 +118,7 @@ message Auth {
   }
   Jwt jwt = 1;
   OAuth oauth = 2;
-  AuthTokens auth_tokens = 3;
-  SmsCode sms_code = 5;
+  SmsCode sms_code = 3;
 }
 
 message I18n {

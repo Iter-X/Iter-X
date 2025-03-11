@@ -15,7 +15,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func wireApp(i18nCfg *conf.I18N, grpcCfg *conf.Server_GRPC, httpCfg *conf.Server_HTTP, d *conf.Data, authCfg *conf.Auth, agentCfg *conf.Agent, logger *zap.SugaredLogger) (*App, func(), error) {
+func wireApp(env conf.Environment, i18nCfg *conf.I18N, grpcCfg *conf.Server_GRPC, httpCfg *conf.Server_HTTP, d *conf.Data, authCfg *conf.Auth, agentCfg *conf.Agent, logger *zap.SugaredLogger) (*App, func(), error) {
 	panic(wire.Build(
 		data.ProviderSet,
 		impl.ProviderSet,

@@ -1,13 +1,24 @@
-FROM ubuntu:22.04
+FROM registry.ap-southeast-1.aliyuncs.com/iter-x/iter-x-builder:latest AS builder
+
+COPY . /iterx
+
+WORKDIR /iterx
+
+RUN make all
+RUN make build
+
+FROM debian:stable-slim
+
+COPY --from=builder /iterx/bin /iterx/bin
+COPY --from=builder /iterx/config /iterx/config
+COPY --from=builder /iterx/i18n /iterx/i18n
+COPY --from=builder /iterx/swagger_ui /iterx/swagger_ui
+
+WORKDIR /iterx
 
 RUN apt update && apt install -y ca-certificates curl wget vim && \
     update-ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-COPY ./bin/server /iterx/bin/server
-COPY ./config /iterx/config
-COPY ./i18n /iterx/i18n
-
-WORKDIR /iterx
-
 CMD ["./bin/server"]
+
