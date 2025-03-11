@@ -1,5 +1,9 @@
 package vobj
 
+import (
+	"strings"
+)
+
 //go:generate go run ../../cmd/stringer/cmd.go -type=ClientType -linecomment -output=client_type.string.go
 type ClientType int
 
@@ -11,10 +15,10 @@ const (
 
 // BuildClientType builds a ClientType from a string.
 func BuildClientType(s string) ClientType {
-	switch s {
-	case "Android", "android":
+	switch strings.ToLower(s) {
+	case "android":
 		return ClientTypeAndroid
-	case "iOS", "ios":
+	case "ios":
 		return ClientTypeIOS
 	default:
 		return ClientTypeUnknown
