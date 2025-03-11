@@ -5,6 +5,7 @@ package auth.v1;
 import "google/api/annotations.proto";
 import "validatex/validatex.proto";
 import "cnst/constant.proto";
+import "openapiv3/openapiv3.proto";
 
 option go_package = "github.com/iter-x/server/internal/api/auth/v1;v1";
 
@@ -15,6 +16,7 @@ service AuthService {
       body: "*"
     };
     option (common.cnst.skip_token) = true;
+    option (openapiv3.method) = {skip_token: true};
   };
   rpc SignInWithOAuth (SignInWithOAuthRequest) returns (SignInWithOAuthResponse) {
     option (google.api.http) = {
@@ -22,6 +24,7 @@ service AuthService {
       body: "*"
     };
     option (common.cnst.skip_token) = true;
+    option (openapiv3.method) = {skip_token: true};
   };
   rpc SignUp (SignUpRequest) returns (SignUpResponse) {
     option (google.api.http) = {
@@ -29,6 +32,7 @@ service AuthService {
       body: "*"
     };
     option (common.cnst.skip_token) = true;
+    option (openapiv3.method) = {skip_token: true};
   };
   rpc RequestPasswordReset (RequestPasswordResetRequest) returns (RequestPasswordResetResponse) {
     option (google.api.http) = {
@@ -36,12 +40,14 @@ service AuthService {
       body: "*"
     };
     option (common.cnst.skip_token) = true;
+    option (openapiv3.method) = {skip_token: true};
   }
   rpc VerifyPasswordResetToken (VerifyPasswordResetTokenRequest) returns (VerifyPasswordResetTokenResponse) {
     option (google.api.http) = {
       get: "/api/v1/auth/verify-password-reset-token"
     };
     option (common.cnst.skip_token) = true;
+    option (openapiv3.method) = {skip_token: true};
   }
   rpc ResetPassword (ResetPasswordRequest) returns (ResetPasswordResponse) {
     option (google.api.http) = {
@@ -49,6 +55,7 @@ service AuthService {
       body: "*"
     };
     option (common.cnst.skip_token) = true;
+    option (openapiv3.method) = {skip_token: true};
   }
   rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse) {
     option (google.api.http) = {
@@ -56,6 +63,7 @@ service AuthService {
       body: "*"
     };
     option (common.cnst.skip_token) = true;
+    option (openapiv3.method) = {skip_token: true};
   };
 
   rpc RefreshTokenX (RefreshTokenRequest) returns (RefreshTokenResponse) {
@@ -63,6 +71,7 @@ service AuthService {
       get: "/api/v1/auth/refresh-token"
     };
     option (common.cnst.skip_token) = true;
+    option (openapiv3.method) = {skip_token: true};
   };
 
   rpc SendSmsCode (SendSmsCodeRequest) returns (SendSmsCodeResponse) {
@@ -71,6 +80,7 @@ service AuthService {
       body: "*"
     };
     option (common.cnst.skip_token) = true;
+    option (openapiv3.method) = {skip_token: true};
   }
 
   rpc VerifySmsCode (VerifySmsCodeRequest) returns (VerifySmsCodeResponse) {
@@ -79,6 +89,7 @@ service AuthService {
       body: "*"
     };
     option (common.cnst.skip_token) = true;
+    option (openapiv3.method) = {skip_token: true};
   }
 
   rpc OneClickLogin (OneClickLoginRequest) returns (OneClickLoginResponse) {
@@ -87,6 +98,7 @@ service AuthService {
       body: "*"
     };
     option (common.cnst.skip_token) = true;
+    option (openapiv3.method) = {skip_token: true};
   }
 }
 

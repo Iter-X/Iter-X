@@ -2,7 +2,7 @@ name: Build and Push Server Image
 
 on:
   push:
-    branches: [ "dev-build" ]
+    branches: [ "main" ]
 
 jobs:
   build-and-push:
