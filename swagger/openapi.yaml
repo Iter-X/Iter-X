@@ -1,16 +1,567 @@
-# Generated with protoc-gen-openapi
-# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
-
-openapi: 3.0.3
+components:
+    schemas:
+        BadRequest:
+            example:
+                code: 3
+                details:
+                    - '@type': type.googleapis.com/google.rpc.ErrorInfo
+                      domain: ""
+                      metadata:
+                        field: phoneNumber
+                      reason: INVALID_PARAMETERS
+                message: must be at least 11 characters long
+            properties:
+                code:
+                    type: integer
+                details:
+                    items:
+                        properties:
+                            '@type':
+                                type: string
+                            domain:
+                                type: string
+                            metadata:
+                                type: object
+                            reason:
+                                type: string
+                        type: object
+                    type: array
+                message:
+                    type: string
+            type: object
+        InternalServerError:
+            example:
+                code: 3
+                details:
+                    - '@type': type.googleapis.com/google.rpc.ErrorInfo
+                      domain: ""
+                      metadata:
+                        field: phoneNumber
+                      reason: INVALID_PARAMETERS
+                message: must be at least 11 characters long
+            properties:
+                code:
+                    type: integer
+                details:
+                    items:
+                        properties:
+                            '@type':
+                                type: string
+                            domain:
+                                type: string
+                            metadata:
+                                type: object
+                            reason:
+                                type: string
+                        type: object
+                    type: array
+                message:
+                    type: string
+            type: object
+        Unauthorized:
+            example:
+                code: 3
+                details:
+                    - '@type': type.googleapis.com/google.rpc.ErrorInfo
+                      domain: ""
+                      metadata:
+                        field: phoneNumber
+                      reason: INVALID_PARAMETERS
+                message: must be at least 11 characters long
+            properties:
+                code:
+                    type: integer
+                details:
+                    items:
+                        properties:
+                            '@type':
+                                type: string
+                            domain:
+                                type: string
+                            metadata:
+                                type: object
+                            reason:
+                                type: string
+                        type: object
+                    type: array
+                message:
+                    type: string
+            type: object
+        auth.v1.OneClickLoginRequest:
+            example:
+                token: ""
+            properties:
+                token:
+                    type: string
+            type: object
+        auth.v1.OneClickLoginResponse:
+            example:
+                expiresIn: 0
+                token: ""
+            properties:
+                expiresIn:
+                    format: double
+                    type: number
+                token:
+                    type: string
+            type: object
+        auth.v1.RefreshTokenRequest:
+            example:
+                refreshToken: ""
+            properties:
+                refreshToken:
+                    type: string
+            type: object
+        auth.v1.RefreshTokenResponse:
+            example:
+                expiresIn: 0
+                token: ""
+            properties:
+                expiresIn:
+                    format: double
+                    type: number
+                token:
+                    type: string
+            type: object
+        auth.v1.RequestPasswordResetRequest:
+            example:
+                email: ""
+            properties:
+                email:
+                    type: string
+            type: object
+        auth.v1.RequestPasswordResetResponse:
+            example:
+                status: ""
+            properties:
+                status:
+                    type: string
+            type: object
+        auth.v1.ResetPasswordRequest:
+            example:
+                newPassword: ""
+                token: ""
+            properties:
+                newPassword:
+                    type: string
+                token:
+                    type: string
+            type: object
+        auth.v1.ResetPasswordResponse:
+            example:
+                status: ""
+            properties:
+                status:
+                    type: string
+            type: object
+        auth.v1.SendSmsCodeRequest:
+            example:
+                phoneNumber: ""
+            properties:
+                phoneNumber:
+                    type: string
+            type: object
+        auth.v1.SendSmsCodeResponse:
+            example:
+                expireTime: 0
+                interval: 0
+            properties:
+                expireTime:
+                    format: int64
+                    type: integer
+                interval:
+                    format: int64
+                    type: integer
+            type: object
+        auth.v1.SignInRequest:
+            example:
+                email: ""
+                password: ""
+            properties:
+                email:
+                    type: string
+                password:
+                    type: string
+            type: object
+        auth.v1.SignInResponse:
+            example:
+                expiresIn: 0
+                refreshToken: ""
+                token: ""
+            properties:
+                expiresIn:
+                    format: double
+                    type: number
+                refreshToken:
+                    type: string
+                token:
+                    type: string
+            type: object
+        auth.v1.SignInWithOAuthRequest:
+            example:
+                code: ""
+                provider: GOOGLE
+            properties:
+                code:
+                    type: string
+                provider:
+                    enum:
+                        - GOOGLE
+                        - GITHUB
+                        - WECHAT
+                    format: enum
+                    type: string
+            type: object
+        auth.v1.SignInWithOAuthResponse:
+            example:
+                token: ""
+            properties:
+                token:
+                    type: string
+            type: object
+        auth.v1.SignUpRequest:
+            example:
+                email: ""
+                password: ""
+            properties:
+                email:
+                    type: string
+                password:
+                    type: string
+            type: object
+        auth.v1.SignUpResponse:
+            example:
+                expiresIn: 0
+                refreshToken: ""
+                token: ""
+            properties:
+                expiresIn:
+                    format: double
+                    type: number
+                refreshToken:
+                    type: string
+                token:
+                    type: string
+            type: object
+        auth.v1.VerifyPasswordResetTokenResponse:
+            example:
+                valid: true
+            properties:
+                valid:
+                    type: boolean
+            type: object
+        auth.v1.VerifySmsCodeRequest:
+            example:
+                phoneNumber: ""
+                verifyCode: ""
+            properties:
+                phoneNumber:
+                    type: string
+                verifyCode:
+                    type: string
+            type: object
+        auth.v1.VerifySmsCodeResponse:
+            example:
+                expiresIn: 0
+                token: ""
+            properties:
+                expiresIn:
+                    format: double
+                    type: number
+                token:
+                    type: string
+            type: object
+        poi.v1.PointOfInterest:
+            example:
+                address: ""
+                category: ""
+                city: ""
+                country: ""
+                description: ""
+                id: ""
+                latitude: 0
+                longitude: 0
+                name: ""
+                nameCn: ""
+                nameEn: ""
+                rating: 0
+                recommendedDurationMinutes: 0
+                state: ""
+                type: ""
+            properties:
+                address:
+                    type: string
+                category:
+                    type: string
+                city:
+                    type: string
+                country:
+                    type: string
+                description:
+                    type: string
+                id:
+                    type: string
+                latitude:
+                    format: double
+                    type: number
+                longitude:
+                    format: double
+                    type: number
+                name:
+                    type: string
+                nameCn:
+                    type: string
+                nameEn:
+                    type: string
+                rating:
+                    format: float
+                    type: number
+                recommendedDurationMinutes:
+                    format: int64
+                    type: integer
+                state:
+                    type: string
+                type:
+                    type: string
+            type: object
+        poi.v1.SearchPointsOfInterestResponse:
+            example:
+                pointsOfInterest: null
+            properties:
+                pointsOfInterest:
+                    items:
+                        $ref: '#/components/schemas/poi.v1.PointOfInterest'
+                    type: array
+            type: object
+        trip.v1.CreateDailyTripRequest:
+            example:
+                date: 1741589979
+                day: 0
+                notes: ""
+                tripId: ""
+            properties:
+                date:
+                    format: int32
+                    type: integer
+                day:
+                    format: int32
+                    type: integer
+                notes:
+                    type: string
+                tripId:
+                    type: string
+            type: object
+        trip.v1.CreateDailyTripResponse:
+            example:
+                dailyTrip: null
+            properties:
+                dailyTrip:
+                    $ref: '#/components/schemas/trip.v1.DailyTrip'
+            type: object
+        trip.v1.CreateTripRequest:
+            example:
+                description: ""
+                endTs: 1741589979
+                startTs: 1741589979
+                title: ""
+            properties:
+                description:
+                    type: string
+                endTs:
+                    format: int32
+                    type: integer
+                startTs:
+                    format: int32
+                    type: integer
+                title:
+                    type: string
+            type: object
+        trip.v1.CreateTripResponse:
+            example:
+                trip: null
+            properties:
+                trip:
+                    $ref: '#/components/schemas/trip.v1.Trip'
+            type: object
+        trip.v1.DailyTrip:
+            example:
+                createdAt: 1741589979
+                date: 1741589979
+                day: 0
+                id: ""
+                notes: ""
+                tripId: ""
+                updatedAt: 1741589979
+            properties:
+                createdAt:
+                    format: int32
+                    type: integer
+                date:
+                    format: int32
+                    type: integer
+                day:
+                    format: int32
+                    type: integer
+                id:
+                    type: string
+                notes:
+                    type: string
+                tripId:
+                    type: string
+                updatedAt:
+                    format: int32
+                    type: integer
+            type: object
+        trip.v1.DeleteDailyTripResponse:
+            example:
+                status: ""
+            properties:
+                status:
+                    type: string
+            type: object
+        trip.v1.DeleteTripResponse:
+            example:
+                status: ""
+            properties:
+                status:
+                    type: string
+            type: object
+        trip.v1.GetDailyTripResponse:
+            example:
+                dailyTrip: null
+            properties:
+                dailyTrip:
+                    $ref: '#/components/schemas/trip.v1.DailyTrip'
+            type: object
+        trip.v1.GetTripResponse:
+            example:
+                trip: null
+            properties:
+                trip:
+                    $ref: '#/components/schemas/trip.v1.Trip'
+            type: object
+        trip.v1.ListDailyTripsResponse:
+            example:
+                dailyTrips: null
+            properties:
+                dailyTrips:
+                    items:
+                        $ref: '#/components/schemas/trip.v1.DailyTrip'
+                    type: array
+            type: object
+        trip.v1.ListTripsResponse:
+            example:
+                trips: null
+            properties:
+                trips:
+                    items:
+                        $ref: '#/components/schemas/trip.v1.Trip'
+                    type: array
+            type: object
+        trip.v1.Trip:
+            example:
+                createdAt: 1741589979
+                description: ""
+                endTs: 1741589979
+                id: ""
+                startTs: 1741589979
+                status: true
+                title: ""
+                updatedAt: 1741589979
+            properties:
+                createdAt:
+                    format: int32
+                    type: integer
+                description:
+                    type: string
+                endTs:
+                    format: int32
+                    type: integer
+                id:
+                    type: string
+                startTs:
+                    format: int32
+                    type: integer
+                status:
+                    type: boolean
+                title:
+                    type: string
+                updatedAt:
+                    format: int32
+                    type: integer
+            type: object
+        trip.v1.UpdateDailyTripRequest:
+            example:
+                dailyId: ""
+                date: 1741589979
+                day: 0
+                notes: ""
+                tripId: ""
+            properties:
+                dailyId:
+                    type: string
+                date:
+                    format: int32
+                    type: integer
+                day:
+                    format: int32
+                    type: integer
+                notes:
+                    type: string
+                tripId:
+                    type: string
+            type: object
+        trip.v1.UpdateDailyTripResponse:
+            example:
+                dailyTrip: null
+            properties:
+                dailyTrip:
+                    $ref: '#/components/schemas/trip.v1.DailyTrip'
+            type: object
+        trip.v1.UpdateTripRequest:
+            example:
+                description: ""
+                endTs: 1741589979
+                id: ""
+                startTs: 1741589979
+                status: true
+                title: ""
+            properties:
+                description:
+                    type: string
+                endTs:
+                    format: int32
+                    type: integer
+                id:
+                    type: string
+                startTs:
+                    format: int32
+                    type: integer
+                status:
+                    type: boolean
+                title:
+                    type: string
+            type: object
+        trip.v1.UpdateTripResponse:
+            example:
+                trip: null
+            properties:
+                trip:
+                    $ref: '#/components/schemas/trip.v1.Trip'
+            type: object
+    securitySchemes:
+        BearerAuth:
+            bearerFormat: JWT
+            scheme: bearer
+            type: http
 info:
-    title: ""
-    version: 0.0.1
+    description: API generated from protobufs
+    title: Generated API
+    version: 1.0.0
+openapi: 3.0.0
 paths:
     /api/v1/auth/one-click-login:
         post:
-            tags:
-                - AuthService
-            description: 一键登陆
             operationId: AuthService_OneClickLogin
             requestBody:
                 content:
@@ -20,31 +571,62 @@ paths:
                 required: true
             responses:
                 "200":
-                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/auth.v1.OneClickLoginResponse'
-    /api/v1/auth/refresh-token:
-        get:
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
             tags:
                 - AuthService
+    /api/v1/auth/refresh-token:
+        get:
             operationId: AuthService_RefreshTokenX
-            parameters:
-                - name: refreshToken
-                  in: query
-                  schema:
-                    type: string
             responses:
                 "200":
-                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/auth.v1.RefreshTokenResponse'
-        post:
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
             tags:
                 - AuthService
+        post:
             operationId: AuthService_RefreshToken
             requestBody:
                 content:
@@ -54,15 +636,33 @@ paths:
                 required: true
             responses:
                 "200":
-                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/auth.v1.RefreshTokenResponse'
-    /api/v1/auth/request-password-reset:
-        post:
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
             tags:
                 - AuthService
+    /api/v1/auth/request-password-reset:
+        post:
             operationId: AuthService_RequestPasswordReset
             requestBody:
                 content:
@@ -72,15 +672,33 @@ paths:
                 required: true
             responses:
                 "200":
-                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/auth.v1.RequestPasswordResetResponse'
-    /api/v1/auth/reset-password:
-        post:
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
             tags:
                 - AuthService
+    /api/v1/auth/reset-password:
+        post:
             operationId: AuthService_ResetPassword
             requestBody:
                 content:
@@ -90,16 +708,33 @@ paths:
                 required: true
             responses:
                 "200":
-                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/auth.v1.ResetPasswordResponse'
-    /api/v1/auth/send-sms-code:
-        post:
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
             tags:
                 - AuthService
-            description: 发送短信验证码
+    /api/v1/auth/send-sms-code:
+        post:
             operationId: AuthService_SendSmsCode
             requestBody:
                 content:
@@ -109,15 +744,33 @@ paths:
                 required: true
             responses:
                 "200":
-                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/auth.v1.SendSmsCodeResponse'
-    /api/v1/auth/sign-in/oauth:
-        post:
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
             tags:
                 - AuthService
+    /api/v1/auth/sign-in/oauth:
+        post:
             operationId: AuthService_SignInWithOAuth
             requestBody:
                 content:
@@ -127,15 +780,33 @@ paths:
                 required: true
             responses:
                 "200":
-                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/auth.v1.SignInWithOAuthResponse'
-    /api/v1/auth/sign-in/password:
-        post:
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
             tags:
                 - AuthService
+    /api/v1/auth/sign-in/password:
+        post:
             operationId: AuthService_SignIn
             requestBody:
                 content:
@@ -145,15 +816,33 @@ paths:
                 required: true
             responses:
                 "200":
-                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/auth.v1.SignInResponse'
-    /api/v1/auth/sign-up:
-        post:
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
             tags:
                 - AuthService
+    /api/v1/auth/sign-up:
+        post:
             operationId: AuthService_SignUp
             requestBody:
                 content:
@@ -163,33 +852,63 @@ paths:
                 required: true
             responses:
                 "200":
-                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/auth.v1.SignUpResponse'
-    /api/v1/auth/verify-password-reset-token:
-        get:
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
             tags:
                 - AuthService
+    /api/v1/auth/verify-password-reset-token:
+        get:
             operationId: AuthService_VerifyPasswordResetToken
-            parameters:
-                - name: token
-                  in: query
-                  schema:
-                    type: string
             responses:
                 "200":
-                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/auth.v1.VerifyPasswordResetTokenResponse'
-    /api/v1/auth/verify-sms-code:
-        post:
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
             tags:
                 - AuthService
-            description: 验证短信验证码
+    /api/v1/auth/verify-sms-code:
+        post:
             operationId: AuthService_VerifySmsCode
             requestBody:
                 content:
@@ -199,47 +918,92 @@ paths:
                 required: true
             responses:
                 "200":
-                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/auth.v1.VerifySmsCodeResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - AuthService
     /api/v1/poi/search:
         get:
-            tags:
-                - PointsOfInterestService
             operationId: PointsOfInterestService_SearchPointsOfInterest
-            parameters:
-                - name: keyword
-                  in: query
-                  schema:
-                    type: string
-                - name: initialCity
-                  in: query
-                  schema:
-                    type: string
             responses:
                 "200":
-                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/poi.v1.SearchPointsOfInterestResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - PointsOfInterestService
     /api/v1/trips:
         get:
-            tags:
-                - TripService
             operationId: TripService_ListTrips
             responses:
                 "200":
-                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/trip.v1.ListTripsResponse'
-        post:
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
             tags:
                 - TripService
+        post:
             operationId: TripService_CreateTrip
             requestBody:
                 content:
@@ -249,36 +1013,110 @@ paths:
                 required: true
             responses:
                 "200":
-                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/trip.v1.CreateTripResponse'
-    /api/v1/trips/{id}:
-        get:
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
             tags:
                 - TripService
-            operationId: TripService_GetTrip
+    /api/v1/trips/{id}:
+        delete:
+            operationId: TripService_DeleteTrip
             parameters:
-                - name: id
+                - example: ""
                   in: path
+                  name: id
                   required: true
                   schema:
                     type: string
             responses:
                 "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.DeleteTripResponse'
                     description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - TripService
+        get:
+            operationId: TripService_GetTrip
+            parameters:
+                - example: ""
+                  in: path
+                  name: id
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/trip.v1.GetTripResponse'
-        put:
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
             tags:
                 - TripService
+        put:
             operationId: TripService_UpdateTrip
             parameters:
-                - name: id
+                - example: ""
                   in: path
+                  name: id
                   required: true
                   schema:
                     type: string
@@ -290,53 +1128,74 @@ paths:
                 required: true
             responses:
                 "200":
-                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/trip.v1.UpdateTripResponse'
-        delete:
-            tags:
-                - TripService
-            operationId: TripService_DeleteTrip
-            parameters:
-                - name: id
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
                     description: OK
+                "400":
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/trip.v1.DeleteTripResponse'
-    /api/v1/trips/{tripId}/daily:
-        get:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
             tags:
                 - TripService
+    /api/v1/trips/{trip_id}/daily:
+        get:
             operationId: TripService_ListDailyTrips
             parameters:
-                - name: tripId
+                - example: ""
                   in: path
+                  name: tripId
                   required: true
                   schema:
                     type: string
             responses:
                 "200":
-                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/trip.v1.ListDailyTripsResponse'
-        post:
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
             tags:
                 - TripService
+        post:
             operationId: TripService_CreateDailyTrip
             parameters:
-                - name: tripId
+                - example: ""
                   in: path
+                  name: tripId
                   required: true
                   schema:
                     type: string
@@ -348,46 +1207,128 @@ paths:
                 required: true
             responses:
                 "200":
-                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/trip.v1.CreateDailyTripResponse'
-    /api/v1/trips/{tripId}/daily/{dailyId}:
-        get:
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
             tags:
                 - TripService
-            operationId: TripService_GetDailyTrip
+    /api/v1/trips/{trip_id}/daily/{daily_id}:
+        delete:
+            operationId: TripService_DeleteDailyTrip
             parameters:
-                - name: tripId
+                - example: ""
                   in: path
+                  name: tripId
                   required: true
                   schema:
                     type: string
-                - name: dailyId
+                - example: ""
                   in: path
+                  name: dailyId
                   required: true
                   schema:
                     type: string
             responses:
                 "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.DeleteDailyTripResponse'
                     description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - TripService
+        get:
+            operationId: TripService_GetDailyTrip
+            parameters:
+                - example: ""
+                  in: path
+                  name: tripId
+                  required: true
+                  schema:
+                    type: string
+                - example: ""
+                  in: path
+                  name: dailyId
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/trip.v1.GetDailyTripResponse'
-        put:
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
             tags:
                 - TripService
+        put:
             operationId: TripService_UpdateDailyTrip
             parameters:
-                - name: tripId
+                - example: ""
                   in: path
+                  name: tripId
                   required: true
                   schema:
                     type: string
-                - name: dailyId
+                - example: ""
                   in: path
+                  name: dailyId
                   required: true
                   schema:
                     type: string
@@ -399,362 +1340,40 @@ paths:
                 required: true
             responses:
                 "200":
-                    description: OK
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/trip.v1.UpdateDailyTripResponse'
-        delete:
-            tags:
-                - TripService
-            operationId: TripService_DeleteDailyTrip
-            parameters:
-                - name: tripId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-                - name: dailyId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
                     description: OK
+                "400":
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/trip.v1.DeleteDailyTripResponse'
-components:
-    schemas:
-        auth.v1.OneClickLoginRequest:
-            type: object
-            properties:
-                token:
-                    type: string
-        auth.v1.OneClickLoginResponse:
-            type: object
-            properties:
-                token:
-                    type: string
-                expiresIn:
-                    type: number
-                    format: double
-        auth.v1.RefreshTokenRequest:
-            type: object
-            properties:
-                refreshToken:
-                    type: string
-        auth.v1.RefreshTokenResponse:
-            type: object
-            properties:
-                token:
-                    type: string
-                expiresIn:
-                    type: number
-                    format: double
-        auth.v1.RequestPasswordResetRequest:
-            type: object
-            properties:
-                email:
-                    type: string
-        auth.v1.RequestPasswordResetResponse:
-            type: object
-            properties:
-                status:
-                    type: string
-        auth.v1.ResetPasswordRequest:
-            type: object
-            properties:
-                token:
-                    type: string
-                newPassword:
-                    type: string
-        auth.v1.ResetPasswordResponse:
-            type: object
-            properties:
-                status:
-                    type: string
-        auth.v1.SendSmsCodeRequest:
-            type: object
-            properties:
-                phoneNumber:
-                    type: string
-        auth.v1.SendSmsCodeResponse:
-            type: object
-            properties:
-                expireTime:
-                    type: string
-                interval:
-                    type: string
-        auth.v1.SignInRequest:
-            type: object
-            properties:
-                email:
-                    type: string
-                password:
-                    type: string
-        auth.v1.SignInResponse:
-            type: object
-            properties:
-                token:
-                    type: string
-                refreshToken:
-                    type: string
-                expiresIn:
-                    type: number
-                    format: double
-        auth.v1.SignInWithOAuthRequest:
-            type: object
-            properties:
-                provider:
-                    type: integer
-                    format: enum
-                code:
-                    type: string
-        auth.v1.SignInWithOAuthResponse:
-            type: object
-            properties:
-                token:
-                    type: string
-        auth.v1.SignUpRequest:
-            type: object
-            properties:
-                email:
-                    type: string
-                password:
-                    type: string
-        auth.v1.SignUpResponse:
-            type: object
-            properties:
-                token:
-                    type: string
-                refreshToken:
-                    type: string
-                expiresIn:
-                    type: number
-                    format: double
-        auth.v1.VerifyPasswordResetTokenResponse:
-            type: object
-            properties:
-                valid:
-                    type: boolean
-        auth.v1.VerifySmsCodeRequest:
-            type: object
-            properties:
-                phoneNumber:
-                    type: string
-                verifyCode:
-                    type: string
-        auth.v1.VerifySmsCodeResponse:
-            type: object
-            properties:
-                token:
-                    type: string
-                expiresIn:
-                    type: number
-                    format: double
-        poi.v1.PointOfInterest:
-            type: object
-            properties:
-                id:
-                    type: string
-                name:
-                    type: string
-                nameEn:
-                    type: string
-                nameCn:
-                    type: string
-                description:
-                    type: string
-                address:
-                    type: string
-                latitude:
-                    type: number
-                    format: double
-                longitude:
-                    type: number
-                    format: double
-                type:
-                    type: string
-                category:
-                    type: string
-                rating:
-                    type: number
-                    format: float
-                recommendedDurationMinutes:
-                    type: string
-                city:
-                    type: string
-                state:
-                    type: string
-                country:
-                    type: string
-        poi.v1.SearchPointsOfInterestResponse:
-            type: object
-            properties:
-                pointsOfInterest:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/poi.v1.PointOfInterest'
-        trip.v1.CreateDailyTripRequest:
-            type: object
-            properties:
-                tripId:
-                    type: string
-                day:
-                    type: integer
-                    format: int32
-                date:
-                    type: string
-                    format: date-time
-                notes:
-                    type: string
-        trip.v1.CreateDailyTripResponse:
-            type: object
-            properties:
-                dailyTrip:
-                    $ref: '#/components/schemas/trip.v1.DailyTrip'
-        trip.v1.CreateTripRequest:
-            type: object
-            properties:
-                title:
-                    type: string
-                description:
-                    type: string
-                startTs:
-                    type: string
-                    format: date-time
-                endTs:
-                    type: string
-                    format: date-time
-        trip.v1.CreateTripResponse:
-            type: object
-            properties:
-                trip:
-                    $ref: '#/components/schemas/trip.v1.Trip'
-        trip.v1.DailyTrip:
-            type: object
-            properties:
-                id:
-                    type: string
-                createdAt:
-                    type: string
-                    format: date-time
-                updatedAt:
-                    type: string
-                    format: date-time
-                tripId:
-                    type: string
-                day:
-                    type: integer
-                    format: int32
-                date:
-                    type: string
-                    format: date-time
-                notes:
-                    type: string
-        trip.v1.DeleteDailyTripResponse:
-            type: object
-            properties:
-                status:
-                    type: string
-        trip.v1.DeleteTripResponse:
-            type: object
-            properties:
-                status:
-                    type: string
-        trip.v1.GetDailyTripResponse:
-            type: object
-            properties:
-                dailyTrip:
-                    $ref: '#/components/schemas/trip.v1.DailyTrip'
-        trip.v1.GetTripResponse:
-            type: object
-            properties:
-                trip:
-                    $ref: '#/components/schemas/trip.v1.Trip'
-        trip.v1.ListDailyTripsResponse:
-            type: object
-            properties:
-                dailyTrips:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/trip.v1.DailyTrip'
-        trip.v1.ListTripsResponse:
-            type: object
-            properties:
-                trips:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/trip.v1.Trip'
-        trip.v1.Trip:
-            type: object
-            properties:
-                id:
-                    type: string
-                createdAt:
-                    type: string
-                    format: date-time
-                updatedAt:
-                    type: string
-                    format: date-time
-                status:
-                    type: boolean
-                title:
-                    type: string
-                description:
-                    type: string
-                startTs:
-                    type: string
-                    format: date-time
-                endTs:
-                    type: string
-                    format: date-time
-        trip.v1.UpdateDailyTripRequest:
-            type: object
-            properties:
-                tripId:
-                    type: string
-                dailyId:
-                    type: string
-                day:
-                    type: integer
-                    format: int32
-                date:
-                    type: string
-                    format: date-time
-                notes:
-                    type: string
-        trip.v1.UpdateDailyTripResponse:
-            type: object
-            properties:
-                dailyTrip:
-                    $ref: '#/components/schemas/trip.v1.DailyTrip'
-        trip.v1.UpdateTripRequest:
-            type: object
-            properties:
-                id:
-                    type: string
-                title:
-                    type: string
-                description:
-                    type: string
-                startTs:
-                    type: string
-                    format: date-time
-                endTs:
-                    type: string
-                    format: date-time
-                status:
-                    type: boolean
-        trip.v1.UpdateTripResponse:
-            type: object
-            properties:
-                trip:
-                    $ref: '#/components/schemas/trip.v1.Trip'
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - TripService
+security:
+    - BearerAuth: []
+servers:
+    - description: Local Server
+      url: http://localhost:8000
 tags:
-    - name: AuthService
-    - name: PointsOfInterestService
-    - name: TripService
+    - description: ""
+      name: AuthService
+    - description: ""
+      name: PointsOfInterestService
+    - description: ""
+      name: TripService

@@ -14,9 +14,9 @@ message Status {
 };
 
 extend google.protobuf.EnumOptions {
-  int32 default_http_code = 10500;
+  int32 default_http_code = 80000;
 }
 
 extend google.protobuf.EnumValueOptions {
-  int32 http_code = 10500;
+  int32 http_code = 80000;
 }

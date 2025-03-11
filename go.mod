@@ -1,6 +1,6 @@
 module github.com/iter-x/iter-x
 
-go 1.24
+go 1.24.1
 
 require (
 	buf.build/go/protoyaml v0.3.1
@@ -35,7 +35,7 @@ require (
 	golang.org/x/text v0.22.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250122153221-138b5a5a4fd4
 	google.golang.org/grpc v1.70.0
-	google.golang.org/protobuf v1.36.3
+	google.golang.org/protobuf v1.36.5
 )
 
 require (

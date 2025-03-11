@@ -22,5 +22,5 @@ message FieldRules {
 }
 
 extend google.protobuf.FieldOptions {
-  FieldRules rules = 50001;
+  FieldRules rules = 70000;
 }
