@@ -1,0 +1,96 @@
+Table User {
+    id uuid [pk]
+    status int8
+    username varchar(50) [not null]
+    password varchar(255) [not null]
+    salt varchar(255) [not null]
+    nickname varchar(50) [null]
+    remark varchar(50) [null]
+    phone varchar(11) [not null]
+    email varchar(255) [not null]
+    avatar_url varchar(255) [null]
+}
+
+Table RefreshToken {
+    id uuid [pk]
+    token varchar(64) [not null]
+    expires_at timestamp [not null]
+    user_id uuid [not null]
+}
+
+Table Trip {
+    id uuid [pk]
+    user_id uuid [not null]
+    status boolean [default: true]
+    title varchar(50) [not null]
+    description varchar(255) [null]
+    start_date timestamp [not null]
+    end_date timestamp [not null]
+}
+
+Table DailyTrip {
+    id uuid [pk]
+    trip_id uuid [not null]
+    day int32 [not null]
+    date timestamp [not null]
+    notes varchar(255) [null]
+}
+
+Table DailyItinerary {
+    id uuid [pk]
+    trip_id uuid [not null]
+    daily_trip_id uuid [not null]
+    poi_id uuid [not null]
+    notes varchar(255) [null]
+}
+
+Table PointsOfInterest {
+    id uuid [pk]
+    description varchar(1000) [null]
+    address varchar(255) [null]
+    latitude float [not null]
+    longitude float [not null]
+    type varchar(50) [not null]
+    category varchar(50) [not null]
+    rating float32 [not null]
+    recommended_duration_minutes int64 [not null]
+    city_id uuid [null]
+    state_id uuid [null]
+    country_id uuid [null]
+    continent_id uuid [null]
+}
+
+Table City {
+    id uuid [pk]
+}
+
+Table State {
+    id uuid [pk]
+}
+
+Table Country {
+    id uuid [pk]
+}
+
+Table Continent {
+    id uuid [pk]
+}
+
+Table Media {
+    id uuid [pk]
+    filename varchar(255) [not null]
+    file_type varchar(255) [not null]
+    storage_type uint8 [not null]
+    path varchar(255) [not null]
+}
+
+Ref: RefreshToken.user_id > User.id [delete: cascade, update: cascade]
+Ref: Trip.user_id > User.id [delete: cascade, update: cascade]
+Ref: DailyTrip.trip_id > Trip.id [delete: cascade, update: cascade]
+Ref: DailyItinerary.trip_id > Trip.id [delete: cascade, update: cascade]
+Ref: DailyItinerary.daily_trip_id > DailyTrip.id [delete: cascade, update: cascade]
+Ref: DailyItinerary.poi_id > PointsOfInterest.id [delete: cascade, update: cascade]
+Ref: PointsOfInterest.city_id > City.id [delete: cascade, update: cascade]
+Ref: PointsOfInterest.state_id > State.id [delete: cascade, update: cascade]
+Ref: PointsOfInterest.country_id > Country.id [delete: cascade, update: cascade]
+Ref: PointsOfInterest.continent_id > Continent.id [delete: cascade, update: cascade]
