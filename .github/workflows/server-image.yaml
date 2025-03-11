@@ -1,4 +1,4 @@
-name: Docker Image Build and Push
+name: Build and Push Server Image
 
 on:
   push:
@@ -17,8 +17,8 @@ jobs:
       - name: Build Docker image
         run: |
           REPO_OWNER_LOWERCASE=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          docker build -f DockerfileBuilder -t ghcr.io/$REPO_OWNER_LOWERCASE/iter-x:builder .
-          docker tag ghcr.io/$REPO_OWNER_LOWERCASE/iter-x:builder registry.ap-southeast-1.aliyuncs.com/iter-x/iter-x:builder
+          docker build -f deploy/server/Dockerfile -t ghcr.io/$REPO_OWNER_LOWERCASE/iter-x:latest .
+          docker tag ghcr.io/$REPO_OWNER_LOWERCASE/iter-x:latest registry.ap-southeast-1.aliyuncs.com/iter-x/iter-x:latest
 
       - name: Login to ghcr
         uses: docker/login-action@v3
@@ -30,11 +30,11 @@ jobs:
       - name: Push Docker image to ghcr
         run: |
           REPO_OWNER_LOWERCASE=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          docker push ghcr.io/$REPO_OWNER_LOWERCASE/iter-x:builder
+          docker push ghcr.io/$REPO_OWNER_LOWERCASE/iter-x:latest
 
       - name: Login to Alibaba Cloud Docker Registry
         run: echo "${{ secrets.ALIYUN_PASSWORD }}" | docker login --username="${{ secrets.ALIYUN_USERNAME }}" registry.ap-southeast-1.aliyuncs.com --password-stdin
 
       - name: Push Docker image to Alibaba Cloud Docker Registry
         run: |
-          docker push registry.ap-southeast-1.aliyuncs.com/iter-x/iter-x:builder
+          docker push registry.ap-southeast-1.aliyuncs.com/iter-x/iter-x:latest

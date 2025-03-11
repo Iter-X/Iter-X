@@ -1,6 +1,6 @@
-FROM registry.ap-southeast-1.aliyuncs.com/iter-x/iter-x:builder AS builder
+FROM ghcr.io/iter-x/iter-x:builder AS builder
 
-COPY . /iterx
+COPY ../.. /iterx
 
 WORKDIR /iterx
 

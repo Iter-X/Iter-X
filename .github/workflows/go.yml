@@ -22,7 +22,6 @@ jobs:
         with:
           go-version: '1.24.1'
 
-      # Install protoc
       - name: Install protoc
         run: |
           sudo apt update
@@ -38,28 +37,3 @@ jobs:
 
       - name: Test
         run: go test -v ./...
-
-      - name: Build Docker image
-        run: |
-          REPO_OWNER_LOWERCASE=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          docker build -t ghcr.io/$REPO_OWNER_LOWERCASE/iter-x:latest .
-          docker tag ghcr.io/$REPO_OWNER_LOWERCASE/iter-x:latest registry.ap-southeast-1.aliyuncs.com/iter-x/iter-x:latest
-
-      - name: Login to ghcr
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Push Docker image to ghcr
-        run: |
-          REPO_OWNER_LOWERCASE=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          docker push ghcr.io/$REPO_OWNER_LOWERCASE/iter-x:latest
-
-      - name: Login to Alibaba Cloud Docker Registry
-        run: echo "${{ secrets.ALIYUN_PASSWORD }}" | docker login --username="${{ secrets.ALIYUN_USERNAME }}" registry.ap-southeast-1.aliyuncs.com --password-stdin
-
-      - name: Push Docker image to Alibaba Cloud Docker Registry
-        run: |
-          docker push registry.ap-southeast-1.aliyuncs.com/iter-x/iter-x:latest

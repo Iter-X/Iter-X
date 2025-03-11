@@ -10,7 +10,7 @@ services:
       - "8000:8000"
       - "9000:9000"
     env_file:
-      - .env
+      - ../.env
 
   db:
     image: registry.ap-southeast-1.aliyuncs.com/iter-x/postgres:16
@@ -27,4 +27,4 @@ services:
       - POSTGRES_USER=${X_DB_USER}
       - POSTGRES_PASSWORD=${X_DB_PASS}
     env_file:
-      - .env
+      - ../.env
