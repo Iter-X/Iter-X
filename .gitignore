@@ -52,6 +52,7 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+.vscode
 .idea
 *.string.go
 /internal/data/ent/*
