@@ -28,8 +28,8 @@ func (PointsOfInterest) Fields() []ent.Field {
 		field.String("address").MaxLen(255),
 		field.Float("latitude"),
 		field.Float("longitude"),
-		field.String("type").MaxLen(50),     // Attractions, Restaurants, Hotels, Cities, etc.
-		field.String("category").MaxLen(50), // Historical, Modern, Natural, etc.
+		field.String("type").MaxLen(50),     // Attraction, Restaurant, Hotel, City, NaturalScenery etc.
+		field.String("category").MaxLen(50), // Mountain, Beach, Museum, Park, Zoo, Aquarium, etc.
 		field.Float32("rating").Positive(),
 		field.Int64("recommended_duration_minutes").Positive(),
 		field.Uint("city_id").Optional(),
@@ -54,5 +54,6 @@ func (PointsOfInterest) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixin{},
 		LocalizedNameMixin{},
+		OperatorMixin{},
 	}
 }

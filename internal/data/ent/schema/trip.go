@@ -22,6 +22,7 @@ func (Trip) Fields() []ent.Field {
 		field.String("description").MaxLen(255),
 		field.Time("start_date"),
 		field.Time("end_date"),
+		field.Int("days").NonNegative(),
 	}
 }
 
@@ -34,6 +35,7 @@ func (Trip) Edges() []ent.Edge {
 			Unique().Required(),
 		edge.To("daily_trip", DailyTrip.Type),
 		edge.To("daily_itinerary", DailyItinerary.Type),
+		edge.To("collaborators", User.Type),
 	}
 }
 

@@ -31,6 +31,7 @@ func (DailyTrip) Edges() []ent.Edge {
 			Field("trip_id").
 			Unique().Required(),
 		edge.To("daily_itinerary", DailyItinerary.Type),
+		edge.To("daily_trip_locations", DailyTripLocation.Type),
 	}
 }
 

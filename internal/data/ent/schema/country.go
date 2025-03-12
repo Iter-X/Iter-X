@@ -26,6 +26,7 @@ func (Country) Edges() []ent.Edge {
 		edge.To("poi", PointsOfInterest.Type),
 		edge.To("state", State.Type),
 		edge.From("continent", Continent.Type).Ref("country").Unique().Required().Field("continent_id"),
+		edge.To("daily_trip_location", DailyTripLocation.Type),
 	}
 }
 

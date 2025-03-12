@@ -34,6 +34,7 @@ func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("refresh_token", RefreshToken.Type),
 		edge.To("trip", Trip.Type),
+		edge.From("trips", Trip.Type).Ref("collaborators"),
 	}
 }
 
