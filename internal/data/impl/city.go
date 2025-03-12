@@ -1,6 +1,9 @@
 package impl
 
 import (
+	"context"
+
+	"github.com/iter-x/iter-x/internal/data/ent/city"
 	"go.uber.org/zap"
 
 	"github.com/iter-x/iter-x/internal/biz/do"
@@ -9,10 +12,11 @@ import (
 	"github.com/iter-x/iter-x/internal/data/ent"
 )
 
-func NewCity(d *data.Data, logger *zap.SugaredLogger) repository.CityRepo {
+func NewCity(d *data.Data, stateRepository repository.StateRepo, logger *zap.SugaredLogger) repository.CityRepo {
 	return &cityRepositoryImpl{
 		Tx:                             d.Tx,
 		logger:                         logger.Named("repo.city"),
+		stateRepository:                stateRepository,
 		pointsOfInterestRepositoryImpl: new(pointsOfInterestRepositoryImpl),
 		stateRepositoryImpl:            new(stateRepositoryImpl),
 	}
@@ -21,6 +25,8 @@ func NewCity(d *data.Data, logger *zap.SugaredLogger) repository.CityRepo {
 type cityRepositoryImpl struct {
 	*data.Tx
 	logger *zap.SugaredLogger
+
+	stateRepository repository.StateRepo
 
 	pointsOfInterestRepositoryImpl repository.BaseRepo[*ent.PointsOfInterest, *do.PointsOfInterest]
 	stateRepositoryImpl            repository.BaseRepo[*ent.State, *do.State]
@@ -53,4 +59,38 @@ func (c *cityRepositoryImpl) ToEntities(pos []*ent.City) []*do.City {
 		list = append(list, c.ToEntity(v))
 	}
 	return list
+}
+
+func (c *cityRepositoryImpl) SearchPointsOfInterest(ctx context.Context, keyword string, limit int) ([]*do.PointsOfInterest, error) {
+	cli := c.GetTx(ctx).City
+
+	rows, err := cli.Query().
+		Where(city.Or(
+			city.NameContains(keyword),
+			city.NameCnContains(keyword),
+			city.NameEnContains(keyword),
+			city.CodeContains(keyword),
+		)).
+		WithPoi().
+		WithState().
+		Limit(limit).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if len(rows) == 0 {
+		return c.stateRepository.SearchPointsOfInterest(ctx, keyword, limit)
+	}
+	pois := make([]*do.PointsOfInterest, 0, len(rows))
+	for _, v := range rows {
+		cityDo := c.ToEntity(v)
+		pois = append(pois, &do.PointsOfInterest{
+			City:           cityDo,
+			State:          cityDo.State,
+			Country:        cityDo.State.Country,
+			Continent:      cityDo.State.Country.Continent,
+			DailyItinerary: nil,
+		})
+	}
+	return pois, nil
 }

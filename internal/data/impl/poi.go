@@ -12,10 +12,11 @@ import (
 	"github.com/iter-x/iter-x/internal/data/ent/pointsofinterest"
 )
 
-func NewPointsOfInterest(d *data.Data, logger *zap.SugaredLogger) repository.PointsOfInterestRepo {
+func NewPointsOfInterest(d *data.Data, cityRepository repository.CityRepo, logger *zap.SugaredLogger) repository.PointsOfInterestRepo {
 	return &pointsOfInterestRepositoryImpl{
 		Tx:                           d.Tx,
 		logger:                       logger.Named("repo.poi"),
+		cityRepository:               cityRepository,
 		cityRepositoryImpl:           new(cityRepositoryImpl),
 		stateRepositoryImpl:          new(stateRepositoryImpl),
 		countryRepositoryImpl:        new(countryRepositoryImpl),
@@ -27,6 +28,8 @@ func NewPointsOfInterest(d *data.Data, logger *zap.SugaredLogger) repository.Poi
 type pointsOfInterestRepositoryImpl struct {
 	*data.Tx
 	logger *zap.SugaredLogger
+
+	cityRepository repository.CityRepo
 
 	cityRepositoryImpl           repository.BaseRepo[*ent.City, *do.City]
 	stateRepositoryImpl          repository.BaseRepo[*ent.State, *do.State]
@@ -47,7 +50,7 @@ func (r *pointsOfInterestRepositoryImpl) ToEntity(po *ent.PointsOfInterest) *do.
 		NameEn:                     po.NameEn,
 		NameCn:                     po.NameCn,
 		Description:                po.Description,
-		Address:                    po.Description,
+		Address:                    po.Address,
 		Latitude:                   po.Latitude,
 		Longitude:                  po.Longitude,
 		Type:                       po.Type,
@@ -81,12 +84,23 @@ func (r *pointsOfInterestRepositoryImpl) SearchPointsOfInterest(ctx context.Cont
 	cli := r.GetTx(ctx).PointsOfInterest
 
 	rows, err := cli.Query().
-		Where(pointsofinterest.NameContains(keyword)).
+		Where(pointsofinterest.Or(
+			pointsofinterest.NameContains(keyword),
+			pointsofinterest.NameCnContains(keyword),
+			pointsofinterest.NameEnContains(keyword),
+			pointsofinterest.DescriptionContains(keyword),
+		)).
 		WithContinent().
 		WithCountry().
 		WithState().
 		WithCity().
 		Limit(limit).
 		All(ctx)
-	return r.ToEntities(rows), err
+	if err != nil {
+		return nil, err
+	}
+	if len(rows) == 0 {
+		return r.cityRepository.SearchPointsOfInterest(ctx, keyword, limit)
+	}
+	return r.ToEntities(rows), nil
 }

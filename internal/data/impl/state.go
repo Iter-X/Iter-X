@@ -1,6 +1,9 @@
 package impl
 
 import (
+	"context"
+
+	"github.com/iter-x/iter-x/internal/data/ent/state"
 	"go.uber.org/zap"
 
 	"github.com/iter-x/iter-x/internal/biz/do"
@@ -9,10 +12,11 @@ import (
 	"github.com/iter-x/iter-x/internal/data/ent"
 )
 
-func NewState(d *data.Data, logger *zap.SugaredLogger) repository.StateRepo {
+func NewState(d *data.Data, countryRepository repository.CountryRepo, logger *zap.SugaredLogger) repository.StateRepo {
 	return &stateRepositoryImpl{
 		Tx:                             d.Tx,
 		logger:                         logger.Named("repo.state"),
+		countryRepository:              countryRepository,
 		pointsOfInterestRepositoryImpl: new(pointsOfInterestRepositoryImpl),
 		cityRepositoryImpl:             new(cityRepositoryImpl),
 		countryRepositoryImpl:          new(countryRepositoryImpl),
@@ -22,6 +26,8 @@ func NewState(d *data.Data, logger *zap.SugaredLogger) repository.StateRepo {
 type stateRepositoryImpl struct {
 	*data.Tx
 	logger *zap.SugaredLogger
+
+	countryRepository repository.CountryRepo
 
 	pointsOfInterestRepositoryImpl repository.BaseRepo[*ent.PointsOfInterest, *do.PointsOfInterest]
 	cityRepositoryImpl             repository.BaseRepo[*ent.City, *do.City]
@@ -57,4 +63,36 @@ func (s *stateRepositoryImpl) ToEntities(pos []*ent.State) []*do.State {
 		list = append(list, s.ToEntity(v))
 	}
 	return list
+}
+
+func (s *stateRepositoryImpl) SearchPointsOfInterest(ctx context.Context, keyword string, limit int) ([]*do.PointsOfInterest, error) {
+	cli := s.GetTx(ctx).State
+
+	rows, err := cli.Query().
+		Where(state.Or(
+			state.NameContains(keyword),
+			state.NameCnContains(keyword),
+			state.NameEnContains(keyword),
+		)).
+		WithCountry().
+		WithCity().
+		Limit(limit).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if len(rows) == 0 {
+		return s.countryRepository.SearchPointsOfInterest(ctx, keyword, limit)
+	}
+
+	pois := make([]*do.PointsOfInterest, 0, len(rows))
+	for _, v := range rows {
+		stateDo := s.ToEntity(v)
+		pois = append(pois, &do.PointsOfInterest{
+			State:     stateDo,
+			Country:   stateDo.Country,
+			Continent: stateDo.Country.Continent,
+		})
+	}
+	return pois, nil
 }
