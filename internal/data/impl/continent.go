@@ -1,6 +1,10 @@
 package impl
 
 import (
+	"context"
+
+	"github.com/iter-x/iter-x/internal/biz/bo"
+	"github.com/iter-x/iter-x/internal/data/ent/continent"
 	"go.uber.org/zap"
 
 	"github.com/iter-x/iter-x/internal/biz/do"
@@ -52,4 +56,31 @@ func (c *continentRepositoryImpl) ToEntities(pos []*ent.Continent) []*do.Contine
 		list = append(list, c.ToEntity(v))
 	}
 	return list
+}
+
+func (c *continentRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params *bo.SearchPointsOfInterestParams) ([]*do.PointsOfInterest, error) {
+	cli := c.GetTx(ctx).Continent
+	keyword := params.Keyword
+	limit := params.Limit
+	rows, err := cli.Query().
+		Where(continent.Or(
+			continent.NameContains(keyword),
+			continent.NameCnContains(keyword),
+			continent.NameEnContains(keyword),
+			continent.CodeContains(keyword),
+		)).
+		Limit(limit).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	pois := make([]*do.PointsOfInterest, 0, len(rows))
+	for _, v := range rows {
+		continentDo := c.ToEntity(v)
+		pois = append(pois, &do.PointsOfInterest{
+			Continent: continentDo,
+		})
+	}
+	return pois, nil
 }

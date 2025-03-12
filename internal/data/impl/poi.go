@@ -5,6 +5,7 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/iter-x/iter-x/internal/biz/bo"
 	"github.com/iter-x/iter-x/internal/biz/do"
 	"github.com/iter-x/iter-x/internal/biz/repository"
 	"github.com/iter-x/iter-x/internal/data"
@@ -12,10 +13,11 @@ import (
 	"github.com/iter-x/iter-x/internal/data/ent/pointsofinterest"
 )
 
-func NewPointsOfInterest(d *data.Data, logger *zap.SugaredLogger) repository.PointsOfInterestRepo {
+func NewPointsOfInterest(d *data.Data, cityRepository repository.CityRepo, logger *zap.SugaredLogger) repository.PointsOfInterestRepo {
 	return &pointsOfInterestRepositoryImpl{
 		Tx:                           d.Tx,
 		logger:                       logger.Named("repo.poi"),
+		cityRepository:               cityRepository,
 		cityRepositoryImpl:           new(cityRepositoryImpl),
 		stateRepositoryImpl:          new(stateRepositoryImpl),
 		countryRepositoryImpl:        new(countryRepositoryImpl),
@@ -27,6 +29,8 @@ func NewPointsOfInterest(d *data.Data, logger *zap.SugaredLogger) repository.Poi
 type pointsOfInterestRepositoryImpl struct {
 	*data.Tx
 	logger *zap.SugaredLogger
+
+	cityRepository repository.CityRepo
 
 	cityRepositoryImpl           repository.BaseRepo[*ent.City, *do.City]
 	stateRepositoryImpl          repository.BaseRepo[*ent.State, *do.State]
@@ -47,7 +51,7 @@ func (r *pointsOfInterestRepositoryImpl) ToEntity(po *ent.PointsOfInterest) *do.
 		NameEn:                     po.NameEn,
 		NameCn:                     po.NameCn,
 		Description:                po.Description,
-		Address:                    po.Description,
+		Address:                    po.Address,
 		Latitude:                   po.Latitude,
 		Longitude:                  po.Longitude,
 		Type:                       po.Type,
@@ -77,16 +81,37 @@ func (r *pointsOfInterestRepositoryImpl) ToEntities(pos []*ent.PointsOfInterest)
 	return list
 }
 
-func (r *pointsOfInterestRepositoryImpl) SearchPointsOfInterest(ctx context.Context, keyword string, limit int) ([]*do.PointsOfInterest, error) {
+func (r *pointsOfInterestRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params *bo.SearchPointsOfInterestParams) ([]*do.PointsOfInterest, error) {
+	if !params.IsPoi() {
+		return r.cityRepository.SearchPointsOfInterest(ctx, params)
+	}
 	cli := r.GetTx(ctx).PointsOfInterest
-
+	keyword := params.Keyword
+	limit := params.Limit
 	rows, err := cli.Query().
-		Where(pointsofinterest.NameContains(keyword)).
+		Where(pointsofinterest.Or(
+			pointsofinterest.NameContains(keyword),
+			pointsofinterest.NameCnContains(keyword),
+			pointsofinterest.NameEnContains(keyword),
+			pointsofinterest.DescriptionContains(keyword),
+		)).
 		WithContinent().
 		WithCountry().
 		WithState().
 		WithCity().
 		Limit(limit).
 		All(ctx)
-	return r.ToEntities(rows), err
+	if err != nil {
+		return nil, err
+	}
+	pois := r.ToEntities(rows)
+	otherRowLimit := limit - len(rows)
+	if otherRowLimit > 0 && params.IsNext() {
+		poiDos, err := r.cityRepository.SearchPointsOfInterest(ctx, params.DepthDec())
+		if err != nil {
+			return nil, err
+		}
+		pois = append(pois, poiDos...)
+	}
+	return pois, nil
 }

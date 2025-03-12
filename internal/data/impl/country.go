@@ -1,6 +1,10 @@
 package impl
 
 import (
+	"context"
+
+	"github.com/iter-x/iter-x/internal/biz/bo"
+	"github.com/iter-x/iter-x/internal/data/ent/country"
 	"go.uber.org/zap"
 
 	"github.com/iter-x/iter-x/internal/biz/do"
@@ -9,10 +13,11 @@ import (
 	"github.com/iter-x/iter-x/internal/data/ent"
 )
 
-func NewCountry(d *data.Data, logger *zap.SugaredLogger) repository.CountryRepo {
+func NewCountry(d *data.Data, continentRepository repository.ContinentRepo, logger *zap.SugaredLogger) repository.CountryRepo {
 	return &countryRepositoryImpl{
 		Tx:                             d.Tx,
 		logger:                         logger.Named("repo.country"),
+		continentRepository:            continentRepository,
 		pointsOfInterestRepositoryImpl: new(pointsOfInterestRepositoryImpl),
 		stateRepositoryImpl:            new(stateRepositoryImpl),
 		continentRepositoryImpl:        new(continentRepositoryImpl),
@@ -21,7 +26,10 @@ func NewCountry(d *data.Data, logger *zap.SugaredLogger) repository.CountryRepo 
 
 type countryRepositoryImpl struct {
 	*data.Tx
-	logger                         *zap.SugaredLogger
+	logger *zap.SugaredLogger
+
+	continentRepository repository.ContinentRepo
+
 	pointsOfInterestRepositoryImpl repository.BaseRepo[*ent.PointsOfInterest, *do.PointsOfInterest]
 	stateRepositoryImpl            repository.BaseRepo[*ent.State, *do.State]
 	continentRepositoryImpl        repository.BaseRepo[*ent.Continent, *do.Continent]
@@ -56,4 +64,44 @@ func (c *countryRepositoryImpl) ToEntities(pos []*ent.Country) []*do.Country {
 		list = append(list, c.ToEntity(v))
 	}
 	return list
+}
+
+func (c *countryRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params *bo.SearchPointsOfInterestParams) ([]*do.PointsOfInterest, error) {
+	if !params.IsCountry() {
+		return c.continentRepository.SearchPointsOfInterest(ctx, params)
+	}
+	cli := c.GetTx(ctx).Country
+	keyword := params.Keyword
+	limit := params.Limit
+	rows, err := cli.Query().
+		Where(country.Or(
+			country.NameContains(keyword),
+			country.NameCnContains(keyword),
+			country.NameEnContains(keyword),
+			country.CodeContains(keyword),
+		)).
+		WithContinent().
+		Limit(limit).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	pois := make([]*do.PointsOfInterest, 0, len(rows))
+	for _, v := range rows {
+		countryDo := c.ToEntity(v)
+		pois = append(pois, &do.PointsOfInterest{
+			Country:   countryDo,
+			Continent: countryDo.Continent,
+		})
+	}
+	otherRowLimit := limit - len(rows)
+	if otherRowLimit > 0 && params.IsNext() {
+		poiDos, err := c.continentRepository.SearchPointsOfInterest(ctx, params.DepthDec())
+		if err != nil {
+			return nil, err
+		}
+		pois = append(pois, poiDos...)
+	}
+
+	return pois, nil
 }

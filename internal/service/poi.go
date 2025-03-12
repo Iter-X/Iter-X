@@ -5,6 +5,7 @@ import (
 
 	poiV1 "github.com/iter-x/iter-x/internal/api/poi/v1"
 	"github.com/iter-x/iter-x/internal/biz"
+	"github.com/iter-x/iter-x/internal/biz/bo"
 )
 
 type PointsOfInterestService struct {
@@ -19,7 +20,12 @@ func NewPointsOfInterestService(pointsOfInterestBiz *biz.PointsOfInterest) *Poin
 }
 
 func (s *PointsOfInterestService) SearchPointsOfInterest(ctx context.Context, req *poiV1.SearchPointsOfInterestRequest) (*poiV1.SearchPointsOfInterestResponse, error) {
-	pointsOfInterest, err := s.pointsOfInterestBiz.SearchPointsOfInterest(ctx, req.Keyword, req.InitialCity)
+	params := &bo.SearchPointsOfInterestParams{
+		Keyword:        req.GetKeyword(),
+		Limit:          int(req.GetLimit()),
+		GeographyLevel: req.GetGeographyLevel(),
+	}
+	pointsOfInterest, err := s.pointsOfInterestBiz.SearchPointsOfInterest(ctx, params.WithDepth(uint8(req.GetDepth())))
 	if err != nil {
 		return nil, err
 	}
