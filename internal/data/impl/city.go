@@ -14,6 +14,7 @@ func NewCity(d *data.Data, logger *zap.SugaredLogger) repository.CityRepo {
 		Tx:                             d.Tx,
 		logger:                         logger.Named("repo.city"),
 		pointsOfInterestRepositoryImpl: new(pointsOfInterestRepositoryImpl),
+		stateRepositoryImpl:            new(stateRepositoryImpl),
 	}
 }
 
@@ -22,6 +23,7 @@ type cityRepositoryImpl struct {
 	logger *zap.SugaredLogger
 
 	pointsOfInterestRepositoryImpl repository.BaseRepo[*ent.PointsOfInterest, *do.PointsOfInterest]
+	stateRepositoryImpl            repository.BaseRepo[*ent.State, *do.State]
 }
 
 func (c *cityRepositoryImpl) ToEntity(po *ent.City) *do.City {
@@ -35,7 +37,10 @@ func (c *cityRepositoryImpl) ToEntity(po *ent.City) *do.City {
 		Name:      po.Name,
 		NameEn:    po.NameEn,
 		NameCn:    po.NameCn,
+		Code:      po.Code,
+		StateID:   po.StateID,
 		Poi:       c.pointsOfInterestRepositoryImpl.ToEntities(po.Edges.Poi),
+		State:     c.stateRepositoryImpl.ToEntity(po.Edges.State),
 	}
 }
 

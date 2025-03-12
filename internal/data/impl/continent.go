@@ -14,6 +14,7 @@ func NewContinent(d *data.Data, logger *zap.SugaredLogger) repository.ContinentR
 		Tx:                             d.Tx,
 		logger:                         logger.Named("repo.continent"),
 		pointsOfInterestRepositoryImpl: new(pointsOfInterestRepositoryImpl),
+		countryRepositoryImpl:          new(countryRepositoryImpl),
 	}
 }
 
@@ -22,6 +23,7 @@ type continentRepositoryImpl struct {
 	logger *zap.SugaredLogger
 
 	pointsOfInterestRepositoryImpl repository.BaseRepo[*ent.PointsOfInterest, *do.PointsOfInterest]
+	countryRepositoryImpl          repository.BaseRepo[*ent.Country, *do.Country]
 }
 
 func (c *continentRepositoryImpl) ToEntity(po *ent.Continent) *do.Continent {
@@ -35,7 +37,9 @@ func (c *continentRepositoryImpl) ToEntity(po *ent.Continent) *do.Continent {
 		Name:      po.Name,
 		NameEn:    po.NameEn,
 		NameCn:    po.NameCn,
+		Code:      po.Code,
 		Poi:       c.pointsOfInterestRepositoryImpl.ToEntities(po.Edges.Poi),
+		Country:   c.countryRepositoryImpl.ToEntities(po.Edges.Country),
 	}
 }
 

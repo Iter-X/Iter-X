@@ -38,13 +38,13 @@ type PointsOfInterest struct {
 	// RecommendedDurationMinutes holds the value of the "recommended_duration_minutes" field.
 	RecommendedDurationMinutes int64 `json:"recommended_duration_minutes,omitempty"`
 	// CityID holds the value of the "city_id" field.
-	CityID uuid.UUID `json:"city_id,omitempty"`
+	CityID uint `json:"city_id,omitempty"`
 	// StateID holds the value of the "state_id" field.
-	StateID uuid.UUID `json:"state_id,omitempty"`
+	StateID uint `json:"state_id,omitempty"`
 	// CountryID holds the value of the "country_id" field.
-	CountryID uuid.UUID `json:"country_id,omitempty"`
+	CountryID uint `json:"country_id,omitempty"`
 	// ContinentID holds the value of the "continent_id" field.
-	ContinentID uuid.UUID `json:"continent_id,omitempty"`
+	ContinentID uint `json:"continent_id,omitempty"`
 
 	// City holds the value of the city edge.
 	City *City `json:"city,omitempty"`

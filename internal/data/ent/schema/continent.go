@@ -4,7 +4,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 )
 
 // Continent holds the schema definition for the Continent entity.
@@ -15,7 +14,8 @@ type Continent struct {
 // Fields of the Continent.
 func (Continent) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", uuid.UUID{}).Unique().Default(uuid.New),
+		field.Uint("id").Unique(),
+		field.String("code").MaxLen(20).Comment("continent code"),
 	}
 }
 
@@ -23,6 +23,7 @@ func (Continent) Fields() []ent.Field {
 func (Continent) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("poi", PointsOfInterest.Type),
+		edge.To("country", Country.Type),
 	}
 }
 

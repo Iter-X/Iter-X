@@ -32,10 +32,10 @@ func (PointsOfInterest) Fields() []ent.Field {
 		field.String("category").MaxLen(50), // Historical, Modern, Natural, etc.
 		field.Float32("rating").Positive(),
 		field.Int64("recommended_duration_minutes").Positive(),
-		field.UUID("city_id", uuid.UUID{}).Optional(),
-		field.UUID("state_id", uuid.UUID{}).Optional(),
-		field.UUID("country_id", uuid.UUID{}).Optional(),
-		field.UUID("continent_id", uuid.UUID{}).Optional(),
+		field.Uint("city_id").Optional(),
+		field.Uint("state_id").Optional(),
+		field.Uint("country_id").Optional(),
+		field.Uint("continent_id").Optional(),
 	}
 }
 

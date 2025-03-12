@@ -32,7 +32,6 @@ type Auth struct {
 }
 
 func NewAuth(c *conf.Auth, transaction repository.Transaction, authRepo repository.AuthRepo, logger *zap.SugaredLogger) *Auth {
-	logger.Debugw("NewAuth", "conf", c)
 	smsClient := sms.NewClient(sms.WithClientConfig(c.GetSmsCode()), sms.WithLogger(logger))
 	return &Auth{
 		cfg:         c,

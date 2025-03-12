@@ -14,6 +14,8 @@ func NewCountry(d *data.Data, logger *zap.SugaredLogger) repository.CountryRepo 
 		Tx:                             d.Tx,
 		logger:                         logger.Named("repo.country"),
 		pointsOfInterestRepositoryImpl: new(pointsOfInterestRepositoryImpl),
+		stateRepositoryImpl:            new(stateRepositoryImpl),
+		continentRepositoryImpl:        new(continentRepositoryImpl),
 	}
 }
 
@@ -21,6 +23,8 @@ type countryRepositoryImpl struct {
 	*data.Tx
 	logger                         *zap.SugaredLogger
 	pointsOfInterestRepositoryImpl repository.BaseRepo[*ent.PointsOfInterest, *do.PointsOfInterest]
+	stateRepositoryImpl            repository.BaseRepo[*ent.State, *do.State]
+	continentRepositoryImpl        repository.BaseRepo[*ent.Continent, *do.Continent]
 }
 
 func (c *countryRepositoryImpl) ToEntity(po *ent.Country) *do.Country {
@@ -29,13 +33,17 @@ func (c *countryRepositoryImpl) ToEntity(po *ent.Country) *do.Country {
 	}
 
 	return &do.Country{
-		ID:        po.ID,
-		CreatedAt: po.CreatedAt,
-		UpdatedAt: po.UpdatedAt,
-		Name:      po.Name,
-		NameEn:    po.NameEn,
-		NameCn:    po.NameCn,
-		Poi:       c.pointsOfInterestRepositoryImpl.ToEntities(po.Edges.Poi),
+		ID:          po.ID,
+		CreatedAt:   po.CreatedAt,
+		UpdatedAt:   po.UpdatedAt,
+		Name:        po.Name,
+		NameEn:      po.NameEn,
+		NameCn:      po.NameCn,
+		Code:        po.Code,
+		ContinentID: po.ContinentID,
+		Poi:         c.pointsOfInterestRepositoryImpl.ToEntities(po.Edges.Poi),
+		State:       c.stateRepositoryImpl.ToEntities(po.Edges.State),
+		Continent:   c.continentRepositoryImpl.ToEntity(po.Edges.Continent),
 	}
 }
 

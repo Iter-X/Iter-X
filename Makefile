@@ -62,6 +62,10 @@ api:
 stringer:
 	cd ./pkg/vobj && go generate
 
+.PHONY: ent
+ent:
+	cd ./internal/data/ent/template && go generate
+
 .PHONY: generate
 # generate
 generate:

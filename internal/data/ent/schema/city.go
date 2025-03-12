@@ -4,7 +4,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 )
 
 // City holds the schema definition for the City entity.
@@ -15,7 +14,9 @@ type City struct {
 // Fields of the City.
 func (City) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", uuid.UUID{}).Unique().Default(uuid.New),
+		field.Uint("id").Unique().Comment("city id"),
+		field.String("code").MaxLen(20).Comment("city code"),
+		field.Uint("state_id").Comment("state id"),
 	}
 }
 
@@ -23,6 +24,7 @@ func (City) Fields() []ent.Field {
 func (City) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("poi", PointsOfInterest.Type),
+		edge.From("state", State.Type).Ref("city").Unique().Required().Field("state_id"),
 	}
 }
 

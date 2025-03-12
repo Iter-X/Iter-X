@@ -4,7 +4,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 )
 
 // Country holds the schema definition for the Country entity.
@@ -15,7 +14,9 @@ type Country struct {
 // Fields of the Country.
 func (Country) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", uuid.UUID{}).Unique().Default(uuid.New),
+		field.Uint("id").Unique(),
+		field.String("code").MaxLen(20).Comment("country code"),
+		field.Uint("continent_id").Comment("continent id"),
 	}
 }
 
@@ -23,6 +24,8 @@ func (Country) Fields() []ent.Field {
 func (Country) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("poi", PointsOfInterest.Type),
+		edge.To("state", State.Type),
+		edge.From("continent", Continent.Type).Ref("country").Unique().Required().Field("continent_id"),
 	}
 }
 
