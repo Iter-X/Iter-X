@@ -3,6 +3,7 @@ package impl
 import (
 	"context"
 
+	"github.com/iter-x/iter-x/internal/biz/bo"
 	"github.com/iter-x/iter-x/internal/data/ent/continent"
 	"go.uber.org/zap"
 
@@ -57,9 +58,10 @@ func (c *continentRepositoryImpl) ToEntities(pos []*ent.Continent) []*do.Contine
 	return list
 }
 
-func (c *continentRepositoryImpl) SearchPointsOfInterest(ctx context.Context, keyword string, limit int) ([]*do.PointsOfInterest, error) {
+func (c *continentRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params *bo.SearchPointsOfInterestParams) ([]*do.PointsOfInterest, error) {
 	cli := c.GetTx(ctx).Continent
-
+	keyword := params.Keyword
+	limit := params.Limit
 	rows, err := cli.Query().
 		Where(continent.Or(
 			continent.NameContains(keyword),

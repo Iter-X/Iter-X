@@ -16,8 +16,17 @@ service PointsOfInterestService {
 }
 
 message SearchPointsOfInterestRequest {
+  enum GeographyLevel {
+    POI = 0;
+    CITY = 1;
+    STATE = 2;
+    COUNTRY = 3;
+    CONTINENT = 4;
+  }
   string keyword = 1 [(validatex.rules).string = {non_empty: true, min_len: 0, max_len: 50}];
-  string initial_city = 2;
+  GeographyLevel geography_level = 2;
+  uint32 limit = 3;
+  uint32 depth = 4;
 }
 
 message SearchPointsOfInterestResponse {

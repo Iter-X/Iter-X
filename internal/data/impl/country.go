@@ -3,6 +3,7 @@ package impl
 import (
 	"context"
 
+	"github.com/iter-x/iter-x/internal/biz/bo"
 	"github.com/iter-x/iter-x/internal/data/ent/country"
 	"go.uber.org/zap"
 
@@ -65,9 +66,13 @@ func (c *countryRepositoryImpl) ToEntities(pos []*ent.Country) []*do.Country {
 	return list
 }
 
-func (c *countryRepositoryImpl) SearchPointsOfInterest(ctx context.Context, keyword string, limit int) ([]*do.PointsOfInterest, error) {
+func (c *countryRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params *bo.SearchPointsOfInterestParams) ([]*do.PointsOfInterest, error) {
+	if !params.IsCountry() {
+		return c.continentRepository.SearchPointsOfInterest(ctx, params)
+	}
 	cli := c.GetTx(ctx).Country
-
+	keyword := params.Keyword
+	limit := params.Limit
 	rows, err := cli.Query().
 		Where(country.Or(
 			country.NameContains(keyword),
@@ -90,8 +95,8 @@ func (c *countryRepositoryImpl) SearchPointsOfInterest(ctx context.Context, keyw
 		})
 	}
 	otherRowLimit := limit - len(rows)
-	if otherRowLimit > 0 {
-		poiDos, err := c.continentRepository.SearchPointsOfInterest(ctx, keyword, otherRowLimit)
+	if otherRowLimit > 0 && params.IsNext() {
+		poiDos, err := c.continentRepository.SearchPointsOfInterest(ctx, params.DepthDec())
 		if err != nil {
 			return nil, err
 		}

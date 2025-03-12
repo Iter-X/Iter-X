@@ -3,13 +3,14 @@ package impl
 import (
 	"context"
 
-	"github.com/iter-x/iter-x/internal/data/ent/city"
 	"go.uber.org/zap"
 
+	"github.com/iter-x/iter-x/internal/biz/bo"
 	"github.com/iter-x/iter-x/internal/biz/do"
 	"github.com/iter-x/iter-x/internal/biz/repository"
 	"github.com/iter-x/iter-x/internal/data"
 	"github.com/iter-x/iter-x/internal/data/ent"
+	"github.com/iter-x/iter-x/internal/data/ent/city"
 )
 
 func NewCity(d *data.Data, stateRepository repository.StateRepo, logger *zap.SugaredLogger) repository.CityRepo {
@@ -61,9 +62,13 @@ func (c *cityRepositoryImpl) ToEntities(pos []*ent.City) []*do.City {
 	return list
 }
 
-func (c *cityRepositoryImpl) SearchPointsOfInterest(ctx context.Context, keyword string, limit int) ([]*do.PointsOfInterest, error) {
+func (c *cityRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params *bo.SearchPointsOfInterestParams) ([]*do.PointsOfInterest, error) {
+	if !params.IsCity() {
+		return c.stateRepository.SearchPointsOfInterest(ctx, params)
+	}
 	cli := c.GetTx(ctx).City
-
+	keyword := params.Keyword
+	limit := params.Limit
 	rows, err := cli.Query().
 		Where(city.Or(
 			city.NameContains(keyword),
@@ -92,8 +97,8 @@ func (c *cityRepositoryImpl) SearchPointsOfInterest(ctx context.Context, keyword
 		})
 	}
 	otherRowLimit := limit - len(rows)
-	if otherRowLimit > 0 {
-		poiDos, err := c.stateRepository.SearchPointsOfInterest(ctx, keyword, otherRowLimit)
+	if otherRowLimit > 0 && params.IsNext() {
+		poiDos, err := c.stateRepository.SearchPointsOfInterest(ctx, params.DepthDec())
 		if err != nil {
 			return nil, err
 		}

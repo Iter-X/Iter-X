@@ -5,6 +5,7 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/iter-x/iter-x/internal/biz/bo"
 	"github.com/iter-x/iter-x/internal/biz/do"
 	"github.com/iter-x/iter-x/internal/biz/repository"
 	"github.com/iter-x/iter-x/internal/data"
@@ -80,9 +81,13 @@ func (r *pointsOfInterestRepositoryImpl) ToEntities(pos []*ent.PointsOfInterest)
 	return list
 }
 
-func (r *pointsOfInterestRepositoryImpl) SearchPointsOfInterest(ctx context.Context, keyword string, limit int) ([]*do.PointsOfInterest, error) {
+func (r *pointsOfInterestRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params *bo.SearchPointsOfInterestParams) ([]*do.PointsOfInterest, error) {
+	if !params.IsPoi() {
+		return r.cityRepository.SearchPointsOfInterest(ctx, params)
+	}
 	cli := r.GetTx(ctx).PointsOfInterest
-
+	keyword := params.Keyword
+	limit := params.Limit
 	rows, err := cli.Query().
 		Where(pointsofinterest.Or(
 			pointsofinterest.NameContains(keyword),
@@ -101,8 +106,8 @@ func (r *pointsOfInterestRepositoryImpl) SearchPointsOfInterest(ctx context.Cont
 	}
 	pois := r.ToEntities(rows)
 	otherRowLimit := limit - len(rows)
-	if otherRowLimit > 0 {
-		poiDos, err := r.cityRepository.SearchPointsOfInterest(ctx, keyword, otherRowLimit)
+	if otherRowLimit > 0 && params.IsNext() {
+		poiDos, err := r.cityRepository.SearchPointsOfInterest(ctx, params.DepthDec())
 		if err != nil {
 			return nil, err
 		}

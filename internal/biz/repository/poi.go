@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 
+	"github.com/iter-x/iter-x/internal/biz/bo"
 	"github.com/iter-x/iter-x/internal/biz/do"
 	"github.com/iter-x/iter-x/internal/data/ent"
 )
@@ -10,7 +11,7 @@ import (
 type PointsOfInterest[T *ent.PointsOfInterest, R *do.PointsOfInterest] interface {
 	BaseRepo[T, R]
 
-	SearchPointsOfInterest(ctx context.Context, keyword string, limit int) ([]*do.PointsOfInterest, error)
+	SearchPointsOfInterest(ctx context.Context, params *bo.SearchPointsOfInterestParams) ([]*do.PointsOfInterest, error)
 }
 
 type PointsOfInterestRepo = PointsOfInterest[*ent.PointsOfInterest, *do.PointsOfInterest]
