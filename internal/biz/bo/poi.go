@@ -8,7 +8,7 @@ type SearchPointsOfInterestParams struct {
 	Keyword        string `json:"keyword"`
 	Limit          int    `json:"limit"`
 	GeographyLevel poiV1.SearchPointsOfInterestRequest_GeographyLevel
-	depth          int
+	depth          uint8
 }
 
 // DepthDec Search depth -1
@@ -18,13 +18,13 @@ func (s *SearchPointsOfInterestParams) DepthDec() *SearchPointsOfInterestParams 
 }
 
 // WithDepth set search depth
-func (s *SearchPointsOfInterestParams) WithDepth(depth int) *SearchPointsOfInterestParams {
+func (s *SearchPointsOfInterestParams) WithDepth(depth uint8) *SearchPointsOfInterestParams {
 	s.depth = depth
 	return s
 }
 
 // Depth get search depth
-func (s *SearchPointsOfInterestParams) Depth() int {
+func (s *SearchPointsOfInterestParams) Depth() uint8 {
 	return s.depth
 }
 

@@ -25,7 +25,7 @@ func (s *PointsOfInterestService) SearchPointsOfInterest(ctx context.Context, re
 		Limit:          int(req.GetLimit()),
 		GeographyLevel: req.GetGeographyLevel(),
 	}
-	pointsOfInterest, err := s.pointsOfInterestBiz.SearchPointsOfInterest(ctx, params.WithDepth(int(req.GetDepth())))
+	pointsOfInterest, err := s.pointsOfInterestBiz.SearchPointsOfInterest(ctx, params.WithDepth(uint8(req.GetDepth())))
 	if err != nil {
 		return nil, err
 	}

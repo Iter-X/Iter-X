@@ -25,7 +25,7 @@ message SearchPointsOfInterestRequest {
   }
   string keyword = 1 [(validatex.rules).string = {non_empty: true, min_len: 0, max_len: 50}];
   GeographyLevel geography_level = 2;
-  uint32 limit = 3;
+  int32 limit = 3;
   uint32 depth = 4;
 }
 
