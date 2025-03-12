@@ -14,6 +14,18 @@ type SearchPointsOfInterestParams struct {
 // DepthDec Search depth -1
 func (s *SearchPointsOfInterestParams) DepthDec() *SearchPointsOfInterestParams {
 	s.depth--
+	switch s.GeographyLevel {
+	case poiV1.SearchPointsOfInterestRequest_POI:
+		s.GeographyLevel = poiV1.SearchPointsOfInterestRequest_CITY
+	case poiV1.SearchPointsOfInterestRequest_CITY:
+		s.GeographyLevel = poiV1.SearchPointsOfInterestRequest_STATE
+	case poiV1.SearchPointsOfInterestRequest_STATE:
+		s.GeographyLevel = poiV1.SearchPointsOfInterestRequest_COUNTRY
+	case poiV1.SearchPointsOfInterestRequest_COUNTRY:
+		s.GeographyLevel = poiV1.SearchPointsOfInterestRequest_CONTINENT
+	default:
+		s.GeographyLevel = poiV1.SearchPointsOfInterestRequest_POI
+	}
 	return s
 }
 
