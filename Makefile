@@ -5,7 +5,6 @@ else
 	API_PROTO_FILES=$(shell find proto/api -name *.proto)
 endif
 
-path := $(shell pwd)
 
 .PHONY: init
 # init env
@@ -61,7 +60,7 @@ api:
 
 .PHONY: stringer
 stringer:
-	go generate $(path)/pkg/vobj
+	cd ./pkg/vobj && go generate
 
 .PHONY: generate
 # generate
