@@ -84,3 +84,55 @@ func (c *continentRepositoryImpl) SearchPointsOfInterest(ctx context.Context, pa
 	}
 	return pois, nil
 }
+
+// ListContinents 列出所有大洲
+func (r *continentRepositoryImpl) ListContinents(ctx context.Context, params *bo.ListContinentsParams) ([]*do.Continent, *bo.PaginationResult, error) {
+	query := r.GetTx(ctx).Continent.Query()
+
+	// 解析分页令牌
+	var err error
+	if params.Offset == 0 && params.PageToken != "" {
+		params.Offset, err = bo.ParsePageToken(params.PageToken)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	// 设置分页
+	limit := int(params.PageSize)
+	if limit <= 0 {
+		limit = 10 // 默认每页10条
+	}
+
+	query = query.Offset(params.Offset).Limit(limit + 1) // 多查询一条用于判断是否有更多数据
+
+	// 执行查询
+	continents, err := query.Order(ent.Asc(continent.FieldName)).All(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// 判断是否有更多数据
+	hasMore := false
+	if len(continents) > limit {
+		hasMore = true
+		continents = continents[:limit] // 去掉多查询的一条
+	}
+
+	// 计算下一页的偏移量
+	nextOffset := params.Offset + len(continents)
+
+	// 转换为DO对象
+	result := make([]*do.Continent, len(continents))
+	for i, c := range continents {
+		result[i] = r.ToEntity(c)
+	}
+
+	// 生成下一页令牌
+	nextPageToken := bo.GenerateNextPageToken(nextOffset, hasMore)
+
+	return result, &bo.PaginationResult{
+		NextPageToken: nextPageToken,
+		HasMore:       hasMore,
+	}, nil
+}

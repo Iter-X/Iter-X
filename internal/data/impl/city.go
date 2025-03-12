@@ -107,3 +107,63 @@ func (c *cityRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params 
 
 	return pois, nil
 }
+
+// ListCities 列出城市，可选按州/省过滤
+func (r *cityRepositoryImpl) ListCities(ctx context.Context, params *bo.ListCitiesParams) ([]*do.City, *bo.PaginationResult, error) {
+	query := r.GetTx(ctx).City.Query()
+
+	// 按州/省过滤
+	if params.StateID > 0 {
+		query = query.Where(city.StateID(params.StateID))
+	}
+
+	// 解析分页令牌
+	var err error
+	if params.Offset == 0 && params.PageToken != "" {
+		params.Offset, err = bo.ParsePageToken(params.PageToken)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	// 设置分页
+	limit := int(params.PageSize)
+	if limit <= 0 {
+		limit = 10 // 默认每页10条
+	}
+
+	query = query.Offset(params.Offset).Limit(limit + 1) // 多查询一条用于判断是否有更多数据
+
+	// 加载关联的州/省信息
+	query = query.WithState()
+
+	// 执行查询
+	cities, err := query.Order(ent.Asc(city.FieldName)).All(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// 判断是否有更多数据
+	hasMore := false
+	if len(cities) > limit {
+		hasMore = true
+		cities = cities[:limit] // 去掉多查询的一条
+	}
+
+	// 计算下一页的偏移量
+	nextOffset := params.Offset + len(cities)
+
+	// 转换为DO对象
+	result := make([]*do.City, len(cities))
+	for i, c := range cities {
+		result[i] = r.ToEntity(c)
+	}
+
+	// 生成下一页令牌
+	nextPageToken := bo.GenerateNextPageToken(nextOffset, hasMore)
+
+	return result, &bo.PaginationResult{
+		NextPageToken: nextPageToken,
+		HasMore:       hasMore,
+	}, nil
+}

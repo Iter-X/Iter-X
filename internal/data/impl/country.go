@@ -105,3 +105,63 @@ func (c *countryRepositoryImpl) SearchPointsOfInterest(ctx context.Context, para
 
 	return pois, nil
 }
+
+// ListCountries 列出国家，可选按大洲过滤
+func (r *countryRepositoryImpl) ListCountries(ctx context.Context, params *bo.ListCountriesParams) ([]*do.Country, *bo.PaginationResult, error) {
+	query := r.GetTx(ctx).Country.Query()
+
+	// 按大洲过滤
+	if params.ContinentID > 0 {
+		query = query.Where(country.ContinentID(params.ContinentID))
+	}
+
+	// 解析分页令牌
+	var err error
+	if params.Offset == 0 && params.PageToken != "" {
+		params.Offset, err = bo.ParsePageToken(params.PageToken)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	// 设置分页
+	limit := int(params.PageSize)
+	if limit <= 0 {
+		limit = 10 // 默认每页10条
+	}
+
+	query = query.Offset(params.Offset).Limit(limit + 1) // 多查询一条用于判断是否有更多数据
+
+	// 加载关联的大洲信息
+	query = query.WithContinent()
+
+	// 执行查询
+	countries, err := query.Order(ent.Asc(country.FieldName)).All(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// 判断是否有更多数据
+	hasMore := false
+	if len(countries) > limit {
+		hasMore = true
+		countries = countries[:limit] // 去掉多查询的一条
+	}
+
+	// 计算下一页的偏移量
+	nextOffset := params.Offset + len(countries)
+
+	// 转换为DO对象
+	result := make([]*do.Country, len(countries))
+	for i, c := range countries {
+		result[i] = r.ToEntity(c)
+	}
+
+	// 生成下一页令牌
+	nextPageToken := bo.GenerateNextPageToken(nextOffset, hasMore)
+
+	return result, &bo.PaginationResult{
+		NextPageToken: nextPageToken,
+		HasMore:       hasMore,
+	}, nil
+}

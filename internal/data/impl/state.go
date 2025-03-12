@@ -107,3 +107,63 @@ func (s *stateRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params
 
 	return pois, nil
 }
+
+// ListStates 列出州/省，可选按国家过滤
+func (r *stateRepositoryImpl) ListStates(ctx context.Context, params *bo.ListStatesParams) ([]*do.State, *bo.PaginationResult, error) {
+	query := r.GetTx(ctx).State.Query()
+
+	// 按国家过滤
+	if params.CountryID > 0 {
+		query = query.Where(state.CountryID(params.CountryID))
+	}
+
+	// 解析分页令牌
+	var err error
+	if params.Offset == 0 && params.PageToken != "" {
+		params.Offset, err = bo.ParsePageToken(params.PageToken)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	// 设置分页
+	limit := int(params.PageSize)
+	if limit <= 0 {
+		limit = 10 // 默认每页10条
+	}
+
+	query = query.Offset(params.Offset).Limit(limit + 1) // 多查询一条用于判断是否有更多数据
+
+	// 加载关联的国家信息
+	query = query.WithCountry()
+
+	// 执行查询
+	states, err := query.Order(ent.Asc(state.FieldName)).All(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// 判断是否有更多数据
+	hasMore := false
+	if len(states) > limit {
+		hasMore = true
+		states = states[:limit] // 去掉多查询的一条
+	}
+
+	// 计算下一页的偏移量
+	nextOffset := params.Offset + len(states)
+
+	// 转换为DO对象
+	result := make([]*do.State, len(states))
+	for i, s := range states {
+		result[i] = r.ToEntity(s)
+	}
+
+	// 生成下一页令牌
+	nextPageToken := bo.GenerateNextPageToken(nextOffset, hasMore)
+
+	return result, &bo.PaginationResult{
+		NextPageToken: nextPageToken,
+		HasMore:       hasMore,
+	}, nil
+}
