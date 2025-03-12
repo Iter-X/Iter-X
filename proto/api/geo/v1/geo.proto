@@ -1,0 +1,121 @@
+syntax = "proto3";
+
+package geo.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/iter-x/iter-x/internal/api/geo/v1;v1";
+
+service GeoService {
+  rpc ListContinents(ListContinentsRequest) returns (ListContinentsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/geo/continents"
+    };
+  }
+  
+  rpc ListCountries(ListCountriesRequest) returns (ListCountriesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/geo/countries"
+    };
+  }
+  
+  rpc ListStates(ListStatesRequest) returns (ListStatesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/geo/states"
+    };
+  }
+  
+  rpc ListCities(ListCitiesRequest) returns (ListCitiesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/geo/cities"
+    };
+  }
+}
+
+message ListContinentsRequest {
+  // 分页大小
+  int32 page_size = 1;
+  // 分页令牌，用于获取下一页数据
+  string page_token = 2;
+}
+
+message ListContinentsResponse {
+  repeated Continent continents = 1;
+  // 下一页的令牌，如果为空表示没有更多数据
+  string next_page_token = 2;
+}
+
+message ListCountriesRequest {
+  // 可选的大洲ID过滤
+  uint32 continent_id = 1;
+  int32 page_size = 2;
+  string page_token = 3;
+}
+
+message ListCountriesResponse {
+  repeated Country countries = 1;
+  string next_page_token = 2;
+}
+
+message ListStatesRequest {
+  // 可选的国家ID过滤
+  uint32 country_id = 1;
+  int32 page_size = 2;
+  string page_token = 3;
+}
+
+message ListStatesResponse {
+  repeated State states = 1;
+  string next_page_token = 2;
+}
+
+message ListCitiesRequest {
+  // 可选的州/省ID过滤
+  uint32 state_id = 1;
+  int32 page_size = 2;
+  string page_token = 3;
+}
+
+message ListCitiesResponse {
+  repeated City cities = 1;
+  string next_page_token = 2;
+}
+
+// 数据模型定义
+message Continent {
+  uint32 id = 1;
+  string name = 2;
+  string name_en = 3;
+  string name_cn = 4;
+  string code = 5;
+}
+
+message Country {
+  uint32 id = 1;
+  string name = 2;
+  string name_en = 3;
+  string name_cn = 4;
+  string code = 5;
+  uint32 continent_id = 6;
+  Continent continent = 7;
+}
+
+message State {
+  uint32 id = 1;
+  string name = 2;
+  string name_en = 3;
+  string name_cn = 4;
+  string code = 5;
+  uint32 country_id = 6;
+  Country country = 7;
+}
+
+message City {
+  uint32 id = 1;
+  string name = 2;
+  string name_en = 3;
+  string name_cn = 4;
+  string code = 5;
+  uint32 state_id = 6;
+  State state = 7;
+} 
