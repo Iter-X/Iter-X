@@ -67,8 +67,6 @@ func (c *continentRepositoryImpl) SearchPointsOfInterest(ctx context.Context, ke
 			continent.NameEnContains(keyword),
 			continent.CodeContains(keyword),
 		)).
-		WithPoi().
-		WithCountry().
 		Limit(limit).
 		All(ctx)
 	if err != nil {

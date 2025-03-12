@@ -75,17 +75,12 @@ func (c *countryRepositoryImpl) SearchPointsOfInterest(ctx context.Context, keyw
 			country.NameEnContains(keyword),
 			country.CodeContains(keyword),
 		)).
-		WithPoi().
-		WithState().
+		WithContinent().
 		Limit(limit).
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(rows) == 0 {
-		return c.continentRepository.SearchPointsOfInterest(ctx, keyword, limit)
-	}
-
 	pois := make([]*do.PointsOfInterest, 0, len(rows))
 	for _, v := range rows {
 		countryDo := c.ToEntity(v)
@@ -94,5 +89,14 @@ func (c *countryRepositoryImpl) SearchPointsOfInterest(ctx context.Context, keyw
 			Continent: countryDo.Continent,
 		})
 	}
+	otherRowLimit := limit - len(rows)
+	if otherRowLimit > 0 {
+		poiDos, err := c.continentRepository.SearchPointsOfInterest(ctx, keyword, otherRowLimit)
+		if err != nil {
+			return nil, err
+		}
+		pois = append(pois, poiDos...)
+	}
+
 	return pois, nil
 }

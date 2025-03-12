@@ -71,26 +71,34 @@ func (c *cityRepositoryImpl) SearchPointsOfInterest(ctx context.Context, keyword
 			city.NameEnContains(keyword),
 			city.CodeContains(keyword),
 		)).
-		WithPoi().
-		WithState().
+		WithState(func(stateQuery *ent.StateQuery) {
+			stateQuery.WithCountry(func(countryQuery *ent.CountryQuery) {
+				countryQuery.WithContinent()
+			})
+		}).
 		Limit(limit).
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(rows) == 0 {
-		return c.stateRepository.SearchPointsOfInterest(ctx, keyword, limit)
-	}
 	pois := make([]*do.PointsOfInterest, 0, len(rows))
 	for _, v := range rows {
 		cityDo := c.ToEntity(v)
 		pois = append(pois, &do.PointsOfInterest{
-			City:           cityDo,
-			State:          cityDo.State,
-			Country:        cityDo.State.Country,
-			Continent:      cityDo.State.Country.Continent,
-			DailyItinerary: nil,
+			City:      cityDo,
+			State:     cityDo.State,
+			Country:   cityDo.State.Country,
+			Continent: cityDo.State.Country.Continent,
 		})
 	}
+	otherRowLimit := limit - len(rows)
+	if otherRowLimit > 0 {
+		poiDos, err := c.stateRepository.SearchPointsOfInterest(ctx, keyword, otherRowLimit)
+		if err != nil {
+			return nil, err
+		}
+		pois = append(pois, poiDos...)
+	}
+
 	return pois, nil
 }

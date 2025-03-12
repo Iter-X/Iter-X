@@ -99,8 +99,14 @@ func (r *pointsOfInterestRepositoryImpl) SearchPointsOfInterest(ctx context.Cont
 	if err != nil {
 		return nil, err
 	}
-	if len(rows) == 0 {
-		return r.cityRepository.SearchPointsOfInterest(ctx, keyword, limit)
+	pois := r.ToEntities(rows)
+	otherRowLimit := limit - len(rows)
+	if otherRowLimit > 0 {
+		poiDos, err := r.cityRepository.SearchPointsOfInterest(ctx, keyword, otherRowLimit)
+		if err != nil {
+			return nil, err
+		}
+		pois = append(pois, poiDos...)
 	}
-	return r.ToEntities(rows), nil
+	return pois, nil
 }
