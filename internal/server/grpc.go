@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc"
 
 	authV1 "github.com/iter-x/iter-x/internal/api/auth/v1"
+	geoV1 "github.com/iter-x/iter-x/internal/api/geo/v1"
 	poiV1 "github.com/iter-x/iter-x/internal/api/poi/v1"
 	tripV1 "github.com/iter-x/iter-x/internal/api/trip/v1"
 	"github.com/iter-x/iter-x/internal/conf"
@@ -30,6 +31,7 @@ func NewGRPCServer(
 	auth *service.Auth,
 	trip *service.Trip,
 	poi *service.PointsOfInterestService,
+	geo *service.GeoService,
 	logger *zap.SugaredLogger,
 ) *GRPCServer {
 	server := grpc.NewServer(
@@ -42,6 +44,7 @@ func NewGRPCServer(
 	authV1.RegisterAuthServiceServer(server, auth)
 	tripV1.RegisterTripServiceServer(server, trip)
 	poiV1.RegisterPointsOfInterestServiceServer(server, poi)
+	geoV1.RegisterGeoServiceServer(server, geo)
 	interceptor.LoadMethodOptions(server)
 	return &GRPCServer{
 		Server:  server,

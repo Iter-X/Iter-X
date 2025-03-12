@@ -271,6 +271,155 @@ components:
                 token:
                     type: string
             type: object
+        geo.v1.City:
+            example:
+                code: ""
+                id: 0
+                name: ""
+                nameCn: ""
+                nameEn: ""
+                state: null
+                stateId: 0
+            properties:
+                code:
+                    type: string
+                id:
+                    format: int32
+                    type: integer
+                name:
+                    type: string
+                nameCn:
+                    type: string
+                nameEn:
+                    type: string
+                state:
+                    $ref: '#/components/schemas/geo.v1.State'
+                stateId:
+                    format: int32
+                    type: integer
+            type: object
+        geo.v1.Continent:
+            example:
+                code: ""
+                id: 0
+                name: ""
+                nameCn: ""
+                nameEn: ""
+            properties:
+                code:
+                    type: string
+                id:
+                    format: int32
+                    type: integer
+                name:
+                    type: string
+                nameCn:
+                    type: string
+                nameEn:
+                    type: string
+            type: object
+        geo.v1.Country:
+            example:
+                code: ""
+                continent: null
+                continentId: 0
+                id: 0
+                name: ""
+                nameCn: ""
+                nameEn: ""
+            properties:
+                code:
+                    type: string
+                continent:
+                    $ref: '#/components/schemas/geo.v1.Continent'
+                continentId:
+                    format: int32
+                    type: integer
+                id:
+                    format: int32
+                    type: integer
+                name:
+                    type: string
+                nameCn:
+                    type: string
+                nameEn:
+                    type: string
+            type: object
+        geo.v1.ListCitiesResponse:
+            example:
+                cities: null
+                nextPageToken: ""
+            properties:
+                cities:
+                    items:
+                        $ref: '#/components/schemas/geo.v1.City'
+                    type: array
+                nextPageToken:
+                    type: string
+            type: object
+        geo.v1.ListContinentsResponse:
+            example:
+                continents: null
+                nextPageToken: ""
+            properties:
+                continents:
+                    items:
+                        $ref: '#/components/schemas/geo.v1.Continent'
+                    type: array
+                nextPageToken:
+                    type: string
+            type: object
+        geo.v1.ListCountriesResponse:
+            example:
+                countries: null
+                nextPageToken: ""
+            properties:
+                countries:
+                    items:
+                        $ref: '#/components/schemas/geo.v1.Country'
+                    type: array
+                nextPageToken:
+                    type: string
+            type: object
+        geo.v1.ListStatesResponse:
+            example:
+                nextPageToken: ""
+                states: null
+            properties:
+                nextPageToken:
+                    type: string
+                states:
+                    items:
+                        $ref: '#/components/schemas/geo.v1.State'
+                    type: array
+            type: object
+        geo.v1.State:
+            example:
+                code: ""
+                country: null
+                countryId: 0
+                id: 0
+                name: ""
+                nameCn: ""
+                nameEn: ""
+            properties:
+                code:
+                    type: string
+                country:
+                    $ref: '#/components/schemas/geo.v1.Country'
+                countryId:
+                    format: int32
+                    type: integer
+                id:
+                    format: int32
+                    type: integer
+                name:
+                    type: string
+                nameCn:
+                    type: string
+                nameEn:
+                    type: string
+            type: object
         poi.v1.PointOfInterest:
             example:
                 address: ""
@@ -954,6 +1103,126 @@ paths:
             security: []
             tags:
                 - AuthService
+    /api/v1/geo/cities:
+        get:
+            operationId: GeoService_ListCities
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/geo.v1.ListCitiesResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - GeoService
+    /api/v1/geo/continents:
+        get:
+            operationId: GeoService_ListContinents
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/geo.v1.ListContinentsResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - GeoService
+    /api/v1/geo/countries:
+        get:
+            operationId: GeoService_ListCountries
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/geo.v1.ListCountriesResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - GeoService
+    /api/v1/geo/states:
+        get:
+            operationId: GeoService_ListStates
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/geo.v1.ListStatesResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - GeoService
     /api/v1/poi/search:
         get:
             operationId: PointsOfInterestService_SearchPointsOfInterest
@@ -1385,6 +1654,9 @@ tags:
     - description: ""
       name: AuthService
     - description: ""
+      name: GeoService
+    - description: ""
       name: PointsOfInterestService
     - description: ""
       name: TripService
+

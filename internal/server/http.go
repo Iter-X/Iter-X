@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	authV1 "github.com/iter-x/iter-x/internal/api/auth/v1"
+	geoV1 "github.com/iter-x/iter-x/internal/api/geo/v1"
 	poiV1 "github.com/iter-x/iter-x/internal/api/poi/v1"
 	tripV1 "github.com/iter-x/iter-x/internal/api/trip/v1"
 	"github.com/iter-x/iter-x/internal/common/cnst"
@@ -51,6 +52,7 @@ func (s *HTTPServer) Start(ctx context.Context) error {
 		authV1.RegisterAuthServiceHandlerFromEndpoint,
 		tripV1.RegisterTripServiceHandlerFromEndpoint,
 		poiV1.RegisterPointsOfInterestServiceHandlerFromEndpoint,
+		geoV1.RegisterGeoServiceHandlerFromEndpoint,
 	} {
 		err := fn(ctx, s.mux, s.cfg.GrpcAddr, opts)
 		if err != nil {
