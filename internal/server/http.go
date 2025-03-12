@@ -78,5 +78,17 @@ func registerDoc(env conf.Environment, mux *runtime.ServeMux) error {
 	if err != nil {
 		return err
 	}
+	err = mux.HandlePath(http.MethodGet, "/dbviewer/*", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+		http.StripPrefix("/dbviewer/", http.FileServer(http.Dir("./dbviewer"))).ServeHTTP(w, r)
+	})
+	if err != nil {
+		return err
+	}
+	err = mux.HandlePath(http.MethodPost, "/dbviewer/*", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+		http.StripPrefix("/dbviewer/", http.FileServer(http.Dir("./dbviewer"))).ServeHTTP(w, r)
+	})
+	if err != nil {
+		return err
+	}
 	return nil
 }
