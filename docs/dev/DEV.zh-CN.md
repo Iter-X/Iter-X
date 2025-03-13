@@ -101,7 +101,7 @@ make all
   * db
   * impl
 
-![go-ddd.png](../images/go-ddd.png)
+![go-ddd.png](../images/go-ddd.zh-CN.png)
 
 ## 依赖倒置
 
