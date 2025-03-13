@@ -13,8 +13,8 @@ type Country[T *ent.Country, R *do.Country] interface {
 
 	SearchPointsOfInterest(ctx context.Context, params *bo.SearchPointsOfInterestParams) ([]*do.PointsOfInterest, error)
 
-	// ListCountries 列出国家，可选按大洲过滤
-	ListCountries(ctx context.Context, params *bo.ListCountriesParams) ([]*do.Country, *bo.PaginationResult, error)
+	// ListCountries lists countries, optionally filtered by continent
+	ListCountries(ctx context.Context, params *bo.ListCountriesParams) ([]*do.Country, int64, error)
 }
 
 type CountryRepo = Country[*ent.Country, *do.Country]

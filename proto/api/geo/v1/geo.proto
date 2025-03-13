@@ -33,55 +33,51 @@ service GeoService {
 }
 
 message ListContinentsRequest {
-  // 分页大小
-  int32 page_size = 1;
-  // 分页令牌，用于获取下一页数据
-  string page_token = 2;
+  int32 limit = 1;
+  int32 offset = 2;
 }
 
 message ListContinentsResponse {
   repeated Continent continents = 1;
-  // 下一页的令牌，如果为空表示没有更多数据
-  string next_page_token = 2;
+  int64 total = 2;
 }
 
 message ListCountriesRequest {
-  // 可选的大洲ID过滤
+  // Optional continent ID filter
   uint32 continent_id = 1;
-  int32 page_size = 2;
-  string page_token = 3;
+  int32 limit = 2;
+  int32 offset = 3;
 }
 
 message ListCountriesResponse {
   repeated Country countries = 1;
-  string next_page_token = 2;
+  int64 total = 2;
 }
 
 message ListStatesRequest {
-  // 可选的国家ID过滤
+  // Optional country ID filter
   uint32 country_id = 1;
-  int32 page_size = 2;
-  string page_token = 3;
+  int32 limit = 2;
+  int32 offset = 3;
 }
 
 message ListStatesResponse {
   repeated State states = 1;
-  string next_page_token = 2;
+  int64 total = 2;
 }
 
 message ListCitiesRequest {
-  // 可选的州/省ID过滤
+  // Optional state ID filter
   uint32 state_id = 1;
-  int32 page_size = 2;
-  string page_token = 3;
+  int32 limit = 2;
+  int32 offset = 3;
 }
 
 message ListCitiesResponse {
   repeated City cities = 1;
-  string next_page_token = 2;
+  int64 total = 2;
 }
 
-// 数据模型定义
 message Continent {
   uint32 id = 1;
   string name = 2;

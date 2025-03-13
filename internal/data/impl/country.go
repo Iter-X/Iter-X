@@ -3,16 +3,17 @@ package impl
 import (
 	"context"
 
-	"github.com/iter-x/iter-x/internal/biz/bo"
-	"github.com/iter-x/iter-x/internal/data/ent/country"
 	"go.uber.org/zap"
 
+	"github.com/iter-x/iter-x/internal/biz/bo"
 	"github.com/iter-x/iter-x/internal/biz/do"
 	"github.com/iter-x/iter-x/internal/biz/repository"
 	"github.com/iter-x/iter-x/internal/data"
 	"github.com/iter-x/iter-x/internal/data/ent"
+	"github.com/iter-x/iter-x/internal/data/ent/country"
 )
 
+// NewCountry creates a new country repository implementation
 func NewCountry(d *data.Data, continentRepository repository.ContinentRepo, logger *zap.SugaredLogger) repository.CountryRepo {
 	return &countryRepositoryImpl{
 		Tx:                             d.Tx,
@@ -35,6 +36,7 @@ type countryRepositoryImpl struct {
 	continentRepositoryImpl        repository.BaseRepo[*ent.Continent, *do.Continent]
 }
 
+// ToEntity converts a persistent object to a domain object
 func (c *countryRepositoryImpl) ToEntity(po *ent.Country) *do.Country {
 	if po == nil {
 		return nil
@@ -55,6 +57,7 @@ func (c *countryRepositoryImpl) ToEntity(po *ent.Country) *do.Country {
 	}
 }
 
+// ToEntities converts a collection of persistent objects to domain objects
 func (c *countryRepositoryImpl) ToEntities(pos []*ent.Country) []*do.Country {
 	if len(pos) == 0 {
 		return nil
@@ -66,6 +69,7 @@ func (c *countryRepositoryImpl) ToEntities(pos []*ent.Country) []*do.Country {
 	return list
 }
 
+// SearchPointsOfInterest searches for points of interest
 func (c *countryRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params *bo.SearchPointsOfInterestParams) ([]*do.PointsOfInterest, error) {
 	if !params.IsCountry() {
 		return c.continentRepository.SearchPointsOfInterest(ctx, params)
@@ -106,62 +110,44 @@ func (c *countryRepositoryImpl) SearchPointsOfInterest(ctx context.Context, para
 	return pois, nil
 }
 
-// ListCountries 列出国家，可选按大洲过滤
-func (r *countryRepositoryImpl) ListCountries(ctx context.Context, params *bo.ListCountriesParams) ([]*do.Country, *bo.PaginationResult, error) {
-	query := r.GetTx(ctx).Country.Query()
+// ListCountries lists countries, optionally filtered by continent
+func (c *countryRepositoryImpl) ListCountries(ctx context.Context, params *bo.ListCountriesParams) ([]*do.Country, int64, error) {
+	query := c.GetTx(ctx).Country.Query()
 
-	// 按大洲过滤
+	// Filter by continent if specified
 	if params.ContinentID > 0 {
 		query = query.Where(country.ContinentID(params.ContinentID))
 	}
 
-	// 解析分页令牌
-	var err error
-	if params.Offset == 0 && params.PageToken != "" {
-		params.Offset, err = bo.ParsePageToken(params.PageToken)
-		if err != nil {
-			return nil, nil, err
-		}
-	}
-
-	// 设置分页
-	limit := int(params.PageSize)
+	// Set pagination
+	limit := int(params.Limit)
 	if limit <= 0 {
-		limit = 10 // 默认每页10条
+		limit = 10 // Default to 10 records per page
 	}
 
-	query = query.Offset(params.Offset).Limit(limit + 1) // 多查询一条用于判断是否有更多数据
+	// Get total count
+	total, err := query.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
 
-	// 加载关联的大洲信息
+	// Apply pagination
+	query = query.Offset(params.Offset).Limit(limit)
+
+	// Load related continent information
 	query = query.WithContinent()
 
-	// 执行查询
+	// Execute query
 	countries, err := query.Order(ent.Asc(country.FieldName)).All(ctx)
 	if err != nil {
-		return nil, nil, err
+		return nil, 0, err
 	}
 
-	// 判断是否有更多数据
-	hasMore := false
-	if len(countries) > limit {
-		hasMore = true
-		countries = countries[:limit] // 去掉多查询的一条
-	}
-
-	// 计算下一页的偏移量
-	nextOffset := params.Offset + len(countries)
-
-	// 转换为DO对象
+	// Convert to domain objects
 	result := make([]*do.Country, len(countries))
-	for i, c := range countries {
-		result[i] = r.ToEntity(c)
+	for i, country := range countries {
+		result[i] = c.ToEntity(country)
 	}
 
-	// 生成下一页令牌
-	nextPageToken := bo.GenerateNextPageToken(nextOffset, hasMore)
-
-	return result, &bo.PaginationResult{
-		NextPageToken: nextPageToken,
-		HasMore:       hasMore,
-	}, nil
+	return result, int64(total), nil
 }

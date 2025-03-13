@@ -1,84 +1,39 @@
 package bo
 
-import (
-	"encoding/base64"
-	"fmt"
-	"strconv"
-	"strings"
-)
-
-// ListContinentsParams 列出大洲的参数
+// ListContinentsParams parameters for listing continents
 type ListContinentsParams struct {
-	PageSize  int32
-	PageToken string
-	// 解析后的偏移量，内部使用
+	// Number of records per page
+	Limit int32
+	// Offset, starting from 0
 	Offset int
 }
 
-// ListCountriesParams 列出国家的参数
+// ListCountriesParams parameters for listing countries
 type ListCountriesParams struct {
+	// Optional continent ID filter
 	ContinentID uint
-	PageSize    int32
-	PageToken   string
-	// 解析后的偏移量，内部使用
+	// Number of records per page
+	Limit int32
+	// Offset, starting from 0
 	Offset int
 }
 
-// ListStatesParams 列出州/省的参数
+// ListStatesParams parameters for listing states/provinces
 type ListStatesParams struct {
+	// Optional country ID filter
 	CountryID uint
-	PageSize  int32
-	PageToken string
-	// 解析后的偏移量，内部使用
+	// Number of records per page
+	Limit int32
+	// Offset, starting from 0
 	Offset int
 }
 
-// ListCitiesParams 列出城市的参数
+// ListCitiesParams parameters for listing cities
 type ListCitiesParams struct {
-	StateID   uint
-	PageSize  int32
-	PageToken string
-	// 解析后的偏移量，内部使用
+	// Optional state ID filter
+	StateID uint
+	// Number of records per page
+	Limit int32
+	// Offset, starting from 0
 	Offset int
-}
-
-// PaginationResult 分页结果
-type PaginationResult struct {
-	// 下一页的令牌，如果为空表示没有更多数据
-	NextPageToken string
-	// 是否有更多数据
-	HasMore bool
-}
-
-// 生成下一页的令牌
-func GenerateNextPageToken(offset int, hasMore bool) string {
-	if !hasMore {
-		return ""
-	}
-	token := fmt.Sprintf("offset=%d", offset)
-	return base64.StdEncoding.EncodeToString([]byte(token))
-}
-
-// 解析分页令牌
-func ParsePageToken(token string) (int, error) {
-	if token == "" {
-		return 0, nil
-	}
-
-	decoded, err := base64.StdEncoding.DecodeString(token)
-	if err != nil {
-		return 0, err
-	}
-
-	parts := strings.Split(string(decoded), "=")
-	if len(parts) != 2 || parts[0] != "offset" {
-		return 0, fmt.Errorf("invalid page token format")
-	}
-
-	offset, err := strconv.Atoi(parts[1])
-	if err != nil {
-		return 0, err
-	}
-
-	return offset, nil
 }

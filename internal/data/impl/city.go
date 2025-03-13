@@ -108,62 +108,44 @@ func (c *cityRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params 
 	return pois, nil
 }
 
-// ListCities 列出城市，可选按州/省过滤
-func (r *cityRepositoryImpl) ListCities(ctx context.Context, params *bo.ListCitiesParams) ([]*do.City, *bo.PaginationResult, error) {
+// ListCities lists cities, optionally filtered by state/province
+func (r *cityRepositoryImpl) ListCities(ctx context.Context, params *bo.ListCitiesParams) ([]*do.City, int64, error) {
 	query := r.GetTx(ctx).City.Query()
 
-	// 按州/省过滤
+	// Filter by state if specified
 	if params.StateID > 0 {
 		query = query.Where(city.StateID(params.StateID))
 	}
 
-	// 解析分页令牌
-	var err error
-	if params.Offset == 0 && params.PageToken != "" {
-		params.Offset, err = bo.ParsePageToken(params.PageToken)
-		if err != nil {
-			return nil, nil, err
-		}
-	}
-
-	// 设置分页
-	limit := int(params.PageSize)
+	// Set pagination
+	limit := int(params.Limit)
 	if limit <= 0 {
-		limit = 10 // 默认每页10条
+		limit = 10 // Default to 10 records per page
 	}
 
-	query = query.Offset(params.Offset).Limit(limit + 1) // 多查询一条用于判断是否有更多数据
+	// Get total count
+	total, err := query.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
 
-	// 加载关联的州/省信息
+	// Apply pagination
+	query = query.Offset(params.Offset).Limit(limit)
+
+	// Load related state information
 	query = query.WithState()
 
-	// 执行查询
+	// Execute query
 	cities, err := query.Order(ent.Asc(city.FieldName)).All(ctx)
 	if err != nil {
-		return nil, nil, err
+		return nil, 0, err
 	}
 
-	// 判断是否有更多数据
-	hasMore := false
-	if len(cities) > limit {
-		hasMore = true
-		cities = cities[:limit] // 去掉多查询的一条
-	}
-
-	// 计算下一页的偏移量
-	nextOffset := params.Offset + len(cities)
-
-	// 转换为DO对象
+	// Convert to DO objects
 	result := make([]*do.City, len(cities))
 	for i, c := range cities {
 		result[i] = r.ToEntity(c)
 	}
 
-	// 生成下一页令牌
-	nextPageToken := bo.GenerateNextPageToken(nextOffset, hasMore)
-
-	return result, &bo.PaginationResult{
-		NextPageToken: nextPageToken,
-		HasMore:       hasMore,
-	}, nil
+	return result, int64(total), nil
 }

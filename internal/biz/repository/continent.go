@@ -13,8 +13,8 @@ type Continent[T *ent.Continent, R *do.Continent] interface {
 
 	SearchPointsOfInterest(ctx context.Context, params *bo.SearchPointsOfInterestParams) ([]*do.PointsOfInterest, error)
 
-	// ListContinents 列出所有大洲
-	ListContinents(ctx context.Context, params *bo.ListContinentsParams) ([]*do.Continent, *bo.PaginationResult, error)
+	// ListContinents lists all continents
+	ListContinents(ctx context.Context, params *bo.ListContinentsParams) ([]*do.Continent, int64, error)
 }
 
 type ContinentRepo = Continent[*ent.Continent, *do.Continent]

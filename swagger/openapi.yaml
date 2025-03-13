@@ -348,50 +348,54 @@ components:
         geo.v1.ListCitiesResponse:
             example:
                 cities: null
-                nextPageToken: ""
+                total: 0
             properties:
                 cities:
                     items:
                         $ref: '#/components/schemas/geo.v1.City'
                     type: array
-                nextPageToken:
-                    type: string
+                total:
+                    format: int64
+                    type: integer
             type: object
         geo.v1.ListContinentsResponse:
             example:
                 continents: null
-                nextPageToken: ""
+                total: 0
             properties:
                 continents:
                     items:
                         $ref: '#/components/schemas/geo.v1.Continent'
                     type: array
-                nextPageToken:
-                    type: string
+                total:
+                    format: int64
+                    type: integer
             type: object
         geo.v1.ListCountriesResponse:
             example:
                 countries: null
-                nextPageToken: ""
+                total: 0
             properties:
                 countries:
                     items:
                         $ref: '#/components/schemas/geo.v1.Country'
                     type: array
-                nextPageToken:
-                    type: string
+                total:
+                    format: int64
+                    type: integer
             type: object
         geo.v1.ListStatesResponse:
             example:
-                nextPageToken: ""
                 states: null
+                total: 0
             properties:
-                nextPageToken:
-                    type: string
                 states:
                     items:
                         $ref: '#/components/schemas/geo.v1.State'
                     type: array
+                total:
+                    format: int64
+                    type: integer
             type: object
         geo.v1.State:
             example:
@@ -1652,11 +1656,10 @@ servers:
       url: http://localhost:8000
 tags:
     - description: ""
-      name: AuthService
-    - description: ""
       name: GeoService
     - description: ""
-      name: PointsOfInterestService
-    - description: ""
       name: TripService
-
+    - description: ""
+      name: AuthService
+    - description: ""
+      name: PointsOfInterestService
