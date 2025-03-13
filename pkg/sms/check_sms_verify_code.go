@@ -9,9 +9,9 @@ import (
 
 type (
 	CheckSmsVerifyCodeParams interface {
-		// GetPhoneNumber 手机号
+		// GetPhoneNumber gets the phone number
 		GetPhoneNumber() string
-		// GetVerifyCode 验证码
+		// GetVerifyCode gets the verification code
 		GetVerifyCode() string
 	}
 
@@ -39,7 +39,7 @@ type (
 	}
 )
 
-// GetCheckSmsVerifyCodeModel 获取响应体
+// GetCheckSmsVerifyCodeModel gets the response body
 func (r *CheckSmsVerifyCodeResponse) GetCheckSmsVerifyCodeModel() *CheckSmsVerifyCodeModel {
 	model := pointer.Get(pointer.Get(r.Body).Model)
 	return &CheckSmsVerifyCodeModel{
@@ -48,7 +48,7 @@ func (r *CheckSmsVerifyCodeResponse) GetCheckSmsVerifyCodeModel() *CheckSmsVerif
 	}
 }
 
-// IsOK 响应是否成功
+// IsOK checks if the response is successful
 func (r *CheckSmsVerifyCodeResponse) IsOK() bool {
 	return pointer.Get(r.StatusCode) == 200 &&
 		pointer.Get(pointer.Get(r.Body).Code) == "OK" &&
@@ -56,7 +56,7 @@ func (r *CheckSmsVerifyCodeResponse) IsOK() bool {
 		r.GetCheckSmsVerifyCodeModel().VerifyResult == "PASS"
 }
 
-// CheckSmsVerifyCode 验证短信验证码
+// CheckSmsVerifyCode verifies the SMS verification code
 func (c *Client) CheckSmsVerifyCode(_ context.Context, params CheckSmsVerifyCodeParams) (*CheckSmsVerifyCodeResponse, error) {
 	request := &dysmsapiV2.CheckSmsVerifyCodeRequest{
 		PhoneNumber: pointer.Of(params.GetPhoneNumber()),
