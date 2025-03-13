@@ -28,3 +28,10 @@ To become the go-to platform for travel planning, ensuring that Iter-X is the fi
 We are a loosely connected remote collaboration team driven by passion. Our goal is to contribute valuable projects to the open-source community, inspiring others to create interesting products or solutions. At the same time, we warmly welcome individuals who are passionate and dedicated to joining us. Whether your motivation comes from a love for open source, a desire for personal growth and recognition, material rewards, exploring commercial opportunities, or simply connecting with like-minded individuals, as long as you can contribute, you are welcome to be part of our team.
 
 Our team extends beyond technical roles. In addition to developers, we also have professional designers who need contributions from various non-technical roles. If this project excites you, we welcome your participation. We embrace every passionate individual with an open mind to build a promising future together.
+
+## Contributor
+
+We welcome more developers to join us! You can start from the following two aspects:
+
+* [GOPHER.md](docs/dev/GOPHER.md)
+* [DEV.md](docs/dev/DEV.md)
