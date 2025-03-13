@@ -54,7 +54,7 @@ import (
 
 ### 2. 命名规范
 
-* 统一按照go官方命名规则（原则是goland编辑器不能有警告⚠️）
+* 统一按照Go官方命名规则（原则是Goland编辑器不能有警告⚠️）
 
 * 对于不确定是否导出的变量， 统一使用小写字母开头，只有明确导出的，才使用大写字母开头
 
@@ -165,7 +165,7 @@ const (
 
 ### 4. 函数定义规范
 
-原则上函数或者方法，第一参数都是context（工具方法除外），如果有return error， error放在最后
+原则上函数或者方法，第一参数都是context（不涉及外部调用或者调用链中涉及上下文管理的工具类方法除外），如果有return error， error放在最后
 
 ```go
 func FuncName(ctx context.Context, param1) (string, error) {
