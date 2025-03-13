@@ -145,8 +145,8 @@ func (c *countryRepositoryImpl) ListCountries(ctx context.Context, params *bo.Li
 
 	// Convert to domain objects
 	result := make([]*do.Country, len(countries))
-	for i, country := range countries {
-		result[i] = c.ToEntity(country)
+	for i, v := range countries {
+		result[i] = c.ToEntity(v)
 	}
 
 	return result, int64(total), nil

@@ -109,8 +109,8 @@ func (c *cityRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params 
 }
 
 // ListCities lists cities, optionally filtered by state/province
-func (r *cityRepositoryImpl) ListCities(ctx context.Context, params *bo.ListCitiesParams) ([]*do.City, int64, error) {
-	query := r.GetTx(ctx).City.Query()
+func (c *cityRepositoryImpl) ListCities(ctx context.Context, params *bo.ListCitiesParams) ([]*do.City, int64, error) {
+	query := c.GetTx(ctx).City.Query()
 
 	// Filter by state if specified
 	if params.StateID > 0 {
@@ -143,8 +143,8 @@ func (r *cityRepositoryImpl) ListCities(ctx context.Context, params *bo.ListCiti
 
 	// Convert to DO objects
 	result := make([]*do.City, len(cities))
-	for i, c := range cities {
-		result[i] = r.ToEntity(c)
+	for i, v := range cities {
+		result[i] = c.ToEntity(v)
 	}
 
 	return result, int64(total), nil
