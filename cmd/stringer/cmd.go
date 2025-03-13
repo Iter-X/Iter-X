@@ -258,7 +258,7 @@ func (g *Generator) generate(typeName string) {
 // toCamelCase converts a string to camel case.
 func getFuncName(typeName, originalName string) string {
 	fieldName := strings.TrimPrefix(originalName, typeName)
-	// 转换为驼峰命名
+	// Convert to camel case
 	fieldName = strings.Trim(fieldName, "_")
 	var b strings.Builder
 	b.WriteString("Is")
