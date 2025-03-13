@@ -3,16 +3,17 @@ package impl
 import (
 	"context"
 
-	"github.com/iter-x/iter-x/internal/biz/bo"
-	"github.com/iter-x/iter-x/internal/data/ent/country"
 	"go.uber.org/zap"
 
+	"github.com/iter-x/iter-x/internal/biz/bo"
 	"github.com/iter-x/iter-x/internal/biz/do"
 	"github.com/iter-x/iter-x/internal/biz/repository"
 	"github.com/iter-x/iter-x/internal/data"
 	"github.com/iter-x/iter-x/internal/data/ent"
+	"github.com/iter-x/iter-x/internal/data/ent/country"
 )
 
+// NewCountry creates a new country repository implementation
 func NewCountry(d *data.Data, continentRepository repository.ContinentRepo, logger *zap.SugaredLogger) repository.CountryRepo {
 	return &countryRepositoryImpl{
 		Tx:                             d.Tx,
@@ -35,6 +36,7 @@ type countryRepositoryImpl struct {
 	continentRepositoryImpl        repository.BaseRepo[*ent.Continent, *do.Continent]
 }
 
+// ToEntity converts a persistent object to a domain object
 func (c *countryRepositoryImpl) ToEntity(po *ent.Country) *do.Country {
 	if po == nil {
 		return nil
@@ -55,6 +57,7 @@ func (c *countryRepositoryImpl) ToEntity(po *ent.Country) *do.Country {
 	}
 }
 
+// ToEntities converts a collection of persistent objects to domain objects
 func (c *countryRepositoryImpl) ToEntities(pos []*ent.Country) []*do.Country {
 	if len(pos) == 0 {
 		return nil
@@ -66,6 +69,7 @@ func (c *countryRepositoryImpl) ToEntities(pos []*ent.Country) []*do.Country {
 	return list
 }
 
+// SearchPointsOfInterest searches for points of interest
 func (c *countryRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params *bo.SearchPointsOfInterestParams) ([]*do.PointsOfInterest, error) {
 	if !params.IsCountry() {
 		return c.continentRepository.SearchPointsOfInterest(ctx, params)
@@ -104,4 +108,46 @@ func (c *countryRepositoryImpl) SearchPointsOfInterest(ctx context.Context, para
 	}
 
 	return pois, nil
+}
+
+// ListCountries lists countries, optionally filtered by continent
+func (c *countryRepositoryImpl) ListCountries(ctx context.Context, params *bo.ListCountriesParams) ([]*do.Country, int64, error) {
+	query := c.GetTx(ctx).Country.Query()
+
+	// Filter by continent if specified
+	if params.ContinentID > 0 {
+		query = query.Where(country.ContinentID(params.ContinentID))
+	}
+
+	// Set pagination
+	limit := int(params.Limit)
+	if limit <= 0 {
+		limit = 10 // Default to 10 records per page
+	}
+
+	// Get total count
+	total, err := query.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Apply pagination
+	query = query.Offset(params.Offset).Limit(limit)
+
+	// Load related continent information
+	query = query.WithContinent()
+
+	// Execute query
+	countries, err := query.Order(ent.Asc(country.FieldName)).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Convert to domain objects
+	result := make([]*do.Country, len(countries))
+	for i, country := range countries {
+		result[i] = c.ToEntity(country)
+	}
+
+	return result, int64(total), nil
 }

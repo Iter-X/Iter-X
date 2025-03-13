@@ -3,14 +3,14 @@ package impl
 import (
 	"context"
 
-	"github.com/iter-x/iter-x/internal/biz/bo"
-	"github.com/iter-x/iter-x/internal/data/ent/state"
 	"go.uber.org/zap"
 
+	"github.com/iter-x/iter-x/internal/biz/bo"
 	"github.com/iter-x/iter-x/internal/biz/do"
 	"github.com/iter-x/iter-x/internal/biz/repository"
 	"github.com/iter-x/iter-x/internal/data"
 	"github.com/iter-x/iter-x/internal/data/ent"
+	"github.com/iter-x/iter-x/internal/data/ent/state"
 )
 
 func NewState(d *data.Data, countryRepository repository.CountryRepo, logger *zap.SugaredLogger) repository.StateRepo {
@@ -106,4 +106,46 @@ func (s *stateRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params
 	}
 
 	return pois, nil
+}
+
+// ListStates lists states/provinces, optionally filtered by country
+func (r *stateRepositoryImpl) ListStates(ctx context.Context, params *bo.ListStatesParams) ([]*do.State, int64, error) {
+	query := r.GetTx(ctx).State.Query()
+
+	// Filter by country if specified
+	if params.CountryID > 0 {
+		query = query.Where(state.CountryID(params.CountryID))
+	}
+
+	// Set pagination
+	limit := int(params.Limit)
+	if limit <= 0 {
+		limit = 10 // Default to 10 records per page
+	}
+
+	// Get total count
+	total, err := query.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Apply pagination
+	query = query.Offset(params.Offset).Limit(limit)
+
+	// Load related country information
+	query = query.WithCountry()
+
+	// Execute query
+	states, err := query.Order(ent.Asc(state.FieldName)).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Convert to DO objects
+	result := make([]*do.State, len(states))
+	for i, s := range states {
+		result[i] = r.ToEntity(s)
+	}
+
+	return result, int64(total), nil
 }

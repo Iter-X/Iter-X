@@ -107,3 +107,45 @@ func (c *cityRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params 
 
 	return pois, nil
 }
+
+// ListCities lists cities, optionally filtered by state/province
+func (r *cityRepositoryImpl) ListCities(ctx context.Context, params *bo.ListCitiesParams) ([]*do.City, int64, error) {
+	query := r.GetTx(ctx).City.Query()
+
+	// Filter by state if specified
+	if params.StateID > 0 {
+		query = query.Where(city.StateID(params.StateID))
+	}
+
+	// Set pagination
+	limit := int(params.Limit)
+	if limit <= 0 {
+		limit = 10 // Default to 10 records per page
+	}
+
+	// Get total count
+	total, err := query.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Apply pagination
+	query = query.Offset(params.Offset).Limit(limit)
+
+	// Load related state information
+	query = query.WithState()
+
+	// Execute query
+	cities, err := query.Order(ent.Asc(city.FieldName)).All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Convert to DO objects
+	result := make([]*do.City, len(cities))
+	for i, c := range cities {
+		result[i] = r.ToEntity(c)
+	}
+
+	return result, int64(total), nil
+}
