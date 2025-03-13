@@ -5,7 +5,7 @@ import (
 	"math/big"
 )
 
-const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()" // 可选，包含特殊字符
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()" // Optional, includes special characters
 
 // GenerateRandomPassword generates a random password of the specified length.
 func GenerateRandomPassword(length int) string {

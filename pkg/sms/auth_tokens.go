@@ -13,19 +13,19 @@ import (
 
 type (
 	AuthTokensConfig interface {
-		// GetBundleId iOS 应用 ID。OsType 为 iOS 时必传。
+		// GetBundleId gets the iOS application ID. Required when OsType is iOS
 		GetBundleId() string
-		// GetExpireSec Token 有效期（单位：秒），最小 900，最大 43200。
+		// GetExpireSec gets the token validity period (in seconds), minimum 900, maximum 43200
 		GetExpireSec() int64
-		// GetPackageName 包名。OsType 为 Android 时必传。
+		// GetPackageName gets the package name. Required when OsType is Android
 		GetPackageName() string
-		// GetSignName 签名。OsType 为 Android 时必传。
+		// GetSignName gets the signature. Required when OsType is Android
 		GetSignName() string
-		// GetSceneCode 方案号。
+		// GetSceneCode gets the scheme number
 		GetSceneCode() string
-		// GetSmsTemplateCode 短信模板 Code。
+		// GetSmsTemplateCode gets the SMS template Code
 		GetSmsTemplateCode() string
-		// GetSmsCodeExpireSec 短信验证码有效期（单位：秒）
+		// GetSmsCodeExpireSec gets the SMS verification code validity period (in seconds)
 		GetSmsCodeExpireSec() int32
 	}
 

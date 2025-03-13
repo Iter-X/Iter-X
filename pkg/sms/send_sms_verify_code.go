@@ -10,36 +10,34 @@ import (
 
 type (
 	SendSmsVerifyCodeParams interface {
-		// GetPhoneNumber 手机号
+		// GetPhoneNumber gets the phone number
 		GetPhoneNumber() string
-		// GetSignName 签名名称
+		// GetSignName gets the signature name
 		GetSignName() string
-		// GetTemplateCode 模板code
-		//  短信模板 CODE。
-		//  您可以登录短信服务控制台，选择国内消息或国际/港澳台消息，在模板管理页面查看模板 CODE。
+		// GetTemplateCode gets the template code
+		//  SMS template CODE.
+		//  You can log in to the SMS service console, select domestic messages or international/Hong Kong, Macao and Taiwan messages, and view the template CODE on the template management page.
 		//  https://dysms.console.aliyun.com/dysms.htm?spm=a2c4g.11186623.0.0.7f43422bP2FbbB#/overview
 		GetTemplateCode() string
-		// GetTemplateParam 模板参数
-		//
-		//  短信模板变量填写的参数值。验证码位置使用"##code##"替代。
-		//  示例：如模板内容为：“您的验证码是${authCode}，5 分钟内有效，请勿告诉他人。”。此时，该字段传入：{"authCode":"##code##"}
-		//  注意 上文中的 authCode 请替换成您实际申请的验证码模板中的参数名称
+		// GetTemplateParam gets the template parameters
+		//  Parameter values for SMS template variables. Use "##code##" for verification code position.
+		//  Example: If the template content is: "Your verification code is ${authCode}, valid for 5 minutes, please do not tell others." Then, this field should be: {"authCode":"##code##"}
+		//  Note: Replace authCode in the above with the actual parameter name in your verification code template
 		GetTemplateParam() string
-		// GetValidTime 验证码有效时长，单位秒，默认为 300 秒。
+		// GetValidTime gets the verification code validity period in seconds, default is 300 seconds
 		GetValidTime() int64
-		// GetCodeLength 验证码长度支持 4～8 位长度，默认是 4 位。
+		// GetCodeLength gets the verification code length, supports 4-8 digits, default is 4 digits
 		GetCodeLength() int64
-		// GetInterval 时间间隔，单位：秒。即多久间隔可以发送一次验证码，用于频控，默认 60 秒。
+		// GetInterval gets the time interval in seconds between sending verification codes, used for frequency control, default is 60 seconds
 		GetInterval() int64
-		// GetCodeType 生成的验证码类型。取值：
-		//
-		//   1：纯数字（默认）。
-		//   2：纯大写字母。
-		//   3：纯小写字母。
-		//   4：大小字母混合。
-		//   5：数字+大写字母混合。
-		//   6：数字+小写字母混合。
-		//   7：数字+大小写字母混合。
+		// GetCodeType gets the generated verification code type
+		//   1: Numbers only (default).
+		//   2: Uppercase letters only.
+		//   3: Lowercase letters only.
+		//   4: Mixed case letters.
+		//   5: Numbers + uppercase letters.
+		//   6: Numbers + lowercase letters.
+		//   7: Numbers + mixed case letters.
 		GetCodeType() int64
 	}
 
@@ -75,12 +73,12 @@ type (
 	}
 )
 
-// IsOK 请求状态码。返回 OK 代表请求成功。其他错误码，请参见返回码列表。
+// IsOK checks if the request status code is OK
 func (r *SendSmsVerifyCodeResponse) IsOK() bool {
 	return pointer.Get(r.StatusCode) == 200 && pointer.Get(pointer.Get(r.Body).Code) == "OK" && pointer.Get(pointer.Get(r.Body).Success)
 }
 
-// GetSendSmsVerifyCodeModel 获取短信验证码返回结果
+// GetSendSmsVerifyCodeModel gets the SMS verification code response result
 func (r *SendSmsVerifyCodeResponse) GetSendSmsVerifyCodeModel() *SendSmsVerifyCodeModel {
 	model := pointer.Get(pointer.Get(r.Body).Model)
 	return &SendSmsVerifyCodeModel{

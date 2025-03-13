@@ -8,14 +8,14 @@ import (
 	"github.com/iter-x/iter-x/pkg/util/password"
 )
 
-// TestGenerateRandomPassword_Success 验证生成的密码长度是否正确
+// TestGenerateRandomPassword_Success verifies correct password length generation
 func TestGenerateRandomPassword_Success(t *testing.T) {
 	length := 10
 	p := password.GenerateRandomPassword(length)
 	assert.Len(t, p, length)
 }
 
-// TestGenerateRandomPassword_Randomness 验证生成的密码是否随机
+// TestGenerateRandomPassword_Randomness verifies password randomness
 func TestGenerateRandomPassword_Randomness(t *testing.T) {
 	length := 10
 	password1 := password.GenerateRandomPassword(length)
@@ -23,14 +23,14 @@ func TestGenerateRandomPassword_Randomness(t *testing.T) {
 	assert.NotEqual(t, password1, password2)
 }
 
-// TestGenerateRandomPassword_ZeroLength 验证处理 length = 0 的情况
+// TestGenerateRandomPassword_ZeroLength verifies handling of length = 0
 func TestGenerateRandomPassword_ZeroLength(t *testing.T) {
 	length := 0
 	p := password.GenerateRandomPassword(length)
 	assert.Len(t, p, length)
 }
 
-// TestGenerateRandomPassword_NegativeLength 验证处理 length < 0 的情况
+// TestGenerateRandomPassword_NegativeLength verifies handling of length < 0
 func TestGenerateRandomPassword_NegativeLength(t *testing.T) {
 	length := -1
 	p := password.GenerateRandomPassword(length)
