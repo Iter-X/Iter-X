@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"github.com/iter-x/iter-x/internal/biz/agent"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,12 +19,14 @@ import (
 type Trip struct {
 	tripRepo repository.TripRepo
 	logger   *zap.SugaredLogger
+	agentHub *agent.Hub
 }
 
-func NewTrip(tripRepo repository.TripRepo, logger *zap.SugaredLogger) *Trip {
+func NewTrip(tripRepo repository.TripRepo, logger *zap.SugaredLogger, agentHub *agent.Hub) *Trip {
 	return &Trip{
 		tripRepo: tripRepo,
 		logger:   logger.Named("biz.tripRepo"),
+		agentHub: agentHub,
 	}
 }
 
