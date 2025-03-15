@@ -3,10 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'app/constants.dart';
+import 'app/notifier/user.dart';
 import 'app/routes.dart';
+import 'business/auth/entity/user_info_entity.dart';
 import 'common/material/app.dart';
 import 'common/material/state.dart';
 import 'common/material/theme_data.dart';
+import 'common/utils/api_util.dart';
+import 'common/utils/logger.dart';
+import 'common/utils/shared_preference_util.dart';
 
 void main() async {
   // 强制竖屏
@@ -15,12 +20,20 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+  ApiUtil.apiModel = await ApiUtil.getSelectedApiModel();
+  UserInfoEntity? user;
+  if (await BaseSpUtil.getJSON(SpKeys.USER_INFO) != null) {
+    user = UserInfoEntity.fromJson(await BaseSpUtil.getJSON(SpKeys.USER_INFO));
+    BaseLogger.v('load user from sp: ${user.toJson()}');
+    Routes.needLogin = false;
+  }
   runApp(
-    const MyApp(),
-    // MultiProvider(
-    //   providers: [],
-    //   child: const MyApp(),
-    // ),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserNotifier(user)),
+      ],
+      child: const MyApp(),
+    ),
   );
 }
 
