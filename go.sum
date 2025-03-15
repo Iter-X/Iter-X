@@ -210,8 +210,8 @@ github.com/protoc-gen/protoc-gen-go-errors v0.3.2 h1:PhjlyXbSLEwkJWxKojw2qrbxK+W
 github.com/protoc-gen/protoc-gen-go-errors v0.3.2/go.mod h1:Zo/474Rz2wfVRjc8LSXDikz4ftwktllcl30JVHHhT+8=
 github.com/protoc-gen/protoc-gen-openapiv3 v0.7.4 h1:sBrSUKYujF0nlYF1s84twfD5OpYPjlp15baF/W8s4P0=
 github.com/protoc-gen/protoc-gen-openapiv3 v0.7.4/go.mod h1:loEeYNZFsOS1sovftntLsOOfhRyWTg6uQZFkBRZayxw=
-github.com/protoc-gen/protoc-gen-validatex v0.8.3 h1:B1fs7KsHyHNl0i3VD3P1QhYNlvJdblgoLf2gYYWS8OE=
-github.com/protoc-gen/protoc-gen-validatex v0.8.3/go.mod h1:tH3xiFZ0ugx9RmFRMEQ/Xw6CR8N9OPoxn+moILdPZqU=
+github.com/protoc-gen/protoc-gen-validatex v0.8.4 h1:vpvTTeaCyjj+AsyxVbUgFIq6LYzrK0E8L3TKo8JLvco=
+github.com/protoc-gen/protoc-gen-validatex v0.8.4/go.mod h1:tH3xiFZ0ugx9RmFRMEQ/Xw6CR8N9OPoxn+moILdPZqU=
 github.com/redis/go-redis/v9 v9.7.1 h1:4LhKRCIduqXqtvCUlaq9c8bdHOkICjDMrr1+Zb3osAc=
 github.com/redis/go-redis/v9 v9.7.1/go.mod h1:f6zhXITC7JUJIlPEiBOTXxJgPLdZcA93GewI7inzyWw=
 github.com/rogpeppe/go-internal v1.13.1 h1:KvO1DLK/DRN07sQ1LQKScxyZJuNnedQ5/wKSR38lUII=

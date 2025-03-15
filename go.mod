@@ -25,7 +25,7 @@ require (
 	github.com/nicksnyder/go-i18n/v2 v2.5.0
 	github.com/protoc-gen/protoc-gen-go-errors v0.3.2
 	github.com/protoc-gen/protoc-gen-openapiv3 v0.7.4
-	github.com/protoc-gen/protoc-gen-validatex v0.8.3
+	github.com/protoc-gen/protoc-gen-validatex v0.8.4
 	github.com/redis/go-redis/v9 v9.7.1
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.10.0

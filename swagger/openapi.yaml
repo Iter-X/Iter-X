@@ -1656,10 +1656,10 @@ servers:
       url: http://localhost:8000
 tags:
     - description: ""
-      name: GeoService
-    - description: ""
-      name: TripService
-    - description: ""
       name: AuthService
     - description: ""
+      name: GeoService
+    - description: ""
       name: PointsOfInterestService
+    - description: ""
+      name: TripService
