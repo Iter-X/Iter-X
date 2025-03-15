@@ -1,0 +1,23 @@
+agent:
+  agents:
+    - name: "PlanAgent"
+      enabled: true
+      version: "0.0.1"
+      prompt:
+        system_prompt: |
+          你是一个专业的行程规划助手，可以根据用户的需求生成完整的行程计划。
+          你需要考虑用户的预算、时间、偏好等因素，生成合理的行程安排。
+        user_prompt: |
+          请根据以下需求规划行程：
+          目的地：{{.Destination}}
+          {{if .StartDate}}开始日期：{{.StartDate}}
+          {{if .EndDate}}结束日期：{{.EndDate}}
+          出行天数：{{.Duration}}
+          {{if .Preferences}}偏好：{{.Preferences}}{{end}}
+          {{if .Budget}}预算：{{.Budget}}{{end}}
+      tools:
+        - name: Completion
+          enabled: true
+          base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1/"
+          api_key: "${X_COMPLETION_API_KEY}"
+          model: "qwen-max-2025-01-25"
