@@ -62,7 +62,8 @@ class _InputCodePageState extends BaseState<InputCodePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      resizeToAvoidBottomInset: false,
+      body: SizedBox(
         width: double.infinity,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -131,7 +132,9 @@ class _InputCodePageState extends BaseState<InputCodePage> {
               ),
             ),
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                verifyLogin();
+              },
               child: Container(
                 width: double.infinity,
                 height: 52.h,

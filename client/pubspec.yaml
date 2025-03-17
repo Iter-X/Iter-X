@@ -53,6 +53,8 @@ dev_dependencies:
   connectivity_plus: ^6.1.3
   # 方形输入框 https://pub-web.flutter-io.cn/packages/pin_code_fields
   pin_code_fields: ^8.0.1
+  # 阿里云一键登录 https://pub-web.flutter-io.cn/packages/flutter_ali_auth#Android
+  ali_auth: ^1.3.0
 
 flutter:
   uses-material-design: true

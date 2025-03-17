@@ -4,3 +4,8 @@ class EventUserLoginStatusChange {
 
   EventUserLoginStatusChange(this.logined);
 }
+
+class EventUnauthorized {
+  int? code;
+  EventUnauthorized({this.code});
+}
