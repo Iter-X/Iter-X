@@ -136,12 +136,17 @@ message Agent {
     PlanAgent = 0;
   }
 
+  message AgentToolConfig {
+    ToolName name = 1;
+    bool enabled = 2;
+  }
+
   message AgentConfig {
-    string name = 1;
+    AgentName name = 1;
     bool enabled = 2;
     string version = 3;
     PromptConfig prompt = 4;
-    repeated ToolConfig tools = 5;
+    repeated AgentToolConfig tools = 5;
   }
 
   message PromptConfig {
@@ -151,15 +156,17 @@ message Agent {
 
   enum ToolName {
     Completion = 0;
+    Browser = 1;
   }
 
   message ToolConfig {
     ToolName name = 1;
-    bool enabled = 2;
+    string description = 2;
     string base_url = 3;
     string api_key = 4;
     string model = 5;
   }
 
   repeated AgentConfig agents = 1;
+  repeated ToolConfig tools = 2;
 }

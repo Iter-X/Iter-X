@@ -23,6 +23,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
 	github.com/nicksnyder/go-i18n/v2 v2.5.0
+	github.com/openai/openai-go v0.1.0-alpha.62
 	github.com/protoc-gen/protoc-gen-go-errors v0.3.2
 	github.com/protoc-gen/protoc-gen-openapiv3 v0.7.5
 	github.com/protoc-gen/protoc-gen-validatex v0.8.4
@@ -79,6 +80,10 @@ require (
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stoewer/go-strcase v1.3.0 // indirect
+	github.com/tidwall/gjson v1.14.4 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/pretty v1.2.1 // indirect
+	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/tjfoc/gmsm v1.4.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/yuin/gopher-lua v1.1.1 // indirect

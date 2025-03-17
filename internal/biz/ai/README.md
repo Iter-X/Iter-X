@@ -1,7 +1,7 @@
-# agent
+# ai
 This is a special biz that provides AI business logic which can be used by other biz.
 
-biz -> agent -> data
+biz -> ai -> data
 
 All agents will be placed here, but all tools will be placed in the data folder.
 

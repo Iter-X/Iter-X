@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/iter-x/iter-x/internal/biz/agent/core"
+	"github.com/iter-x/iter-x/internal/biz/ai/core"
 )
 
 // PromptVersion represents a version of a prompt

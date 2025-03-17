@@ -2,7 +2,7 @@ package biz
 
 import (
 	"context"
-	"github.com/iter-x/iter-x/internal/biz/agent"
+	"github.com/iter-x/iter-x/internal/biz/ai/agent"
 	"time"
 
 	"github.com/google/uuid"
