@@ -30,4 +30,7 @@ class BaseColor {
 
   static const Color c_1D1F1E = Color(0xFF1D1F1E);
   static const Color c_F2F2F2 = Color(0xFFF2F2F2);
+  static const Color c_E3E3E3 = Color(0xFFE3E3E3);
+  static const Color c_999999 = Color(0xFF999999);
+  static const Color c_f2f2f2 = Color(0xFFF2F2F2);
 }

@@ -297,7 +297,7 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
     if (result != null) {
       await BaseSpUtil.setJSON(SpKeys.TOKEN, result.token);
       await BaseSpUtil.setJSON(SpKeys.USER_INFO, result);
-      go(Routes.home, clearStack: true);
+      go(Routes.homeMain, clearStack: true);
     }
   }
 }
