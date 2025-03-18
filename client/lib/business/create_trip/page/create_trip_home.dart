@@ -1,11 +1,14 @@
+import 'package:client/app/routes.dart';
 import 'package:client/common/material/image.dart';
 import 'package:client/common/material/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 
 import '../../../common/utils/color.dart';
 import '../../common/widgets/buttom_widgets.dart';
+import '../../../common/material/state.dart';
 import '../widgets/bottom_create_widgets.dart';
 import '../widgets/widgets.dart';
 
@@ -16,7 +19,7 @@ class CreateTripHomePage extends StatefulWidget {
   State<CreateTripHomePage> createState() => _CreateTripHomePageState();
 }
 
-class _CreateTripHomePageState extends State<CreateTripHomePage> {
+class _CreateTripHomePageState extends BaseState<CreateTripHomePage> {
   int selectIndex = 0;
   final _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
@@ -65,7 +68,9 @@ class _CreateTripHomePageState extends State<CreateTripHomePage> {
                 ),
               ),
               Text(
-                _selectOneHasFocus ? '输入目的地' : '世界是一本书，那些不旅行的人只读了其中的一页\n——Danny Kaye',
+                _selectOneHasFocus
+                    ? '输入目的地'
+                    : '世界是一本书，那些不旅行的人只读了其中的一页\n——Danny Kaye',
                 style: TextStyle(
                   fontSize: 18.sp,
                   color: const Color(0xFF888888),
@@ -78,7 +83,9 @@ class _CreateTripHomePageState extends State<CreateTripHomePage> {
                       children: [
                         ItemCreateWidget(
                           isSelected: selectIndex == 0,
-                          img: selectIndex == 0 ? 'ic_create_manually.png' : 'ic_create_manually_black.png',
+                          img: selectIndex == 0
+                              ? 'ic_create_manually.png'
+                              : 'ic_create_manually_black.png',
                           text: '手动创建',
                           onTap: () {
                             setState(() {
@@ -89,7 +96,9 @@ class _CreateTripHomePageState extends State<CreateTripHomePage> {
                         Gap(20.w),
                         ItemCreateWidget(
                           isSelected: selectIndex == 1,
-                          img: selectIndex == 1 ? 'ic_create_voice.png' : 'ic_create_voice_black.png',
+                          img: selectIndex == 1
+                              ? 'ic_create_voice.png'
+                              : 'ic_create_voice_black.png',
                           text: '语音创建',
                           onTap: () {
                             setState(() {
@@ -107,7 +116,9 @@ class _CreateTripHomePageState extends State<CreateTripHomePage> {
                         children: [
                           ItemCreateWidget(
                             isSelected: selectIndex == 2,
-                            img: selectIndex == 2 ? 'ic_create_link.png' : 'ic_create_link_black.png',
+                            img: selectIndex == 2
+                                ? 'ic_create_link.png'
+                                : 'ic_create_link_black.png',
                             text: '外部链接',
                             onTap: () {
                               setState(() {
@@ -118,7 +129,9 @@ class _CreateTripHomePageState extends State<CreateTripHomePage> {
                           Gap(20.w),
                           ItemCreateWidget(
                             isSelected: selectIndex == 3,
-                            img: selectIndex == 3 ? 'ic_create_photo.png' : 'ic_create_photo_black.png',
+                            img: selectIndex == 3
+                                ? 'ic_create_photo.png'
+                                : 'ic_create_photo_black.png',
                             text: '截图创建',
                             onTap: () {
                               setState(() {
@@ -140,7 +153,19 @@ class _CreateTripHomePageState extends State<CreateTripHomePage> {
               focusNode: _focusNode,
               hasFocus: _hasFocus,
               selectIndex: selectIndex,
-              onTap: () {},
+              onTap: () async {
+                if (selectIndex == 0) {
+                  go(Routes.cardSelection);
+                } else {
+                  final ClipboardData? clipboardData =
+                      await Clipboard.getData(Clipboard.kTextPlain);
+                  if (clipboardData != null && clipboardData.text != null) {
+                    setState(() {
+                      _controller.text = clipboardData.text!;
+                    });
+                  }
+                }
+              },
             )
           : selectIndex == 3
               ? CreatePhotoWidget(

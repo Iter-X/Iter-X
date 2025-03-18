@@ -4,7 +4,7 @@
  * @Autor: GiottoLLL7
  * @Date: 2025-03-14 13:13:11
  * @LastEditors: GiottoLLL7
- * @LastEditTime: 2025-03-18 23:13:03
+ * @LastEditTime: 2025-03-19 00:38:47
  */
 import 'package:client/business/auth/page/input_code.dart';
 import 'package:client/business/auth/page/login.dart';
@@ -42,6 +42,7 @@ class Routes {
     phoneLogin,
     inputCode,
     createTripHome,
+    cardSelection
   ];
 
   static void config(FluroRouter router) {

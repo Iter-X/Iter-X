@@ -48,11 +48,12 @@ abstract class BaseState<T extends StatefulWidget> extends State<T> with Event {
     super.initState();
     //
     if (checkConnectivity) {
-      _connectSub = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
+      _connectSub = Connectivity()
+          .onConnectivityChanged
+          .listen((List<ConnectivityResult> result) {
         refreshConnectivityResult();
       });
     }
-
   }
 
   @override
