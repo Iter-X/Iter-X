@@ -1,6 +1,8 @@
+import 'package:client/business/auth/page/input_code.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+// import 'package:flutter_ali_auth/flutter_ali_auth.dart';
 
 import 'app/constants.dart';
 import 'app/notifier/user.dart';
@@ -27,6 +29,36 @@ void main() async {
     BaseLogger.v('load user from sp: ${user.toJson()}');
     Routes.needLogin = false;
   }
+  // 阿里云一键登录初始化
+  // await AliAuthClient.initSdk(
+  //   authConfig: AuthConfig(
+  //     iosSdk: Constants.aliIosSdk,
+  //     androidSdk: Constants.aliAndroidSdk,
+  //     enableLog: false,
+  //     authUIConfig: FullScreenUIConfig(
+  //       backgroundColor: '#f2f2f2',
+  //       phoneNumberConfig: PhoneNumberConfig(
+  //         numberColor: '#1D1F1E',
+  //         numberFontSize: 30,
+  //       ),
+  //       loginButtonConfig: LoginButtonConfig(
+  //         loginBtnText: '一键登录',
+  //         loginBtnTextColor: '#ffffff',
+  //         loginBtnTextSize: 16,
+  //         loginBtnHeight: 52,
+  //         loginBtnWidth: 285,
+  //         loginBtnNormalImage: 'assets/images/login_btn_normal.png',
+  //         loginBtnFrameOffsetY: 60,
+  //       ),
+  //       changeButtonConfig: ChangeButtonConfig(
+  //         changeBtnTitle: '手机验证码登录',
+  //         changeBtnTextColor: '#1D1F1E',
+  //         changeBtnTextSize: 16,
+  //       ),
+  //       // customViewBlockList:
+  //     ),
+  //   ),
+  // );
   runApp(
     MultiProvider(
       providers: [

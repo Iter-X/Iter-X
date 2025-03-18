@@ -33,4 +33,15 @@ class AuthService {
     }
     return null;
   }
+
+  // 一键登录
+  static Future<UserInfoEntity?> oneClickLogin(String token) async {
+    HttpResultBean result = await Http.instance.post(
+      AuthApi.oneClickLogin,
+      data: {
+        'token': token,
+      },
+    );
+    return result.isSuccess() ? UserInfoEntity.fromJson(result.data) : null;
+  }
 }

@@ -62,7 +62,8 @@ class _InputCodePageState extends BaseState<InputCodePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      resizeToAvoidBottomInset: false,
+      body: SizedBox(
         width: double.infinity,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -131,7 +132,9 @@ class _InputCodePageState extends BaseState<InputCodePage> {
               ),
             ),
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                verifyLogin();
+              },
               child: Container(
                 width: double.infinity,
                 height: 52.h,
@@ -205,7 +208,7 @@ class _InputCodePageState extends BaseState<InputCodePage> {
     if (result != null) {
       await BaseSpUtil.setJSON(SpKeys.TOKEN, result.token);
       await BaseSpUtil.setJSON(SpKeys.USER_INFO, result);
-      go(Routes.home, clearStack: true);
+      go(Routes.homeMain, clearStack: true);
     }
   }
 }

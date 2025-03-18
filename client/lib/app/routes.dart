@@ -13,6 +13,8 @@ import 'package:client/business/home/page/home.dart';
 import 'package:client/business/itinerary/page/card_selection.dart';
 import 'package:fluro/fluro.dart';
 
+import '../business/home_main/page/home_main.dart';
+
 // 页面路由路径
 class Routes {
   static bool _hasDefaultRoute = false;
@@ -27,21 +29,21 @@ class Routes {
   // 输入验证码页面
   static String inputCode = '/auth/input_code';
   // 首页
-  static String home = '/home/home';
-  // 图卡选择页
-  static String cardSelection = '/itinerary/card_selection';
+  static String homeMain = '/home_main/home_main';
+  static String createTripHome = '/create_trip/create_trip_home';
 
   // 无需登录即可访问的页面
   static List<String> routesWithoutLogin = [
     login,
     phoneLogin,
     inputCode,
+    createTripHome,
   ];
 
   static void config(FluroRouter router) {
     if (!_hasDefaultRoute) {
       router.define(root, handler: Handler(handlerFunc: (c, p) {
-        return const CardSelectionPage();
+        return const HomeMainPage();
       }));
       _hasDefaultRoute = true;
     }
@@ -58,8 +60,11 @@ class Routes {
       final args = c?.settings?.arguments as InputCodeArgument;
       return InputCodePage(argument: args);
     }));
-    router.define(home, handler: Handler(handlerFunc: (c, p) {
-      return const HomePage();
+    router.define(homeMain, handler: Handler(handlerFunc: (c, p) {
+      return const HomeMainPage();
+    }));
+    router.define(createTripHome, handler: Handler(handlerFunc: (c, p) {
+      return const CreateTripHomePage();
     }));
   }
 }
