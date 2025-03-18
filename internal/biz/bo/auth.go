@@ -16,10 +16,34 @@ var _ encoding.BinaryMarshaler = (*SmsCodeItem)(nil)
 var _ encoding.BinaryUnmarshaler = (*SmsCodeItem)(nil)
 
 type (
+	SignInRequest struct {
+		Email    string
+		Password string
+	}
+
+	SignInWithOAuthRequest struct {
+		Provider vobj.OAuthProvider
+		Code     string
+	}
+
+	RefreshTokenRequest struct {
+		RefreshToken string
+	}
+
 	SignInResponse struct {
 		Token        string
 		RefreshToken string
 		ExpiresIn    float64
+	}
+
+	SendSmsCodeResponse struct {
+		ExpireTime int64
+		Interval   int64
+	}
+
+	VerifySmsCodeRequest struct {
+		PhoneNumber string
+		VerifyCode  string
 	}
 
 	CreateUserByPhoneParam struct {
@@ -52,6 +76,14 @@ type (
 		codeType      int64
 	}
 )
+
+func (v *VerifySmsCodeRequest) GetPhoneNumber() string {
+	return v.PhoneNumber
+}
+
+func (v *VerifySmsCodeRequest) GetVerifyCode() string {
+	return v.VerifyCode
+}
 
 // MarshalBinary marshal binary
 func (s *SmsCodeItem) MarshalBinary() (data []byte, err error) {

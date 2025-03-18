@@ -7,6 +7,8 @@ import (
 
 	authV1 "github.com/iter-x/iter-x/internal/api/auth/v1"
 	"github.com/iter-x/iter-x/internal/biz"
+	"github.com/iter-x/iter-x/internal/biz/bo"
+	"github.com/iter-x/iter-x/pkg/vobj"
 )
 
 type Auth struct {
@@ -21,21 +23,47 @@ func NewAuth(authBiz *biz.Auth) *Auth {
 }
 
 func (s *Auth) SignIn(ctx context.Context, req *authV1.SignInRequest) (*authV1.SignInResponse, error) {
-	return s.authBiz.SignIn(ctx, req)
-}
-
-func (s *Auth) SignInWithOAuth(ctx context.Context, req *authV1.SignInWithOAuthRequest) (*authV1.SignInWithOAuthResponse, error) {
-	token, err := s.authBiz.SignInWithOAuth(ctx, req)
+	params := &bo.SignInRequest{
+		Email:    req.GetEmail(),
+		Password: req.GetPassword(),
+	}
+	signIn, err := s.authBiz.SignIn(ctx, params)
 	if err != nil {
 		return nil, err
 	}
-	return &authV1.SignInWithOAuthResponse{
-		Token: token,
+	return &authV1.SignInResponse{
+		Token:        signIn.Token,
+		RefreshToken: signIn.RefreshToken,
+		ExpiresIn:    signIn.ExpiresIn,
 	}, nil
 }
 
+func (s *Auth) SignInWithOAuth(ctx context.Context, req *authV1.SignInWithOAuthRequest) (*authV1.SignInWithOAuthResponse, error) {
+	params := &bo.SignInWithOAuthRequest{
+		Code:     req.GetCode(),
+		Provider: vobj.OAuthProvider(req.GetProvider()),
+	}
+	token, err := s.authBiz.SignInWithOAuth(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return &authV1.SignInWithOAuthResponse{Token: token}, nil
+}
+
 func (s *Auth) SignUp(ctx context.Context, req *authV1.SignUpRequest) (*authV1.SignUpResponse, error) {
-	return s.authBiz.SignUp(ctx, req)
+	params := &bo.SignInRequest{
+		Email:    req.GetEmail(),
+		Password: req.GetPassword(),
+	}
+	signUp, err := s.authBiz.SignUp(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return &authV1.SignUpResponse{
+		Token:        signUp.Token,
+		RefreshToken: signUp.RefreshToken,
+		ExpiresIn:    signUp.ExpiresIn,
+	}, nil
 }
 
 func (s *Auth) RequestPasswordReset(ctx context.Context, req *authV1.RequestPasswordResetRequest) (*authV1.RequestPasswordResetResponse, error) {
@@ -60,7 +88,17 @@ func (s *Auth) ResetPassword(ctx context.Context, req *authV1.ResetPasswordReque
 }
 
 func (s *Auth) RefreshToken(ctx context.Context, req *authV1.RefreshTokenRequest) (*authV1.RefreshTokenResponse, error) {
-	return s.authBiz.RefreshToken(ctx, req)
+	params := &bo.RefreshTokenRequest{
+		RefreshToken: req.GetRefreshToken(),
+	}
+	signIn, err := s.authBiz.RefreshToken(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return &authV1.RefreshTokenResponse{
+		Token:     signIn.Token,
+		ExpiresIn: signIn.ExpiresIn,
+	}, nil
 }
 
 func (s *Auth) ValidateToken(ctx context.Context, token string) (jwt.Claims, error) {
@@ -68,13 +106,44 @@ func (s *Auth) ValidateToken(ctx context.Context, token string) (jwt.Claims, err
 }
 
 func (s *Auth) SendSmsCode(ctx context.Context, req *authV1.SendSmsCodeRequest) (*authV1.SendSmsCodeResponse, error) {
-	return s.authBiz.SendSmsCode(ctx, req)
+	params := &bo.SendSmsConfigParams{
+		PhoneNumber: req.GetPhoneNumber(),
+	}
+	smsCode, err := s.authBiz.SendSmsCode(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return &authV1.SendSmsCodeResponse{
+		ExpireTime: smsCode.ExpireTime,
+		Interval:   smsCode.Interval,
+	}, nil
 }
 
 func (s *Auth) VerifySmsCode(ctx context.Context, req *authV1.VerifySmsCodeRequest) (*authV1.VerifySmsCodeResponse, error) {
-	return s.authBiz.VerifySmsCode(ctx, req)
+	params := &bo.VerifySmsCodeRequest{
+		PhoneNumber: req.GetPhoneNumber(),
+		VerifyCode:  req.GetVerifyCode(),
+	}
+	singIn, err := s.authBiz.VerifySmsCode(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return &authV1.VerifySmsCodeResponse{
+		Token:     singIn.Token,
+		ExpiresIn: singIn.ExpiresIn,
+	}, nil
 }
 
 func (s *Auth) OneClickLogin(ctx context.Context, req *authV1.OneClickLoginRequest) (*authV1.OneClickLoginResponse, error) {
-	return s.authBiz.OneClickLogin(ctx, req)
+	params := &bo.GetMobileConfigParams{
+		Token: req.GetToken(),
+	}
+	signIn, err := s.authBiz.OneClickLogin(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return &authV1.OneClickLoginResponse{
+		Token:     signIn.Token,
+		ExpiresIn: signIn.ExpiresIn,
+	}, nil
 }

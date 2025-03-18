@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	poiV1 "github.com/iter-x/iter-x/internal/api/poi/v1"
 )
 
 // PointsOfInterest is the model entity for the PointsOfInterest schema.
@@ -56,28 +55,4 @@ type PointsOfInterest struct {
 	Continent *Continent `json:"continent,omitempty"`
 	// DailyItinerary holds the value of the daily_itinerary edge.
 	DailyItinerary []*DailyItinerary `json:"daily_itinerary,omitempty"`
-}
-
-// ToPointsOfInterestProto copies the current object into a PointsOfInterest.
-func (p *PointsOfInterest) ToPointsOfInterestProto() *poiV1.PointOfInterest {
-	if p == nil {
-		return nil
-	}
-	return &poiV1.PointOfInterest{
-		Id:                         p.ID.String(),
-		Name:                       p.Name,
-		NameEn:                     p.NameEn,
-		NameCn:                     p.NameCn,
-		Description:                p.Description,
-		Address:                    p.Address,
-		Latitude:                   p.Latitude,
-		Longitude:                  p.Longitude,
-		Type:                       p.Type,
-		Category:                   p.Category,
-		Rating:                     p.Rating,
-		RecommendedDurationMinutes: p.RecommendedDurationMinutes,
-		City:                       p.City.Name,
-		State:                      p.State.Name,
-		Country:                    p.Country.Name,
-	}
 }

@@ -4,9 +4,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"google.golang.org/protobuf/types/known/timestamppb"
-
-	tripV1 "github.com/iter-x/iter-x/internal/api/trip/v1"
 )
 
 // Trip is the model entity for the Trip schema.
@@ -38,18 +35,6 @@ type Trip struct {
 	DailyItinerary []*DailyItinerary `json:"daily_itinerary,omitempty"`
 }
 
-func (t *Trip) ToTripProto() *tripV1.Trip {
-	return &tripV1.Trip{
-		Id:        t.ID.String(),
-		Status:    t.Status,
-		Title:     t.Title,
-		StartTs:   timestamppb.New(t.StartDate),
-		EndTs:     timestamppb.New(t.EndDate),
-		CreatedAt: timestamppb.New(t.CreatedAt),
-		UpdatedAt: timestamppb.New(t.UpdatedAt),
-	}
-}
-
 // DailyTrip is the model entity for the DailyTrip schema.
 type DailyTrip struct {
 	// ID of the ent.
@@ -66,16 +51,4 @@ type DailyTrip struct {
 	Date time.Time `json:"date,omitempty"`
 	// Notes holds the value of the "notes" field.
 	Notes string `json:"notes,omitempty"`
-}
-
-func (dt *DailyTrip) ToDailyTripProto() *tripV1.DailyTrip {
-	return &tripV1.DailyTrip{
-		Id:        dt.ID.String(),
-		TripId:    dt.TripID.String(),
-		Day:       dt.Day,
-		Date:      timestamppb.New(dt.Date),
-		Notes:     dt.Notes,
-		CreatedAt: timestamppb.New(dt.CreatedAt),
-		UpdatedAt: timestamppb.New(dt.UpdatedAt),
-	}
 }
