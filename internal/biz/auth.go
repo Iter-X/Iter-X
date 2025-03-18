@@ -3,7 +3,6 @@ package biz
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -252,8 +251,7 @@ func (b *Auth) ValidateToken(_ context.Context, s string) (jwt.Claims, error) {
 // SendSmsCode sends sms code.
 func (b *Auth) SendSmsCode(ctx context.Context, params *bo.SendSmsConfigParams) (*bo.SendSmsCodeResponse, error) {
 	smsCodeConf := b.cfg.GetSmsCode()
-	smsCode := sms.GenerateRandomNumberCode(int(smsCodeConf.GetCodeLength()))
-	sendParams := params.WithSmsConfig(smsCodeConf, fmt.Sprintf(`{"code":"%s"}`, smsCode))
+	sendParams := params.WithSmsConfig(smsCodeConf, `{"code":"##code##"}`)
 	sendSmsResponse, err := b.smsClient.SendSmsVerifyCode(ctx, sendParams)
 	if err != nil {
 		return nil, err
