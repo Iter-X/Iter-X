@@ -4,13 +4,14 @@
  * @Autor: GiottoLLL7
  * @Date: 2025-03-14 13:13:11
  * @LastEditors: GiottoLLL7
- * @LastEditTime: 2025-03-18 00:47:50
+ * @LastEditTime: 2025-03-18 23:13:03
  */
 import 'package:client/business/auth/page/input_code.dart';
 import 'package:client/business/auth/page/login.dart';
 import 'package:client/business/auth/page/phone_login.dart';
 import 'package:client/business/home/page/home.dart';
-import 'package:client/business/itinerary/page/card_selection.dart';
+import 'package:client/business/create_trip/page/card_selection.dart';
+import 'package:client/business/create_trip/page/create_trip_home.dart';
 import 'package:fluro/fluro.dart';
 
 import '../business/home_main/page/home_main.dart';
@@ -30,7 +31,10 @@ class Routes {
   static String inputCode = '/auth/input_code';
   // 首页
   static String homeMain = '/home_main/home_main';
+  // 创建行程
   static String createTripHome = '/create_trip/create_trip_home';
+  // 创建行程图卡选择
+  static String cardSelection = '/create_trip/card_selection';
 
   // 无需登录即可访问的页面
   static List<String> routesWithoutLogin = [
@@ -65,6 +69,9 @@ class Routes {
     }));
     router.define(createTripHome, handler: Handler(handlerFunc: (c, p) {
       return const CreateTripHomePage();
+    }));
+    router.define(cardSelection, handler: Handler(handlerFunc: (c, p) {
+      return const CardSelectionPage();
     }));
   }
 }
