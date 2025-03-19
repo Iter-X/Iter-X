@@ -2,8 +2,10 @@ package sms
 
 import (
 	"context"
+	"encoding/json"
 
 	dysmsapiV2 "github.com/alibabacloud-go/dypnsapi-20170525/v2/client"
+
 	"github.com/iter-x/iter-x/pkg/util/pointer"
 )
 
@@ -39,6 +41,12 @@ type (
 	}
 )
 
+// String returns the verification result
+func (r *CheckSmsVerifyCodeResponse) String() string {
+	bs, _ := json.Marshal(r)
+	return string(bs)
+}
+
 // GetCheckSmsVerifyCodeModel gets the response body
 func (r *CheckSmsVerifyCodeResponse) GetCheckSmsVerifyCodeModel() *CheckSmsVerifyCodeModel {
 	model := pointer.Get(pointer.Get(r.Body).Model)
@@ -65,8 +73,10 @@ func (c *Client) CheckSmsVerifyCode(_ context.Context, params CheckSmsVerifyCode
 	c.logger.Debugw("CheckSmsVerifyCode", "req", request)
 	response, err := c.clientV2.CheckSmsVerifyCode(request)
 	if err != nil {
+		c.logger.Errorw("Failed to check sms verify code", "error", err)
 		return nil, err
 	}
-	c.logger.Debugw("CheckSmsVerifyCode", "resp", response)
-	return &CheckSmsVerifyCodeResponse{response}, nil
+	res := &CheckSmsVerifyCodeResponse{response}
+	c.logger.Debugw("CheckSmsVerifyCode", "resp", res)
+	return res, nil
 }

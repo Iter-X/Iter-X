@@ -3,7 +3,6 @@ package biz
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -278,8 +277,7 @@ func (b *Auth) SendSmsCode(ctx context.Context, params *authV1.SendSmsCodeReques
 		PhoneNumber: params.GetPhoneNumber(),
 	}
 	smsCodeConf := b.cfg.GetSmsCode()
-	smsCode := sms.GenerateRandomNumberCode(int(smsCodeConf.GetCodeLength()))
-	sendParams := sendSmsConfigParams.WithSmsConfig(smsCodeConf, fmt.Sprintf(`{"code":"%s"}`, smsCode))
+	sendParams := sendSmsConfigParams.WithSmsConfig(smsCodeConf, `{"code":"##code##"}`)
 	sendSmsResponse, err := b.smsClient.SendSmsVerifyCode(ctx, sendParams)
 	if err != nil {
 		return nil, err
