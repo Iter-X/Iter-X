@@ -2,6 +2,7 @@ package sms
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/iter-x/iter-x/pkg/util/pointer"
 
@@ -73,6 +74,12 @@ type (
 	}
 )
 
+// String SendSmsVerifyCodeResponse stringifies the response
+func (r *SendSmsVerifyCodeResponse) String() string {
+	bs, _ := json.Marshal(r)
+	return string(bs)
+}
+
 // IsOK checks if the request status code is OK
 func (r *SendSmsVerifyCodeResponse) IsOK() bool {
 	return pointer.Get(r.StatusCode) == 200 && pointer.Get(pointer.Get(r.Body).Code) == "OK" && pointer.Get(pointer.Get(r.Body).Success)
@@ -94,20 +101,23 @@ func (r *SendSmsVerifyCodeResponse) GetSendSmsVerifyCodeModel() *SendSmsVerifyCo
 //	https://help.aliyun.com/zh/pnvs/developer-reference/api-dypnsapi-2017-05-25-sendsmsverifycode?spm=a2c4g.11186623.help-menu-75010.d_5_5_3_0_0_0.7db318d2Jl66Ok&scm=20140722.H_2573695._.OR_help-T_cn~zh-V_1
 func (c *Client) SendSmsVerifyCode(_ context.Context, params SendSmsVerifyCodeParams) (*SendSmsVerifyCodeResponse, error) {
 	req := &dysmsapiV2.SendSmsVerifyCodeRequest{
-		PhoneNumber:   pointer.Of(params.GetPhoneNumber()),
-		SignName:      pointer.Of(params.GetSignName()),
-		TemplateCode:  pointer.Of(params.GetTemplateCode()),
-		TemplateParam: pointer.Of(params.GetTemplateParam()),
-		CodeLength:    pointer.Of(params.GetCodeLength()),
-		ValidTime:     pointer.Of(params.GetValidTime()),
-		CodeType:      pointer.Of(params.GetCodeType()),
-		Interval:      pointer.Of(params.GetInterval()),
+		PhoneNumber:      pointer.Of(params.GetPhoneNumber()),
+		SignName:         pointer.Of(params.GetSignName()),
+		TemplateCode:     pointer.Of(params.GetTemplateCode()),
+		TemplateParam:    pointer.Of(params.GetTemplateParam()),
+		CodeLength:       pointer.Of(params.GetCodeLength()),
+		ValidTime:        pointer.Of(params.GetValidTime()),
+		CodeType:         pointer.Of(params.GetCodeType()),
+		Interval:         pointer.Of(params.GetInterval()),
+		ReturnVerifyCode: pointer.Of(true),
 	}
 	c.logger.Debugw("SendSmsVerifyCode", "req", req)
 	resp, err := c.clientV2.SendSmsVerifyCode(req)
 	if err != nil {
 		return nil, err
 	}
-	c.logger.Debugw("SendSmsVerifyCode", "resp", resp)
-	return &SendSmsVerifyCodeResponse{resp}, nil
+
+	res := &SendSmsVerifyCodeResponse{resp}
+	c.logger.Debugw("SendSmsVerifyCode", "resp", res, "code", res.GetSendSmsVerifyCodeModel().VerifyCode)
+	return res, nil
 }
