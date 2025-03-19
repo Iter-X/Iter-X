@@ -3,6 +3,7 @@ syntax = "proto3";
 package geo.v1;
 
 import "google/api/annotations.proto";
+import "validatex/validatex.proto";
 
 option go_package = "github.com/iter-x/iter-x/internal/api/geo/v1;v1";
 
@@ -33,8 +34,13 @@ service GeoService {
 }
 
 message ListContinentsRequest {
-  int32 limit = 1;
-  int32 offset = 2;
+  int32 limit = 1 [(validatex.rules).numeric = {
+    gte: 1,
+    lte: 100
+  }];
+  int32 offset = 2 [(validatex.rules).numeric = {
+    gte: 0
+  }];
 }
 
 message ListContinentsResponse {

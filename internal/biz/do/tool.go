@@ -1,4 +1,4 @@
-package bo
+package do
 
 type (
 	ToolCompletionInputMessage struct {

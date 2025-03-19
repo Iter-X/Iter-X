@@ -1,5 +1,44 @@
+[BoolRequired]
+other = "必须为真"
+
 [EmailInvalid]
 other = "必须是一个有效的邮箱地址"
+
+[NumericEqualTo]
+other = "必须等于{{.Value}}"
+
+[NumericGt]
+other = "必须大于{{.Value}}"
+
+[NumericGte]
+other = "必须大于或等于{{.Value}}"
+
+[NumericLt]
+other = "必须小于{{.Value}}"
+
+[NumericLte]
+other = "必须小于或等于{{.Value}}"
+
+[NumericNegative]
+other = "必须是负数"
+
+[NumericNonZero]
+other = "不能为零"
+
+[NumericPositive]
+other = "必须是正数"
+
+[RepeatedExact]
+other = "必须恰好有{{.ExactItems}}个项目"
+
+[RepeatedMax]
+other = "最多只能有{{.MaxItems}}个项目"
+
+[RepeatedMin]
+other = "至少需要{{.MinItems}}个项目"
+
+[RepeatedUnique]
+other = "所有项目必须唯一"
 
 [StringLen]
 other = "长度必须等于{{.Len}}"
@@ -12,6 +51,21 @@ other = "长度不能小于{{.MinLen}}"
 
 [StringNonEmpty]
 other = "不能为空"
+
+[TimestampFuture]
+other = "必须是未来的时间"
+
+[TimestampMax]
+other = "必须早于 {{.MaxTime}}"
+
+[TimestampMin]
+other = "必须晚于 {{.MinTime}}"
+
+[TimestampNow]
+other = "必须在当前时间的一分钟范围内"
+
+[TimestampPast]
+other = "必须是过去的时间"
 
 [UUIDInvalid]
 other = "必须是一个有效的UUID"

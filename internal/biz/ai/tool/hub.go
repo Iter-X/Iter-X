@@ -58,3 +58,16 @@ func createTool(cfg *conf.Agent_ToolConfig) (core.Tool, error) {
 		return nil, fmt.Errorf("unknown tool: %s", cfg.GetName())
 	}
 }
+
+// GetTool returns a tool by name
+func (h *Hub) GetTool(name string) (core.Tool, error) {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+
+	tool, exists := h.tools[name]
+	if !exists {
+		return nil, fmt.Errorf("tool %s not found", name)
+	}
+
+	return tool, nil
+}

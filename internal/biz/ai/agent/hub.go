@@ -87,3 +87,16 @@ func (h *Hub) ListAgents() []core.Agent {
 	}
 	return agents
 }
+
+// GetAgent returns an agent by name
+func (h *Hub) GetAgent(name string) (core.Agent, error) {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+
+	agent, exists := h.agents[name]
+	if !exists {
+		return nil, fmt.Errorf("agent %s not found", name)
+	}
+
+	return agent, nil
+}

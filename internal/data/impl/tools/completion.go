@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/iter-x/iter-x/internal/biz/ai/core"
-	"github.com/iter-x/iter-x/internal/biz/bo"
+	"github.com/iter-x/iter-x/internal/biz/do"
 	"github.com/iter-x/iter-x/internal/conf"
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
@@ -29,23 +29,22 @@ type completionImpl struct {
 
 func (l completionImpl) Execute(ctx context.Context, inputAny any) (any, error) {
 	var (
-		input  bo.ToolCompletionInput
-		output bo.ToolCompletionOutput
-		ok     bool
+		input *do.ToolCompletionInput
+		ok    bool
 	)
 
-	if input, ok = inputAny.(bo.ToolCompletionInput); !ok {
+	if input, ok = inputAny.(*do.ToolCompletionInput); !ok {
 		return nil, fmt.Errorf("invalid input type: %T", input)
 	}
 
 	messages := make([]openai.ChatCompletionMessageParamUnion, 0, len(input.Messages))
 	for _, msg := range input.Messages {
 		switch msg.Role {
-		case bo.CompletionRoleUser:
+		case do.CompletionRoleUser:
 			messages = append(messages, openai.UserMessage(msg.Content))
-		case bo.CompletionRoleAssistant:
+		case do.CompletionRoleAssistant:
 			messages = append(messages, openai.AssistantMessage(msg.Content))
-		case bo.CompletionRoleSystem:
+		case do.CompletionRoleSystem:
 			messages = append(messages, openai.SystemMessage(msg.Content))
 		}
 	}
@@ -55,12 +54,12 @@ func (l completionImpl) Execute(ctx context.Context, inputAny any) (any, error) 
 		Model:    openai.F(l.model),
 	})
 	if err != nil {
-		return output, err
+		return nil, err
 	}
 
 	if len(resp.Choices) == 0 {
-		return output, nil
+		return nil, nil
 	}
 
-	return bo.ToolCompletionOutput{Content: resp.Choices[0].Message.Content}, nil
+	return &do.ToolCompletionOutput{Content: resp.Choices[0].Message.Content}, nil
 }

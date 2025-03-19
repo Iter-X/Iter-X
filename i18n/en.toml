@@ -31,6 +31,9 @@ other = "SMS code expired"
 [SMS_CODE_INVALID]
 other = "SMS code invalid"
 
+[INVALID_CREATION_METHOD]
+other = "Invalid creation method"
+
 [UNAUTHORIZED]
 other = "Unauthorized"
 

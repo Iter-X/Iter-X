@@ -19,6 +19,7 @@ enum ClientError {
   INVALID_DAILY_TRIP_ID = 8;
   SMS_CODE_EXPIRED = 9;
   SMS_CODE_INVALID = 10;
+  INVALID_CREATION_METHOD = 11;
 }
 
 enum UnauthorizedError {

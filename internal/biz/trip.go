@@ -2,15 +2,16 @@ package biz
 
 import (
 	"context"
-	"github.com/iter-x/iter-x/internal/biz/ai/agent"
 	"time"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 
+	"github.com/iter-x/iter-x/internal/biz/ai/agent"
 	"github.com/iter-x/iter-x/internal/biz/bo"
 	"github.com/iter-x/iter-x/internal/biz/do"
 	"github.com/iter-x/iter-x/internal/biz/repository"
+	"github.com/iter-x/iter-x/internal/common/cnst"
 	"github.com/iter-x/iter-x/internal/common/xerr"
 	"github.com/iter-x/iter-x/internal/data/ent"
 	"github.com/iter-x/iter-x/internal/helper/auth"
@@ -36,21 +37,55 @@ func (b *Trip) CreateTrip(ctx context.Context, req *bo.CreateTripRequest) (*do.T
 		return nil, xerr.ErrorUnauthorized()
 	}
 
-	trip := &do.Trip{
-		UserID:      claims.UID,
-		Title:       req.Title,
-		Description: req.Description,
-		StartDate:   req.StartDate,
-		EndDate:     req.EndDate,
-	}
+	switch req.CreationMethod {
+	case cnst.TripCreationMethodManual:
+		// Get the PlanAgent from the agentHub
+		planAgent, err := b.agentHub.GetAgent("PlanAgent")
+		if err != nil {
+			b.logger.Errorw("failed to get PlanAgent", "err", err)
+			return nil, xerr.ErrorCreateTripFailed()
+		}
 
-	createdTrip, err := b.tripRepo.CreateTrip(ctx, trip)
-	if err != nil {
-		b.logger.Errorw("failed to create tripRepo", "err", err)
+		// Execute the PlanAgent
+		result, err := planAgent.Execute(ctx, &do.PlanAgentInput{
+			Destination: req.Destination,
+			StartDate:   req.StartDate,
+			EndDate:     req.EndDate,
+			Duration:    req.Duration,
+		})
+		if err != nil {
+			b.logger.Errorw("failed to plan trip with PlanAgent", "err", err)
+			return nil, xerr.ErrorCreateTripFailed()
+		}
+		if result == nil {
+			b.logger.Error("failed to plan trip with PlanAgent because result is nil")
+			return nil, xerr.ErrorCreateTripFailed()
+		}
+		rawTrip, ok := result.(*do.PlanAgentOutput)
+		if !ok {
+			b.logger.Error("failed to cast PlanAgent output to PlanAgentOutput")
+			return nil, xerr.ErrorCreateTripFailed()
+		}
+
+		// Create the trip
+		_ = claims.UID
+		_ = rawTrip
+		return nil, nil
+	case cnst.TripCreationMethodCard:
+		// TODO: Handle card-based creation
 		return nil, xerr.ErrorCreateTripFailed()
+	case cnst.TripCreationMethodExternalLink:
+		// TODO: Handle external link creation
+		return nil, xerr.ErrorCreateTripFailed()
+	case cnst.TripCreationMethodImage:
+		// TODO: Handle image-based creation
+		return nil, xerr.ErrorCreateTripFailed()
+	case cnst.TripCreationMethodVoice:
+		// TODO: Handle voice-based creation
+		return nil, xerr.ErrorCreateTripFailed()
+	default:
+		return nil, xerr.ErrorInvalidCreationMethod()
 	}
-
-	return createdTrip, nil
 }
 
 func (b *Trip) GetTrip(ctx context.Context, id uuid.UUID) (*do.Trip, error) {
