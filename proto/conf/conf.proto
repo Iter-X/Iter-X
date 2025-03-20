@@ -156,9 +156,12 @@ message Agent {
   }
 
   message PromptConfig {
-    string system_prompt = 1;
-    string user_prompt = 2;
-    string refine_prompt = 3;
+    repeated PromptRound rounds = 1;
+  }
+
+  message PromptRound {
+    string system = 1;
+    string user = 2;
   }
 
   enum ToolName {

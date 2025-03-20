@@ -2,8 +2,9 @@ package agent
 
 import (
 	"fmt"
-	"github.com/iter-x/iter-x/internal/biz/repository"
 	"sync"
+
+	"github.com/iter-x/iter-x/internal/biz/repository"
 
 	"github.com/iter-x/iter-x/internal/biz/ai/core"
 	"github.com/iter-x/iter-x/internal/biz/ai/plan"
@@ -32,12 +33,14 @@ func NewHub(cfg *conf.Agent, toolHub *tool.Hub, poiRepo repository.PointsOfInter
 		}
 
 		// Create prompt
-		prompt := NewPrompt(
-			agentCfg.GetPrompt().GetSystemPrompt(),
-			agentCfg.GetPrompt().GetUserPrompt(),
-			agentCfg.GetPrompt().GetRefinePrompt(),
-			agentCfg.GetVersion(),
-		)
+		rounds := make([]PromptRound, 0, len(agentCfg.GetPrompt().GetRounds()))
+		for _, r := range agentCfg.GetPrompt().GetRounds() {
+			rounds = append(rounds, PromptRound{
+				System: r.GetSystem(),
+				User:   r.GetUser(),
+			})
+		}
+		prompt := NewPrompt(rounds, agentCfg.GetVersion())
 
 		// Create agent
 		agent, err := createAgent(agentCfg, hub.toolHub, prompt, poiRepo)

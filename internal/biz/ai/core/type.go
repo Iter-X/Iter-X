@@ -8,8 +8,9 @@ import (
 type Prompt interface {
 	GetSystemPrompt() string
 	GetUserPrompt() string
+	GetSystemPromptByRound(round int) string
+	GetUserPromptByRound(round int) string
 	GetVersion() string
-	GetRefinePrompt() string
 }
 
 type (

@@ -26,6 +26,8 @@ type Trip struct {
 	StartDate time.Time `json:"start_date,omitempty"`
 	// EndDate holds the value of the "end_date" field.
 	EndDate time.Time `json:"end_date,omitempty"`
+	// Days holds the value of the "days" field.
+	Days int8 `json:"days,omitempty"`
 
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`

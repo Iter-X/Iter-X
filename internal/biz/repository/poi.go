@@ -13,6 +13,8 @@ type PointsOfInterest[T *ent.PointsOfInterest, R *do.PointsOfInterest] interface
 
 	SearchPointsOfInterest(ctx context.Context, params *bo.SearchPointsOfInterestParams) ([]*do.PointsOfInterest, error)
 	SearchPointsOfInterestByNamesFromES(ctx context.Context, names []string) ([]*do.PointsOfInterest, error)
+
+	GetByCityNames(ctx context.Context, cityNames []string) ([]*do.PointsOfInterest, error)
 }
 
 type PointsOfInterestRepo = PointsOfInterest[*ent.PointsOfInterest, *do.PointsOfInterest]

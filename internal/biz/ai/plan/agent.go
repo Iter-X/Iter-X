@@ -5,11 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/ifuryst/lol"
 	"time"
 
 	"github.com/iter-x/iter-x/internal/common/cnst"
 
-	"github.com/ifuryst/lol"
 	"github.com/iter-x/iter-x/internal/biz/ai/tool"
 	"github.com/iter-x/iter-x/internal/biz/do"
 
@@ -43,6 +43,18 @@ type (
 		Notes         string `json:"notes"`    // e.g. "Visit the world-famous palace and gardens"
 	}
 
+	dayPlan struct {
+		Day   int          `json:"day"`
+		Title string       `json:"title"`
+		POIs  []dayPlanPoi `json:"pois"`
+	}
+	dayPlanPoi struct {
+		Time     string `json:"time"`
+		ID       string `json:"id"`
+		Duration int    `json:"duration"`
+		Notes    string `json:"notes"`
+	}
+
 	refinedResp struct {
 		DailyPlans []*refinedDailyPlan `json:"daily_plans"`
 	}
@@ -59,13 +71,23 @@ type (
 		Notes         string `json:"notes"`
 	}
 
-	userPromptTpl struct {
+	r1UserPromptTpl struct {
 		Destination string
 		StartDate   time.Time
 		EndDate     time.Time
 		Duration    int
 		Preferences string
 		Budget      float64
+	}
+
+	r2UserPromptTpl struct {
+		Destination string
+		StartDate   time.Time
+		EndDate     time.Time
+		Duration    int
+		Preferences string
+		Budget      float64
+		POIs        []briefPOI
 	}
 
 	briefPOI struct {
@@ -83,6 +105,124 @@ func NewAgent(name string, toolHub *tool.Hub, prompt core.Prompt, poiRepo reposi
 	}
 }
 
+func getRound1Prompt(prompt core.Prompt, input *do.PlanAgentInput) (*do.ToolCompletionInput, error) {
+	systemPrompt := prompt.GetSystemPrompt()
+	userPrompt := prompt.GetUserPrompt()
+	tmplData := r1UserPromptTpl{
+		Destination: input.Destination,
+		StartDate:   input.StartDate,
+		EndDate:     input.EndDate,
+		Duration:    input.Duration,
+		Preferences: input.Preferences,
+		Budget:      input.Budget,
+	}
+	tmpl, err := template.New("round1_user_prompt").Parse(userPrompt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse round1 user prompt template: %v", err)
+	}
+
+	var userPromptBuf bytes.Buffer
+	if err := tmpl.Execute(&userPromptBuf, tmplData); err != nil {
+		return nil, fmt.Errorf("failed to execute user prompt template: %v", err)
+	}
+
+	return &do.ToolCompletionInput{
+		Messages: []do.ToolCompletionInputMessage{
+			{
+				Role:    do.CompletionRoleSystem,
+				Content: systemPrompt,
+			},
+			{
+				Role:    do.CompletionRoleUser,
+				Content: userPromptBuf.String(),
+			},
+		},
+	}, nil
+}
+
+func getPotentialCities(ctx context.Context, completionTool core.Tool, prompt core.Prompt, input *do.PlanAgentInput) ([][]string, error) {
+	completionInput, err := getRound1Prompt(prompt, input)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := completionTool.Execute(ctx, completionInput)
+	if err != nil {
+		return nil, err
+	}
+
+	// Extract the raw trip plan from the completion tool
+	completionOutput, ok := resp.(*do.ToolCompletionOutput)
+	if !ok {
+		return nil, fmt.Errorf("invalid completion response type: %T", resp)
+	}
+
+	var cities [][]string
+	return cities, json.Unmarshal([]byte(completionOutput.Content), &cities)
+}
+
+func getRound2Prompt(prompt core.Prompt, input *do.PlanAgentInput, pois []*do.PointsOfInterest) (*do.ToolCompletionInput, error) {
+	systemPrompt := prompt.GetSystemPromptByRound(2)
+	userPrompt := prompt.GetUserPromptByRound(2)
+	tpl := r2UserPromptTpl{
+		Destination: input.Destination,
+		StartDate:   input.StartDate,
+		EndDate:     input.EndDate,
+		Duration:    input.Duration,
+		Preferences: input.Preferences,
+		Budget:      input.Budget,
+	}
+
+	for _, poi := range pois {
+		tpl.POIs = append(tpl.POIs, briefPOI{
+			ID:   poi.ID.String(),
+			Name: poi.Name,
+		})
+	}
+
+	tmpl, err := template.New("round2_user_prompt").Parse(userPrompt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse round2 user prompt template: %v", err)
+	}
+
+	var userPromptBuf bytes.Buffer
+	if err := tmpl.Execute(&userPromptBuf, tpl); err != nil {
+		return nil, fmt.Errorf("failed to execute round2 user prompt template: %v", err)
+	}
+
+	return &do.ToolCompletionInput{
+		Messages: []do.ToolCompletionInputMessage{
+			{
+				Role:    do.CompletionRoleSystem,
+				Content: systemPrompt,
+			},
+			{
+				Role:    do.CompletionRoleUser,
+				Content: userPromptBuf.String(),
+			},
+		},
+	}, nil
+}
+
+func getItineraries(ctx context.Context, completionTool core.Tool, prompt core.Prompt, input *do.PlanAgentInput, pois []*do.PointsOfInterest) ([]dayPlan, error) {
+	completionInput, err := getRound2Prompt(prompt, input, pois)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := completionTool.Execute(ctx, completionInput)
+	if err != nil {
+		return nil, err
+	}
+
+	// Extract the raw trip plan from the completion tool
+	completionOutput, ok := resp.(*do.ToolCompletionOutput)
+	if !ok {
+		return nil, fmt.Errorf("invalid completion response type: %T", resp)
+	}
+
+	var itineraries []dayPlan
+	return itineraries, json.Unmarshal([]byte(completionOutput.Content), &itineraries)
+}
+
 // Execute implements the main logic of PlanAgent
 func (a *agent) Execute(ctx context.Context, inputAny any) (any, error) {
 	input, ok := inputAny.(*do.PlanAgentInput)
@@ -96,187 +236,59 @@ func (a *agent) Execute(ctx context.Context, inputAny any) (any, error) {
 		return nil, err
 	}
 
-	// Generate prompt
-	prompt := a.GetPrompt()
-	systemPrompt := prompt.GetSystemPrompt()
-	userPrompt := prompt.GetUserPrompt()
-	tmplData := userPromptTpl{
-		Destination: input.Destination,
-		StartDate:   input.StartDate,
-		EndDate:     input.EndDate,
-		Duration:    input.Duration,
-		Preferences: input.Preferences,
-		Budget:      input.Budget,
-	}
-	tmpl, err := template.New("user_prompt").Parse(userPrompt)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse user prompt template: %v", err)
-	}
-
-	var userPromptBuf bytes.Buffer
-	if err := tmpl.Execute(&userPromptBuf, tmplData); err != nil {
-		return nil, fmt.Errorf("failed to execute user prompt template: %v", err)
-	}
-
-	completionInput := &do.ToolCompletionInput{
-		Messages: []do.ToolCompletionInputMessage{
-			{
-				Role:    do.CompletionRoleSystem,
-				Content: systemPrompt,
-			},
-			{
-				Role:    do.CompletionRoleUser,
-				Content: userPromptBuf.String(),
-			},
-		},
-	}
-	resp, err := completionTool.Execute(ctx, completionInput)
+	// Round 1: get potential cities
+	potentialCities, err := getPotentialCities(ctx, completionTool, a.GetPrompt(), input)
 	if err != nil {
 		return nil, err
 	}
 
-	// Extract the raw trip plan from the completion tool
-	completionOutput, ok := resp.(*do.ToolCompletionOutput)
-	if !ok {
-		return nil, fmt.Errorf("invalid completion response type: %T", resp)
-	}
-
-	var rawTrip completionResp
-	if err := json.Unmarshal([]byte(completionOutput.Content), &rawTrip); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal completion output: %v", err)
-	}
-
-	// Extract all activity names from the raw trip
-	activityNames := make([]string, 0, len(rawTrip.DailyPlans)*3)
-	for _, dp := range rawTrip.DailyPlans {
-		for _, act := range dp.Activities {
-			activityNames = append(activityNames, act.Name)
-		}
-	}
-	activityNames = lol.UniqSlice(activityNames)
-
-	// Search for all activities in the database
-	pois, err := a.poiRepo.SearchPointsOfInterestByNamesFromES(ctx, activityNames)
+	// Retrieve POIs for potential cities
+	pois, err := a.poiRepo.GetByCityNames(ctx, lol.UniqSlice(potentialCities...))
 	if err != nil {
-		return nil, fmt.Errorf("failed to search points of interest: %v", err)
+		return nil, fmt.Errorf("failed to get POIs for potential cities: %v", err)
 	}
 
-	// Create a map of name to POI for quick lookup
-	poiMap := make(map[string]*do.PointsOfInterest)
-	for _, poi := range pois {
-		poiMap[poi.Name] = poi
-	}
-
-	// Generate refine prompt with POI information
-	refinePrompt := a.GetPrompt().GetRefinePrompt()
-	type refinePromptData struct {
-		Activities []struct {
-			ID   string
-			Name string
-		}
-	}
-	refineData := refinePromptData{
-		Activities: make([]struct {
-			ID   string
-			Name string
-		}, 0, len(pois)),
-	}
-
-	for _, poi := range pois {
-		refineData.Activities = append(refineData.Activities, briefPOI{
-			ID:   poi.ID.String(),
-			Name: poi.Name,
-		})
-	}
-
-	tmpl, err = template.New("refine_prompt").Parse(refinePrompt)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse refine prompt template: %v", err)
-	}
-
-	var refinePromptBuf bytes.Buffer
-	if err := tmpl.Execute(&refinePromptBuf, refineData); err != nil {
-		return nil, fmt.Errorf("failed to execute refine prompt template: %v", err)
-	}
-
-	// Get refined plan with POI IDs
-	completionInput = &do.ToolCompletionInput{
-		Messages: []do.ToolCompletionInputMessage{
-			{
-				Role:    do.CompletionRoleSystem,
-				Content: systemPrompt,
-			},
-			{
-				Role:    do.CompletionRoleUser,
-				Content: userPromptBuf.String(),
-			},
-			{
-				Role:    do.CompletionRoleAssistant,
-				Content: completionOutput.Content,
-			},
-			{
-				Role:    do.CompletionRoleUser,
-				Content: refinePromptBuf.String(),
-			},
-		},
-	}
-	resp, err = completionTool.Execute(ctx, completionInput)
+	// Round 2: refine trip plan
+	itineraries, err := getItineraries(ctx, completionTool, a.GetPrompt(), input, pois)
 	if err != nil {
 		return nil, err
-	}
-
-	completionOutput, ok = resp.(*do.ToolCompletionOutput)
-	if !ok {
-		return nil, fmt.Errorf("invalid completion response type: %T", resp)
-	}
-
-	var refinedTrip refinedResp
-	if err := json.Unmarshal([]byte(completionOutput.Content), &refinedTrip); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal refined completion output: %v", err)
 	}
 
 	// Convert to PlanAgentOutput
-	result := &do.PlanAgentOutput{
-		DailyPlans: make([]*do.DailyPlan, 0, len(refinedTrip.DailyPlans)),
-	}
-
-	for _, dp := range refinedTrip.DailyPlans {
-		dailyPlan := &do.DailyPlan{
-			Day:        dp.Day,
-			Date:       input.StartDate.AddDate(0, 0, dp.Day-1),
-			Title:      dp.Title,
-			Activities: make([]*do.Activity, 0, len(dp.Activities)),
+	result := do.PlanAgentOutput{}
+	for _, itinerary := range itineraries {
+		dp := &do.DailyPlan{
+			Day:   itinerary.Day,
+			Title: itinerary.Title,
 		}
 
-		for _, act := range dp.Activities {
+		// Calculate date based on start date and day number
+		date := input.StartDate.AddDate(0, 0, itinerary.Day-1)
+		dp.Date = date
+
+		for _, poi := range itinerary.POIs {
 			// Parse time string to time.Time
-			timeStr := fmt.Sprintf("%s %s", dailyPlan.Date.Format("2006-01-02"), act.Time)
-			parsedTime, err := time.Parse("2006-01-02 15:04", timeStr)
+			timeStr := fmt.Sprintf("%s %s", date.Format("2006-01-02"), poi.Time)
+			activityTime, err := time.Parse("2006-01-02 15:04", timeStr)
 			if err != nil {
-				return nil, fmt.Errorf("failed to parse time %s: %v", act.Time, err)
+				return nil, fmt.Errorf("failed to parse time: %v", err)
 			}
 
-			// Parse POI ID
-			var poiID uuid.UUID
-			if act.ID != "" {
-				poiID, err = uuid.Parse(act.ID)
-				if err != nil {
-					return nil, fmt.Errorf("failed to parse POI ID %s: %v", act.ID, err)
-				}
+			poiID, err := uuid.Parse(poi.ID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse DailyPlanPoi ID: %v", err)
 			}
 
-			duration := time.Duration(act.DurationInSec) * time.Second
-			activity := &do.Activity{
+			dp.POIs = append(dp.POIs, &do.DailyPlanPoi{
 				Id:       poiID,
-				Time:     parsedTime,
-				Name:     act.Name,
-				Duration: duration,
-				Notes:    act.Notes,
-			}
-			dailyPlan.Activities = append(dailyPlan.Activities, activity)
+				Time:     activityTime,
+				Name:     poi.Notes,
+				Duration: time.Duration(poi.Duration) * time.Second,
+				Notes:    poi.Notes,
+			})
 		}
-		result.DailyPlans = append(result.DailyPlans, dailyPlan)
+		result = append(result, dp)
 	}
 
-	return result, nil
+	return &result, nil
 }

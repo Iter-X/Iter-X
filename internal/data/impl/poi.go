@@ -5,7 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"github.com/google/uuid"
+	"github.com/iter-x/iter-x/internal/data/ent/city"
+	"github.com/iter-x/iter-x/internal/data/ent/predicate"
 	"go.uber.org/zap"
 
 	"github.com/iter-x/iter-x/internal/biz/bo"
@@ -218,5 +221,34 @@ func (r *pointsOfInterestRepositoryImpl) SearchPointsOfInterest(ctx context.Cont
 		}
 		pois = append(pois, poiDos...)
 	}
+	return pois, nil
+}
+
+func (r *pointsOfInterestRepositoryImpl) GetByCityNames(ctx context.Context, cityNames []string) ([]*do.PointsOfInterest, error) {
+	if len(cityNames) == 0 {
+		return nil, nil
+	}
+	cli := r.GetTx(ctx).City
+	predicates := make([]predicate.City, 0, len(cityNames))
+	for _, name := range cityNames {
+		predicates = append(predicates, city.NameContains(name))
+	}
+	cityRows, err := cli.Query().
+		Where(city.Or(predicates...)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	cityIds := make([]uint, 0, len(cityRows))
+	for _, v := range cityRows {
+		cityIds = append(cityIds, v.ID)
+	}
+	rows, err := r.GetTx(ctx).PointsOfInterest.Query().Select("id", "name").
+		Where(pointsofinterest.CityIDIn(cityIds...)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	pois := r.ToEntities(rows)
 	return pois, nil
 }

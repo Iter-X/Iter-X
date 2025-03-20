@@ -58,12 +58,12 @@ func NewConnection(c *conf.Data, logger *zap.SugaredLogger) (*Data, func(), erro
 		return nil, nil, err
 	}
 
-	res, err := esCli.Ping()
-	if err != nil || res.IsError() {
-		logger.Error("failed to ping elasticsearch: ", err)
-		return nil, nil, fmt.Errorf("failed to ping elasticsearch: %w", err)
-	}
-	defer res.Body.Close()
+	//res, err := esCli.Ping()
+	//if err != nil || res.IsError() {
+	//	logger.Error("failed to ping elasticsearch: ", err)
+	//	return nil, nil, fmt.Errorf("failed to ping elasticsearch: %w", err)
+	//}
+	//defer res.Body.Close()
 
 	d := &Data{
 		Tx:    newTx(client),

@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -66,11 +67,18 @@ func (b *Trip) CreateTrip(ctx context.Context, req *bo.CreateTripRequest) (*do.T
 			return nil, xerr.ErrorCreateTripFailed()
 		}
 
+		var days int8
+		if req.Duration > 0 {
+			days = int8(req.Duration)
+		} else {
+			days = int8(req.EndDate.Sub(req.StartDate).Hours()/24) + 1
+		}
 		trip := &do.Trip{
 			UserID:    claims.UID,
-			Title:     req.Destination,
+			Title:     fmt.Sprintf("%s%d日游", req.Destination, days),
 			StartDate: req.StartDate,
 			EndDate:   req.EndDate,
+			Days:      days,
 		}
 
 		createdTrip, err := b.tripRepo.CreateTrip(ctx, trip)
@@ -79,10 +87,11 @@ func (b *Trip) CreateTrip(ctx context.Context, req *bo.CreateTripRequest) (*do.T
 			return nil, xerr.ErrorCreateTripFailed()
 		}
 
-		for _, dailyPlan := range rawTrip.DailyPlans {
+		for _, dailyPlan := range *rawTrip {
 			dailyTrip := &do.DailyTrip{
 				TripID: createdTrip.ID,
 				Day:    int32(dailyPlan.Day),
+				Date:   dailyPlan.Date,
 				Notes:  dailyPlan.Title,
 			}
 
@@ -92,12 +101,12 @@ func (b *Trip) CreateTrip(ctx context.Context, req *bo.CreateTripRequest) (*do.T
 				return nil, xerr.ErrorCreateDailyTripFailed()
 			}
 
-			for _, act := range dailyPlan.Activities {
+			for _, poi := range dailyPlan.POIs {
 				dailyItinerary := &do.DailyItinerary{
 					TripID:      createdTrip.ID,
 					DailyTripID: createdDailyTrip.ID,
-					PoiID:       act.Id,
-					Notes:       act.Notes,
+					PoiID:       poi.Id,
+					Notes:       poi.Notes,
 				}
 
 				_, err = b.tripRepo.CreateDailyItinerary(ctx, dailyItinerary)

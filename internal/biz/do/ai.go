@@ -15,16 +15,14 @@ type (
 		Preferences string
 		Budget      float64
 	}
-	PlanAgentOutput struct {
-		DailyPlans []*DailyPlan
+	PlanAgentOutput []*DailyPlan
+	DailyPlan       struct {
+		Day   int
+		Date  time.Time
+		Title string
+		POIs  []*DailyPlanPoi
 	}
-	DailyPlan struct {
-		Day        int
-		Date       time.Time
-		Title      string
-		Activities []*Activity
-	}
-	Activity struct {
+	DailyPlanPoi struct {
 		Id       uuid.UUID
 		Time     time.Time
 		Name     string
