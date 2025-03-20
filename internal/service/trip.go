@@ -4,13 +4,16 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	v1 "github.com/iter-x/iter-x/internal/api/trip/v1"
+
+	tripV1 "github.com/iter-x/iter-x/internal/api/trip/v1"
 	"github.com/iter-x/iter-x/internal/biz"
+	"github.com/iter-x/iter-x/internal/biz/bo"
 	"github.com/iter-x/iter-x/internal/common/xerr"
+	"github.com/iter-x/iter-x/internal/service/build"
 )
 
 type Trip struct {
-	v1.UnimplementedTripServiceServer
+	tripV1.UnimplementedTripServiceServer
 	tripBiz *biz.Trip
 }
 
@@ -20,15 +23,21 @@ func NewTrip(tripBiz *biz.Trip) *Trip {
 	}
 }
 
-func (s *Trip) CreateTrip(ctx context.Context, req *v1.CreateTripRequest) (*v1.CreateTripResponse, error) {
-	trip, err := s.tripBiz.CreateTrip(ctx, req)
+func (s *Trip) CreateTrip(ctx context.Context, req *tripV1.CreateTripRequest) (*tripV1.CreateTripResponse, error) {
+	params := &bo.CreateTripRequest{
+		Title:       req.GetTitle(),
+		Description: req.GetDescription(),
+		StartDate:   req.GetStartTs().AsTime(),
+		EndDate:     req.GetEndTs().AsTime(),
+	}
+	trip, err := s.tripBiz.CreateTrip(ctx, params)
 	if err != nil {
 		return nil, err
 	}
-	return &v1.CreateTripResponse{Trip: trip}, nil
+	return &tripV1.CreateTripResponse{Trip: build.ToTripProto(trip)}, nil
 }
 
-func (s *Trip) GetTrip(ctx context.Context, req *v1.GetTripRequest) (*v1.GetTripResponse, error) {
+func (s *Trip) GetTrip(ctx context.Context, req *tripV1.GetTripRequest) (*tripV1.GetTripResponse, error) {
 	tripId, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, xerr.ErrorInvalidTripId()
@@ -37,18 +46,26 @@ func (s *Trip) GetTrip(ctx context.Context, req *v1.GetTripRequest) (*v1.GetTrip
 	if err != nil {
 		return nil, err
 	}
-	return &v1.GetTripResponse{Trip: trip}, nil
+	return &tripV1.GetTripResponse{Trip: build.ToTripProto(trip)}, nil
 }
 
-func (s *Trip) UpdateTrip(ctx context.Context, req *v1.UpdateTripRequest) (*v1.UpdateTripResponse, error) {
-	trip, err := s.tripBiz.UpdateTrip(ctx, req)
+func (s *Trip) UpdateTrip(ctx context.Context, req *tripV1.UpdateTripRequest) (*tripV1.UpdateTripResponse, error) {
+	params := &bo.UpdateTripRequest{
+		ID:          req.GetId(),
+		Title:       req.GetTitle(),
+		Description: req.GetDescription(),
+		StartDate:   req.GetStartTs().AsTime(),
+		EndDate:     req.GetEndTs().AsTime(),
+		Status:      req.GetStatus(),
+	}
+	trip, err := s.tripBiz.UpdateTrip(ctx, params)
 	if err != nil {
 		return nil, err
 	}
-	return &v1.UpdateTripResponse{Trip: trip}, nil
+	return &tripV1.UpdateTripResponse{Trip: build.ToTripProto(trip)}, nil
 }
 
-func (s *Trip) DeleteTrip(ctx context.Context, req *v1.DeleteTripRequest) (*v1.DeleteTripResponse, error) {
+func (s *Trip) DeleteTrip(ctx context.Context, req *tripV1.DeleteTripRequest) (*tripV1.DeleteTripResponse, error) {
 	tripId, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, xerr.ErrorInvalidTripId()
@@ -57,53 +74,76 @@ func (s *Trip) DeleteTrip(ctx context.Context, req *v1.DeleteTripRequest) (*v1.D
 	if err != nil {
 		return nil, err
 	}
-	return &v1.DeleteTripResponse{Status: "deleted"}, nil
+	return &tripV1.DeleteTripResponse{Status: "deleted"}, nil
 }
 
-func (s *Trip) ListTrips(ctx context.Context, _ *v1.ListTripsRequest) (*v1.ListTripsResponse, error) {
+func (s *Trip) ListTrips(ctx context.Context, _ *tripV1.ListTripsRequest) (*tripV1.ListTripsResponse, error) {
 	trips, err := s.tripBiz.ListTrips(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return &v1.ListTripsResponse{Trips: trips}, nil
+	return &tripV1.ListTripsResponse{Trips: build.ToTripsProto(trips)}, nil
 }
 
-func (s *Trip) CreateDailyTrip(ctx context.Context, req *v1.CreateDailyTripRequest) (*v1.CreateDailyTripResponse, error) {
-	dailyTrip, err := s.tripBiz.CreateDailyTrip(ctx, req)
+func (s *Trip) CreateDailyTrip(ctx context.Context, req *tripV1.CreateDailyTripRequest) (*tripV1.CreateDailyTripResponse, error) {
+	params := &bo.CreateDailyTripRequest{
+		TripID: req.GetTripId(),
+		Date:   req.GetDate().AsTime(),
+		Day:    req.GetDay(),
+		Notes:  req.GetNotes(),
+	}
+	dailyTrip, err := s.tripBiz.CreateDailyTrip(ctx, params)
 	if err != nil {
 		return nil, err
 	}
-	return &v1.CreateDailyTripResponse{DailyTrip: dailyTrip}, nil
+	return &tripV1.CreateDailyTripResponse{DailyTrip: build.ToDailyTripProto(dailyTrip)}, nil
 }
 
-func (s *Trip) GetDailyTrip(ctx context.Context, req *v1.GetDailyTripRequest) (*v1.GetDailyTripResponse, error) {
-	dailyTrip, err := s.tripBiz.GetDailyTrip(ctx, req)
+func (s *Trip) GetDailyTrip(ctx context.Context, req *tripV1.GetDailyTripRequest) (*tripV1.GetDailyTripResponse, error) {
+	params := &bo.GetDailyTripRequest{
+		TripID:  req.GetTripId(),
+		DailyID: req.GetDailyId(),
+	}
+	dailyTrip, err := s.tripBiz.GetDailyTrip(ctx, params)
 	if err != nil {
 		return nil, err
 	}
-	return &v1.GetDailyTripResponse{DailyTrip: dailyTrip}, nil
+	return &tripV1.GetDailyTripResponse{DailyTrip: build.ToDailyTripProto(dailyTrip)}, nil
 }
 
-func (s *Trip) UpdateDailyTrip(ctx context.Context, req *v1.UpdateDailyTripRequest) (*v1.UpdateDailyTripResponse, error) {
-	dailyTrip, err := s.tripBiz.UpdateDailyTrip(ctx, req)
+func (s *Trip) UpdateDailyTrip(ctx context.Context, req *tripV1.UpdateDailyTripRequest) (*tripV1.UpdateDailyTripResponse, error) {
+	params := &bo.UpdateDailyTripRequest{
+		DailyID: req.GetDailyId(),
+		Date:    req.GetDate().AsTime(),
+		Day:     req.GetDay(),
+		Notes:   req.GetNotes(),
+		TripID:  req.GetTripId(),
+	}
+	dailyTrip, err := s.tripBiz.UpdateDailyTrip(ctx, params)
 	if err != nil {
 		return nil, err
 	}
-	return &v1.UpdateDailyTripResponse{DailyTrip: dailyTrip}, nil
+	return &tripV1.UpdateDailyTripResponse{DailyTrip: build.ToDailyTripProto(dailyTrip)}, nil
 }
 
-func (s *Trip) DeleteDailyTrip(ctx context.Context, req *v1.DeleteDailyTripRequest) (*v1.DeleteDailyTripResponse, error) {
-	err := s.tripBiz.DeleteDailyTrip(ctx, req)
+func (s *Trip) DeleteDailyTrip(ctx context.Context, req *tripV1.DeleteDailyTripRequest) (*tripV1.DeleteDailyTripResponse, error) {
+	params := &bo.DeleteDailyTripRequest{
+		DailyID: req.GetDailyId(),
+		TripID:  req.GetTripId(),
+	}
+	if err := s.tripBiz.DeleteDailyTrip(ctx, params); err != nil {
+		return nil, err
+	}
+	return &tripV1.DeleteDailyTripResponse{Status: "deleted"}, nil
+}
+
+func (s *Trip) ListDailyTrips(ctx context.Context, req *tripV1.ListDailyTripsRequest) (*tripV1.ListDailyTripsResponse, error) {
+	params := &bo.ListDailyTripsRequest{
+		TripID: req.GetTripId(),
+	}
+	dailyTrips, err := s.tripBiz.ListDailyTrips(ctx, params)
 	if err != nil {
 		return nil, err
 	}
-	return &v1.DeleteDailyTripResponse{Status: "deleted"}, nil
-}
-
-func (s *Trip) ListDailyTrips(ctx context.Context, req *v1.ListDailyTripsRequest) (*v1.ListDailyTripsResponse, error) {
-	dailyTrips, err := s.tripBiz.ListDailyTrips(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	return &v1.ListDailyTripsResponse{DailyTrips: dailyTrips}, nil
+	return &tripV1.ListDailyTripsResponse{DailyTrips: build.ToDailyTripsProto(dailyTrips)}, nil
 }

@@ -6,6 +6,7 @@ import (
 	poiV1 "github.com/iter-x/iter-x/internal/api/poi/v1"
 	"github.com/iter-x/iter-x/internal/biz"
 	"github.com/iter-x/iter-x/internal/biz/bo"
+	"github.com/iter-x/iter-x/internal/service/build"
 )
 
 type PointsOfInterestService struct {
@@ -29,5 +30,5 @@ func (s *PointsOfInterestService) SearchPointsOfInterest(ctx context.Context, re
 	if err != nil {
 		return nil, err
 	}
-	return &poiV1.SearchPointsOfInterestResponse{PointsOfInterest: pointsOfInterest}, nil
+	return &poiV1.SearchPointsOfInterestResponse{PointsOfInterest: build.ToPointsOfInterestsProto(pointsOfInterest)}, nil
 }

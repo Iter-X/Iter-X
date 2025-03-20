@@ -10,7 +10,6 @@ import (
 	"github.com/ifuryst/lol"
 	"go.uber.org/zap"
 
-	authV1 "github.com/iter-x/iter-x/internal/api/auth/v1"
 	"github.com/iter-x/iter-x/internal/biz/bo"
 	"github.com/iter-x/iter-x/internal/biz/do"
 	"github.com/iter-x/iter-x/internal/biz/repository"
@@ -20,6 +19,7 @@ import (
 	"github.com/iter-x/iter-x/internal/helper/auth"
 	"github.com/iter-x/iter-x/pkg/sms"
 	"github.com/iter-x/iter-x/pkg/util/password"
+	"github.com/iter-x/iter-x/pkg/vobj"
 )
 
 type Auth struct {
@@ -90,7 +90,7 @@ func (b *Auth) getToken(ctx context.Context, user *do.User, renew bool) (*bo.Sig
 }
 
 // SignIn signs in and returns a token.
-func (b *Auth) SignIn(ctx context.Context, params *authV1.SignInRequest) (*authV1.SignInResponse, error) {
+func (b *Auth) SignIn(ctx context.Context, params *bo.SignInRequest) (*bo.SignInResponse, error) {
 	user, err := b.authRepo.FindByEmail(ctx, params.Email)
 	if err != nil || user == nil {
 		return nil, xerr.ErrorInvalidEmailOrPassword()
@@ -101,19 +101,11 @@ func (b *Auth) SignIn(ctx context.Context, params *authV1.SignInRequest) (*authV
 		return nil, xerr.ErrorInvalidEmailOrPassword()
 	}
 
-	res, err := b.getToken(ctx, user, true)
-	if err != nil {
-		return nil, err
-	}
-	return &authV1.SignInResponse{
-		Token:        res.Token,
-		RefreshToken: res.RefreshToken,
-		ExpiresIn:    res.ExpiresIn,
-	}, nil
+	return b.getToken(ctx, user, true)
 }
 
 // SignUp creates a new user.
-func (b *Auth) SignUp(ctx context.Context, params *authV1.SignUpRequest) (*authV1.SignUpResponse, error) {
+func (b *Auth) SignUp(ctx context.Context, params *bo.SignInRequest) (*bo.SignInResponse, error) {
 	// confirm the user does not exist
 	usr, err := b.authRepo.FindByEmail(ctx, params.Email)
 	if err != nil && !xerr.IsUserNotFound(err) {
@@ -140,23 +132,15 @@ func (b *Auth) SignUp(ctx context.Context, params *authV1.SignUpRequest) (*authV
 		return nil, err
 	}
 
-	res, err := b.getToken(ctx, user, true)
-	if err != nil {
-		return nil, err
-	}
-	return &authV1.SignUpResponse{
-		Token:        res.Token,
-		RefreshToken: res.RefreshToken,
-		ExpiresIn:    res.ExpiresIn,
-	}, nil
+	return b.getToken(ctx, user, true)
 }
 
 // SignInWithOAuth signs in with oauth and returns a token.
-func (b *Auth) SignInWithOAuth(ctx context.Context, params *authV1.SignInWithOAuthRequest) (string, error) {
+func (b *Auth) SignInWithOAuth(ctx context.Context, params *bo.SignInWithOAuthRequest) (string, error) {
 	var user = &do.User{}
 
 	switch params.Provider {
-	case authV1.OAuthProvider_GITHUB:
+	case vobj.OAuthProviderGITHUB:
 		res, err := auth.GitHub(ctx, b.cfg.Oauth.GithubClientId,
 			b.cfg.Oauth.GithubClientSecret, b.cfg.Oauth.GithubRedirectUrl, params.Code)
 		if err != nil {
@@ -165,7 +149,7 @@ func (b *Auth) SignInWithOAuth(ctx context.Context, params *authV1.SignInWithOAu
 		user.Username = res["login"].(string)
 		user.Email = res["email"].(string)
 		user.AvatarURL = res["avatar_url"].(string)
-	case authV1.OAuthProvider_GOOGLE:
+	case vobj.OAuthProviderGOOGLE:
 		res, err := auth.Google(ctx, b.cfg.Oauth.GoogleClientId,
 			b.cfg.Oauth.GoogleClientSecret, b.cfg.Oauth.GoogleRedirectUrl, params.Code)
 		if err != nil {
@@ -174,7 +158,7 @@ func (b *Auth) SignInWithOAuth(ctx context.Context, params *authV1.SignInWithOAu
 		user.Username = res["name"].(string)
 		user.Email = res["email"].(string)
 		user.AvatarURL = res["picture"].(string)
-	case authV1.OAuthProvider_WECHAT:
+	case vobj.OAuthProviderWECHAT:
 		res, err := auth.WeChat(ctx, b.cfg.Oauth.WechatClientId,
 			b.cfg.Oauth.WechatClientSecret, b.cfg.Oauth.WechatRedirectUrl, params.Code)
 		if err != nil {
@@ -222,7 +206,7 @@ func (b *Auth) SignInWithOAuth(ctx context.Context, params *authV1.SignInWithOAu
 	}, b.cfg.Jwt.Issuer, b.cfg.Jwt.Expiration.AsDuration())
 }
 
-func (b *Auth) RefreshToken(ctx context.Context, params *authV1.RefreshTokenRequest) (*authV1.RefreshTokenResponse, error) {
+func (b *Auth) RefreshToken(ctx context.Context, params *bo.RefreshTokenRequest) (*bo.SignInResponse, error) {
 	refreshToken, err := b.authRepo.GetRefreshToken(ctx, params.RefreshToken)
 	if err != nil {
 		return nil, xerr.ErrorUnauthorized()
@@ -239,14 +223,7 @@ func (b *Auth) RefreshToken(ctx context.Context, params *authV1.RefreshTokenRequ
 		return nil, err
 	}
 
-	res, err := b.getToken(ctx, user, false)
-	if err != nil {
-		return nil, err
-	}
-	return &authV1.RefreshTokenResponse{
-		Token:     res.Token,
-		ExpiresIn: res.ExpiresIn,
-	}, nil
+	return b.getToken(ctx, user, false)
 }
 
 func (b *Auth) ValidateToken(_ context.Context, s string) (jwt.Claims, error) {
@@ -272,12 +249,9 @@ func (b *Auth) ValidateToken(_ context.Context, s string) (jwt.Claims, error) {
 }
 
 // SendSmsCode sends sms code.
-func (b *Auth) SendSmsCode(ctx context.Context, params *authV1.SendSmsCodeRequest) (*authV1.SendSmsCodeResponse, error) {
-	sendSmsConfigParams := &bo.SendSmsConfigParams{
-		PhoneNumber: params.GetPhoneNumber(),
-	}
+func (b *Auth) SendSmsCode(ctx context.Context, params *bo.SendSmsConfigParams) (*bo.SendSmsCodeResponse, error) {
 	smsCodeConf := b.cfg.GetSmsCode()
-	sendParams := sendSmsConfigParams.WithSmsConfig(smsCodeConf, `{"code":"##code##"}`)
+	sendParams := params.WithSmsConfig(smsCodeConf, `{"code":"##code##"}`)
 	sendSmsResponse, err := b.smsClient.SendSmsVerifyCode(ctx, sendParams)
 	if err != nil {
 		return nil, err
@@ -285,14 +259,14 @@ func (b *Auth) SendSmsCode(ctx context.Context, params *authV1.SendSmsCodeReques
 	if !sendSmsResponse.IsOK() {
 		return nil, xerr.ErrorBadRequest()
 	}
-	return &authV1.SendSmsCodeResponse{
+	return &bo.SendSmsCodeResponse{
 		ExpireTime: smsCodeConf.GetValidTime().GetSeconds(),
 		Interval:   smsCodeConf.GetInterval().GetSeconds(),
 	}, nil
 }
 
 // VerifySmsCode verifies sms code.
-func (b *Auth) VerifySmsCode(ctx context.Context, params *authV1.VerifySmsCodeRequest) (*authV1.VerifySmsCodeResponse, error) {
+func (b *Auth) VerifySmsCode(ctx context.Context, params *bo.VerifySmsCodeRequest) (*bo.SignInResponse, error) {
 	verifySmsCode, err := b.smsClient.CheckSmsVerifyCode(ctx, params)
 	if err != nil {
 		return nil, err
@@ -302,25 +276,17 @@ func (b *Auth) VerifySmsCode(ctx context.Context, params *authV1.VerifySmsCodeRe
 		return nil, xerr.ErrorSmsCodeInvalid()
 	}
 
-	res, err := b.loginByPhone(ctx, params.GetPhoneNumber())
-	if err != nil {
-		return nil, err
-	}
-	return &authV1.VerifySmsCodeResponse{
-		Token:     res.Token,
-		ExpiresIn: res.ExpiresIn,
-	}, nil
+	return b.loginByPhone(ctx, params.GetPhoneNumber())
 }
 
 // OneClickLogin one click login.
-func (b *Auth) OneClickLogin(ctx context.Context, params *authV1.OneClickLoginRequest) (*authV1.OneClickLoginResponse, error) {
-	if params.GetToken() == "" {
+func (b *Auth) OneClickLogin(ctx context.Context, params *bo.GetMobileConfigParams) (*bo.SignInResponse, error) {
+	if params.Token == "" {
 		return nil, xerr.ErrorBadRequest()
 	}
 
-	getMobileConfigParams := &bo.GetMobileConfigParams{Token: params.GetToken()}
 	// TODO logging request to sms service
-	mobileResponse, err := b.smsClient.GetMobile(ctx, getMobileConfigParams)
+	mobileResponse, err := b.smsClient.GetMobile(ctx, params)
 	if err != nil {
 		return nil, err
 	}
@@ -328,14 +294,7 @@ func (b *Auth) OneClickLogin(ctx context.Context, params *authV1.OneClickLoginRe
 		return nil, xerr.ErrorBadRequest()
 	}
 
-	res, err := b.loginByPhone(ctx, mobileResponse.GetBody().GetMobile())
-	if err != nil {
-		return nil, err
-	}
-	return &authV1.OneClickLoginResponse{
-		Token:     res.Token,
-		ExpiresIn: res.ExpiresIn,
-	}, nil
+	return b.loginByPhone(ctx, mobileResponse.GetBody().GetMobile())
 }
 
 // loginByPhone logs in by phone.
