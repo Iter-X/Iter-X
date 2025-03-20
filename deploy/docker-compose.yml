@@ -6,6 +6,7 @@ services:
     restart: always
     depends_on:
       - db
+      - es
     ports:
       - "8000:8000"
       - "9000:9000"
@@ -28,3 +29,16 @@ services:
       - POSTGRES_PASSWORD=${X_DB_PASS}
     env_file:
       - ../.env
+
+  es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.3
+    container_name: iterx-es
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=iterx
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - ./es:/usr/share/elasticsearch/data

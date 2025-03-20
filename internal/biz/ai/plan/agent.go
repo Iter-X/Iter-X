@@ -5,8 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/iter-x/iter-x/internal/common/cnst"
 	"time"
+
+	"github.com/iter-x/iter-x/internal/common/cnst"
 
 	"github.com/ifuryst/lol"
 	"github.com/iter-x/iter-x/internal/biz/ai/tool"
@@ -25,19 +26,18 @@ type (
 	}
 
 	completionResp struct {
-		DailyPlans []*dailyPlan
+		DailyPlans []*dailyPlan `json:"daily_plans"`
 	}
 	dailyPlan struct {
-		Day        int
-		Date       time.Time
-		Title      string
-		Activities []*activity
+		Day        int         `json:"day"`   // e.g. 1
+		Title      string      `json:"title"` // e.g. "Cultural Tour"
+		Activities []*activity `json:"activities"`
 	}
 	activity struct {
-		Time     time.Time
-		Name     string
-		Duration time.Duration
-		Notes    string
+		Time          string `json:"time"`     // e.g. "09:00"
+		Name          string `json:"name"`     // e.g. "The Palace of Versailles"
+		DurationInSec uint64 `json:"duration"` // e.g. 10800 (3 hours)
+		Notes         string `json:"notes"`    // e.g. "Visit the world-famous palace and gardens"
 	}
 
 	userPromptTpl struct {

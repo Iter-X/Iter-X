@@ -1,8 +1,11 @@
 package impl
 
 import (
+	"bytes"
 	"context"
-
+	"encoding/json"
+	"fmt"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 
 	"github.com/iter-x/iter-x/internal/biz/bo"
@@ -14,19 +17,21 @@ import (
 	"github.com/iter-x/iter-x/internal/data/impl/build"
 )
 
-func NewPointsOfInterest(d *data.Data, cityRepository repository.CityRepo, logger *zap.SugaredLogger) repository.PointsOfInterestRepo {
-	return &pointsOfInterestRepositoryImpl{
-		Tx:             d.Tx,
-		logger:         logger.Named("repo.poi"),
-		cityRepository: cityRepository,
-	}
-}
-
 type pointsOfInterestRepositoryImpl struct {
 	*data.Tx
 	logger *zap.SugaredLogger
+	es     *data.Es
 
 	cityRepository repository.CityRepo
+}
+
+func NewPointsOfInterest(d *data.Data, cityRepository repository.CityRepo, logger *zap.SugaredLogger) repository.PointsOfInterestRepo {
+	return &pointsOfInterestRepositoryImpl{
+		Tx:             d.Tx,
+		es:             d.Es,
+		logger:         logger.Named("repo.poi"),
+		cityRepository: cityRepository,
+	}
 }
 
 func (r *pointsOfInterestRepositoryImpl) ToEntity(po *ent.PointsOfInterest) *do.PointsOfInterest {
@@ -41,6 +46,144 @@ func (r *pointsOfInterestRepositoryImpl) ToEntities(pos []*ent.PointsOfInterest)
 		return nil
 	}
 	return build.PointsOfInterestRepositoryImplToEntities(pos)
+}
+
+const esIndex = "points_of_interest"
+
+type (
+	SearchResponse struct {
+		Took     int         `json:"took"`
+		TimedOut bool        `json:"timed_out"`
+		Shards   ShardsInfo  `json:"_shards"`
+		Hits     HitsWrapper `json:"hits"`
+	}
+	ShardsInfo struct {
+		Total      int `json:"total"`
+		Successful int `json:"successful"`
+		Skipped    int `json:"skipped"`
+		Failed     int `json:"failed"`
+	}
+	HitsWrapper struct {
+		Total    TotalHits `json:"total"`
+		MaxScore float64   `json:"max_score"`
+		Hits     []Hit     `json:"hits"`
+	}
+	TotalHits struct {
+		Value    int    `json:"value"`
+		Relation string `json:"relation"`
+	}
+	Hit struct {
+		Index  string  `json:"_index"`
+		ID     string  `json:"_id"`
+		Score  float64 `json:"_score"`
+		Source POI     `json:"_source"`
+	}
+	POI struct {
+		ID                         string   `json:"id"`
+		Name                       string   `json:"name"`
+		NameEn                     string   `json:"name_en"`
+		NameCn                     string   `json:"name_cn"`
+		Description                string   `json:"description"`
+		Address                    string   `json:"address"`
+		Type                       string   `json:"type"`
+		Category                   string   `json:"category"`
+		Rating                     float64  `json:"rating"`
+		RecommendedDurationMinutes int      `json:"recommended_duration_minutes"`
+		CityID                     uint     `json:"city_id"`
+		ContinentID                uint     `json:"continent_id"`
+		CountryID                  uint     `json:"country_id"`
+		StateID                    uint     `json:"state_id"`
+		Location                   Location `json:"location"`
+	}
+	Location struct {
+		Lat float64 `json:"lat"`
+		Lon float64 `json:"lon"`
+	}
+)
+
+func (r *pointsOfInterestRepositoryImpl) SearchPointsOfInterestByNamesFromES(ctx context.Context, names []string) ([]*do.PointsOfInterest, error) {
+	if len(names) == 0 {
+		r.logger.Warn("names cannot be empty")
+		return nil, fmt.Errorf("names cannot be empty")
+	}
+
+	var shouldQueries []map[string]map[string]string
+	for _, name := range names {
+		shouldQueries = append(shouldQueries, map[string]map[string]string{
+			"match": {"name": name},
+		})
+	}
+
+	query := map[string]interface{}{
+		"query": map[string]interface{}{
+			"bool": map[string]interface{}{
+				"should":               shouldQueries,
+				"minimum_should_match": 1,
+			},
+		},
+	}
+
+	queryBody, err := json.Marshal(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal query: %w", err)
+	}
+
+	res, err := r.es.Cli.Search(
+		r.es.Cli.Search.WithContext(ctx),
+		r.es.Cli.Search.WithIndex(esIndex),
+		r.es.Cli.Search.WithBody(bytes.NewReader(queryBody)),
+	)
+	if err != nil {
+		r.logger.Warnf("failed to search points of interest from elasticsearch: %v", err)
+		return nil, nil
+	}
+
+	if res.StatusCode != 200 {
+		r.logger.Warnf("failed to search points of interest from elasticsearch: %v", res.String())
+		return nil, nil
+	}
+
+	var sr SearchResponse
+	decoder := json.NewDecoder(res.Body)
+	err = decoder.Decode(&sr)
+	if err != nil {
+		r.logger.Warnf("failed to decode search response: %v", err)
+		return nil, nil
+	}
+
+	pois := make([]*do.PointsOfInterest, 0, len(sr.Hits.Hits))
+	for _, hit := range sr.Hits.Hits {
+		id, err := uuid.Parse(hit.Source.ID)
+		if err != nil {
+			r.logger.Warnf("failed to parse poi id: %s", hit.Source.ID)
+			continue
+		}
+		poi := &do.PointsOfInterest{
+			ID:                         id,
+			Name:                       hit.Source.Name,
+			NameEn:                     hit.Source.NameEn,
+			NameCn:                     hit.Source.NameCn,
+			Description:                hit.Source.Description,
+			Address:                    hit.Source.Address,
+			Latitude:                   hit.Source.Location.Lat,
+			Longitude:                  hit.Source.Location.Lon,
+			Type:                       hit.Source.Type,
+			Category:                   hit.Source.Category,
+			Rating:                     float32(hit.Source.Rating),
+			RecommendedDurationMinutes: int64(hit.Source.RecommendedDurationMinutes),
+			CityID:                     hit.Source.CityID,
+			StateID:                    hit.Source.StateID,
+			CountryID:                  hit.Source.CountryID,
+			ContinentID:                hit.Source.ContinentID,
+			City:                       new(do.City),
+			State:                      new(do.State),
+			Country:                    new(do.Country),
+			Continent:                  new(do.Continent),
+		}
+		pois = append(pois, poi)
+	}
+
+	return pois, nil
 }
 
 func (r *pointsOfInterestRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params *bo.SearchPointsOfInterestParams) ([]*do.PointsOfInterest, error) {

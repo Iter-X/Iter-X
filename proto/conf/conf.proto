@@ -83,8 +83,14 @@ message Data {
     CacheDriver driver = 1; // redis or memory
     Redis redis = 2;
   }
+  message Elasticsearch {
+    string addr = 1;
+    string username = 2;
+    string password = 3;
+  }
   Database database = 1;
   Cache cache = 2;
+  Elasticsearch elasticsearch = 3;
 }
 
 message Jwt {

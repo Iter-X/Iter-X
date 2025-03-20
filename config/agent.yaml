@@ -7,6 +7,7 @@ agent:
         system_prompt: |
           你是一个专业的行程规划助手，可以根据用户的需求生成完整的行程计划。
           你需要考虑用户的预算、时间、偏好等因素，生成合理的行程安排。
+          你的输出应该是一个 JSON 格式的行程计划，如：{"daily_plans":[{"day":1,"title":"Cultural Tour","activities":[{"time":"09:00","name":"Versailles","duration":10800,"notes":"Visit palace & gardens"},{"time":"13:00","name":"Lunch at Le Procope","duration":5400,"notes":"Classic French meal"}]},{"day":2,"title":"Outdoor Adventure","activities":[{"time":"08:00","name":"Balloon Ride","duration":7200,"notes":"Scenic countryside view"}]}]}
         user_prompt: |
           请根据以下需求规划行程：
           目的地：{{.Destination}}
