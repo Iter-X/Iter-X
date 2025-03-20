@@ -4,7 +4,7 @@
  * @Autor: GiottoLLL7
  * @Date: 2025-03-18 00:30:03
  * @LastEditors: GiottoLLL7
- * @LastEditTime: 2025-03-20 01:36:28
+ * @LastEditTime: 2025-03-21 01:07:44
  */
 
 import 'package:flutter/material.dart';
@@ -44,7 +44,47 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
       'name': '澳大利亚',
       'englishName': 'Australia'
     },
+    {'id': '4', 'image': 'img_china.png', 'name': '中国', 'englishName': 'China'},
+    {
+      'id': '5',
+      'image': 'img_finland.png',
+      'name': '芬兰',
+      'englishName': 'Finland'
+    },
+    {'id': '6', 'image': 'img_uk.png', 'name': '英国', 'englishName': 'UK'},
+    {
+      'id': '7',
+      'image': 'img_france.png',
+      'name': '法国',
+      'englishName': 'France'
+    },
+    {'id': '8', 'image': 'img_japan.png', 'name': '日本', 'englishName': 'Japan'},
+    {
+      'id': '9',
+      'image': 'img_italy.png',
+      'name': '意大利',
+      'englishName': 'Italy'
+    },
+    {
+      'id': '10',
+      'image': 'img_thailand.png',
+      'name': '泰国',
+      'englishName': 'Thailand'
+    },
+    {
+      'id': '11',
+      'image': 'img_iceland.png',
+      'name': '冰岛',
+      'englishName': 'Iceland'
+    },
+    {
+      'id': '12',
+      'image': 'img_spain.png',
+      'name': '西班牙',
+      'englishName': 'Spain'
+    }
   ];
+  final List<Map<String, dynamic>> _cityList = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,14 +125,54 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                     width: 2,
                   ),
                 ),
-                child: Column(
+                child: Stack(
                   children: [
                     BaseImage.asset(
                       name: country['image'],
-                      size: 142.w,
+                      width: 142.w,
                       fit: BoxFit.cover,
                     ),
-                    Text(country['name']),
+                    Positioned(
+                      bottom: 0,
+                      right: 8.w,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(country['name'],
+                              textAlign: TextAlign.end, // 文字居中
+                              style: TextStyle(
+                                fontSize: 22.sp,
+                                color: BaseColor.c_f2f2f2,
+                                fontWeight: FontWeight.w900,
+                                shadows: [
+                                  Shadow(
+                                    color: BaseColor.c_1D1F1E, // 阴影颜色
+                                    offset: Offset(2, 2), // 阴影偏移量
+                                    blurRadius: 2, // 阴影模糊半径
+                                  ),
+                                ],
+                              )),
+                          if (country['englishName'] != null &&
+                              country['englishName'].isNotEmpty)
+                            Text(
+                              country['englishName'],
+                              textAlign: TextAlign.end, // 文字居中
+                              style: TextStyle(
+                                fontSize: 22.sp,
+                                color: BaseColor.c_f2f2f2,
+                                fontWeight: FontWeight.w900,
+                                shadows: [
+                                  Shadow(
+                                    color: BaseColor.c_1D1F1E, // 阴影颜色
+                                    offset: Offset(2, 2), // 阴影偏移量
+                                    blurRadius: 2, // 阴影模糊半径
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -164,19 +244,56 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: _selectedCountries
                       .map((id) =>
                           _countryList.firstWhere((item) => item['id'] == id))
-                      .map((country) => ChoiceChip(
-                            label: Text(country['name']),
-                            onSelected: (value) {
-                              setState(() {
-                                _selectedCountries.remove(country['id']);
-                              });
-                            },
-                            selected:
-                                _selectedCountries.contains(country['id']),
-                          ))
+                      .map((country) => Row(children: [
+                            IntrinsicWidth(
+                                child: Container(
+                              height: 42.w,
+                              alignment: Alignment.center,
+                              padding: EdgeInsets.symmetric(horizontal: 15),
+                              decoration: BoxDecoration(
+                                color: BaseColor.c_E3E3E3,
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(5.sp),
+                                  bottomLeft: Radius.circular(5.sp),
+                                ),
+                              ),
+                              child: Text(
+                                country['name'],
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  color: BaseColor.c_1D1F1E,
+                                ),
+                              ),
+                            )),
+                            GestureDetector(
+                                onTap: () => {
+                                      setState(() {
+                                        _selectedCountries
+                                            .remove(country['id']);
+                                      })
+                                    },
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: BaseColor.c_1D1F1E,
+                                    borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(5.sp),
+                                      bottomRight: Radius.circular(5.sp),
+                                    ),
+                                  ),
+                                  margin: EdgeInsets.only(right: 10.w),
+                                  width: 38.w,
+                                  height: 42.w,
+                                  child: BaseImage.asset(
+                                    name: 'ic_card_cancel.png',
+                                    size: 26.w,
+                                  ),
+                                ))
+                          ]))
                       .toList(),
                 ),
               ),
