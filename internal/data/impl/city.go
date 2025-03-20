@@ -11,15 +11,14 @@ import (
 	"github.com/iter-x/iter-x/internal/data"
 	"github.com/iter-x/iter-x/internal/data/ent"
 	"github.com/iter-x/iter-x/internal/data/ent/city"
+	"github.com/iter-x/iter-x/internal/data/impl/build"
 )
 
 func NewCity(d *data.Data, stateRepository repository.StateRepo, logger *zap.SugaredLogger) repository.CityRepo {
 	return &cityRepositoryImpl{
-		Tx:                             d.Tx,
-		logger:                         logger.Named("repo.city"),
-		stateRepository:                stateRepository,
-		pointsOfInterestRepositoryImpl: new(pointsOfInterestRepositoryImpl),
-		stateRepositoryImpl:            new(stateRepositoryImpl),
+		Tx:              d.Tx,
+		logger:          logger.Named("repo.city"),
+		stateRepository: stateRepository,
 	}
 }
 
@@ -28,45 +27,27 @@ type cityRepositoryImpl struct {
 	logger *zap.SugaredLogger
 
 	stateRepository repository.StateRepo
-
-	pointsOfInterestRepositoryImpl repository.BaseRepo[*ent.PointsOfInterest, *do.PointsOfInterest]
-	stateRepositoryImpl            repository.BaseRepo[*ent.State, *do.State]
 }
 
-func (c *cityRepositoryImpl) ToEntity(po *ent.City) *do.City {
+func (r *cityRepositoryImpl) ToEntity(po *ent.City) *do.City {
 	if po == nil {
 		return nil
 	}
-	return &do.City{
-		ID:        po.ID,
-		CreatedAt: po.CreatedAt,
-		UpdatedAt: po.UpdatedAt,
-		Name:      po.Name,
-		NameEn:    po.NameEn,
-		NameCn:    po.NameCn,
-		Code:      po.Code,
-		StateID:   po.StateID,
-		Poi:       c.pointsOfInterestRepositoryImpl.ToEntities(po.Edges.Poi),
-		State:     c.stateRepositoryImpl.ToEntity(po.Edges.State),
-	}
+	return build.CityRepositoryImplToEntity(po)
 }
 
-func (c *cityRepositoryImpl) ToEntities(pos []*ent.City) []*do.City {
+func (r *cityRepositoryImpl) ToEntities(pos []*ent.City) []*do.City {
 	if len(pos) == 0 {
 		return nil
 	}
-	list := make([]*do.City, 0, len(pos))
-	for _, v := range pos {
-		list = append(list, c.ToEntity(v))
-	}
-	return list
+	return build.CityRepositoryImplToEntities(pos)
 }
 
-func (c *cityRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params *bo.SearchPointsOfInterestParams) ([]*do.PointsOfInterest, error) {
+func (r *cityRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params *bo.SearchPointsOfInterestParams) ([]*do.PointsOfInterest, error) {
 	if !params.IsCity() {
-		return c.stateRepository.SearchPointsOfInterest(ctx, params)
+		return r.stateRepository.SearchPointsOfInterest(ctx, params)
 	}
-	cli := c.GetTx(ctx).City
+	cli := r.GetTx(ctx).City
 	keyword := params.Keyword
 	limit := params.Limit
 	rows, err := cli.Query().
@@ -88,7 +69,7 @@ func (c *cityRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params 
 	}
 	pois := make([]*do.PointsOfInterest, 0, len(rows))
 	for _, v := range rows {
-		cityDo := c.ToEntity(v)
+		cityDo := r.ToEntity(v)
 		pois = append(pois, &do.PointsOfInterest{
 			City:      cityDo,
 			State:     cityDo.State,
@@ -98,7 +79,7 @@ func (c *cityRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params 
 	}
 	otherRowLimit := limit - len(rows)
 	if otherRowLimit > 0 && params.IsNext() {
-		poiDos, err := c.stateRepository.SearchPointsOfInterest(ctx, params.DepthDec())
+		poiDos, err := r.stateRepository.SearchPointsOfInterest(ctx, params.DepthDec())
 		if err != nil {
 			return nil, err
 		}

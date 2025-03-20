@@ -12,25 +12,19 @@ import (
 	"github.com/iter-x/iter-x/internal/data/ent"
 	"github.com/iter-x/iter-x/internal/data/ent/dailytrip"
 	"github.com/iter-x/iter-x/internal/data/ent/trip"
+	"github.com/iter-x/iter-x/internal/data/impl/build"
 )
 
 func NewTrip(d *data.Data, logger *zap.SugaredLogger) repository.TripRepo {
 	return &tripRepositoryImpl{
-		Tx:                           d.Tx,
-		logger:                       logger.Named("repo.trip"),
-		authRepositoryImpl:           new(authRepositoryImpl),
-		dailyTripRepositoryImpl:      new(dailyTripRepositoryImpl),
-		dailyItineraryRepositoryImpl: new(dailyItineraryRepositoryImpl),
+		Tx:     d.Tx,
+		logger: logger.Named("repo.trip"),
 	}
 }
 
 type tripRepositoryImpl struct {
 	*data.Tx
 	logger *zap.SugaredLogger
-
-	authRepositoryImpl           repository.BaseRepo[*ent.User, *do.User]
-	dailyTripRepositoryImpl      repository.BaseRepo[*ent.DailyTrip, *do.DailyTrip]
-	dailyItineraryRepositoryImpl repository.BaseRepo[*ent.DailyItinerary, *do.DailyItinerary]
 }
 
 func (r *tripRepositoryImpl) ToEntity(po *ent.Trip) *do.Trip {
@@ -38,20 +32,7 @@ func (r *tripRepositoryImpl) ToEntity(po *ent.Trip) *do.Trip {
 		return nil
 	}
 
-	return &do.Trip{
-		ID:             po.ID,
-		CreatedAt:      po.CreatedAt,
-		UpdatedAt:      po.UpdatedAt,
-		UserID:         po.UserID,
-		Status:         po.Status,
-		Title:          po.Title,
-		Description:    po.Description,
-		StartDate:      po.StartDate,
-		EndDate:        po.EndDate,
-		User:           r.authRepositoryImpl.ToEntity(po.Edges.User),
-		DailyTrip:      r.dailyTripRepositoryImpl.ToEntities(po.Edges.DailyTrip),
-		DailyItinerary: r.dailyItineraryRepositoryImpl.ToEntities(po.Edges.DailyItinerary),
-	}
+	return build.TripRepositoryImplToEntity(po)
 }
 
 func (r *tripRepositoryImpl) ToEntities(pos []*ent.Trip) []*do.Trip {
@@ -59,11 +40,7 @@ func (r *tripRepositoryImpl) ToEntities(pos []*ent.Trip) []*do.Trip {
 		return nil
 	}
 
-	list := make([]*do.Trip, 0, len(pos))
-	for _, v := range pos {
-		list = append(list, r.ToEntity(v))
-	}
-	return list
+	return build.TripRepositoryImplToEntities(pos)
 }
 
 func (r *tripRepositoryImpl) CreateTrip(ctx context.Context, trip *do.Trip) (*do.Trip, error) {
@@ -121,7 +98,7 @@ func (r *tripRepositoryImpl) CreateDailyTrip(ctx context.Context, dailyTrip *do.
 		SetDate(dailyTrip.Date).
 		SetNotes(dailyTrip.Notes).
 		Save(ctx)
-	return r.dailyTripRepositoryImpl.ToEntity(row), err
+	return build.DailyTripRepositoryImplToEntity(row), err
 }
 
 func (r *tripRepositoryImpl) GetDailyTrip(ctx context.Context, tripId, dailyId uuid.UUID) (*do.DailyTrip, error) {
@@ -129,7 +106,7 @@ func (r *tripRepositoryImpl) GetDailyTrip(ctx context.Context, tripId, dailyId u
 
 	row, err := cli.Query().
 		Where(dailytrip.ID(dailyId), dailytrip.HasTripWith(trip.ID(tripId))).Only(ctx)
-	return r.dailyTripRepositoryImpl.ToEntity(row), err
+	return build.DailyTripRepositoryImplToEntity(row), err
 }
 
 func (r *tripRepositoryImpl) UpdateDailyTrip(ctx context.Context, dailyTrip *do.DailyTrip) (*do.DailyTrip, error) {
@@ -141,7 +118,7 @@ func (r *tripRepositoryImpl) UpdateDailyTrip(ctx context.Context, dailyTrip *do.
 		SetNotes(dailyTrip.Notes).
 		SetUpdatedAt(dailyTrip.UpdatedAt).
 		Save(ctx)
-	return r.dailyTripRepositoryImpl.ToEntity(row), err
+	return build.DailyTripRepositoryImplToEntity(row), err
 }
 
 func (r *tripRepositoryImpl) DeleteDailyTrip(ctx context.Context, id uuid.UUID) error {
@@ -154,5 +131,5 @@ func (r *tripRepositoryImpl) ListDailyTrips(ctx context.Context, tripId uuid.UUI
 	cli := r.GetTx(ctx).DailyTrip
 
 	rows, err := cli.Query().Where(dailytrip.TripID(tripId)).All(ctx)
-	return r.dailyTripRepositoryImpl.ToEntities(rows), err
+	return build.DailyTripRepositoryImplToEntities(rows), err
 }
