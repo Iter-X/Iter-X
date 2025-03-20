@@ -79,3 +79,6 @@ other = "Delete daily trip failed"
 [SEARCH_POI_FAILED]
 other = "Search failed"
 
+[CREATE_DAILY_ITINERARY_FAILED]
+other = "Create daily itinerary failed"
+

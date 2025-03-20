@@ -46,31 +46,69 @@ func (b *Trip) CreateTrip(ctx context.Context, req *bo.CreateTripRequest) (*do.T
 			return nil, xerr.ErrorCreateTripFailed()
 		}
 
-		// Execute the PlanAgent
-		result, err := planAgent.Execute(ctx, &do.PlanAgentInput{
+		// 执行PlanAgent
+		planAgentInput := &do.PlanAgentInput{
 			Destination: req.Destination,
 			StartDate:   req.StartDate,
 			EndDate:     req.EndDate,
 			Duration:    req.Duration,
-		})
+		}
+
+		planAgentOutput, err := planAgent.Execute(ctx, planAgentInput)
 		if err != nil {
 			b.logger.Errorw("failed to plan trip with PlanAgent", "err", err)
 			return nil, xerr.ErrorCreateTripFailed()
 		}
-		if result == nil {
-			b.logger.Error("failed to plan trip with PlanAgent because result is nil")
-			return nil, xerr.ErrorCreateTripFailed()
-		}
-		rawTrip, ok := result.(*do.PlanAgentOutput)
+
+		rawTrip, ok := planAgentOutput.(*do.PlanAgentOutput)
 		if !ok {
-			b.logger.Error("failed to cast PlanAgent output to PlanAgentOutput")
+			b.logger.Errorw("failed to cast PlanAgentOutput", "err", err)
 			return nil, xerr.ErrorCreateTripFailed()
 		}
 
-		// Create the trip
-		_ = claims.UID
-		_ = rawTrip
-		return nil, nil
+		trip := &do.Trip{
+			UserID:    claims.UID,
+			Title:     req.Destination,
+			StartDate: req.StartDate,
+			EndDate:   req.EndDate,
+		}
+
+		createdTrip, err := b.tripRepo.CreateTrip(ctx, trip)
+		if err != nil {
+			b.logger.Errorw("failed to create trip", "err", err)
+			return nil, xerr.ErrorCreateTripFailed()
+		}
+
+		for _, dailyPlan := range rawTrip.DailyPlans {
+			dailyTrip := &do.DailyTrip{
+				TripID: createdTrip.ID,
+				Day:    int32(dailyPlan.Day),
+				Notes:  dailyPlan.Title,
+			}
+
+			createdDailyTrip, err := b.tripRepo.CreateDailyTrip(ctx, dailyTrip)
+			if err != nil {
+				b.logger.Errorw("failed to create daily trip", "err", err)
+				return nil, xerr.ErrorCreateDailyTripFailed()
+			}
+
+			for _, act := range dailyPlan.Activities {
+				dailyItinerary := &do.DailyItinerary{
+					TripID:      createdTrip.ID,
+					DailyTripID: createdDailyTrip.ID,
+					PoiID:       act.Id,
+					Notes:       act.Notes,
+				}
+
+				_, err = b.tripRepo.CreateDailyItinerary(ctx, dailyItinerary)
+				if err != nil {
+					b.logger.Errorw("failed to create daily itinerary", "err", err)
+					return nil, xerr.ErrorCreateDailyItineraryFailed()
+				}
+			}
+		}
+
+		return createdTrip, nil
 	case cnst.TripCreationMethodCard:
 		// TODO: Handle card-based creation
 		return nil, xerr.ErrorCreateTripFailed()

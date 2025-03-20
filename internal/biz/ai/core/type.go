@@ -9,6 +9,7 @@ type Prompt interface {
 	GetSystemPrompt() string
 	GetUserPrompt() string
 	GetVersion() string
+	GetRefinePrompt() string
 }
 
 type (

@@ -104,14 +104,16 @@ func (pm *PromptManager) ListVersions(agentName string) ([]PromptVersion, error)
 type Prompt struct {
 	systemPrompt string
 	userPrompt   string
+	refinePrompt string
 	version      string
 }
 
 // NewPrompt creates a new Prompt instance
-func NewPrompt(system, user, version string) core.Prompt {
+func NewPrompt(system, user, refine, version string) core.Prompt {
 	return &Prompt{
 		systemPrompt: system,
 		userPrompt:   user,
+		refinePrompt: refine,
 		version:      version,
 	}
 }
@@ -124,6 +126,11 @@ func (p *Prompt) GetSystemPrompt() string {
 // GetUserPrompt returns the user prompt
 func (p *Prompt) GetUserPrompt() string {
 	return p.userPrompt
+}
+
+// GetRefinePrompt returns the refine prompt
+func (p *Prompt) GetRefinePrompt() string {
+	return p.refinePrompt
 }
 
 // GetVersion returns the prompt version

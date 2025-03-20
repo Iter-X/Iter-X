@@ -11,11 +11,28 @@ agent:
         user_prompt: |
           请根据以下需求规划行程：
           目的地：{{.Destination}}
-          {{if .StartDate}}开始日期：{{.StartDate}}
-          {{if .EndDate}}结束日期：{{.EndDate}}
-          出行天数：{{.Duration}}
+          {{if .StartDate}}开始日期：{{.StartDate}}{{end}}
+          {{if .EndDate}}结束日期：{{.EndDate}}{{end}}
+          {{if ne .Duration 0}}出行天数：{{.Duration}}{{end}}
           {{if .Preferences}}偏好：{{.Preferences}}{{end}}
           {{if .Budget}}预算：{{.Budget}}{{end}}
+        refine_prompt: |
+          这里根据activity.name从数据库查询出来的id列表，请把前面的activity对应成具体的id
+          {{range .Activities}}
+          {{.ID}}: {{.Name}}
+          {{end}}
+          如果你发现有不存在的点位，id就留空表示
+          请只返回每天的activities数组，格式如下：
+          {
+            "daily_plans": [
+              {
+                "day": 1,
+                "activities": [
+                  {"id": "xxx", "name": "xxx", "time": "09:00", "duration": 10800, "notes": "xxx"}
+                ]
+              }
+            ]
+          }
       tools:
         - name: Completion
           enabled: true

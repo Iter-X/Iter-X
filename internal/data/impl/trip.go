@@ -133,3 +133,15 @@ func (r *tripRepositoryImpl) ListDailyTrips(ctx context.Context, tripId uuid.UUI
 	rows, err := cli.Query().Where(dailytrip.TripID(tripId)).All(ctx)
 	return build.DailyTripRepositoryImplToEntities(rows), err
 }
+
+func (r *tripRepositoryImpl) CreateDailyItinerary(ctx context.Context, dailyItinerary *do.DailyItinerary) (*do.DailyItinerary, error) {
+	cli := r.GetTx(ctx).DailyItinerary
+
+	row, err := cli.Create().
+		SetTripID(dailyItinerary.TripID).
+		SetDailyTripID(dailyItinerary.DailyTripID).
+		SetPoiID(dailyItinerary.PoiID).
+		SetNotes(dailyItinerary.Notes).
+		Save(ctx)
+	return build.DailyItineraryRepositoryImplToEntity(row), err
+}

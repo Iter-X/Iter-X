@@ -1,6 +1,10 @@
 package do
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type (
 	PlanAgentInput struct {
@@ -21,6 +25,7 @@ type (
 		Activities []*Activity
 	}
 	Activity struct {
+		Id       uuid.UUID
 		Time     time.Time
 		Name     string
 		Duration time.Duration

@@ -15,7 +15,9 @@ import (
 
 	"text/template"
 
+	"github.com/google/uuid"
 	"github.com/iter-x/iter-x/internal/biz/ai/core"
+	"github.com/iter-x/iter-x/internal/biz/repository"
 )
 
 type (
@@ -23,6 +25,7 @@ type (
 	agent struct {
 		*core.BaseAgent
 		toolHub *tool.Hub
+		poiRepo repository.PointsOfInterestRepo
 	}
 
 	completionResp struct {
@@ -40,6 +43,22 @@ type (
 		Notes         string `json:"notes"`    // e.g. "Visit the world-famous palace and gardens"
 	}
 
+	refinedResp struct {
+		DailyPlans []*refinedDailyPlan `json:"daily_plans"`
+	}
+	refinedDailyPlan struct {
+		Day        int                `json:"day"`
+		Title      string             `json:"title"`
+		Activities []*refinedActivity `json:"activities"`
+	}
+	refinedActivity struct {
+		ID            string `json:"id"`
+		Name          string `json:"name"`
+		Time          string `json:"time"`
+		DurationInSec uint64 `json:"duration"`
+		Notes         string `json:"notes"`
+	}
+
 	userPromptTpl struct {
 		Destination string
 		StartDate   time.Time
@@ -48,24 +67,24 @@ type (
 		Preferences string
 		Budget      float64
 	}
+
+	briefPOI struct {
+		ID   string
+		Name string
+	}
 )
 
 // NewAgent creates a new PlanAgent
-func NewAgent(name string, toolHub *tool.Hub, prompt core.Prompt) core.Agent {
+func NewAgent(name string, toolHub *tool.Hub, prompt core.Prompt, poiRepo repository.PointsOfInterestRepo) core.Agent {
 	return &agent{
 		BaseAgent: core.NewBaseAgent(name, prompt),
 		toolHub:   toolHub,
+		poiRepo:   poiRepo,
 	}
 }
 
 // Execute implements the main logic of PlanAgent
 func (a *agent) Execute(ctx context.Context, inputAny any) (any, error) {
-	// Implement the specific travel planning logic here
-	// 1. Parse input parameters
-	// 2. Use the toolset for planning
-	// 3. Generate travel plan
-	// 4. Return the result
-
 	input, ok := inputAny.(*do.PlanAgentInput)
 	if !ok {
 		return nil, fmt.Errorf("invalid input type: %T", inputAny)
@@ -77,12 +96,10 @@ func (a *agent) Execute(ctx context.Context, inputAny any) (any, error) {
 		return nil, err
 	}
 
-	// 处理prompt模板
+	// Generate prompt
 	prompt := a.GetPrompt()
 	systemPrompt := prompt.GetSystemPrompt()
 	userPrompt := prompt.GetUserPrompt()
-
-	// 创建模板数据
 	tmplData := userPromptTpl{
 		Destination: input.Destination,
 		StartDate:   input.StartDate,
@@ -91,8 +108,6 @@ func (a *agent) Execute(ctx context.Context, inputAny any) (any, error) {
 		Preferences: input.Preferences,
 		Budget:      input.Budget,
 	}
-
-	// 处理用户prompt模板
 	tmpl, err := template.New("user_prompt").Parse(userPrompt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse user prompt template: %v", err)
@@ -103,7 +118,6 @@ func (a *agent) Execute(ctx context.Context, inputAny any) (any, error) {
 		return nil, fmt.Errorf("failed to execute user prompt template: %v", err)
 	}
 
-	// 组装completion input
 	completionInput := &do.ToolCompletionInput{
 		Messages: []do.ToolCompletionInputMessage{
 			{
@@ -116,7 +130,6 @@ func (a *agent) Execute(ctx context.Context, inputAny any) (any, error) {
 			},
 		},
 	}
-
 	resp, err := completionTool.Execute(ctx, completionInput)
 	if err != nil {
 		return nil, err
@@ -143,10 +156,127 @@ func (a *agent) Execute(ctx context.Context, inputAny any) (any, error) {
 	activityNames = lol.UniqSlice(activityNames)
 
 	// Search for all activities in the database
-	// TODO: Implement activity search
+	pois, err := a.poiRepo.SearchPointsOfInterestByNamesFromES(ctx, activityNames)
+	if err != nil {
+		return nil, fmt.Errorf("failed to search points of interest: %v", err)
+	}
 
-	// Readjust the activities based on the search results
+	// Create a map of name to POI for quick lookup
+	poiMap := make(map[string]*do.PointsOfInterest)
+	for _, poi := range pois {
+		poiMap[poi.Name] = poi
+	}
 
-	// Return the final trip plan
-	return nil, nil
+	// Generate refine prompt with POI information
+	refinePrompt := a.GetPrompt().GetRefinePrompt()
+	type refinePromptData struct {
+		Activities []struct {
+			ID   string
+			Name string
+		}
+	}
+	refineData := refinePromptData{
+		Activities: make([]struct {
+			ID   string
+			Name string
+		}, 0, len(pois)),
+	}
+
+	for _, poi := range pois {
+		refineData.Activities = append(refineData.Activities, briefPOI{
+			ID:   poi.ID.String(),
+			Name: poi.Name,
+		})
+	}
+
+	tmpl, err = template.New("refine_prompt").Parse(refinePrompt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse refine prompt template: %v", err)
+	}
+
+	var refinePromptBuf bytes.Buffer
+	if err := tmpl.Execute(&refinePromptBuf, refineData); err != nil {
+		return nil, fmt.Errorf("failed to execute refine prompt template: %v", err)
+	}
+
+	// Get refined plan with POI IDs
+	completionInput = &do.ToolCompletionInput{
+		Messages: []do.ToolCompletionInputMessage{
+			{
+				Role:    do.CompletionRoleSystem,
+				Content: systemPrompt,
+			},
+			{
+				Role:    do.CompletionRoleUser,
+				Content: userPromptBuf.String(),
+			},
+			{
+				Role:    do.CompletionRoleAssistant,
+				Content: completionOutput.Content,
+			},
+			{
+				Role:    do.CompletionRoleUser,
+				Content: refinePromptBuf.String(),
+			},
+		},
+	}
+	resp, err = completionTool.Execute(ctx, completionInput)
+	if err != nil {
+		return nil, err
+	}
+
+	completionOutput, ok = resp.(*do.ToolCompletionOutput)
+	if !ok {
+		return nil, fmt.Errorf("invalid completion response type: %T", resp)
+	}
+
+	var refinedTrip refinedResp
+	if err := json.Unmarshal([]byte(completionOutput.Content), &refinedTrip); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal refined completion output: %v", err)
+	}
+
+	// Convert to PlanAgentOutput
+	result := &do.PlanAgentOutput{
+		DailyPlans: make([]*do.DailyPlan, 0, len(refinedTrip.DailyPlans)),
+	}
+
+	for _, dp := range refinedTrip.DailyPlans {
+		dailyPlan := &do.DailyPlan{
+			Day:        dp.Day,
+			Date:       input.StartDate.AddDate(0, 0, dp.Day-1),
+			Title:      dp.Title,
+			Activities: make([]*do.Activity, 0, len(dp.Activities)),
+		}
+
+		for _, act := range dp.Activities {
+			// Parse time string to time.Time
+			timeStr := fmt.Sprintf("%s %s", dailyPlan.Date.Format("2006-01-02"), act.Time)
+			parsedTime, err := time.Parse("2006-01-02 15:04", timeStr)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse time %s: %v", act.Time, err)
+			}
+
+			// Parse POI ID
+			var poiID uuid.UUID
+			if act.ID != "" {
+				poiID, err = uuid.Parse(act.ID)
+				if err != nil {
+					return nil, fmt.Errorf("failed to parse POI ID %s: %v", act.ID, err)
+				}
+			}
+
+			duration := time.Duration(act.DurationInSec) * time.Second
+			activity := &do.Activity{
+				Id:       poiID,
+				Time:     parsedTime,
+				Name:     act.Name,
+				Duration: duration,
+				Notes:    act.Notes,
+			}
+			dailyPlan.Activities = append(dailyPlan.Activities, activity)
+		}
+		result.DailyPlans = append(result.DailyPlans, dailyPlan)
+	}
+
+	return result, nil
 }

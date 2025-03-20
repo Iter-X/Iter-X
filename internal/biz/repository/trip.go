@@ -31,6 +31,8 @@ type Trip[T *ent.Trip, R *do.Trip] interface {
 	DeleteDailyTrip(ctx context.Context, id uuid.UUID) error
 
 	ListDailyTrips(ctx context.Context, tripId uuid.UUID) ([]*do.DailyTrip, error)
+
+	CreateDailyItinerary(ctx context.Context, dailyItinerary *do.DailyItinerary) (*do.DailyItinerary, error)
 }
 
 type TripRepo = Trip[*ent.Trip, *do.Trip]

@@ -158,6 +158,7 @@ message Agent {
   message PromptConfig {
     string system_prompt = 1;
     string user_prompt = 2;
+    string refine_prompt = 3;
   }
 
   enum ToolName {

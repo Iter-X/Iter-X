@@ -14,7 +14,7 @@ import (
 )
 
 type Trip struct {
-	v1.UnimplementedTripServiceServer
+	tripV1.UnimplementedTripServiceServer
 	tripBiz *biz.Trip
 }
 
@@ -24,17 +24,17 @@ func NewTrip(tripBiz *biz.Trip) *Trip {
 	}
 }
 
-func to(method v1.TripCreationMethod) cnst.TripCreationMethod {
+func to(method tripV1.TripCreationMethod) cnst.TripCreationMethod {
 	switch method {
-	case v1.TripCreationMethod_MANUAL:
+	case tripV1.TripCreationMethod_MANUAL:
 		return cnst.TripCreationMethodManual
-	case v1.TripCreationMethod_CARD:
+	case tripV1.TripCreationMethod_CARD:
 		return cnst.TripCreationMethodCard
-	case v1.TripCreationMethod_EXTERNAL_LINK:
+	case tripV1.TripCreationMethod_EXTERNAL_LINK:
 		return cnst.TripCreationMethodExternalLink
-	case v1.TripCreationMethod_IMAGE:
+	case tripV1.TripCreationMethod_IMAGE:
 		return cnst.TripCreationMethodImage
-	case v1.TripCreationMethod_VOICE:
+	case tripV1.TripCreationMethod_VOICE:
 		return cnst.TripCreationMethodVoice
 	default:
 		return cnst.TripCreationMethodUnspecified
