@@ -4,28 +4,26 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/iter-x/iter-x/internal/conf"
-	"github.com/iter-x/iter-x/internal/data/cache"
 	"go.uber.org/zap"
 
 	"github.com/iter-x/iter-x/internal/biz/do"
 	"github.com/iter-x/iter-x/internal/biz/repository"
 	"github.com/iter-x/iter-x/internal/common/xerr"
+	"github.com/iter-x/iter-x/internal/conf"
 	"github.com/iter-x/iter-x/internal/data"
+	"github.com/iter-x/iter-x/internal/data/cache"
 	"github.com/iter-x/iter-x/internal/data/ent"
 	"github.com/iter-x/iter-x/internal/data/ent/refreshtoken"
 	"github.com/iter-x/iter-x/internal/data/ent/user"
-	"github.com/iter-x/iter-x/pkg/vobj"
+	"github.com/iter-x/iter-x/internal/data/impl/build"
 )
 
 func NewAuth(c *conf.Auth, d *data.Data, logger *zap.SugaredLogger) repository.AuthRepo {
 	return &authRepositoryImpl{
-		smsConf:            c.GetSmsCode(),
-		Tx:                 d.Tx,
-		Cacher:             d.Cache,
-		logger:             logger.Named("repo.auth"),
-		refreshTokenImpl:   new(refreshTokenImpl),
-		tripRepositoryImpl: new(tripRepositoryImpl),
+		smsConf: c.GetSmsCode(),
+		Tx:      d.Tx,
+		Cacher:  d.Cache,
+		logger:  logger.Named("repo.auth"),
 	}
 }
 
@@ -34,42 +32,20 @@ type authRepositoryImpl struct {
 	*data.Tx
 	cache.Cacher
 	logger *zap.SugaredLogger
-
-	refreshTokenImpl   repository.BaseRepo[*ent.RefreshToken, *do.RefreshToken]
-	tripRepositoryImpl repository.BaseRepo[*ent.Trip, *do.Trip]
 }
 
 func (r *authRepositoryImpl) ToEntity(po *ent.User) *do.User {
 	if po == nil {
 		return nil
 	}
-	return &do.User{
-		ID:            po.ID,
-		CreatedAt:     po.CreatedAt,
-		UpdatedAt:     po.UpdatedAt,
-		Status:        vobj.UserStatus(po.Status),
-		Username:      po.Username,
-		Password:      po.Password,
-		Salt:          po.Salt,
-		Nickname:      po.Nickname,
-		Remark:        po.Remark,
-		Phone:         po.Phone,
-		Email:         po.Email,
-		AvatarURL:     po.AvatarURL,
-		RefreshTokens: r.refreshTokenImpl.ToEntities(po.Edges.RefreshToken),
-		Trips:         r.tripRepositoryImpl.ToEntities(po.Edges.Trip),
-	}
+	return build.AuthRepositoryImplToEntity(po)
 }
 
 func (r *authRepositoryImpl) ToEntities(pos []*ent.User) []*do.User {
 	if pos == nil {
 		return nil
 	}
-	list := make([]*do.User, 0, len(pos))
-	for _, v := range pos {
-		list = append(list, r.ToEntity(v))
-	}
-	return list
+	return build.AuthRepositoryImplToEntities(pos)
 }
 
 func (r *authRepositoryImpl) FindByEmail(ctx context.Context, email string) (*do.User, error) {
@@ -118,14 +94,14 @@ func (r *authRepositoryImpl) GetRefreshTokenByUserId(ctx context.Context, userId
 	cli := r.GetTx(ctx).RefreshToken
 
 	row, err := cli.Query().Where(refreshtoken.UserID(userId)).Only(ctx)
-	return r.refreshTokenImpl.ToEntity(row), err
+	return build.RefreshTokenImplToEntity(row), err
 }
 
 func (r *authRepositoryImpl) GetRefreshToken(ctx context.Context, token string) (*do.RefreshToken, error) {
 	cli := r.GetTx(ctx).RefreshToken
 
 	row, err := cli.Query().Where(refreshtoken.TokenEQ(token)).Only(ctx)
-	return r.refreshTokenImpl.ToEntity(row), err
+	return build.RefreshTokenImplToEntity(row), err
 }
 
 func (r *authRepositoryImpl) SaveRefreshToken(ctx context.Context, val *do.RefreshToken) error {

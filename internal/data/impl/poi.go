@@ -11,18 +11,14 @@ import (
 	"github.com/iter-x/iter-x/internal/data"
 	"github.com/iter-x/iter-x/internal/data/ent"
 	"github.com/iter-x/iter-x/internal/data/ent/pointsofinterest"
+	"github.com/iter-x/iter-x/internal/data/impl/build"
 )
 
 func NewPointsOfInterest(d *data.Data, cityRepository repository.CityRepo, logger *zap.SugaredLogger) repository.PointsOfInterestRepo {
 	return &pointsOfInterestRepositoryImpl{
-		Tx:                           d.Tx,
-		logger:                       logger.Named("repo.poi"),
-		cityRepository:               cityRepository,
-		cityRepositoryImpl:           new(cityRepositoryImpl),
-		stateRepositoryImpl:          new(stateRepositoryImpl),
-		countryRepositoryImpl:        new(countryRepositoryImpl),
-		continentRepositoryImpl:      new(continentRepositoryImpl),
-		dailyItineraryRepositoryImpl: new(dailyItineraryRepositoryImpl),
+		Tx:             d.Tx,
+		logger:         logger.Named("repo.poi"),
+		cityRepository: cityRepository,
 	}
 }
 
@@ -31,54 +27,20 @@ type pointsOfInterestRepositoryImpl struct {
 	logger *zap.SugaredLogger
 
 	cityRepository repository.CityRepo
-
-	cityRepositoryImpl           repository.BaseRepo[*ent.City, *do.City]
-	stateRepositoryImpl          repository.BaseRepo[*ent.State, *do.State]
-	countryRepositoryImpl        repository.BaseRepo[*ent.Country, *do.Country]
-	continentRepositoryImpl      repository.BaseRepo[*ent.Continent, *do.Continent]
-	dailyItineraryRepositoryImpl repository.BaseRepo[*ent.DailyItinerary, *do.DailyItinerary]
 }
 
 func (r *pointsOfInterestRepositoryImpl) ToEntity(po *ent.PointsOfInterest) *do.PointsOfInterest {
 	if po == nil {
 		return nil
 	}
-	return &do.PointsOfInterest{
-		ID:                         po.ID,
-		CreatedAt:                  po.CreatedAt,
-		UpdatedAt:                  po.UpdatedAt,
-		Name:                       po.Name,
-		NameEn:                     po.NameEn,
-		NameCn:                     po.NameCn,
-		Description:                po.Description,
-		Address:                    po.Address,
-		Latitude:                   po.Latitude,
-		Longitude:                  po.Longitude,
-		Type:                       po.Type,
-		Category:                   po.Category,
-		Rating:                     po.Rating,
-		RecommendedDurationMinutes: po.RecommendedDurationMinutes,
-		CityID:                     po.CityID,
-		StateID:                    po.StateID,
-		CountryID:                  po.CountryID,
-		ContinentID:                po.ContinentID,
-		City:                       r.cityRepositoryImpl.ToEntity(po.Edges.City),
-		State:                      r.stateRepositoryImpl.ToEntity(po.Edges.State),
-		Country:                    r.countryRepositoryImpl.ToEntity(po.Edges.Country),
-		Continent:                  r.continentRepositoryImpl.ToEntity(po.Edges.Continent),
-		DailyItinerary:             r.dailyItineraryRepositoryImpl.ToEntities(po.Edges.DailyItinerary),
-	}
+	return build.PointsOfInterestRepositoryImplToEntity(po)
 }
 
 func (r *pointsOfInterestRepositoryImpl) ToEntities(pos []*ent.PointsOfInterest) []*do.PointsOfInterest {
 	if len(pos) == 0 {
 		return nil
 	}
-	list := make([]*do.PointsOfInterest, 0, len(pos))
-	for _, v := range pos {
-		list = append(list, r.ToEntity(v))
-	}
-	return list
+	return build.PointsOfInterestRepositoryImplToEntities(pos)
 }
 
 func (r *pointsOfInterestRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params *bo.SearchPointsOfInterestParams) ([]*do.PointsOfInterest, error) {
