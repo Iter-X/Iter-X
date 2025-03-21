@@ -25,7 +25,7 @@ func NewCompletion(cfg *conf.Agent_ToolConfig) core.Tool {
 
 type completionImpl struct {
 	*core.BaseTool
-	cli   *openai.Client
+	cli   openai.Client
 	model string
 }
 
@@ -52,8 +52,8 @@ func (l completionImpl) Execute(ctx context.Context, inputAny any) (any, error) 
 	}
 
 	resp, err := l.cli.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
-		Messages: openai.F(messages),
-		Model:    openai.F(l.model),
+		Messages: messages,
+		Model:    l.model,
 	})
 	if err != nil {
 		return nil, err
