@@ -14,6 +14,7 @@ init:
 	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.25.1
 	go install github.com/protoc-gen/protoc-gen-validatex@v0.8.4
 	go install github.com/protoc-gen/protoc-gen-go-errors@v0.3.2
+	go install github.com/moon-monitor/stringer@latest
 	go install github.com/google/wire/cmd/wire@v0.6.0
 	go install github.com/protoc-gen/protoc-gen-openapiv3@v0.7.5
 	go install mvdan.cc/gofumpt@latest

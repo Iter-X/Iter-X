@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-//go:generate go run ../../cmd/stringer/cmd.go -type=ClientType -linecomment -output=client_type.string.go
+//go:generate stringer -type=ClientType -linecomment -output=client_type.string.go
 type ClientType int
 
 const (
