@@ -1,6 +1,3 @@
-//go:build ignore
-// +build ignore
-
 // copy from: golang.org/x/tools/cmd/stringer
 package main
 
