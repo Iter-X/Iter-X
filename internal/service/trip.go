@@ -8,6 +8,7 @@ import (
 	tripV1 "github.com/iter-x/iter-x/internal/api/trip/v1"
 	"github.com/iter-x/iter-x/internal/biz"
 	"github.com/iter-x/iter-x/internal/biz/bo"
+	"github.com/iter-x/iter-x/internal/common/cnst"
 	"github.com/iter-x/iter-x/internal/common/xerr"
 	"github.com/iter-x/iter-x/internal/service/build"
 )
@@ -23,14 +24,31 @@ func NewTrip(tripBiz *biz.Trip) *Trip {
 	}
 }
 
-func (s *Trip) CreateTrip(ctx context.Context, req *tripV1.CreateTripRequest) (*tripV1.CreateTripResponse, error) {
-	params := &bo.CreateTripRequest{
-		Title:       req.GetTitle(),
-		Description: req.GetDescription(),
-		StartDate:   req.GetStartTs().AsTime(),
-		EndDate:     req.GetEndTs().AsTime(),
+func to(method tripV1.TripCreationMethod) cnst.TripCreationMethod {
+	switch method {
+	case tripV1.TripCreationMethod_MANUAL:
+		return cnst.TripCreationMethodManual
+	case tripV1.TripCreationMethod_CARD:
+		return cnst.TripCreationMethodCard
+	case tripV1.TripCreationMethod_EXTERNAL_LINK:
+		return cnst.TripCreationMethodExternalLink
+	case tripV1.TripCreationMethod_IMAGE:
+		return cnst.TripCreationMethodImage
+	case tripV1.TripCreationMethod_VOICE:
+		return cnst.TripCreationMethodVoice
+	default:
+		return cnst.TripCreationMethodUnspecified
 	}
-	trip, err := s.tripBiz.CreateTrip(ctx, params)
+}
+
+func (s *Trip) CreateTrip(ctx context.Context, req *tripV1.CreateTripRequest) (*tripV1.CreateTripResponse, error) {
+	trip, err := s.tripBiz.CreateTrip(ctx, &bo.CreateTripRequest{
+		CreationMethod: to(req.CreationMethod),
+		Destination:    req.Destination,
+		StartDate:      req.StartTs.AsTime(),
+		EndDate:        req.EndTs.AsTime(),
+		Duration:       int(req.Duration),
+	})
 	if err != nil {
 		return nil, err
 	}

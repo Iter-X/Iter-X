@@ -7,7 +7,7 @@ import "validatex/validatex.proto";
 import "cnst/constant.proto";
 import "openapiv3/openapiv3.proto";
 
-option go_package = "github.com/iter-x/server/internal/api/auth/v1;v1";
+option go_package = "github.com/iter-x/iter-x/internal/api/auth/v1;v1";
 
 service AuthService {
   rpc SignIn (SignInRequest) returns (SignInResponse) {

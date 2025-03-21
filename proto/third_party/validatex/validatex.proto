@@ -3,6 +3,7 @@ syntax = "proto3";
 package validatex;
 
 import "google/protobuf/descriptor.proto";
+import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/protoc-gen/protoc-gen-validatex/validatex;validatex";
 
@@ -15,9 +16,43 @@ message StringRules {
   bool uuid = 6;
 }
 
+message NumericRules {
+  double gt = 1;
+  double gte = 2;
+  double lt = 3;
+  double lte = 4;
+  bool positive = 5;
+  bool negative = 6;
+  double equal_to = 7;
+  bool non_zero = 8;
+}
+
+message TimestampRules {
+  google.protobuf.Timestamp min_time = 1;
+  google.protobuf.Timestamp max_time = 2;
+  bool required_now = 3;
+  bool required_past = 4;
+  bool required_future = 5;
+}
+
+message RepeatedRules {
+  uint32 min_items = 1;
+  uint32 max_items = 2;
+  uint32 exact_items = 3;
+  bool unique = 4;
+}
+
+message BoolRules {
+  bool required = 1;
+}
+
 message FieldRules {
   oneof type {
     StringRules string = 1;
+    NumericRules numeric = 2;
+    TimestampRules timestamp = 3;
+    RepeatedRules repeated = 4;
+    BoolRules bool = 5;
   }
 }
 

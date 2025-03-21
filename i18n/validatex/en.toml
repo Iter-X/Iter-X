@@ -1,5 +1,44 @@
+[BoolRequired]
+other = "must be true"
+
 [EmailInvalid]
 other = "must be a valid email address"
+
+[NumericEqualTo]
+other = "must be equal to {{.Value}}"
+
+[NumericGt]
+other = "must be greater than {{.Value}}"
+
+[NumericGte]
+other = "must be greater than or equal to {{.Value}}"
+
+[NumericLt]
+other = "must be less than {{.Value}}"
+
+[NumericLte]
+other = "must be less than or equal to {{.Value}}"
+
+[NumericNegative]
+other = "must be negative"
+
+[NumericNonZero]
+other = "must not be zero"
+
+[NumericPositive]
+other = "must be positive"
+
+[RepeatedExact]
+other = "must have exactly {{.ExactItems}} items"
+
+[RepeatedMax]
+other = "must have at most {{.MaxItems}} items"
+
+[RepeatedMin]
+other = "must have at least {{.MinItems}} items"
+
+[RepeatedUnique]
+other = "must contain unique items"
 
 [StringLen]
 other = "must be exactly {{.Len}} characters long"
@@ -12,6 +51,21 @@ other = "must be at least {{.MinLen}} characters long"
 
 [StringNonEmpty]
 other = "cannot be empty"
+
+[TimestampFuture]
+other = "must be in the future"
+
+[TimestampMax]
+other = "must be before {{.MaxTime}}"
+
+[TimestampMin]
+other = "must be after {{.MinTime}}"
+
+[TimestampNow]
+other = "must be within one minute of current time"
+
+[TimestampPast]
+other = "must be in the past"
 
 [UUIDInvalid]
 other = "must be a valid UUID"

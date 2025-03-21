@@ -66,3 +66,5 @@ Temporary Items
 /internal/common/xerr/*
 /internal/conf/*.pb*.go
 /bin
+
+/cache

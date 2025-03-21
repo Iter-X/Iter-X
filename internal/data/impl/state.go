@@ -86,8 +86,8 @@ func (s *stateRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params
 }
 
 // ListStates lists states/provinces, optionally filtered by country
-func (r *stateRepositoryImpl) ListStates(ctx context.Context, params *bo.ListStatesParams) ([]*do.State, int64, error) {
-	query := r.GetTx(ctx).State.Query()
+func (s *stateRepositoryImpl) ListStates(ctx context.Context, params *bo.ListStatesParams) ([]*do.State, int64, error) {
+	query := s.GetTx(ctx).State.Query()
 
 	// Filter by country if specified
 	if params.CountryID > 0 {
@@ -120,8 +120,8 @@ func (r *stateRepositoryImpl) ListStates(ctx context.Context, params *bo.ListSta
 
 	// Convert to DO objects
 	result := make([]*do.State, len(states))
-	for i, s := range states {
-		result[i] = r.ToEntity(s)
+	for i, v := range states {
+		result[i] = s.ToEntity(v)
 	}
 
 	return result, int64(total), nil

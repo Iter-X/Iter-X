@@ -6,6 +6,7 @@ package main
 import (
 	"github.com/google/wire"
 	"github.com/iter-x/iter-x/internal/biz"
+	"github.com/iter-x/iter-x/internal/biz/ai"
 	"github.com/iter-x/iter-x/internal/conf"
 	"github.com/iter-x/iter-x/internal/data"
 	"github.com/iter-x/iter-x/internal/data/impl"
@@ -17,6 +18,7 @@ import (
 
 func wireApp(env conf.Environment, i18nCfg *conf.I18N, grpcCfg *conf.Server_GRPC, httpCfg *conf.Server_HTTP, d *conf.Data, authCfg *conf.Auth, agentCfg *conf.Agent, logger *zap.SugaredLogger) (*App, func(), error) {
 	panic(wire.Build(
+		ai.ProviderSet,
 		data.ProviderSet,
 		impl.ProviderSet,
 		biz.ProviderSet,

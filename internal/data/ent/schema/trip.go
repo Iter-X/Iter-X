@@ -22,7 +22,7 @@ func (Trip) Fields() []ent.Field {
 		field.String("description").MaxLen(255),
 		field.Time("start_date"),
 		field.Time("end_date"),
-		field.Int("days").NonNegative(),
+		field.Int8("days").NonNegative(),
 	}
 }
 

@@ -513,21 +513,33 @@ components:
             type: object
         trip.v1.CreateTripRequest:
             example:
-                description: ""
+                creationMethod: TRIP_CREATION_METHOD_UNSPECIFIED
+                destination: ""
+                duration: 0
                 endTs: 1741589979
                 startTs: 1741589979
-                title: ""
             properties:
-                description:
+                creationMethod:
+                    enum:
+                        - TRIP_CREATION_METHOD_UNSPECIFIED
+                        - MANUAL
+                        - CARD
+                        - EXTERNAL_LINK
+                        - IMAGE
+                        - VOICE
+                    format: enum
                     type: string
+                destination:
+                    type: string
+                duration:
+                    format: int32
+                    type: integer
                 endTs:
                     format: int32
                     type: integer
                 startTs:
                     format: int32
                     type: integer
-                title:
-                    type: string
             type: object
         trip.v1.CreateTripResponse:
             example:

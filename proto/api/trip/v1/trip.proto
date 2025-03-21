@@ -6,7 +6,7 @@ import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 import "validatex/validatex.proto";
 
-option go_package = "github.com/iter-x/server/internal/api/trip/v1;v1";
+option go_package = "github.com/iter-x/iter-x/internal/api/trip/v1;v1";
 
 service TripService {
   rpc CreateTrip(CreateTripRequest) returns (CreateTripResponse) {
@@ -77,11 +77,23 @@ message Trip {
   google.protobuf.Timestamp end_ts = 8;
 }
 
+
+// Define the enum type for trip creation methods
+enum TripCreationMethod {
+  TRIP_CREATION_METHOD_UNSPECIFIED = 0;
+  MANUAL = 1; // Manual creation
+  CARD = 2; // Card-based creation
+  EXTERNAL_LINK = 3; // External link creation
+  IMAGE = 4; // Image-based creation
+  VOICE = 5; // Voice-based creation
+}
+
 message CreateTripRequest {
-  string title = 1 [(validatex.rules).string = {min_len: 1, max_len: 50}];
-  string description = 2 [(validatex.rules).string = {max_len: 255}];
+  TripCreationMethod creation_method = 1;
+  string destination = 2;
   google.protobuf.Timestamp start_ts = 3;
   google.protobuf.Timestamp end_ts = 4;
+  int32 duration = 5;
 }
 
 message CreateTripResponse {

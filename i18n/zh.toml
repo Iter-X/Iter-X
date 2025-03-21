@@ -31,6 +31,9 @@ other = "短信验证码已过期"
 [SMS_CODE_INVALID]
 other = "短信验证码无效"
 
+[INVALID_CREATION_METHOD]
+other = "无效的模式"
+
 [UNAUTHORIZED]
 other = "未授权"
 
@@ -75,4 +78,7 @@ other = "删除每日行程失败"
 
 [SEARCH_POI_FAILED]
 other = "搜索失败"
+
+[CREATE_DAILY_ITINERARY_FAILED]
+other = "创建每日行程失败"
 

@@ -2,6 +2,32 @@ package bo
 
 import (
 	"time"
+
+	"github.com/google/uuid"
+
+	"github.com/iter-x/iter-x/internal/common/cnst"
+)
+
+type (
+	Trip struct {
+		ID          uuid.UUID
+		UserID      uuid.UUID
+		Title       string
+		Description string
+		StartDate   time.Time
+		EndDate     time.Time
+		CreatedAt   time.Time
+		UpdatedAt   time.Time
+		Status      bool
+	}
+
+	CreateTripRequest struct {
+		CreationMethod cnst.TripCreationMethod
+		Destination    string
+		StartDate      time.Time
+		EndDate        time.Time
+		Duration       int
+	}
 )
 
 type ListDailyTripsRequest struct {
@@ -40,11 +66,4 @@ type UpdateTripRequest struct {
 	StartDate   time.Time `json:"start_date"`
 	EndDate     time.Time `json:"end_date"`
 	Status      bool      `json:"status"`
-}
-
-type CreateTripRequest struct {
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	StartDate   time.Time `json:"start_date"`
-	EndDate     time.Time `json:"end_date"`
 }

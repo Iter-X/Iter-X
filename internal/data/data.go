@@ -1,15 +1,15 @@
 package data
 
 import (
-	"github.com/iter-x/iter-x/internal/data/cache"
-	_ "github.com/lib/pq"
-
 	"context"
 	"fmt"
 
+	"github.com/elastic/go-elasticsearch/v8"
+	_ "github.com/lib/pq"
 	"go.uber.org/zap"
 
 	"github.com/iter-x/iter-x/internal/conf"
+	"github.com/iter-x/iter-x/internal/data/cache"
 	"github.com/iter-x/iter-x/internal/data/ent"
 )
 
@@ -18,15 +18,24 @@ type (
 		Cli *ent.Client
 	}
 
+	Es struct {
+		Cli *elasticsearch.Client
+	}
+
 	Data struct {
 		Tx    *Tx
 		Cache cache.Cacher
+		Es    *Es
 	}
 )
 
 // newTx create a new tx
 func newTx(cli *ent.Client) *Tx {
 	return &Tx{Cli: cli}
+}
+
+func newEs(cli *elasticsearch.Client) *Es {
+	return &Es{Cli: cli}
 }
 
 func NewConnection(c *conf.Data, logger *zap.SugaredLogger) (*Data, func(), error) {
@@ -37,9 +46,28 @@ func NewConnection(c *conf.Data, logger *zap.SugaredLogger) (*Data, func(), erro
 		logger.Error("failed opening connection to postgres: ", err)
 		return nil, nil, err
 	}
+
+	esCli, err := elasticsearch.NewClient(elasticsearch.Config{
+		Addresses: []string{c.GetElasticsearch().GetAddr()},
+		Username:  c.GetElasticsearch().GetUsername(),
+		Password:  c.GetElasticsearch().GetPassword(),
+	})
+	if err != nil {
+		logger.Error("failed to create elasticsearch client: ", err)
+		return nil, nil, err
+	}
+
+	//res, err := esCli.Ping()
+	//if err != nil || res.IsError() {
+	//	logger.Error("failed to ping elasticsearch: ", err)
+	//	return nil, nil, fmt.Errorf("failed to ping elasticsearch: %w", err)
+	//}
+	//defer res.Body.Close()
+
 	d := &Data{
 		Tx:    newTx(client),
 		Cache: cache.NewCache(c),
+		Es:    newEs(esCli),
 	}
 
 	cleanup := func() {

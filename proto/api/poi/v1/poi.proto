@@ -5,7 +5,7 @@ package poi.v1;
 import "google/api/annotations.proto";
 import "validatex/validatex.proto";
 
-option go_package = "github.com/iter-x/server/internal/api/poi/v1;v1";
+option go_package = "github.com/iter-x/iter-x/internal/api/poi/v1;v1";
 
 service PointsOfInterestService {
   rpc SearchPointsOfInterest(SearchPointsOfInterestRequest) returns (SearchPointsOfInterestResponse) {

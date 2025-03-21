@@ -53,6 +53,8 @@ api:
  	       --go_out=paths=source_relative:./internal/api \
  	       --go-grpc_out=paths=source_relative:./internal/api \
  	       --grpc-gateway_out=paths=source_relative:./internal/api \
+		   --validatex_out=paths=source_relative:./internal/api \
+		   --validatex_opt=i18n_dir=./i18n/validatex,i18n_out_relative_dir=../../i18n/validatex,json_name=true \
  	       --openapiv3_out=paths=source_relative:. \
  	       --openapiv3_opt=openapi_out_path=./swagger \
  	       --openapiv3_opt=servers='http://localhost:8000|Local Server' \

@@ -83,8 +83,14 @@ message Data {
     CacheDriver driver = 1; // redis or memory
     Redis redis = 2;
   }
+  message Elasticsearch {
+    string addr = 1;
+    string username = 2;
+    string password = 3;
+  }
   Database database = 1;
   Cache cache = 2;
+  Elasticsearch elasticsearch = 3;
 }
 
 message Jwt {
@@ -132,5 +138,45 @@ enum I18nFormat {
 }
 
 message Agent {
-  Jwt jwt = 1;
+  enum AgentName {
+    PlanAgent = 0;
+  }
+
+  message AgentToolConfig {
+    ToolName name = 1;
+    bool enabled = 2;
+  }
+
+  message AgentConfig {
+    AgentName name = 1;
+    bool enabled = 2;
+    string version = 3;
+    PromptConfig prompt = 4;
+    repeated AgentToolConfig tools = 5;
+  }
+
+  message PromptConfig {
+    repeated PromptRound rounds = 1;
+  }
+
+  message PromptRound {
+    string system = 1;
+    string user = 2;
+  }
+
+  enum ToolName {
+    Completion = 0;
+    Browser = 1;
+  }
+
+  message ToolConfig {
+    ToolName name = 1;
+    string description = 2;
+    string base_url = 3;
+    string api_key = 4;
+    string model = 5;
+  }
+
+  repeated AgentConfig agents = 1;
+  repeated ToolConfig tools = 2;
 }

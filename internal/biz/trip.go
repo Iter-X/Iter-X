@@ -2,14 +2,17 @@ package biz
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 
+	"github.com/iter-x/iter-x/internal/biz/ai/agent"
 	"github.com/iter-x/iter-x/internal/biz/bo"
 	"github.com/iter-x/iter-x/internal/biz/do"
 	"github.com/iter-x/iter-x/internal/biz/repository"
+	"github.com/iter-x/iter-x/internal/common/cnst"
 	"github.com/iter-x/iter-x/internal/common/xerr"
 	"github.com/iter-x/iter-x/internal/data/ent"
 	"github.com/iter-x/iter-x/internal/helper/auth"
@@ -18,12 +21,14 @@ import (
 type Trip struct {
 	tripRepo repository.TripRepo
 	logger   *zap.SugaredLogger
+	agentHub *agent.Hub
 }
 
-func NewTrip(tripRepo repository.TripRepo, logger *zap.SugaredLogger) *Trip {
+func NewTrip(tripRepo repository.TripRepo, logger *zap.SugaredLogger, agentHub *agent.Hub) *Trip {
 	return &Trip{
 		tripRepo: tripRepo,
 		logger:   logger.Named("biz.tripRepo"),
+		agentHub: agentHub,
 	}
 }
 
@@ -33,21 +38,100 @@ func (b *Trip) CreateTrip(ctx context.Context, req *bo.CreateTripRequest) (*do.T
 		return nil, xerr.ErrorUnauthorized()
 	}
 
-	trip := &do.Trip{
-		UserID:      claims.UID,
-		Title:       req.Title,
-		Description: req.Description,
-		StartDate:   req.StartDate,
-		EndDate:     req.EndDate,
-	}
+	switch req.CreationMethod {
+	case cnst.TripCreationMethodManual:
+		// Get the PlanAgent from the agentHub
+		planAgent, err := b.agentHub.GetAgent("PlanAgent")
+		if err != nil {
+			b.logger.Errorw("failed to get PlanAgent", "err", err)
+			return nil, xerr.ErrorCreateTripFailed()
+		}
 
-	createdTrip, err := b.tripRepo.CreateTrip(ctx, trip)
-	if err != nil {
-		b.logger.Errorw("failed to create tripRepo", "err", err)
+		planAgentInput := &do.PlanAgentInput{
+			Destination: req.Destination,
+			StartDate:   req.StartDate,
+			EndDate:     req.EndDate,
+			Duration:    req.Duration,
+		}
+
+		planAgentOutput, err := planAgent.Execute(ctx, planAgentInput)
+		if err != nil {
+			b.logger.Errorw("failed to plan trip with PlanAgent", "err", err)
+			return nil, xerr.ErrorCreateTripFailed()
+		}
+
+		rawTrip, ok := planAgentOutput.(*do.PlanAgentOutput)
+		if !ok {
+			b.logger.Errorw("failed to cast PlanAgentOutput", "err", err)
+			return nil, xerr.ErrorCreateTripFailed()
+		}
+
+		var days int8
+		if req.Duration > 0 {
+			days = int8(req.Duration)
+		} else {
+			days = int8(req.EndDate.Sub(req.StartDate).Hours()/24) + 1
+		}
+		trip := &do.Trip{
+			UserID:    claims.UID,
+			Title:     fmt.Sprintf("%s%d日游", req.Destination, days),
+			StartDate: req.StartDate,
+			EndDate:   req.EndDate,
+			Days:      days,
+		}
+
+		createdTrip, err := b.tripRepo.CreateTrip(ctx, trip)
+		if err != nil {
+			b.logger.Errorw("failed to create trip", "err", err)
+			return nil, xerr.ErrorCreateTripFailed()
+		}
+
+		for _, dailyPlan := range *rawTrip {
+			dailyTrip := &do.DailyTrip{
+				TripID: createdTrip.ID,
+				Day:    int32(dailyPlan.Day),
+				Date:   dailyPlan.Date,
+				Notes:  dailyPlan.Title,
+			}
+
+			createdDailyTrip, err := b.tripRepo.CreateDailyTrip(ctx, dailyTrip)
+			if err != nil {
+				b.logger.Errorw("failed to create daily trip", "err", err)
+				return nil, xerr.ErrorCreateDailyTripFailed()
+			}
+
+			for _, poi := range dailyPlan.POIs {
+				dailyItinerary := &do.DailyItinerary{
+					TripID:      createdTrip.ID,
+					DailyTripID: createdDailyTrip.ID,
+					PoiID:       poi.Id,
+					Notes:       poi.Notes,
+				}
+
+				_, err = b.tripRepo.CreateDailyItinerary(ctx, dailyItinerary)
+				if err != nil {
+					b.logger.Errorw("failed to create daily itinerary", "err", err)
+					return nil, xerr.ErrorCreateDailyItineraryFailed()
+				}
+			}
+		}
+
+		return createdTrip, nil
+	case cnst.TripCreationMethodCard:
+		// TODO: Handle card-based creation
 		return nil, xerr.ErrorCreateTripFailed()
+	case cnst.TripCreationMethodExternalLink:
+		// TODO: Handle external link creation
+		return nil, xerr.ErrorCreateTripFailed()
+	case cnst.TripCreationMethodImage:
+		// TODO: Handle image-based creation
+		return nil, xerr.ErrorCreateTripFailed()
+	case cnst.TripCreationMethodVoice:
+		// TODO: Handle voice-based creation
+		return nil, xerr.ErrorCreateTripFailed()
+	default:
+		return nil, xerr.ErrorInvalidCreationMethod()
 	}
-
-	return createdTrip, nil
 }
 
 func (b *Trip) GetTrip(ctx context.Context, id uuid.UUID) (*do.Trip, error) {
