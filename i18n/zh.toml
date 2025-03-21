@@ -82,3 +82,15 @@ other = "搜索失败"
 [CREATE_DAILY_ITINERARY_FAILED]
 other = "创建每日行程失败"
 
+[GET_CONTINENTS_LIST_FAILED]
+other = "获取大洲列表失败"
+
+[GET_COUNTRIES_LIST_FAILED]
+other = "获取国家列表失败"
+
+[GET_STATES_LIST_FAILED]
+other = "获取省份/州列表失败"
+
+[GET_CITIES_LIST_FAILED]
+other = "获取城市列表失败"
+
