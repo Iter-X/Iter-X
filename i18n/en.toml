@@ -82,3 +82,15 @@ other = "Search failed"
 [CREATE_DAILY_ITINERARY_FAILED]
 other = "Create daily itinerary failed"
 
+[GET_CONTINENTS_LIST_FAILED]
+other = "Get continents failed"
+
+[GET_COUNTRIES_LIST_FAILED]
+other = "Get countries failed"
+
+[GET_STATES_LIST_FAILED]
+other = "Get states failed"
+
+[GET_CITIES_LIST_FAILED]
+other = "Get cities failed"
+
