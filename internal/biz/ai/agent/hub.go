@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/iter-x/iter-x/internal/biz/repository"
-
 	"github.com/iter-x/iter-x/internal/biz/ai/core"
 	"github.com/iter-x/iter-x/internal/biz/ai/plan"
 	"github.com/iter-x/iter-x/internal/biz/ai/tool"
+	"github.com/iter-x/iter-x/internal/biz/repository"
 	"github.com/iter-x/iter-x/internal/conf"
 )
 

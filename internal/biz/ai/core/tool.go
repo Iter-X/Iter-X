@@ -1,6 +1,9 @@
 package core
 
-import "context"
+import (
+	"context"
+	"fmt"
+)
 
 // BaseTool provides a basic implementation of the Tool interface
 type BaseTool struct {
@@ -28,5 +31,5 @@ func (a *BaseTool) Description() string {
 
 // Execute provides a basic implementation that can be overridden by subclasses
 func (a *BaseTool) Execute(context.Context, any) (any, error) {
-	return nil, nil
+	return nil, fmt.Errorf("not implemented")
 }

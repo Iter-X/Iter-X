@@ -3,11 +3,13 @@ package tools
 import (
 	"context"
 	"fmt"
+
+	"github.com/openai/openai-go"
+	"github.com/openai/openai-go/option"
+
 	"github.com/iter-x/iter-x/internal/biz/ai/core"
 	"github.com/iter-x/iter-x/internal/biz/do"
 	"github.com/iter-x/iter-x/internal/conf"
-	"github.com/openai/openai-go"
-	"github.com/openai/openai-go/option"
 )
 
 func NewCompletion(cfg *conf.Agent_ToolConfig) core.Tool {

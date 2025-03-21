@@ -1,10 +1,11 @@
 package bo
 
 import (
-	"github.com/iter-x/iter-x/internal/common/cnst"
 	"time"
 
 	"github.com/google/uuid"
+
+	"github.com/iter-x/iter-x/internal/common/cnst"
 )
 
 type (

@@ -2,11 +2,11 @@ package tool
 
 import (
 	"fmt"
-	"github.com/iter-x/iter-x/internal/data/impl/tools"
 	"sync"
 
 	"github.com/iter-x/iter-x/internal/biz/ai/core"
 	"github.com/iter-x/iter-x/internal/conf"
+	"github.com/iter-x/iter-x/internal/data/impl/tools"
 )
 
 // Hub is the central manager for all tools

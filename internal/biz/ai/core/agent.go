@@ -1,6 +1,9 @@
 package core
 
-import "context"
+import (
+	"context"
+	"fmt"
+)
 
 // BaseAgent provides a basic implementation of the Agent interface
 type BaseAgent struct {
@@ -28,5 +31,5 @@ func (a *BaseAgent) GetPrompt() Prompt {
 
 // Execute provides a basic implementation that can be overridden by subclasses
 func (a *BaseAgent) Execute(context.Context, any) (any, error) {
-	return nil, nil
+	return nil, fmt.Errorf("not implemented")
 }

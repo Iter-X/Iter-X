@@ -1,16 +1,15 @@
 package data
 
 import (
-	"github.com/elastic/go-elasticsearch/v8"
-	"github.com/iter-x/iter-x/internal/data/cache"
-	_ "github.com/lib/pq"
-
 	"context"
 	"fmt"
 
+	"github.com/elastic/go-elasticsearch/v8"
+	_ "github.com/lib/pq"
 	"go.uber.org/zap"
 
 	"github.com/iter-x/iter-x/internal/conf"
+	"github.com/iter-x/iter-x/internal/data/cache"
 	"github.com/iter-x/iter-x/internal/data/ent"
 )
 

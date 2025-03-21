@@ -47,7 +47,6 @@ func (b *Trip) CreateTrip(ctx context.Context, req *bo.CreateTripRequest) (*do.T
 			return nil, xerr.ErrorCreateTripFailed()
 		}
 
-		// 执行PlanAgent
 		planAgentInput := &do.PlanAgentInput{
 			Destination: req.Destination,
 			StartDate:   req.StartDate,

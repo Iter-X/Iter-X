@@ -5,19 +5,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/ifuryst/lol"
+	"text/template"
 	"time"
 
-	"github.com/iter-x/iter-x/internal/common/cnst"
+	"github.com/google/uuid"
+	"github.com/ifuryst/lol"
 
+	"github.com/iter-x/iter-x/internal/biz/ai/core"
 	"github.com/iter-x/iter-x/internal/biz/ai/tool"
 	"github.com/iter-x/iter-x/internal/biz/do"
-
-	"text/template"
-
-	"github.com/google/uuid"
-	"github.com/iter-x/iter-x/internal/biz/ai/core"
 	"github.com/iter-x/iter-x/internal/biz/repository"
+	"github.com/iter-x/iter-x/internal/common/cnst"
 )
 
 type (
@@ -26,21 +24,6 @@ type (
 		*core.BaseAgent
 		toolHub *tool.Hub
 		poiRepo repository.PointsOfInterestRepo
-	}
-
-	completionResp struct {
-		DailyPlans []*dailyPlan `json:"daily_plans"`
-	}
-	dailyPlan struct {
-		Day        int         `json:"day"`   // e.g. 1
-		Title      string      `json:"title"` // e.g. "Cultural Tour"
-		Activities []*activity `json:"activities"`
-	}
-	activity struct {
-		Time          string `json:"time"`     // e.g. "09:00"
-		Name          string `json:"name"`     // e.g. "The Palace of Versailles"
-		DurationInSec uint64 `json:"duration"` // e.g. 10800 (3 hours)
-		Notes         string `json:"notes"`    // e.g. "Visit the world-famous palace and gardens"
 	}
 
 	dayPlan struct {
@@ -53,22 +36,6 @@ type (
 		ID       string `json:"id"`
 		Duration int    `json:"duration"`
 		Notes    string `json:"notes"`
-	}
-
-	refinedResp struct {
-		DailyPlans []*refinedDailyPlan `json:"daily_plans"`
-	}
-	refinedDailyPlan struct {
-		Day        int                `json:"day"`
-		Title      string             `json:"title"`
-		Activities []*refinedActivity `json:"activities"`
-	}
-	refinedActivity struct {
-		ID            string `json:"id"`
-		Name          string `json:"name"`
-		Time          string `json:"time"`
-		DurationInSec uint64 `json:"duration"`
-		Notes         string `json:"notes"`
 	}
 
 	r1UserPromptTpl struct {
