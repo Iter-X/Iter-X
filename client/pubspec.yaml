@@ -22,7 +22,7 @@ dev_dependencies:
   # 日志打印 https://pub.dev/packages/logger
   logger: ^2.0.1
   # 本地存储 https://pub.dev/packages/shared_preferences
-  shared_preferences: ^2.2.1
+  shared_preferences: ^2.5.2
   # 事务通知 https://pub.dev/packages/event_bus
   event_bus: ^2.0.0
   # 屏幕适配 https://pub.flutter-io.cn/packages/flutter_screenutil
