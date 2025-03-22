@@ -6,7 +6,10 @@ import 'package:easy_refresh/easy_refresh.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../app/notifier/user.dart';
+import '../../app/routes.dart';
 import '../utils/logger.dart';
 import 'app.dart';
 
@@ -45,11 +48,12 @@ abstract class BaseState<T extends StatefulWidget> extends State<T> with Event {
     super.initState();
     //
     if (checkConnectivity) {
-      _connectSub = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
+      _connectSub = Connectivity()
+          .onConnectivityChanged
+          .listen((List<ConnectivityResult> result) {
         refreshConnectivityResult();
       });
     }
-
   }
 
   @override
@@ -108,34 +112,34 @@ abstract class BaseState<T extends StatefulWidget> extends State<T> with Event {
     // 关闭键盘
     FocusScope.of(context).unfocus();
     //
-    // needLogin ??= !Routes.routesWithoutLogin.contains(path);
+    needLogin ??= !Routes.routesWithoutLogin.contains(path);
     // //
-    // if (needLogin && !context.read<UserNotifier>().logined()) {
-    //   return go(Routes.login).then((value) {
-    //     if (context.read<UserNotifier>().logined()) {
-    //       return router.navigateTo(
-    //         context, path, //路径
-    //         replace: replace,
-    //         clearStack: clearStack,
-    //         transition: transition ?? TransitionType.cupertino,
-    //         routeSettings: RouteSettings(
-    //           arguments: arguments,
-    //         ),
-    //       );
-    //     }
-    //   });
-    // } else {
-    return router.navigateTo(
-      context,
-      path,
-      replace: replace,
-      clearStack: clearStack,
-      transition: transition ?? TransitionType.cupertino,
-      routeSettings: RouteSettings(
-        arguments: arguments,
-      ),
-    );
-    // }
+    if (needLogin && !context.read<UserNotifier>().logined()) {
+      return go(Routes.phoneLogin).then((value) {
+        if (context.read<UserNotifier>().logined()) {
+          return router.navigateTo(
+            context, path, //路径
+            replace: replace,
+            clearStack: clearStack,
+            transition: transition ?? TransitionType.cupertino,
+            routeSettings: RouteSettings(
+              arguments: arguments,
+            ),
+          );
+        }
+      });
+    } else {
+      return router.navigateTo(
+        context,
+        path,
+        replace: replace,
+        clearStack: clearStack,
+        transition: transition ?? TransitionType.cupertino,
+        routeSettings: RouteSettings(
+          arguments: arguments,
+        ),
+      );
+    }
     return Future(() => null);
   }
 }

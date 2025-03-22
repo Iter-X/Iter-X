@@ -23,14 +23,14 @@ class HttpResultBean {
     return m;
   }
 
-  // 业务code 0 才是真正的成功
+  // 业务code 200 才是真正的成功
   bool isSuccess() {
-    bool success = code == 0;
+    bool success = code == 200;
     return success;
   }
 
   bool isFail() {
-    bool fail = code != 0;
+    bool fail = code != 200;
     return fail;
   }
 }

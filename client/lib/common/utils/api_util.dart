@@ -11,14 +11,14 @@ class ApiUtil {
   static final ApiModel _releaseApi = ApiModel(
     selected: _isRelease,
     title: '线上地址',
-    baseUrl: 'https://',
+    baseUrl: 'https://api.iter-x.com',
   );
 
   static final List<ApiModel> _apis = [
     ApiModel(
       selected: !_isRelease,
       title: '测试地址',
-      baseUrl: 'http://',
+      baseUrl: 'https://api.iter-x.com',
     ),
     _releaseApi,
   ];

@@ -12,3 +12,7 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+build.gradle.kts
+gradle.properties
+settings.gradle.kts
+gradle-wrapper.properties
