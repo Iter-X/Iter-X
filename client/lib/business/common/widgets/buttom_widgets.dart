@@ -4,13 +4,18 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // 返回按钮
 class ButtonBackWidget extends StatelessWidget {
-  const ButtonBackWidget({super.key});
+  final VoidCallback? onTap;
+  const ButtonBackWidget({super.key, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.pop(context);
+        if (onTap != null) {
+          onTap!();
+        } else {
+          Navigator.pop(context);
+        }
       },
       child: Container(
         padding: EdgeInsets.all(20.w),
