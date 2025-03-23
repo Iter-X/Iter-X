@@ -19,7 +19,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Gap(107.h),
+        Gap(48.h),
         Container(
           margin: EdgeInsets.only(
             left: 35.w,

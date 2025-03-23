@@ -22,13 +22,24 @@ class _HomeMainPageState extends BaseState<HomeMainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Column(
         children: [
+          Container(
+            color: BaseColor.c_f2f2f2,
+            child: SafeArea(
+              bottom: false,
+              child: Container(height: 0),
+            ),
+          ),
           Expanded(
-            child: selectIndex == 0 ? HomePage() : MinePage(),
+            child: Container(
+              color: BaseColor.c_f2f2f2,
+              child: selectIndex == 0 ? HomePage() : MinePage(),
+            ),
           ),
           Container(
-            color: BaseColor.bottomBar,
+            color: Colors.white,
             child: SafeArea(
               top: false,
               child: Container(

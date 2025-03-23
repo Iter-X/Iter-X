@@ -1,5 +1,6 @@
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -61,7 +62,14 @@ class BaseApp {
       configRouter?.call(router);
     }
     const designSize = Size(430, 932);
-    //
+
+    // 设置状态栏样式
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent, // 状态栏背景色透明
+      statusBarIconBrightness: Brightness.dark, // 状态栏图标为深色
+      statusBarBrightness: Brightness.light, // iOS状态栏图标为浅色
+    ));
+    
     return ScreenUtilInit(
       designSize: designSize,
       fontSizeResolver: (fontSize, instance) {
