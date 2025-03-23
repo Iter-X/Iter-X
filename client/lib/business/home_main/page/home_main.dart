@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../common/material/state.dart';
+import '../../../common/utils/color.dart';
 import '../../mine/page/mine.dart';
 import '../widgets/widgets.dart';
 
@@ -27,38 +28,69 @@ class _HomeMainPageState extends BaseState<HomeMainPage> {
             child: selectIndex == 0 ? HomePage() : MinePage(),
           ),
           Container(
-            height: 102.h,
-            width: double.infinity,
-            margin: EdgeInsets.only(
-              left: 50.w,
-              right: 50.w,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ItemHomeBottomWidget(
-                  img: selectIndex == 0 ? 'ic_home_selected.png' : 'ic_home.png',
-                  onTap: () {
-                    setState(() {
-                      selectIndex = 0;
-                    });
-                  },
+            color: BaseColor.bottomBar,
+            child: SafeArea(
+              top: false,
+              child: Container(
+                color: BaseColor.bottomBar,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      height: 72.h,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        border: Border(
+                          top: BorderSide(
+                            color: BaseColor.bottomBarLine,
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 15.h),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Center(
+                              child: ItemHomeBottomWidget(
+                                img: selectIndex == 0 ? 'ic_home_selected.png' : 'ic_home.png',
+                                onTap: () {
+                                  setState(() {
+                                    selectIndex = 0;
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Center(
+                              child: ItemHomeBottomWidget(
+                                img: 'ic_add.png',
+                                onTap: () {
+                                  go(Routes.createTripHome);
+                                },
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Center(
+                              child: ItemHomeBottomWidget(
+                                img: selectIndex == 1 ? 'ic_mine_selected.png' : 'ic_mine.png',
+                                onTap: () {
+                                  setState(() {
+                                    selectIndex = 1;
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                ItemHomeBottomWidget(
-                  img: 'ic_add.png',
-                  onTap: () {
-                    go(Routes.createTripHome);
-                  },
-                ),
-                ItemHomeBottomWidget(
-                  img: selectIndex == 1 ? 'ic_mine_selected.png' : 'ic_mine.png',
-                  onTap: () {
-                    setState(() {
-                      selectIndex = 1;
-                    });
-                  },
-                ),
-              ],
+              ),
             ),
           )
         ],
