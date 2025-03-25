@@ -1,21 +1,49 @@
 class UserInfoEntity {
-  String? token;
-  int? expiresIn;
+  final String id;
+  final String username;
+  final String nickname;
+  final String email;
+  final String phoneNumber;
+  final String avatarUrl;
+  final String createdAt;
+  final String updatedAt;
 
   UserInfoEntity({
-    this.token,
-    this.expiresIn,
+    required this.id,
+    required this.username,
+    required this.nickname,
+    required this.email,
+    required this.phoneNumber,
+    required this.avatarUrl,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
-  UserInfoEntity.fromJson(Map<String, dynamic> json) {
-    token = json['token'];
-    expiresIn = json['expiresIn'];
+  bool get hasValidAvatar => avatarUrl.isNotEmpty;
+
+  factory UserInfoEntity.fromJson(Map<String, dynamic> json) {
+    return UserInfoEntity(
+      id: json['id'] as String,
+      username: json['username'] as String,
+      nickname: json['nickname'] as String,
+      email: json['email'] as String,
+      phoneNumber: json['phoneNumber'] as String,
+      avatarUrl: json['avatarUrl'] as String,
+      createdAt: json['createdAt'] as String,
+      updatedAt: json['updatedAt'] as String,
+    );
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['token'] = token;
-    data['expiresIn'] = expiresIn;
-    return data;
+    return {
+      'id': id,
+      'username': username,
+      'nickname': nickname,
+      'email': email,
+      'phoneNumber': phoneNumber,
+      'avatarUrl': avatarUrl,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+    };
   }
 }

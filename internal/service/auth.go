@@ -129,8 +129,9 @@ func (s *Auth) VerifySmsCode(ctx context.Context, req *authV1.VerifySmsCodeReque
 		return nil, err
 	}
 	return &authV1.VerifySmsCodeResponse{
-		Token:     singIn.Token,
-		ExpiresIn: singIn.ExpiresIn,
+		Token:        singIn.Token,
+		RefreshToken: singIn.RefreshToken,
+		ExpiresIn:    singIn.ExpiresIn,
 	}, nil
 }
 
@@ -143,7 +144,8 @@ func (s *Auth) OneClickLogin(ctx context.Context, req *authV1.OneClickLoginReque
 		return nil, err
 	}
 	return &authV1.OneClickLoginResponse{
-		Token:     signIn.Token,
-		ExpiresIn: signIn.ExpiresIn,
+		Token:        signIn.Token,
+		RefreshToken: signIn.RefreshToken,
+		ExpiresIn:    signIn.ExpiresIn,
 	}, nil
 }

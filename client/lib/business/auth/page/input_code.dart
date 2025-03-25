@@ -1,18 +1,16 @@
 import 'dart:async';
 
+import 'package:client/app/notifier/user.dart';
 import 'package:client/app/routes.dart';
-import 'package:client/business/auth/entity/user_info_entity.dart';
+import 'package:client/business/auth/service/auth_service.dart';
 import 'package:client/common/material/loading.dart';
+import 'package:client/common/material/state.dart';
 import 'package:client/common/utils/color.dart';
-import 'package:client/common/utils/shared_preference_util.dart';
-import 'package:client/common/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:gap/gap.dart';
-
-import '../../../common/material/state.dart';
-import '../service/auth_service.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:provider/provider.dart';
 
 class InputCodeArgument {
   final String phone;
@@ -198,16 +196,21 @@ class _InputCodePageState extends BaseState<InputCodePage> {
     setState(() {
       isLoading = true;
     });
-    UserInfoEntity? result = await AuthService.verifyLogin(
+    final token = await AuthService.verifyLogin(
       widget.argument.phone,
       _codeController.text,
     );
     setState(() {
       isLoading = false;
     });
-    if (result != null) {
-      await BaseSpUtil.setJSON(SpKeys.TOKEN, result.token);
-      await BaseSpUtil.setJSON(SpKeys.USER_INFO, result);
+    if (token != null) {
+      if (mounted) {
+        // guard the use of BuildContext with the mounted check
+        UserNotifier userNotifier = Provider.of<UserNotifier>(context, listen: false);
+        await userNotifier.login(token: token);
+        await userNotifier.refreshUserInfo();
+      }
+
       go(Routes.homeMain, clearStack: true);
     }
   }

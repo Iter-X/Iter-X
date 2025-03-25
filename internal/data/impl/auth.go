@@ -27,6 +27,14 @@ func NewAuth(c *conf.Auth, d *data.Data, logger *zap.SugaredLogger) repository.A
 	}
 }
 
+func NewUser(d *data.Data, logger *zap.SugaredLogger) repository.UserRepo {
+	return &authRepositoryImpl{
+		Tx:     d.Tx,
+		Cacher: d.Cache,
+		logger: logger.Named("repo.user"),
+	}
+}
+
 type authRepositoryImpl struct {
 	smsConf *conf.Auth_SmsCode
 	*data.Tx

@@ -13,6 +13,7 @@ import (
 	geoV1 "github.com/iter-x/iter-x/internal/api/geo/v1"
 	poiV1 "github.com/iter-x/iter-x/internal/api/poi/v1"
 	tripV1 "github.com/iter-x/iter-x/internal/api/trip/v1"
+	userV1 "github.com/iter-x/iter-x/internal/api/user/v1"
 	"github.com/iter-x/iter-x/internal/common/cnst"
 	"github.com/iter-x/iter-x/internal/conf"
 )
@@ -53,6 +54,7 @@ func (s *HTTPServer) Start(ctx context.Context) error {
 		tripV1.RegisterTripServiceHandlerFromEndpoint,
 		poiV1.RegisterPointsOfInterestServiceHandlerFromEndpoint,
 		geoV1.RegisterGeoServiceHandlerFromEndpoint,
+		userV1.RegisterUserServiceHandlerFromEndpoint,
 	} {
 		err := fn(ctx, s.mux, s.cfg.GrpcAddr, opts)
 		if err != nil {

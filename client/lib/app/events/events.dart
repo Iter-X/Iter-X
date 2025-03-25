@@ -1,8 +1,8 @@
 // 登录状态事件
 class EventUserLoginStatusChange {
-  bool logined;
+  bool isLoggedIn;
 
-  EventUserLoginStatusChange(this.logined);
+  EventUserLoginStatusChange(this.isLoggedIn);
 }
 
 class EventUnauthorized {

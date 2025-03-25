@@ -313,5 +313,5 @@ func (b *Auth) loginByPhone(ctx context.Context, phone string) (*bo.SignInRespon
 		}
 	}
 
-	return b.getToken(ctx, user, false)
+	return b.getToken(ctx, user, true)
 }

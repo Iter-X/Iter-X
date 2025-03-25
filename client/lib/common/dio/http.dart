@@ -2,17 +2,21 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:client/app/events/events.dart';
+import 'package:client/common/material/state.dart';
+import 'package:client/main.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 
+import '../../app/notifier/user.dart';
 import '../utils/api_util.dart';
 import '../utils/logger.dart';
-import '../utils/shared_preference_util.dart';
 import '../utils/util.dart';
 import 'app_network_config.dart';
-import 'package:path/path.dart' as path;
-
 import 'http_result_bean.dart';
 
 class HttpMethod {
@@ -87,19 +91,58 @@ class Http {
       QueuedInterceptorsWrapper(
         onRequest: (options, handler) async {
           String apiPath = options.path.substring(0, options.path.lastIndexOf('/'));
-          await BaseSpUtil.getString(SpKeys.TOKEN).then((String? token) {
-            if (token != null) {
-              options.headers['token'] = token;
-            }
-          });
+          
+          // 不需要 token 的接口直接放行
+          if (apiPath.contains('/auth/') || options.path.contains('/auth/')) {
+            return handler.next(options);
+          }
+
+          // 获取 UserNotifier 实例
+          final BuildContext? context = navigatorKey.currentContext;
+          if (context == null) {
+            return handler.reject(
+              DioException(
+                requestOptions: options,
+                error: 'No context available',
+              ),
+            );
+          }
+
+          final userNotifier = context.read<UserNotifier>();
+          
+          // 检查是否有有效的 token
+          if (!await userNotifier.ensureValidToken()) {
+            return handler.reject(
+              DioException(
+                requestOptions: options,
+                error: 'Token expired or invalid',
+              ),
+            );
+          }
+
+          // 添加 token 到请求头
+          if (userNotifier.token != null) {
+            options.headers['Authorization'] = 'Bearer ${userNotifier.token!.token}';
+          }
+
           BaseLogger.v('request headers: ${json.encode(options.headers)}');
           try {
-            // Unhandled Exception: Converting object to an encodable object failed: Instance of 'FormData'
             BaseLogger.v('request data: ${json.encode(options.data)}');
           } catch (exception) {
             BaseLogger.v('request data: ${options.data}');
           }
           return handler.next(options);
+        },
+        onError: (error, handler) async {
+          if (error.response?.statusCode == 401) {
+            final BuildContext? context = navigatorKey.currentContext;
+            if (context != null) {
+              final userNotifier = context.read<UserNotifier>();
+              // 触发未授权事件
+              eventBus.fire(EventUnauthorized());
+            }
+          }
+          return handler.next(error);
         },
       ),
     );

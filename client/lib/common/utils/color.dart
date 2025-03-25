@@ -28,6 +28,9 @@ class BaseColor {
   static const Color content = Color(0xFF111111);
   static const Color hint = Color(0xFF535A5F);
 
+  static const Color bottomBar = Color(0xFFFFFFFF);
+  static const Color bottomBarLine = Color(0xFFEBEBEB);
+
   static const Color c_1D1F1E = Color(0xFF1D1F1E);
   static const Color c_F2F2F2 = Color(0xFFF2F2F2);
   static const Color c_E3E3E3 = Color(0xFFE3E3E3);

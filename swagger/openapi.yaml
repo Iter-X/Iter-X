@@ -97,11 +97,14 @@ components:
         auth.v1.OneClickLoginResponse:
             example:
                 expiresIn: 0
+                refreshToken: ""
                 token: ""
             properties:
                 expiresIn:
                     format: double
                     type: number
+                refreshToken:
+                    type: string
                 token:
                     type: string
             type: object
@@ -263,11 +266,14 @@ components:
         auth.v1.VerifySmsCodeResponse:
             example:
                 expiresIn: 0
+                refreshToken: ""
                 token: ""
             properties:
                 expiresIn:
                     format: double
                     type: number
+                refreshToken:
+                    type: string
                 token:
                     type: string
             type: object
@@ -714,6 +720,52 @@ components:
                 trip:
                     $ref: '#/components/schemas/trip.v1.Trip'
             type: object
+        user.v1.GetUserInfoResponse:
+            example:
+                avatarUrl: ""
+                createdAt: 0
+                email: ""
+                id: ""
+                nickname: ""
+                phoneNumber: ""
+                updatedAt: 0
+                username: ""
+            properties:
+                avatarUrl:
+                    type: string
+                createdAt:
+                    format: int64
+                    type: integer
+                email:
+                    type: string
+                id:
+                    type: string
+                nickname:
+                    type: string
+                phoneNumber:
+                    type: string
+                updatedAt:
+                    format: int64
+                    type: integer
+                username:
+                    type: string
+            type: object
+        user.v1.UpdateUserInfoRequest:
+            example:
+                avatarUrl: ""
+                nickname: ""
+                username: ""
+            properties:
+                avatarUrl:
+                    type: string
+                nickname:
+                    type: string
+                username:
+                    type: string
+            type: object
+        user.v1.UpdateUserInfoResponse:
+            properties: {}
+            type: object
     securitySchemes:
         BearerAuth:
             bearerFormat: JWT
@@ -763,36 +815,6 @@ paths:
             tags:
                 - AuthService
     /api/v1/auth/refresh-token:
-        get:
-            operationId: AuthService_RefreshTokenX
-            responses:
-                "200":
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/auth.v1.RefreshTokenResponse'
-                    description: OK
-                "400":
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/BadRequest'
-                    description: Bad Request
-                "401":
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Unauthorized'
-                    description: Unauthorized
-                "500":
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/InternalServerError'
-                    description: Internal Server Error
-            security: []
-            tags:
-                - AuthService
         post:
             operationId: AuthService_RefreshToken
             requestBody:
@@ -1661,6 +1683,71 @@ paths:
                     description: Internal Server Error
             tags:
                 - TripService
+    /api/v1/user/info:
+        get:
+            operationId: UserService_GetUserInfo
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.GetUserInfoResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - UserService
+        put:
+            operationId: UserService_UpdateUserInfo
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.UpdateUserInfoRequest'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.UpdateUserInfoResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - UserService
 security:
     - BearerAuth: []
 servers:
@@ -1675,3 +1762,5 @@ tags:
       name: PointsOfInterestService
     - description: ""
       name: TripService
+    - description: ""
+      name: UserService
