@@ -2,6 +2,7 @@ import 'package:client/common/dio/http_result_bean.dart';
 
 import '../../../app/apis/auth_api.dart';
 import '../../../common/dio/http.dart';
+import '../entity/token_entity.dart';
 import '../entity/user_info_entity.dart';
 
 class AuthService {
@@ -17,7 +18,7 @@ class AuthService {
   }
 
   // 验证码登录
-  static Future<UserInfoEntity?> verifyLogin(
+  static Future<TokenEntity?> verifyLogin(
     String phoneNumber,
     String verifyCode,
   ) async {
@@ -29,19 +30,47 @@ class AuthService {
       },
     );
     if (result.isSuccess()) {
-      return UserInfoEntity.fromJson(result.data);
+      return TokenEntity.fromJson(result.data);
     }
     return null;
   }
 
   // 一键登录
-  static Future<UserInfoEntity?> oneClickLogin(String token) async {
+  static Future<TokenEntity?> oneClickLogin(String token) async {
     HttpResultBean result = await Http.instance.post(
       AuthApi.oneClickLogin,
       data: {
         'token': token,
       },
     );
-    return result.isSuccess() ? UserInfoEntity.fromJson(result.data) : null;
+    if (result.isSuccess()) {
+      return TokenEntity.fromJson(result.data);
+    }
+    return null;
+  }
+
+  // 获取用户信息
+  static Future<UserInfoEntity?> getUserInfo() async {
+    HttpResultBean result = await Http.instance.get(
+      '/api/v1/user/info',
+    );
+    if (result.isSuccess()) {
+      return UserInfoEntity.fromJson(result.data);
+    }
+    return null;
+  }
+
+  // 刷新 token
+  static Future<TokenEntity?> refreshToken(String refreshToken) async {
+    HttpResultBean result = await Http.instance.post(
+      '/api/v1/auth/refresh-token',
+      data: {
+        'refreshToken': refreshToken,
+      },
+    );
+    if (result.isSuccess()) {
+      return TokenEntity.fromJson(result.data);
+    }
+    return null;
   }
 }

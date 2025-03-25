@@ -1,11 +1,13 @@
 import 'package:fluro/fluro.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
+import '../../app/notifier/user.dart';
+import '../../app/routes.dart';
 import 'over_scroll.dart';
 
 class SafeAreaX extends StatefulWidget {
@@ -112,7 +114,7 @@ class BaseApp {
     scaffoldMessengerKey,
     home,
     Map<String, WidgetBuilder>? routes,
-    initialRoute,
+    String? initialRoute,
     onGenerateRoute,
     onGenerateInitialRoutes,
     onUnknownRoute,
@@ -143,11 +145,11 @@ class BaseApp {
     scrollBehavior,
     useInheritedMediaQuery,
   }) {
-    // 配置页面路由
-    if (onGenerateRoute == null) {
-      assert(configRouter != null);
-      configRouter?.call(router);
+    // confirm the router is configured
+    if (configRouter != null) {
+      configRouter(router);
     }
+
     const designSize = Size(430, 932);
     
     return ScreenUtilInit(
@@ -156,25 +158,47 @@ class BaseApp {
         final display = View.of(context!).display;
         final screenSize = display.size / display.devicePixelRatio;
         final scaleWidth = screenSize.width / designSize.width;
-
         return fontSize * scaleWidth;
       },
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (BuildContext context, Widget? child) {
+        // check login status
+        final userNotifier = context.watch<UserNotifier>();
+        final effectiveInitialRoute = initialRoute ?? 
+            (userNotifier.isTokenExpired ? Routes.login : Routes.homeMain);
+
         return MaterialApp(
           key: key,
           navigatorKey: navigatorKey,
           scaffoldMessengerKey: scaffoldMessengerKey,
-          home: home,
-          routes: routes ?? const <String, WidgetBuilder>{},
-          initialRoute: initialRoute,
-          onGenerateRoute: onGenerateRoute ?? router.generator,
-          onGenerateInitialRoutes: onGenerateInitialRoutes,
+          home: null, // use routes instead of home
+          routes: const <String, WidgetBuilder>{},
+          initialRoute: effectiveInitialRoute,
+          onGenerateRoute: (settings) {
+            // 如果路由需要登录但用户未登录，重定向到登录页
+            if (!Routes.requiresLogin(settings.name) &&
+                userNotifier.isTokenExpired) {
+              return router.generator(
+                RouteSettings(name: Routes.login)
+              );
+            }
+            return router.generator(settings);
+          },
+          onGenerateInitialRoutes: (String initialRoute) {
+            return [
+              router.generator(
+                RouteSettings(name: initialRoute)
+              ),
+            ].whereType<Route<dynamic>>().toList();
+          },
           onUnknownRoute: onUnknownRoute,
           navigatorObservers: navigatorObservers ?? const <NavigatorObserver>[],
-          builder: EasyLoading.init(
-            builder: (context, child) => Scaffold(
+          builder: (context, child) {
+            if (child == null) return const SizedBox.shrink();
+            
+            child = EasyLoading.init()(context, child);
+            return Scaffold(
               resizeToAvoidBottomInset: false,
               body: GestureDetector(
                 onTap: () {
@@ -189,12 +213,12 @@ class BaseApp {
                   behavior: OverScrollBehavior(), // 取消滚动组件滑到顶部和尾部水波纹效果
                   child: MediaQuery(
                     data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-                    child: child!,
+                    child: child,
                   ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
           title: title ?? '',
           onGenerateTitle: onGenerateTitle,
           color: color,

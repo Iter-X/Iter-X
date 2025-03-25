@@ -111,13 +111,12 @@ abstract class BaseState<T extends StatefulWidget> extends State<T> with Event {
     BaseLogger.v('go path: $path');
     // 关闭键盘
     FocusScope.of(context).unfocus();
-    //
-    needLogin ??= !Routes.routesWithoutLogin.contains(path);
+    needLogin ??= !Routes.requiresLogin(path);
     BaseLogger.v('needLogin: $needLogin');
-    BaseLogger.v('isLoggedIn: ${context.read<UserNotifier>().isLoggedIn}');
-    if (needLogin && !context.read<UserNotifier>().isLoggedIn) {
-      return go(Routes.login).then((value) {
-        if (context.read<UserNotifier>().isLoggedIn) {
+    BaseLogger.v('isTokenExpired: ${context.read<UserNotifier>().isTokenExpired}');
+    if (needLogin && context.read<UserNotifier>().isTokenExpired) {
+      return go(Routes.login, clearStack: true).then((value) {
+        if (!context.read<UserNotifier>().isTokenExpired) {
           return router.navigateTo(
             context, path, //路径
             replace: replace,

@@ -1,16 +1,15 @@
+import 'package:client/app/constants.dart';
+import 'package:client/common/material/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import 'app/constants.dart';
 import 'app/events/events.dart';
 import 'app/notifier/user.dart';
 import 'app/routes.dart';
 import 'common/material/app.dart';
 import 'common/material/state.dart';
-import 'common/material/theme_data.dart';
 import 'common/utils/api_util.dart';
-import 'common/utils/shared_preference_util.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -30,12 +29,11 @@ void main() async {
   // 监听登录过期事件
   eventBus.on<EventUnauthorized>().listen((event) async {
     // 清除用户信息
-    await BaseSpUtil.remove(SpKeys.USER_INFO);
-    await BaseSpUtil.remove(SpKeys.TOKEN);
+    await userNotifier.logout();
     // 跳转到登录页
     navigatorKey.currentState?.pushNamedAndRemoveUntil(
       Routes.login,
-          (Route<dynamic> route) => false, // 清空所有页面
+      (Route<dynamic> route) => false, // 清空所有页面
     );
   });
 
