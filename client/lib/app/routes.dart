@@ -39,7 +39,8 @@ class Routes {
   static final Map<String, Handler> _routeHandlers = {
     root: Handler(handlerFunc: (context, params) => const HomeMainPage()),
     login: Handler(handlerFunc: (context, params) => const LoginPage()),
-    phoneLogin: Handler(handlerFunc: (context, params) => const PhoneLoginPage()),
+    phoneLogin:
+        Handler(handlerFunc: (context, params) => const PhoneLoginPage()),
     inputCode: Handler(handlerFunc: (context, params) {
       if (context?.settings?.arguments is! InputCodeArgument) {
         return const LoginPage(); // 如果参数不正确，返回登录页
@@ -48,8 +49,10 @@ class Routes {
       return InputCodePage(argument: args);
     }),
     homeMain: Handler(handlerFunc: (context, params) => const HomeMainPage()),
-    createTripHome: Handler(handlerFunc: (context, params) => const CreateTripHomePage()),
-    cardSelection: Handler(handlerFunc: (context, params) => const CardSelectionPage()),
+    createTripHome:
+        Handler(handlerFunc: (context, params) => const CreateTripHomePage()),
+    cardSelection:
+        Handler(handlerFunc: (context, params) => const CardSelectionPage()),
   };
 
   // 404路由处理器
