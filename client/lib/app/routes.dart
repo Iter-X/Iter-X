@@ -9,17 +9,14 @@
 import 'package:client/business/auth/page/input_code.dart';
 import 'package:client/business/auth/page/login.dart';
 import 'package:client/business/auth/page/phone_login.dart';
-import 'package:client/business/home/page/home.dart';
 import 'package:client/business/create_trip/page/card_selection.dart';
 import 'package:client/business/create_trip/page/create_trip_home.dart';
+import 'package:client/business/home_main/page/home_main.dart';
 import 'package:fluro/fluro.dart';
-
-import '../business/home_main/page/home_main.dart';
 
 // 页面路由路径
 class Routes {
-  static bool _hasDefaultRoute = false;
-  static bool needLogin = false;
+  static bool _alreadyDefined = false;
 
   static String root = '/';
 
@@ -41,18 +38,15 @@ class Routes {
     login,
     phoneLogin,
     inputCode,
-    createTripHome,
-    cardSelection
   ];
 
   static void config(FluroRouter router) {
-    if (!_hasDefaultRoute) {
-      router.define(root, handler: Handler(handlerFunc: (c, p) {
-        return const HomeMainPage();
-      }));
-      _hasDefaultRoute = true;
-    }
-    router.define(login, handler: Handler(handlerFunc: (c, p) {
+    if (_alreadyDefined) return;
+    _alreadyDefined = true;
+    router.define(root, handler: Handler(handlerFunc: (c, p) {
+      return const HomeMainPage();
+    }));
+    router.define(cardSelection, handler: Handler(handlerFunc: (c, p) {
       return const CardSelectionPage();
     }));
     router.define(login, handler: Handler(handlerFunc: (c, p) {

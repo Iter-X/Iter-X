@@ -1,39 +1,55 @@
 import 'dart:convert';
 
+import 'package:client/common/utils/logger.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../business/auth/entity/user_info_entity.dart';
 import '../../common/material/state.dart';
 import '../events/events.dart';
 
+const String _kToken = 'token';
+
 class UserNotifier with ChangeNotifier, DiagnosticableTreeMixin {
-  UserNotifier(this._user);
+  final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   UserInfoEntity? _user;
 
   UserInfoEntity? get user => _user;
 
-  bool logined() => _user != null;
+  bool get isLoggedIn => _user != null; // need to confirm if the token is expired
 
-  updateUserInfo(UserInfoEntity? user) {
+  Future<void> loadUserInfo() async {
+    String? token = await _storage.read(key: _kToken);
+    BaseLogger.v('load token from storage: $token');
+    if (token != null) {
+      _user = UserInfoEntity(
+        token: token,
+      );
+      notifyListeners();
+    }
+  }
+
+  Future<void> login(UserInfoEntity user) async {
     if (_user == user) {
       return;
     }
-    if ((_user == null && user != null) || (_user != null && user == null)) {
-      eventBus.fire(EventUserLoginStatusChange(user != null));
-    }
 
     _user = user;
+
+    await _storage.write(key: _kToken, value: user.token);
+
     notifyListeners();
+    eventBus.fire(EventUserLoginStatusChange(true));
   }
 
-  updateUserInfoPart({
-    String? token,
-  }) {
-    if (token != null) {
-      _user?.token = token;
-    }
+  Future<void> logout() async {
+    _user = null;
+
+    await _storage.delete(key: _kToken);
+
     notifyListeners();
+    eventBus.fire(EventUserLoginStatusChange(false));
   }
 
   @override

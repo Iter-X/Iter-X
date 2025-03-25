@@ -1,22 +1,23 @@
 import 'dart:convert';
 
 import 'package:client/app/constants.dart';
+import 'package:client/app/notifier/user.dart';
 import 'package:client/app/routes.dart';
 import 'package:client/business/auth/page/input_code.dart';
 import 'package:client/business/auth/service/auth_service.dart';
 import 'package:client/common/material/loading.dart';
+import 'package:client/common/material/state.dart';
 import 'package:client/common/material/text_field.dart';
 import 'package:client/common/utils/color.dart';
+import 'package:client/common/utils/shared_preference_util.dart';
 import 'package:client/common/utils/toast.dart';
 import 'package:client/common/utils/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:ali_auth/ali_auth.dart';
+import 'package:provider/provider.dart';
 
-import '../../../common/dio/http_result_bean.dart';
-import '../../../common/material/state.dart';
-import '../../../common/utils/shared_preference_util.dart';
 
 class PhoneLoginPage extends StatefulWidget {
   const PhoneLoginPage({super.key});
@@ -297,6 +298,13 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
     if (result != null) {
       await BaseSpUtil.setJSON(SpKeys.TOKEN, result.token);
       await BaseSpUtil.setJSON(SpKeys.USER_INFO, result);
+
+      if (mounted) {
+        // guard the use of BuildContext with the mounted check
+        UserNotifier userNotifier = Provider.of<UserNotifier>(context, listen: false);
+        await userNotifier.login(result);
+      }
+
       go(Routes.homeMain, clearStack: true);
     }
   }

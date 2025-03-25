@@ -1,16 +1,16 @@
 import 'dart:async';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:client/app/notifier/user.dart';
+import 'package:client/app/routes.dart';
 import 'package:client/common/utils/color.dart';
+import 'package:client/common/utils/logger.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../app/notifier/user.dart';
-import '../../app/routes.dart';
-import '../utils/logger.dart';
 import 'app.dart';
 
 /// The global [EventBus] object.
@@ -113,10 +113,11 @@ abstract class BaseState<T extends StatefulWidget> extends State<T> with Event {
     FocusScope.of(context).unfocus();
     //
     needLogin ??= !Routes.routesWithoutLogin.contains(path);
-    // //
-    if (needLogin && !context.read<UserNotifier>().logined()) {
-      return go(Routes.phoneLogin).then((value) {
-        if (context.read<UserNotifier>().logined()) {
+    BaseLogger.v('needLogin: $needLogin');
+    BaseLogger.v('isLoggedIn: ${context.read<UserNotifier>().isLoggedIn}');
+    if (needLogin && !context.read<UserNotifier>().isLoggedIn) {
+      return go(Routes.login).then((value) {
+        if (context.read<UserNotifier>().isLoggedIn) {
           return router.navigateTo(
             context, path, //路径
             replace: replace,
@@ -140,7 +141,6 @@ abstract class BaseState<T extends StatefulWidget> extends State<T> with Event {
         ),
       );
     }
-    return Future(() => null);
   }
 }
 
