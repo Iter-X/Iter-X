@@ -15,8 +15,8 @@ type GeoService struct {
 	geoBiz *biz.Geo
 }
 
-// NewGeoService creates a new geographic information service instance
-func NewGeoService(geoBiz *biz.Geo) *GeoService {
+// NewGeo creates a new geographic information service instance
+func NewGeo(geoBiz *biz.Geo) *GeoService {
 	return &GeoService{
 		geoBiz: geoBiz,
 	}

@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package user.v1;
+
+import "google/api/annotations.proto";
+import "validatex/validatex.proto";
+import "cnst/constant.proto";
+import "openapiv3/openapiv3.proto";
+
+option go_package = "github.com/iter-x/iter-x/internal/api/user/v1;v1";
+
+service UserService {
+  rpc GetUserInfo (GetUserInfoRequest) returns (GetUserInfoResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/user/info"
+    };
+  }
+
+  rpc UpdateUserInfo (UpdateUserInfoRequest) returns (UpdateUserInfoResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/user/info"
+      body: "*"
+    };
+  }
+}
+
+message GetUserInfoRequest {}
+
+message GetUserInfoResponse {
+  string id = 1;
+  string username = 2;
+  string nickname = 3;
+  string email = 4;
+  string phone_number = 5;
+  string avatar_url = 6;
+  int64 created_at = 7;
+  int64 updated_at = 8;
+}
+
+message UpdateUserInfoRequest {
+  string username = 1 [(validatex.rules).string = {
+    max_len: 50
+  }];
+  string nickname = 2 [(validatex.rules).string = {
+    max_len: 50
+  }];
+  string avatar_url = 3 [(validatex.rules).string = {
+    max_len: 255
+  }];
+}
+
+message UpdateUserInfoResponse {}

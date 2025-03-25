@@ -14,7 +14,7 @@ type PointsOfInterestService struct {
 	pointsOfInterestBiz *biz.PointsOfInterest
 }
 
-func NewPointsOfInterestService(pointsOfInterestBiz *biz.PointsOfInterest) *PointsOfInterestService {
+func NewPointsOfInterest(pointsOfInterestBiz *biz.PointsOfInterest) *PointsOfInterestService {
 	return &PointsOfInterestService{
 		pointsOfInterestBiz: pointsOfInterestBiz,
 	}
