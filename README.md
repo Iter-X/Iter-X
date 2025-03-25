@@ -52,5 +52,6 @@ Whether you're a developer, designer, or travel enthusiast, if you're passionate
 
 ## 📚 Developer Documentation
 
+* [CLIENT.md](docs/dev/CLIENT.md)
+* [SERVER.md](docs/dev/SERVER.md)
 * [GOPHER.md](docs/dev/GOPHER.md)
-* [DEV.md](docs/dev/DEV.md)

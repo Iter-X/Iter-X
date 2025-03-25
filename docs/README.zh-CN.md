@@ -52,5 +52,6 @@
 
 ## 📚 开发者文档
 
-* [GOPHER.md](dev/GOPHER.md)
-* [DEV.md](dev/DEV.md)
+* [后端开发规范](dev/SERVER.zh-CN.md)
+* [客户端开发规范](dev/CLIENT.zh-CN.md)
+* [Go开发规范](dev/GOPHER.zh-CN.md)
