@@ -4,7 +4,7 @@
 
 <div align="center">
 
-| [English](DEV.md) | [中文简体](DEV.zh-CN.md) |
+| [English](SERVER.md) | [中文简体](SERVER.zh-CN.md) |
 
 </div>
 
