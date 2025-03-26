@@ -297,7 +297,7 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
     final token = await AuthService.oneClickLogin(code);
     if (token != null) {
       if (mounted) {
-        BaseLogger.v('oneClickLogin token: $token');
+        BaseLogger.i('oneClickLogin token: $token');
         // guard the use of BuildContext with the mounted check
         UserNotifier userNotifier = Provider.of<UserNotifier>(context, listen: false);
         await userNotifier.login(token: token);

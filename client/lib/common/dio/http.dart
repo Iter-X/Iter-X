@@ -125,11 +125,11 @@ class Http {
             options.headers['Authorization'] = 'Bearer ${userNotifier.token!.token}';
           }
 
-          BaseLogger.v('request headers: ${json.encode(options.headers)}');
+          BaseLogger.i('request headers: ${json.encode(options.headers)}');
           try {
-            BaseLogger.v('request data: ${json.encode(options.data)}');
+            BaseLogger.i('request data: ${json.encode(options.data)}');
           } catch (exception) {
-            BaseLogger.v('request data: ${options.data}');
+            BaseLogger.i('request data: ${options.data}');
           }
           return handler.next(options);
         },
@@ -195,7 +195,7 @@ class Http {
         cancelToken: cancelToken,
         onReceiveProgress: onReceiveProgress,
       );
-      BaseLogger.v('$path / response ${json.encode(response.data)}');
+      BaseLogger.i('$path / response ${json.encode(response.data)}');
       return _handleResponseData(response, isShowLoading);
     } catch (exception) {
       BaseLogger.e("----catch--请求错误-----${exception}");
@@ -232,7 +232,7 @@ class Http {
         onSendProgress: onSendProgress,
         onReceiveProgress: onReceiveProgress,
       );
-      BaseLogger.v('response ${json.encode(response.data)}');
+      BaseLogger.i('response ${json.encode(response.data)}');
       return _handleResponseData(response, isShowLoading);
     } catch (exception) {
       BaseLogger.e("--catch--请求错误-----$exception");
@@ -262,7 +262,7 @@ class Http {
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,
     );
-    BaseLogger.v('response ${json.encode(response.data)}');
+    BaseLogger.i('response ${json.encode(response.data)}');
     return _handleResponseData(response, isShowLoading);
   }
 
@@ -284,14 +284,14 @@ class Http {
       onSendProgress: onSendProgress,
       cancelToken: cancelToken,
     );
-    BaseLogger.v('response ${json.encode(response.data)}');
+    BaseLogger.i('response ${json.encode(response.data)}');
     return _handleResponseData(response, false);
   }
 
   // 文件下载
   Future downFile(String path) async {
     Response<String> response = await dio.post<String>(path);
-    BaseLogger.v('response ${json.encode(response.data)}');
+    BaseLogger.i('response ${json.encode(response.data)}');
     return _handleResponseData(response, false);
   }
 
@@ -315,7 +315,7 @@ class Http {
         onSendProgress: onSendProgress,
         onReceiveProgress: onReceiveProgress,
       );
-      BaseLogger.v('response ${json.encode(response.data)}');
+      BaseLogger.i('response ${json.encode(response.data)}');
       return _handleResponseData(response, false);
     } catch (exception) {
       BaseLogger.e("----catch--请求错误-----${exception}");
@@ -342,7 +342,7 @@ class Http {
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,
     );
-    BaseLogger.v('response ${json.encode(response.data)}');
+    BaseLogger.i('response ${json.encode(response.data)}');
     return response.data;
   }
 
@@ -364,7 +364,7 @@ class Http {
         options: options,
         cancelToken: cancelToken,
       );
-      BaseLogger.v('response ${json.encode(response.data)}');
+      BaseLogger.i('response ${json.encode(response.data)}');
       return _handleResponseData(response, false);
     } catch (exception) {
       BaseLogger.e("----catch--请求错误-----${exception}");
