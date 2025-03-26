@@ -1,49 +1,113 @@
+import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 
-// 日志输出
+enum LogLevel {
+  debug,
+  info,
+  warn,
+  error,
+}
+
+enum Environment {
+  development,
+  testing,
+  production,
+}
+
+// Base logger class
 class BaseLogger {
   BaseLogger._();
 
+  static Environment _environment = _getDefaultEnvironment();
+  static LogLevel _minLevel = LogLevel.debug;
+  static bool _enable = true;
+
+  static Environment _getDefaultEnvironment() {
+    if (kReleaseMode) {
+      return Environment.production;
+    } else if (kDebugMode) {
+      return Environment.development;
+    } else {
+      return Environment.testing;
+    }
+  }
+
   static final _logger = Logger(
     printer: PrettyPrinter(
+      // Stack trace depth for normal logs, 0 means no stack trace
       methodCount: 0,
-      // 打印方法行数
+      // Stack trace depth for error logs
       errorMethodCount: 8,
-      // number of method calls if stacktrace is provided
+      // Maximum width of log output
       lineLength: 5000,
-      // width of the output
-      colors: true,
-      // Colorful log messages
-      printEmojis: false,
-      // Print an emoji for each log message
-      printTime: false,
-      // Should each log print contain a timestamp
+      // Enable colored output
+      colors: false,
+      // Show emojis for different log levels
+      printEmojis: true,
+      // Time format setting, shows current time and app running duration
+      dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart,
+      // Disable box drawing by default
       noBoxingByDefault: true,
     ),
   );
 
-  // 日志开关
-  static bool _enable = true;
-
   static bool get enable => _enable;
+  static Environment get environment => _environment;
+  static LogLevel get minLevel => _minLevel;
 
-  static setEnable(bool enable) {
+  static void setEnvironment(Environment env) {
+    _environment = env;
+    _updateMinLevel();
+  }
+
+  static void setEnable(bool enable) {
     _enable = enable;
   }
 
-  static v(dynamic message, [dynamic error, StackTrace? stackTrace]) {
-    if (_enable) {
-      _logger.d(message);
+  static void _updateMinLevel() {
+    switch (_environment) {
+      case Environment.development:
+        _minLevel = LogLevel.debug;
+        break;
+      case Environment.testing:
+        _minLevel = LogLevel.info;
+        break;
+      case Environment.production:
+        _minLevel = LogLevel.warn;
+        break;
     }
   }
 
-  static e(dynamic message, [dynamic error, StackTrace? stackTrace]) {
-    if (_enable) {
-      _logger.e(message);
+  static bool _shouldLog(LogLevel level) {
+    if (!_enable) return false;
+    return level.index >= _minLevel.index;
+  }
+
+  static void d(dynamic message, [dynamic error, StackTrace? stackTrace]) {
+    if (_shouldLog(LogLevel.debug)) {
+      _logger.d(message, error: error, stackTrace: stackTrace);
     }
   }
 
-  static close() {
+  static void i(dynamic message, [dynamic error, StackTrace? stackTrace]) {
+    if (_shouldLog(LogLevel.info)) {
+      _logger.i(message, error: error, stackTrace: stackTrace);
+    }
+  }
+
+  static void w(dynamic message, [dynamic error, StackTrace? stackTrace]) {
+    if (_shouldLog(LogLevel.warn)) {
+      _logger.w(message, error: error, stackTrace: stackTrace);
+    }
+  }
+
+  static void e(dynamic message, [dynamic error, StackTrace? stackTrace]) {
+    if (_shouldLog(LogLevel.error)) {
+      _logger.e(message, error: error, stackTrace: stackTrace);
+    }
+  }
+
+  static void close() {
     _logger.close();
   }
 }

@@ -93,8 +93,8 @@ class UserNotifier with ChangeNotifier, DiagnosticableTreeMixin {
   }
 
   Future<void> refreshUserInfo() async {
-    BaseLogger.v('token: $token');
-    BaseLogger.v('token valid: ${!isTokenExpired}');
+    BaseLogger.i('token: $token');
+    BaseLogger.i('token valid: ${!isTokenExpired}');
     // 确保 token 有效
     if (!await ensureValidToken()) return;
     
@@ -125,7 +125,7 @@ class UserNotifier with ChangeNotifier, DiagnosticableTreeMixin {
       _token = token;
     }
 
-    BaseLogger.v('login token: ${_token!.toJson()}');
+    BaseLogger.i('login token: ${_token!.toJson()}');
     
     await _storage.write(key: _kToken, value: json.encode(_token!.toJson()));
 

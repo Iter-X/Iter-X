@@ -108,12 +108,12 @@ abstract class BaseState<T extends StatefulWidget> extends State<T> with Event {
     bool clearStack = false,
     TransitionType? transition,
   }) {
-    BaseLogger.v('go path: $path');
+    BaseLogger.i('go path: $path');
     // 关闭键盘
     FocusScope.of(context).unfocus();
-    needLogin ??= !Routes.requiresLogin(path);
-    BaseLogger.v('needLogin: $needLogin');
-    BaseLogger.v('isTokenExpired: ${context.read<UserNotifier>().isTokenExpired}');
+    needLogin ??= Routes.requiresLogin(path);
+    BaseLogger.i('needLogin: $needLogin');
+    BaseLogger.i('isTokenExpired: ${context.read<UserNotifier>().isTokenExpired}');
     if (needLogin && context.read<UserNotifier>().isTokenExpired) {
       return go(Routes.login, clearStack: true).then((value) {
         if (!context.read<UserNotifier>().isTokenExpired) {
