@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:flutter_speech/flutter_speech.dart';
 
 import '../../../common/material/image.dart';
 import '../../../common/material/text_field.dart';
@@ -139,5 +140,121 @@ class CreatePhotoWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+// 语音创建 底部样式
+class CreateVoiceWidget extends StatefulWidget {
+  final Function(String) onTextRecognized;
+
+  const CreateVoiceWidget({
+    super.key,
+    required this.onTextRecognized,
+  });
+
+  @override
+  _CreateVoiceWidgetState createState() => _CreateVoiceWidgetState();
+}
+
+class _CreateVoiceWidgetState extends State<CreateVoiceWidget> {
+  double _scale = 1.0;
+  String _recognizedText = '';
+  late SpeechRecognition _speechRecognition;
+  bool _isListening = false;
+  final String _locale = 'zh-CN';
+  final List<Map<String, dynamic>> _languages = [
+    {
+      'name': 'Chinese',
+      'code': 'zh-CN',
+    },
+    {
+      'name': 'English',
+      'code': 'en-US',
+    },
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _speechRecognition = SpeechRecognition();
+    _speechRecognition.setAvailabilityHandler((bool result) {
+      setState(() {
+        // 处理语音识别可用性
+      });
+    });
+    _speechRecognition.setRecognitionStartedHandler(() {
+      setState(() {
+        _isListening = true;
+        print('开始识别');
+      });
+    });
+    _speechRecognition.setRecognitionResultHandler((String text) {
+      setState(() {
+        _recognizedText = text;
+        widget.onTextRecognized(text); // 调用回调函数传递识别结果
+        _isListening = false;
+        print('识别结果：$text');
+      });
+    });
+    _speechRecognition.setRecognitionCompleteHandler((String text) {
+      setState(() {
+        _isListening = false;
+        print('识别完成：$text');
+      });
+    });
+    _speechRecognition.activate(_languages[0]['code']).then((result) {
+      setState(() {
+        // 处理激活结果
+        print('激活结果：$result');
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+      if (_isListening)
+        Container(
+            margin: EdgeInsets.only(bottom: 20.h),
+            child: BaseImage.asset(
+              name: 'ic_create_voice_black.png',
+              width: 50.w,
+              height: 50.h,
+              fit: BoxFit.cover,
+            )),
+      if (_recognizedText != '')
+        Text(
+          _recognizedText,
+          style: TextStyle(
+            fontSize: 16.sp,
+            color: BaseColor.c_1D1F1E,
+          ),
+        ),
+      Container(
+        margin: EdgeInsets.only(bottom: 90.h, top: 20.h),
+        child: GestureDetector(
+          onLongPress: () {
+            _recognizedText = '';
+            _scale = 1.2;
+            _speechRecognition.listen();
+          },
+          onLongPressEnd: (_) {
+            setState(() {
+              _scale = 1.0;
+            });
+            _speechRecognition.stop();
+          },
+          child: Transform.scale(
+            scale: _scale,
+            child: BaseImage.asset(
+              name: 'btn_create_voice.png',
+              width: 100.w,
+              height: 100.h,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+      )
+    ]);
   }
 }
