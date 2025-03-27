@@ -35,7 +35,7 @@ type UploadPart struct {
 }
 
 type FileManager interface {
-	InitiateMultipartUpload(objectKey string) (*InitiateMultipartUploadResult, error)
+	InitiateMultipartUpload(originalName, group string) (*InitiateMultipartUploadResult, error)
 	GenerateUploadPartURL(uploadID, objectKey string, partNumber int, expires time.Duration) (*UploadPartInfo, error)
 	CompleteMultipartUpload(uploadID, objectKey string, parts []UploadPart) (*CompleteMultipartUploadResult, error)
 	GeneratePublicURL(objectKey string, exp time.Duration) (string, error)
@@ -43,7 +43,7 @@ type FileManager interface {
 
 type Config interface {
 	GetEndpoint() string
-	GetAccessKeyID() string
+	GetAccessKeyId() string
 	GetAccessKeySecret() string
 	GetBucketName() string
 }

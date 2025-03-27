@@ -30,7 +30,7 @@ func (c *config) GetEndpoint() string {
 	return c.endpoint
 }
 
-func (c *config) GetAccessKeyID() string {
+func (c *config) GetAccessKeyId() string {
 	return c.accessKeyID
 }
 
@@ -56,7 +56,7 @@ func Test_NewOSS(t *testing.T) {
 		t.Fatal(err)
 	}
 	fileName := ".env.example"
-	initiateMultipartUpload, err := fileManager.InitiateMultipartUpload(fileName)
+	initiateMultipartUpload, err := fileManager.InitiateMultipartUpload(fileName, "test_0")
 	if err != nil {
 		t.Fatal(err)
 	}

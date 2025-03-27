@@ -8,14 +8,14 @@ import (
 	"time"
 
 	alioss "github.com/aliyun/aliyun-oss-go-sdk/oss"
-	
+
 	"github.com/iter-x/iter-x/pkg/oss"
 )
 
 var _ oss.FileManager = (*aliCloud)(nil)
 
 func NewOSS(c oss.Config) (oss.FileManager, error) {
-	client, err := alioss.New(c.GetEndpoint(), c.GetAccessKeyID(), c.GetAccessKeySecret())
+	client, err := alioss.New(c.GetEndpoint(), c.GetAccessKeyId(), c.GetAccessKeySecret())
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func NewOSS(c oss.Config) (oss.FileManager, error) {
 	}
 
 	return &aliCloud{
-		accessKeyID:     c.GetAccessKeyID(),
+		accessKeyID:     c.GetAccessKeyId(),
 		accessKeySecret: c.GetAccessKeySecret(),
 		bucketName:      c.GetBucketName(),
 		endpoint:        c.GetEndpoint(),
@@ -45,12 +45,12 @@ type aliCloud struct {
 	bucket *alioss.Bucket
 }
 
-func generateObjectKey(originalName string) string {
-	return fmt.Sprintf("uploads/%s/%d_%s", time.Now().Format("2006_01_02"), time.Now().UnixNano(), originalName)
+func generateObjectKey(originalName, group string) string {
+	return fmt.Sprintf("uploads/%s/%s/%d_%s", group, time.Now().Format("2006_01_02"), time.Now().UnixNano(), originalName)
 }
 
-func (a *aliCloud) InitiateMultipartUpload(objectKey string) (*oss.InitiateMultipartUploadResult, error) {
-	uniqueKey := generateObjectKey(objectKey)
+func (a *aliCloud) InitiateMultipartUpload(originalName, group string) (*oss.InitiateMultipartUploadResult, error) {
+	uniqueKey := generateObjectKey(originalName, group)
 
 	// 初始化分片上传
 	multipartUpload, err := a.bucket.InitiateMultipartUpload(uniqueKey)
