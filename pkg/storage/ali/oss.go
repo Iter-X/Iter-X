@@ -9,12 +9,12 @@ import (
 
 	alioss "github.com/aliyun/aliyun-oss-go-sdk/oss"
 
-	"github.com/iter-x/iter-x/pkg/oss"
+	"github.com/iter-x/iter-x/pkg/storage"
 )
 
-var _ oss.FileManager = (*aliCloud)(nil)
+var _ storage.FileManager = (*aliCloud)(nil)
 
-func NewOSS(c oss.Config) (oss.FileManager, error) {
+func NewOSS(c Config) (storage.FileManager, error) {
 	client, err := alioss.New(c.GetEndpoint(), c.GetAccessKeyId(), c.GetAccessKeySecret())
 	if err != nil {
 		return nil, err
@@ -35,6 +35,13 @@ func NewOSS(c oss.Config) (oss.FileManager, error) {
 	}, nil
 }
 
+type Config interface {
+	GetEndpoint() string
+	GetAccessKeyId() string
+	GetAccessKeySecret() string
+	GetBucketName() string
+}
+
 type aliCloud struct {
 	endpoint        string
 	accessKeyID     string
@@ -49,7 +56,7 @@ func generateObjectKey(originalName, group string) string {
 	return fmt.Sprintf("uploads/%s/%s/%d_%s", group, time.Now().Format("2006_01_02"), time.Now().UnixNano(), originalName)
 }
 
-func (a *aliCloud) InitiateMultipartUpload(originalName, group string) (*oss.InitiateMultipartUploadResult, error) {
+func (a *aliCloud) InitiateMultipartUpload(originalName, group string) (*storage.InitiateMultipartUploadResult, error) {
 	uniqueKey := generateObjectKey(originalName, group)
 
 	// 初始化分片上传
@@ -58,14 +65,14 @@ func (a *aliCloud) InitiateMultipartUpload(originalName, group string) (*oss.Ini
 		return nil, err
 	}
 
-	return &oss.InitiateMultipartUploadResult{
+	return &storage.InitiateMultipartUploadResult{
 		UploadID:   multipartUpload.UploadID,
 		BucketName: multipartUpload.Bucket,
 		ObjectKey:  multipartUpload.Key,
 	}, nil
 }
 
-func (a *aliCloud) GenerateUploadPartURL(uploadID, objectKey string, partNumber int, expires time.Duration) (*oss.UploadPartInfo, error) {
+func (a *aliCloud) GenerateUploadPartURL(uploadID, objectKey string, partNumber int, expires time.Duration) (*storage.UploadPartInfo, error) {
 	sec := int64(expires.Seconds())
 
 	options := []alioss.Option{
@@ -81,7 +88,7 @@ func (a *aliCloud) GenerateUploadPartURL(uploadID, objectKey string, partNumber 
 		return nil, err
 	}
 
-	return &oss.UploadPartInfo{
+	return &storage.UploadPartInfo{
 		UploadID:       uploadID,
 		BucketName:     a.bucketName,
 		ObjectKey:      objectKey,
@@ -91,7 +98,7 @@ func (a *aliCloud) GenerateUploadPartURL(uploadID, objectKey string, partNumber 
 	}, nil
 }
 
-func (a *aliCloud) CompleteMultipartUpload(uploadID, objectKey string, parts []oss.UploadPart) (*oss.CompleteMultipartUploadResult, error) {
+func (a *aliCloud) CompleteMultipartUpload(uploadID, objectKey string, parts []storage.UploadPart) (*storage.CompleteMultipartUploadResult, error) {
 	sort.Slice(parts, func(i, j int) bool {
 		return parts[i].PartNumber < parts[j].PartNumber
 	})
@@ -121,7 +128,7 @@ func (a *aliCloud) CompleteMultipartUpload(uploadID, objectKey string, parts []o
 		return nil, fmt.Errorf("generate public URL failed: %w", err)
 	}
 
-	return &oss.CompleteMultipartUploadResult{
+	return &storage.CompleteMultipartUploadResult{
 		Location:   completeMultipartUpload.Location,
 		Bucket:     completeMultipartUpload.Bucket,
 		Key:        completeMultipartUpload.Key,

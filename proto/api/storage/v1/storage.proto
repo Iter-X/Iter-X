@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package storage.v1;
+
+import "google/api/annotations.proto";
+import "validatex/validatex.proto";
+
+option go_package = "github.com/iter-x/iter-x/internal/api/storage/v1;v1";
+
+service Storage {
+  rpc InitUpload (InitUploadRequest) returns (InitUploadReply) {
+    option (google.api.http) = {
+      post: "/api/storage/v1/init-upload"
+      body: "*"
+    };
+  }
+  rpc GenerateUploadPartURL (GenerateUploadPartURLRequest) returns (GenerateUploadPartURLReply) {
+    option (google.api.http) = {
+      post: "/api/storage/v1/generate-upload-part-url"
+      body: "*"
+    };
+  }
+  rpc CompleteUpload (CompleteUploadRequest) returns (CompleteUploadReply) {
+    option (google.api.http) = {
+      post: "/api/storage/v1/complete-upload"
+      body: "*"
+    };
+  }
+}
+
+message InitUploadRequest {
+  string filename = 1 [(validatex.rules).string.min_len = 1];
+}
+message InitUploadReply {
+  string upload_id = 1;
+  string object_key = 2;
+  string bucket_name = 3;
+}
+
+message GenerateUploadPartURLRequest {
+  string upload_id = 1 [(validatex.rules).string.min_len = 1];
+  string object_key = 2 [(validatex.rules).string.min_len = 1];
+  int32 part_number = 3 [(validatex.rules).numeric.gt = 0];
+}
+message GenerateUploadPartURLReply {
+  string upload_id = 1;
+  string object_key = 2;
+  string bucket_name = 3;
+  string upload_url = 4;
+  int32 part_number = 5;
+  int64 expiration_time = 6;
+}
+
+message CompleteUploadRequest {
+  message UploadPart {
+    int32 part_number = 1 [(validatex.rules).numeric.gt = 0];
+    string etag = 2 [(validatex.rules).string.min_len = 1];
+  }
+  string upload_id = 1 [(validatex.rules).string.min_len = 1];
+  string object_key = 2 [(validatex.rules).string.min_len = 1];
+  repeated UploadPart parts = 3 [(validatex.rules).repeated.min_items = 1];
+}
+message CompleteUploadReply {
+  string location = 1;
+  string bucket = 2;
+  string key = 3;
+  string etag = 4;
+  string private_url = 5;
+  string public_url = 6;
+  int64 expiration = 7;
+}

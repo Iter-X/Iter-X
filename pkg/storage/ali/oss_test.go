@@ -13,11 +13,11 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"github.com/iter-x/iter-x/pkg/oss"
-	"github.com/iter-x/iter-x/pkg/oss/ali"
+	"github.com/iter-x/iter-x/pkg/storage"
+	"github.com/iter-x/iter-x/pkg/storage/ali"
 )
 
-var _ oss.Config = (*config)(nil)
+var _ ali.Config = (*config)(nil)
 
 type config struct {
 	endpoint        string
@@ -75,7 +75,7 @@ func Test_NewOSS(t *testing.T) {
 
 const chunkSize = 1 * 1024 * 1024
 
-func uploadFile(fileName string, manager oss.FileManager, params *oss.InitiateMultipartUploadResult) ([]oss.UploadPart, error) {
+func uploadFile(fileName string, manager storage.FileManager, params *storage.InitiateMultipartUploadResult) ([]storage.UploadPart, error) {
 	file, err := os.Open(fileName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open the file: %v", err)
@@ -89,7 +89,7 @@ func uploadFile(fileName string, manager oss.FileManager, params *oss.InitiateMu
 
 	fileSize := fileInfo.Size()
 	chunks := int((fileSize + chunkSize - 1) / chunkSize)
-	parts := make([]oss.UploadPart, 0, chunks)
+	parts := make([]storage.UploadPart, 0, chunks)
 
 	for i := 0; i < chunks; i++ {
 		start := int64(i) * chunkSize
@@ -122,7 +122,7 @@ func uploadFile(fileName string, manager oss.FileManager, params *oss.InitiateMu
 			return nil, fmt.Errorf("the %d shard upload failed: %v", partNumber, err)
 		}
 
-		parts = append(parts, oss.UploadPart{
+		parts = append(parts, storage.UploadPart{
 			PartNumber: partNumber,
 			ETag:       eTag,
 		})

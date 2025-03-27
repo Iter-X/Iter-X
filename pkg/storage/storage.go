@@ -1,4 +1,4 @@
-package oss
+package storage
 
 import (
 	"time"
@@ -39,11 +39,4 @@ type FileManager interface {
 	GenerateUploadPartURL(uploadID, objectKey string, partNumber int, expires time.Duration) (*UploadPartInfo, error)
 	CompleteMultipartUpload(uploadID, objectKey string, parts []UploadPart) (*CompleteMultipartUploadResult, error)
 	GeneratePublicURL(objectKey string, exp time.Duration) (string, error)
-}
-
-type Config interface {
-	GetEndpoint() string
-	GetAccessKeyId() string
-	GetAccessKeySecret() string
-	GetBucketName() string
 }

@@ -13,7 +13,7 @@ message Bootstrap {
   Auth auth = 5;
   I18n i18n = 6;
   Agent agent = 7;
-  OSS oss = 8;
+  Storage storage = 8;
 }
 
 enum Environment {
@@ -182,24 +182,28 @@ message Agent {
   repeated ToolConfig tools = 2;
 }
 
-message OSS {
-  enum OSSDriver {
+message Storage {
+  enum StorageDriver {
     LOCAL = 0;
     ALIYUN = 1;
   }
 
   message Local {
     string root = 1;
+    string uploadMethod = 2;
+    string uploadURL = 3;
+    string previewURL = 4;
+    string endpoint = 5;
   }
 
-  message Ali {
+  message AliCloudOSS {
     string endpoint = 1;
     string access_key_id = 2;
     string access_key_secret = 3;
     string bucket_name = 4;
   }
 
-  OSSDriver driver = 1;
+  StorageDriver driver = 1;
   Local local = 2;
-  Ali ali = 3;
+  AliCloudOSS ali = 3;
 }

@@ -1,9 +1,0 @@
-oss:
-  driver: ${X_OSS_DRIVER:LOCAL}
-  local:
-    root: "${X_OSS_LOCAL_ROOT:./oss}"
-  ali:
-    endpoint: "${X_OSS_ALI_ENDPOINT:oss-cn-beijing.aliyuncs.com}"
-    access_key_id: "${X_OSS_ALI_ACCESS_KEY_ID:}"
-    access_key_secret: "${X_OSS_ALI_ACCESS_KEY_SECRET:}"
-    bucket_name: "${X_OSS_ALI_BUCKET:}"

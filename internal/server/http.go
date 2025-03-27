@@ -16,16 +16,19 @@ import (
 	userV1 "github.com/iter-x/iter-x/internal/api/user/v1"
 	"github.com/iter-x/iter-x/internal/common/cnst"
 	"github.com/iter-x/iter-x/internal/conf"
+	"github.com/iter-x/iter-x/internal/data"
+	"github.com/iter-x/iter-x/pkg/storage/local"
 )
 
 type HTTPServer struct {
 	env    conf.Environment
 	cfg    *conf.Server_HTTP
 	mux    *runtime.ServeMux
+	data   *data.Data
 	logger *zap.SugaredLogger
 }
 
-func NewHTTPServer(env conf.Environment, c *conf.Server_HTTP, logger *zap.SugaredLogger) *HTTPServer {
+func NewHTTPServer(env conf.Environment, c *conf.Server_HTTP, d *data.Data, logger *zap.SugaredLogger) *HTTPServer {
 	mux := runtime.NewServeMux(
 		runtime.WithIncomingHeaderMatcher(func(key string) (string, bool) {
 			switch key {
@@ -40,12 +43,16 @@ func NewHTTPServer(env conf.Environment, c *conf.Server_HTTP, logger *zap.Sugare
 		env:    env,
 		cfg:    c,
 		mux:    mux,
+		data:   d,
 		logger: logger.Named("http"),
 	}
 }
 
 func (s *HTTPServer) Start(ctx context.Context) error {
 	if err := registerDoc(s.env, s.mux); err != nil {
+		return err
+	}
+	if err := registerStorage(s.data, s.mux); err != nil {
 		return err
 	}
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
@@ -90,6 +97,28 @@ func registerDoc(env conf.Environment, mux *runtime.ServeMux) error {
 	}
 	err = mux.HandlePath(http.MethodPost, "/dbviewer/*", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 		http.StripPrefix("/dbviewer/", http.FileServer(http.Dir("./dbviewer"))).ServeHTTP(w, r)
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func registerStorage(d *data.Data, mux *runtime.ServeMux) error {
+	localStorage, ok := d.Storage.(*local.Local)
+	if !ok {
+		return nil
+	}
+	c := localStorage.GetConfig()
+	err := mux.HandlePath(c.GetUploadMethod(), c.GetUploadURL(), func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+		localStorage.UploadHandler(w, r)
+	})
+	if err != nil {
+		return err
+	}
+
+	err = mux.HandlePath("GET", c.GetPreviewURL(), func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+		localStorage.PreviewHandler(w, r)
 	})
 	if err != nil {
 		return err
