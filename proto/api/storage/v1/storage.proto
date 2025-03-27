@@ -10,14 +10,12 @@ option go_package = "github.com/iter-x/iter-x/internal/api/storage/v1;v1";
 service Storage {
   rpc InitUpload (InitUploadRequest) returns (InitUploadReply) {
     option (google.api.http) = {
-      post: "/api/storage/v1/init-upload"
-      body: "*"
+      get: "/api/storage/v1/init-upload"
     };
   }
   rpc GenerateUploadPartURL (GenerateUploadPartURLRequest) returns (GenerateUploadPartURLReply) {
     option (google.api.http) = {
-      post: "/api/storage/v1/generate-upload-part-url"
-      body: "*"
+      get: "/api/storage/v1/generate-upload-part-url"
     };
   }
   rpc CompleteUpload (CompleteUploadRequest) returns (CompleteUploadReply) {

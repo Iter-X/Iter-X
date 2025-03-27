@@ -1,6 +1,8 @@
 package server
 
 import (
+	_ "embed"
+
 	"context"
 	"net/http"
 
@@ -12,6 +14,7 @@ import (
 	authV1 "github.com/iter-x/iter-x/internal/api/auth/v1"
 	geoV1 "github.com/iter-x/iter-x/internal/api/geo/v1"
 	poiV1 "github.com/iter-x/iter-x/internal/api/poi/v1"
+	storageV1 "github.com/iter-x/iter-x/internal/api/storage/v1"
 	tripV1 "github.com/iter-x/iter-x/internal/api/trip/v1"
 	userV1 "github.com/iter-x/iter-x/internal/api/user/v1"
 	"github.com/iter-x/iter-x/internal/common/cnst"
@@ -62,6 +65,7 @@ func (s *HTTPServer) Start(ctx context.Context) error {
 		poiV1.RegisterPointsOfInterestServiceHandlerFromEndpoint,
 		geoV1.RegisterGeoServiceHandlerFromEndpoint,
 		userV1.RegisterUserServiceHandlerFromEndpoint,
+		storageV1.RegisterStorageHandlerFromEndpoint,
 	} {
 		err := fn(ctx, s.mux, s.cfg.GrpcAddr, opts)
 		if err != nil {
@@ -104,11 +108,18 @@ func registerDoc(env conf.Environment, mux *runtime.ServeMux) error {
 	return nil
 }
 
+//go:embed oss.html
+var aliyunOssHtml []byte
+
 func registerStorage(d *data.Data, mux *runtime.ServeMux) error {
 	localStorage, ok := d.Storage.(*local.Local)
 	if !ok {
 		return nil
 	}
+	mux.HandlePath("GET", "/storage", func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write(aliyunOssHtml)
+	})
 	c := localStorage.GetConfig()
 	err := mux.HandlePath(c.GetUploadMethod(), c.GetUploadURL(), func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 		localStorage.UploadHandler(w, r)

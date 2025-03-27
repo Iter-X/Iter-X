@@ -5,26 +5,29 @@ import (
 	"time"
 
 	"github.com/iter-x/iter-x/internal/biz/bo"
+	"github.com/iter-x/iter-x/internal/data"
 	"github.com/iter-x/iter-x/internal/helper/auth"
 	"github.com/iter-x/iter-x/pkg/storage"
 )
 
-func NewStorage(fileManager storage.FileManager) *Storage {
+func NewStorage(d *data.Data) *Storage {
 	return &Storage{
-		fileManager: fileManager,
+		storage: d.Storage,
 	}
 }
 
 type Storage struct {
-	fileManager storage.FileManager
+	storage storage.FileManager
 }
 
 func (s *Storage) InitUpload(ctx context.Context, request *bo.InitUploadRequest) (*bo.InitUploadReply, error) {
 	claims, err := auth.ExtractClaims(ctx)
 	if err != nil {
+		//claims = new(auth.Claims)
+		//claims.UID = uuid.New()
 		return nil, err
 	}
-	uploadResult, err := s.fileManager.InitiateMultipartUpload(request.Filename, claims.UID.String())
+	uploadResult, err := s.storage.InitiateMultipartUpload(request.Filename, claims.UID.String())
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +40,7 @@ func (s *Storage) InitUpload(ctx context.Context, request *bo.InitUploadRequest)
 
 func (s *Storage) GenerateUploadPartURL(_ context.Context, request *bo.GenerateUploadPartURLRequest) (*bo.GenerateUploadPartURLReply, error) {
 	// TODO expiration time should be configurable
-	uploadPartURL, err := s.fileManager.GenerateUploadPartURL(request.UploadID, request.ObjectKey, request.PartNumber, time.Minute*15)
+	uploadPartURL, err := s.storage.GenerateUploadPartURL(request.UploadID, request.ObjectKey, request.PartNumber, time.Minute*15)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +62,7 @@ func (s *Storage) CompleteUpload(_ context.Context, request *bo.CompleteUploadRe
 			PartNumber: part.PartNumber,
 		})
 	}
-	completeMultipartUpload, err := s.fileManager.CompleteMultipartUpload(request.UploadID, request.ObjectKey, parts)
+	completeMultipartUpload, err := s.storage.CompleteMultipartUpload(request.UploadID, request.ObjectKey, parts)
 	if err != nil {
 		return nil, err
 	}

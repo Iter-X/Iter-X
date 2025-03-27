@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>OSS 上传</title>
+</head>
+
+<body>
+<h1>OSS 上传</h1>
+<input type="file" id="fileInput" />
+<button id="uploadButton">上传</button>
+<div id="progress"></div>
+
+<script type="module">
+    async function uploadFile(file) {
+        const progress = document.getElementById('progress')
+
+        try {
+            // 1. 初始化上传
+            progress.textContent = '初始化上传...'
+            const initResponse = await fetch(`/api/storage/v1/init-upload?filename=${file.name}`)
+            if (!initResponse.ok) {
+                const errorData = await initResponse.json()
+                throw new Error(`初始化上传失败: ${errorData.message || initResponse.statusText}`)
+            }
+            const { uploadId, bucketName, objectKey } = await initResponse.json()
+
+            // 2. 分片上传
+            const chunkSize = 5 * 1024 * 1024 // 5MB
+            const chunks = Math.ceil(file.size / chunkSize)
+            const parts = []
+
+            for (let i = 0; i < chunks; i++) {
+                const start = i * chunkSize
+                const end = Math.min(start + chunkSize, file.size)
+                const chunk = file.slice(start, end)
+
+                progress.textContent = `正在上传第 ${i + 1}/${chunks} 个分片...`
+
+                try {
+                    // 获取预签名URL
+                    const urlResponse = await fetch(
+                        `/api/storage/v1/generate-upload-part-url?uploadId=${uploadId}&objectKey=${objectKey}&partNumber=${i + 1}`
+                    )
+                    const { uploadUrl } = await urlResponse.json()
+
+                    // 上传分片
+                    const uploadResponse = await fetch(uploadUrl, {
+                        method: 'PUT',
+                        body: chunk,
+                        headers: {
+                            'Content-Type': 'application/octet-stream',
+                        },
+                        mode: 'cors',
+                        credentials: 'omit',
+                    })
+
+                    if (!uploadResponse.ok) {
+                        throw new Error(`分片上传失败: HTTP ${uploadResponse.status}`)
+                    }
+
+                    const headers = uploadResponse.headers
+                    // 尝试多种方式获取 ETag
+                    const eTag = headers.get('etag') ||
+                        headers.get('ETag') ||
+                        headers.get('Etag') ||
+                        headers.get('etag') ||
+                        uploadResponse.headers.get('etag')
+
+                    console.log('Final ETag:', eTag)
+
+                    parts.push({
+                        part_number: i + 1,
+                        etag: eTag.replace(/^"(.*)"$/, '$1'), // 移除引号
+                    })
+                } catch (error) {
+                    throw new Error(`第 ${i + 1} 个分片上传失败: ${error.message}`)
+                }
+            }
+
+            // 3. 完成上传
+            progress.textContent = '正在完成上传...'
+            const completeResponse = await fetch('/api/storage/v1/complete-upload', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    uploadId,
+                    objectKey,
+                    parts,
+                }),
+            })
+
+            if (!completeResponse.ok) {
+                const errorData = await completeResponse.json()
+                throw new Error(`完成上传失败: ${errorData.message || completeResponse.statusText}`)
+            }
+
+            const result = await completeResponse.json()
+            return result.publicUrl
+        } catch (error) {
+            throw new Error(`上传过程出错: ${error.message}`)
+        }
+    }
+
+    document.getElementById('uploadButton').addEventListener('click', async () => {
+        const file = document.getElementById('fileInput').files[0]
+        if (!file) {
+            alert('请选择一个文件')
+            return
+        }
+
+        const progress = document.getElementById('progress')
+        progress.textContent = '上传中...'
+
+        try {
+            const url = await uploadFile(file)
+            progress.textContent = '上传成功:'
+            const a = document.createElement('a')
+            a.href = url
+            a.textContent = "查看文件"
+            a.target = "_blank"
+            document.body.appendChild(a)
+            // alert(`上传成功，URL: ${url}`)
+        } catch (error) {
+            progress.textContent = '上传失败'
+            alert(`上传失败: ${error.message}`)
+        }
+    })
+</script>
+</body>
+
+</html>

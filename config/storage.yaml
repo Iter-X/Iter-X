@@ -1,7 +1,7 @@
 storage:
   driver: ${X_STORAGE_DRIVER:LOCAL}
   local:
-    root: "${X_STORAGE_LOCAL_ROOT:./STORAGE}"
+    root: "${X_STORAGE_LOCAL_ROOT:./storage}"
     uploadMethod: "${X_STORAGE_LOCAL_UPLOAD_METHOD:PUT}"
     uploadURL: "${X_STORAGE_LOCAL_UPLOAD_URL:/storage/upload}"
     previewURL: "${X_STORAGE_LOCAL_PREVIEW_URL:/storage/preview}"

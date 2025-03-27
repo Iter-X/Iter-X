@@ -11,10 +11,10 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/iter-x/iter-x/pkg/storage"
+	"github.com/iter-x/iter-x/pkg/util/safety"
 )
 
 var _ storage.FileManager = (*Local)(nil)
@@ -30,7 +30,7 @@ func NewLocalOSS(c Config) (*Local, error) {
 		uploadURL:    c.GetUploadURL(),
 		previewURL:   c.GetPreviewURL(),
 		endpoint:     c.GetEndpoint(),
-		uploads:      make(map[string]*uploadSession),
+		uploads:      safety.NewMap[string, *uploadSession](),
 	}, nil
 }
 
@@ -43,8 +43,6 @@ type Config interface {
 }
 
 type Local struct {
-	rw sync.RWMutex
-
 	c Config
 
 	root         string
@@ -52,12 +50,12 @@ type Local struct {
 	uploadURL    string
 	previewURL   string
 	endpoint     string
-	uploads      map[string]*uploadSession // uploadID -> session
+	uploads      *safety.Map[string, *uploadSession] // uploadID -> session
 }
 
 type uploadSession struct {
 	objectKey string
-	parts     map[int]string // partNumber -> temp file
+	parts     *safety.Map[int, string] // partNumber -> temp file
 	createdAt time.Time
 }
 
@@ -70,17 +68,14 @@ func (l *Local) generateObjectKey(originalName, group string) string {
 }
 
 func (l *Local) InitiateMultipartUpload(originalName, group string) (*storage.InitiateMultipartUploadResult, error) {
-	l.rw.Lock()
-	defer l.rw.Unlock()
-
 	objectKey := l.generateObjectKey(originalName, group)
 	uploadID := generateUploadID(objectKey)
 
-	l.uploads[uploadID] = &uploadSession{
+	l.uploads.Set(uploadID, &uploadSession{
 		objectKey: objectKey,
-		parts:     make(map[int]string),
+		parts:     safety.NewMap[int, string](),
 		createdAt: time.Now(),
-	}
+	})
 
 	return &storage.InitiateMultipartUploadResult{
 		UploadID:   uploadID,
@@ -106,10 +101,7 @@ func (l *Local) GenerateUploadPartURL(uploadID, objectKey string, partNumber int
 }
 
 func (l *Local) CompleteMultipartUpload(uploadID, objectKey string, parts []storage.UploadPart) (*storage.CompleteMultipartUploadResult, error) {
-	l.rw.Lock()
-	defer l.rw.Unlock()
-
-	session, exists := l.uploads[uploadID]
+	session, exists := l.uploads.Get(uploadID)
 	if !exists {
 		return nil, fmt.Errorf("upload session not found")
 	}
@@ -152,7 +144,7 @@ func (l *Local) CompleteMultipartUpload(uploadID, objectKey string, parts []stor
 	})
 
 	for _, part := range parts {
-		partFilePath, ok := session.parts[part.PartNumber]
+		partFilePath, ok := session.parts.Get(part.PartNumber)
 		if !ok {
 			return nil, fmt.Errorf("part %d not found", part.PartNumber)
 		}
@@ -168,7 +160,7 @@ func (l *Local) CompleteMultipartUpload(uploadID, objectKey string, parts []stor
 		return nil, fmt.Errorf("failed to clean temp files: %w", err)
 	}
 
-	delete(l.uploads, uploadID)
+	l.uploads.Delete(uploadID)
 	publicURL, err := l.GeneratePublicURL(session.objectKey, time.Hour*24*7)
 	if err != nil {
 		return nil, err

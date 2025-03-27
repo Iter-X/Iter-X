@@ -34,10 +34,7 @@ func (l *Local) UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	l.rw.RLock()
-	session, exists := l.uploads[uploadID]
-	l.rw.RUnlock()
-
+	session, exists := l.uploads.Get(uploadID)
 	if !exists {
 		http.Error(w, "upload session not found", http.StatusNotFound)
 		return
@@ -66,9 +63,7 @@ func (l *Local) UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	eTag := hex.EncodeToString(hasher.Sum(nil))
 
-	l.rw.Lock()
-	session.parts[partNumber] = tempFile.Name()
-	l.rw.Unlock()
+	session.parts.Set(partNumber, tempFile.Name())
 
 	w.Header().Set("ETag", eTag)
 	w.Header().Set("Content-Type", "application/json")
@@ -104,6 +99,7 @@ func (l *Local) PreviewHandler(w http.ResponseWriter, r *http.Request) {
 	ext := filepath.Ext(file.Name())
 	contentType := getContentType(ext)
 	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=\"%s\"", filepath.Base(file.Name())))
 	io.Copy(w, file)
 	return
 }

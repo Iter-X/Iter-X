@@ -568,20 +568,6 @@ components:
                 uploadUrl:
                     type: string
             type: object
-        storage.v1.GenerateUploadPartURLRequest:
-            example:
-                objectKey: ""
-                partNumber: 0
-                uploadId: ""
-            properties:
-                objectKey:
-                    type: string
-                partNumber:
-                    format: int32
-                    type: integer
-                uploadId:
-                    type: string
-            type: object
         storage.v1.InitUploadReply:
             example:
                 bucketName: ""
@@ -593,13 +579,6 @@ components:
                 objectKey:
                     type: string
                 uploadId:
-                    type: string
-            type: object
-        storage.v1.InitUploadRequest:
-            example:
-                filename: ""
-            properties:
-                filename:
                     type: string
             type: object
         trip.v1.CreateDailyTripRequest:
@@ -924,14 +903,8 @@ paths:
             tags:
                 - Storage
     /api/storage/v1/generate-upload-part-url:
-        post:
+        get:
             operationId: Storage_GenerateUploadPartURL
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/storage.v1.GenerateUploadPartURLRequest'
-                required: true
             responses:
                 "200":
                     content:
@@ -960,14 +933,8 @@ paths:
             tags:
                 - Storage
     /api/storage/v1/init-upload:
-        post:
+        get:
             operationId: Storage_InitUpload
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/storage.v1.InitUploadRequest'
-                required: true
             responses:
                 "200":
                     content:
