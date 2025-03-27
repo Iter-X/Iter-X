@@ -4,7 +4,7 @@
  * @Autor: GiottoLLL7
  * @Date: 2025-03-23 20:35:12
  * @LastEditors: GiottoLLL7
- * @LastEditTime: 2025-03-23 22:54:37
+ * @LastEditTime: 2025-03-27 17:54:06
  */
 /*
  * @Description: 图卡选择页
@@ -19,8 +19,11 @@ import 'package:flutter/material.dart';
 import 'package:client/common/utils/color.dart';
 import 'package:client/common/material/image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 
+import '../../../common/material/app.dart';
+import '../../../common/material/iter_text.dart';
 import '../../common/widgets/buttom_widgets.dart';
 
 class CardSelectionPage extends StatefulWidget {
@@ -179,301 +182,311 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: BaseColor.c_f2f2f2,
-      appBar: AppBar(
-          title: selectionLevel == 0 ? Text('选择目的国家') : Text('选择目的城市'),
-          backgroundColor: Colors.transparent,
-          leading: ButtonBackWidget(onTap: () {
-            if (selectionLevel == 1) {
-              setState(() {
-                selectionLevel = 0;
-                _continentCountList = _selectedContinentId == '0'
-                    ? _allCountryList
-                        .where((country) => country['isHot'] == true)
-                        .toList()
-                    : _allCountryList
-                        .where((country) =>
-                            country['continentId'] == _selectedContinentId)
-                        .toList();
-              });
-            } else {
-              Navigator.pop(context);
-            }
-          })),
-      body: Column(children: [
-        Expanded(
-            child: SingleChildScrollView(
-                child: GridView.builder(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 4,
-            mainAxisSpacing: 4,
-          ),
-          itemCount: _continentCountList.length,
-          itemBuilder: (context, index) {
-            final country = _continentCountList[index];
-            final isSelected = _selectedCountries.contains(country['cityId']);
-            return GestureDetector(
-              onTap: () {
+        backgroundColor: BaseColor.c_f2f2f2,
+        appBar: AppBar(
+            title: selectionLevel == 0 ? Text('选择目的国家') : Text('选择目的城市'),
+            systemOverlayStyle: SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness: Brightness.dark,
+              statusBarBrightness: Brightness.light,
+            ),
+            backgroundColor: Colors.transparent,
+            leading: ButtonBackWidget(onTap: () {
+              if (selectionLevel == 1) {
                 setState(() {
-                  if (selectionLevel == 0) {
-                    _continentCountList = _allCityList
-                        .where(
-                            (city) => city['countryId'] == country['countryId'])
-                        .toList();
-                    selectionLevel = 1;
-                  } else {
-                    if (isSelected) {
-                      _selectedCountries.remove(country['cityId']);
-                    } else {
-                      _selectedCountries.add(country['cityId']);
-                    }
-                  }
+                  selectionLevel = 0;
+                  _continentCountList = _selectedContinentId == '0'
+                      ? _allCountryList
+                          .where((country) => country['isHot'] == true)
+                          .toList()
+                      : _allCountryList
+                          .where((country) =>
+                              country['continentId'] == _selectedContinentId)
+                          .toList();
                 });
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: isSelected ? Colors.black : Colors.transparent,
-                    width: 2,
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    BaseImage.asset(
-                      name: country['image'],
-                      width: 142.w,
-                      fit: BoxFit.cover,
+              } else {
+                Navigator.pop(context);
+              }
+            })),
+        body: SafeAreaX(
+          child: Column(children: [
+            Expanded(
+                child: SingleChildScrollView(
+                    child: GridView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 4,
+                mainAxisSpacing: 4,
+              ),
+              itemCount: _continentCountList.length,
+              itemBuilder: (context, index) {
+                final country = _continentCountList[index];
+                final isSelected =
+                    _selectedCountries.contains(country['cityId']);
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      if (selectionLevel == 0) {
+                        _continentCountList = _allCityList
+                            .where((city) =>
+                                city['countryId'] == country['countryId'])
+                            .toList();
+                        selectionLevel = 1;
+                      } else {
+                        if (isSelected) {
+                          _selectedCountries.remove(country['cityId']);
+                        } else {
+                          _selectedCountries.add(country['cityId']);
+                        }
+                      }
+                    });
+                  },
+                  child: Container(
+                    child: Stack(
+                      children: [
+                        BaseImage.asset(
+                          name: country['image'],
+                          width: 142.w,
+                          fit: BoxFit.cover,
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: 8.w,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              IterText(country['name'],
+                                  style: TextStyle(
+                                    fontSize: 22.sp,
+                                    color: isSelected
+                                        ? BaseColor.c_1D1F1E
+                                        : BaseColor.c_f2f2f2,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                  borders: BorderProperties(
+                                    width: 2,
+                                    color: isSelected
+                                        ? BaseColor.c_f2f2f2
+                                        : BaseColor.c_1D1F1E,
+                                  )),
+                              if (country['englishName'] != null &&
+                                  country['englishName'].isNotEmpty)
+                                IterText(country['englishName'],
+                                    textAlign: TextAlign.end, // 文字居中
+                                    style: TextStyle(
+                                      fontSize: 22.sp,
+                                      color: isSelected
+                                          ? BaseColor.c_1D1F1E
+                                          : BaseColor.c_f2f2f2,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                    borders: BorderProperties(
+                                      width: 2,
+                                      color: isSelected
+                                          ? BaseColor.c_f2f2f2
+                                          : BaseColor.c_1D1F1E,
+                                    )),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    Positioned(
-                      bottom: 0,
-                      right: 8.w,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                  ),
+                );
+              },
+            ))),
+            // 大洲Tab
+            Container(
+              padding: EdgeInsets.all(20),
+              color: BaseColor.c_F2F2F2,
+              child: Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    child: Wrap(
+                      alignment: WrapAlignment.start,
+                      spacing: 10, // 水平间距
+                      runSpacing: 10, // 垂直间距
+                      children: [
+                        ..._continentList
+                            .map((tag) => IntrinsicWidth(
+                                    child: GestureDetector(
+                                  onTap: () => {
+                                    setState(() {
+                                      _selectedContinentId = tag['continentId'];
+                                      _continentCountList =
+                                          _selectedContinentId == '0'
+                                              ? _allCountryList
+                                                  .where((country) =>
+                                                      country['isHot'] == true)
+                                                  .toList()
+                                              : _allCountryList
+                                                  .where((country) =>
+                                                      country['continentId'] ==
+                                                      _selectedContinentId)
+                                                  .toList();
+                                      selectionLevel = 0;
+                                    })
+                                  },
+                                  child: Container(
+                                      alignment: Alignment.center,
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 15), // 内间距
+                                      height: 38.h,
+                                      decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(28.w),
+                                        color: selectionLevel == 0 &&
+                                                _selectedContinentId ==
+                                                    tag['continentId']
+                                            ? BaseColor.c_1D1F1E
+                                            : BaseColor.c_E3E3E3,
+                                      ),
+                                      child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            if (selectionLevel == 0 &&
+                                                _selectedContinentId ==
+                                                    tag['continentId'])
+                                              BaseImage.asset(
+                                                name: 'ic_create_picard.png',
+                                                size: 18.w,
+                                              ),
+                                            Gap(5.w),
+                                            Text(
+                                              tag['name'],
+                                              style: TextStyle(
+                                                fontSize: 14.sp,
+                                                color: selectionLevel == 0 &&
+                                                        _selectedContinentId ==
+                                                            tag['continentId']
+                                                    ? BaseColor.c_F2F2F2
+                                                    : BaseColor.c_1D1F1E,
+                                              ),
+                                            ),
+                                          ])),
+                                )))
+                            .toList()
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  // 已选城市滚动区
+                  Container(
+                    width: double.infinity,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: _selectedCountries
+                            .map((id) => _allCityList
+                                .firstWhere((item) => item['cityId'] == id))
+                            .map((country) => Row(children: [
+                                  IntrinsicWidth(
+                                      child: Container(
+                                    height: 42.w,
+                                    alignment: Alignment.center,
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 15),
+                                    decoration: BoxDecoration(
+                                      color: BaseColor.c_E3E3E3,
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(5.sp),
+                                        bottomLeft: Radius.circular(5.sp),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      country['name'],
+                                      style: TextStyle(
+                                        fontSize: 16.sp,
+                                        color: BaseColor.c_1D1F1E,
+                                      ),
+                                    ),
+                                  )),
+                                  GestureDetector(
+                                      onTap: () => {
+                                            setState(() {
+                                              _selectedCountries
+                                                  .remove(country['cityId']);
+                                            })
+                                          },
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: BaseColor.c_1D1F1E,
+                                          borderRadius: BorderRadius.only(
+                                            topRight: Radius.circular(5.sp),
+                                            bottomRight: Radius.circular(5.sp),
+                                          ),
+                                        ),
+                                        margin: EdgeInsets.only(right: 10.w),
+                                        width: 38.w,
+                                        height: 42.w,
+                                        child: BaseImage.asset(
+                                          name: 'ic_card_cancel.png',
+                                          size: 26.w,
+                                        ),
+                                      ))
+                                ]))
+                            .toList(),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  GestureDetector(
+                    onTap: () => {print('点击')},
+                    child: Container(
+                      width: 390.w,
+                      height: 52.h,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(28.w),
+                        color: BaseColor.c_1D1F1E,
+                      ),
+                      margin: EdgeInsets.only(right: 6.w),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(country['name'],
-                              textAlign: TextAlign.end, // 文字居中
-                              style: TextStyle(
-                                fontSize: 22.sp,
-                                color: BaseColor.c_f2f2f2,
-                                fontWeight: FontWeight.w900,
-                                shadows: [
-                                  Shadow(
-                                    color: BaseColor.c_1D1F1E, // 阴影颜色
-                                    offset: Offset(2, 2), // 阴影偏移量
-                                    blurRadius: 2, // 阴影模糊半径
-                                  ),
-                                ],
-                              )),
-                          if (country['englishName'] != null &&
-                              country['englishName'].isNotEmpty)
-                            Text(
-                              country['englishName'],
-                              textAlign: TextAlign.end, // 文字居中
-                              style: TextStyle(
-                                fontSize: 22.sp,
-                                color: BaseColor.c_f2f2f2,
-                                fontWeight: FontWeight.w900,
-                                shadows: [
-                                  Shadow(
-                                    color: BaseColor.c_1D1F1E, // 阴影颜色
-                                    offset: Offset(2, 2), // 阴影偏移量
-                                    blurRadius: 2, // 阴影模糊半径
-                                  ),
-                                ],
-                              ),
+                          BaseImage.asset(
+                            name: 'ic_card_location.png',
+                            size: 24.w,
+                          ),
+                          Gap(5.w),
+                          Text(
+                            "已选${_selectedCountries.length}",
+                            style: TextStyle(
+                              fontSize: 18.sp,
+                              color: BaseColor.c_f2f2f2,
                             ),
+                          ),
+                          Gap(10.w),
+                          BaseImage.asset(
+                            name: 'ic_card_arrow_right.png',
+                            size: 20.w,
+                          ),
+                          Gap(10.w),
+                          BaseImage.asset(
+                            name: 'ic_card_generate.png',
+                            size: 24.w,
+                          ),
+                          Gap(5.w),
+                          Text(
+                            "生成行程",
+                            style: TextStyle(
+                              fontSize: 18.sp,
+                              color: BaseColor.c_f2f2f2,
+                            ),
+                          )
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ))),
-        Container(
-          padding: EdgeInsets.all(16),
-          color: BaseColor.c_F2F2F2,
-          child: Column(
-            children: [
-              Wrap(
-                alignment: WrapAlignment.start,
-                spacing: 10, // 水平间距
-                runSpacing: 10, // 垂直间距
-                children: [
-                  ..._continentList
-                      .map((tag) => IntrinsicWidth(
-                              child: GestureDetector(
-                            onTap: () => {
-                              setState(() {
-                                _selectedContinentId = tag['continentId'];
-                                _continentCountList =
-                                    _selectedContinentId == '0'
-                                        ? _allCountryList
-                                            .where((country) =>
-                                                country['isHot'] == true)
-                                            .toList()
-                                        : _allCountryList
-                                            .where((country) =>
-                                                country['continentId'] ==
-                                                _selectedContinentId)
-                                            .toList();
-                                selectionLevel = 0;
-                              })
-                            },
-                            child: Container(
-                                alignment: Alignment.center,
-                                padding:
-                                    EdgeInsets.symmetric(horizontal: 15), // 内间距
-                                height: 38.h,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(28.w),
-                                  color: selectionLevel == 0 &&
-                                          _selectedContinentId ==
-                                              tag['continentId']
-                                      ? BaseColor.c_1D1F1E
-                                      : BaseColor.c_E3E3E3,
-                                ),
-                                child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      if (selectionLevel == 0 &&
-                                          _selectedContinentId ==
-                                              tag['continentId'])
-                                        BaseImage.asset(
-                                          name: 'ic_create_picard.png',
-                                          size: 18.w,
-                                        ),
-                                      Gap(5.w),
-                                      Text(
-                                        tag['name'],
-                                        style: TextStyle(
-                                          fontSize: 14.sp,
-                                          color: selectionLevel == 0 &&
-                                                  _selectedContinentId ==
-                                                      tag['continentId']
-                                              ? BaseColor.c_F2F2F2
-                                              : BaseColor.c_1D1F1E,
-                                        ),
-                                      ),
-                                    ])),
-                          )))
-                      .toList()
+                  )
                 ],
               ),
-              SizedBox(height: 20),
-              // 已选城市滚动区
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: _selectedCountries
-                      .map((id) => _allCityList
-                          .firstWhere((item) => item['cityId'] == id))
-                      .map((country) => Row(children: [
-                            IntrinsicWidth(
-                                child: Container(
-                              height: 42.w,
-                              alignment: Alignment.center,
-                              padding: EdgeInsets.symmetric(horizontal: 15),
-                              decoration: BoxDecoration(
-                                color: BaseColor.c_E3E3E3,
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(5.sp),
-                                  bottomLeft: Radius.circular(5.sp),
-                                ),
-                              ),
-                              child: Text(
-                                country['name'],
-                                style: TextStyle(
-                                  fontSize: 16.sp,
-                                  color: BaseColor.c_1D1F1E,
-                                ),
-                              ),
-                            )),
-                            GestureDetector(
-                                onTap: () => {
-                                      setState(() {
-                                        _selectedCountries
-                                            .remove(country['cityId']);
-                                      })
-                                    },
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    color: BaseColor.c_1D1F1E,
-                                    borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(5.sp),
-                                      bottomRight: Radius.circular(5.sp),
-                                    ),
-                                  ),
-                                  margin: EdgeInsets.only(right: 10.w),
-                                  width: 38.w,
-                                  height: 42.w,
-                                  child: BaseImage.asset(
-                                    name: 'ic_card_cancel.png',
-                                    size: 26.w,
-                                  ),
-                                ))
-                          ]))
-                      .toList(),
-                ),
-              ),
-              SizedBox(height: 20),
-              GestureDetector(
-                onTap: () => {print('点击')},
-                child: Container(
-                  width: 390.w,
-                  height: 52.h,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(28.w),
-                    color: BaseColor.c_1D1F1E,
-                  ),
-                  margin: EdgeInsets.only(right: 6.w),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      BaseImage.asset(
-                        name: 'ic_card_location.png',
-                        size: 24.w,
-                      ),
-                      Gap(5.w),
-                      Text(
-                        "已选${_selectedCountries.length}",
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          color: BaseColor.c_f2f2f2,
-                        ),
-                      ),
-                      Gap(10.w),
-                      BaseImage.asset(
-                        name: 'ic_card_arrow_right.png',
-                        size: 20.w,
-                      ),
-                      Gap(10.w),
-                      BaseImage.asset(
-                        name: 'ic_card_generate.png',
-                        size: 24.w,
-                      ),
-                      Gap(5.w),
-                      Text(
-                        "生成行程",
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          color: BaseColor.c_f2f2f2,
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              )
-            ],
-          ),
-        )
-      ]),
-    );
+            )
+          ]),
+        ));
   }
 }
