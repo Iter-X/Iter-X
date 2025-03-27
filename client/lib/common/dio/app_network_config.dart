@@ -1,8 +1,8 @@
+import 'package:client/app/events/events.dart';
+import 'package:client/common/material/state.dart';
+import 'package:client/common/utils/toast.dart';
 import 'package:dio/dio.dart';
 
-import '../../app/events/events.dart';
-import '../material/state.dart';
-import '../utils/toast.dart';
 import 'http_result_bean.dart';
 
 /// 网络请求库配置

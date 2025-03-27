@@ -1,17 +1,14 @@
 import 'package:client/app/routes.dart';
-import 'package:client/common/material/image.dart';
-import 'package:client/common/material/text_field.dart';
+import 'package:client/business/common/widgets/buttom_widgets.dart';
+import 'package:client/business/create_trip/widgets/bottom_create_widgets.dart';
+import 'package:client/business/create_trip/widgets/widgets.dart';
+import 'package:client/common/material/app.dart';
+import 'package:client/common/material/state.dart';
+import 'package:client/common/utils/color.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-
-import '../../../common/material/app.dart';
-import '../../../common/utils/color.dart';
-import '../../common/widgets/buttom_widgets.dart';
-import '../../../common/material/state.dart';
-import '../widgets/bottom_create_widgets.dart';
-import '../widgets/widgets.dart';
 
 class CreateTripHomePage extends StatefulWidget {
   const CreateTripHomePage({super.key});

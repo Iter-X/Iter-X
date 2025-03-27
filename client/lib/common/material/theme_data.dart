@@ -1,7 +1,6 @@
+import 'package:client/common/utils/color.dart';
+import 'package:client/common/utils/style.dart';
 import 'package:flutter/material.dart';
-
-import '../utils/color.dart';
-import '../utils/style.dart';
 
 class BaseThemeData {
   BaseThemeData._();

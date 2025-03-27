@@ -1,14 +1,12 @@
 import 'package:client/app/routes.dart';
 import 'package:client/business/home/page/home.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:client/business/home_main/widgets/widgets.dart';
+import 'package:client/business/mine/page/mine.dart';
+import 'package:client/common/material/app.dart';
+import 'package:client/common/material/state.dart';
+import 'package:client/common/utils/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-import '../../../common/material/app.dart';
-import '../../../common/material/state.dart';
-import '../../../common/utils/color.dart';
-import '../../mine/page/mine.dart';
-import '../widgets/widgets.dart';
 
 class HomeMainPage extends StatefulWidget {
   const HomeMainPage({super.key});

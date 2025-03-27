@@ -1,9 +1,8 @@
+import 'package:client/app/apis/auth_api.dart';
+import 'package:client/business/auth/entity/token_entity.dart';
+import 'package:client/business/auth/entity/user_info_entity.dart';
+import 'package:client/common/dio/http.dart';
 import 'package:client/common/dio/http_result_bean.dart';
-
-import '../../../app/apis/auth_api.dart';
-import '../../../common/dio/http.dart';
-import '../entity/token_entity.dart';
-import '../entity/user_info_entity.dart';
 
 class AuthService {
   // 获取验证码

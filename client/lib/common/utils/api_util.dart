@@ -1,5 +1,7 @@
 import 'dart:convert';
-import '../dio/api_model.dart';
+
+import 'package:client/common/dio/api_model.dart';
+
 import 'shared_preference_util.dart';
 
 // API工具类
