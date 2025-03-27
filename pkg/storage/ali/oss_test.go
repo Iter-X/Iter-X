@@ -50,12 +50,15 @@ func Test_NewOSS(t *testing.T) {
 		accessKeySecret: os.Getenv("ALIYUN_OSS_ACCESS_KEY_SECRET"),
 		bucketName:      os.Getenv("ALIYUN_OSS_BUCKET_NAME"),
 	}
+	if c.GetEndpoint() == "" {
+		return
+	}
 
 	fileManager, err := ali.NewOSS(c)
 	if err != nil {
 		t.Fatal(err)
 	}
-	fileName := ".env.example"
+	fileName := "../test.txt"
 	initiateMultipartUpload, err := fileManager.InitiateMultipartUpload(fileName, "test_0")
 	if err != nil {
 		t.Fatal(err)
