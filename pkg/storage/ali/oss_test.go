@@ -54,11 +54,17 @@ func Test_NewOSS(t *testing.T) {
 		return
 	}
 
+	fileName := "test.txt"
+	// Create a test.txt file with 2M data
+	if err := os.WriteFile(fileName, bytes.Repeat([]byte("a"), 2*1024*1024), 0644); err != nil {
+		t.Fatal(err)
+	}
+
 	fileManager, err := ali.NewOSS(c)
 	if err != nil {
 		t.Fatal(err)
 	}
-	fileName := "../test.txt"
+
 	initiateMultipartUpload, err := fileManager.InitiateMultipartUpload(fileName, "test_0")
 	if err != nil {
 		t.Fatal(err)

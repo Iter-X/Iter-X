@@ -83,7 +83,12 @@ func Test_NewLocalOSS(t *testing.T) {
 			ch <- syscall.SIGINT
 		}()
 		var fileManager storage.FileManager = localOSS
-		fileName := "../test.txt"
+		fileName := "test.txt"
+		// Create a test.txt file with 2M data
+		if err := os.WriteFile(fileName, bytes.Repeat([]byte("a"), 2*1024*1024), 0644); err != nil {
+			t.Fatal(err)
+		}
+
 		initiateMultipartUpload, err := fileManager.InitiateMultipartUpload("test.txt", "test_0")
 		if err != nil {
 			t.Fatal(err)
