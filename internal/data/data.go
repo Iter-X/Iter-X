@@ -5,6 +5,9 @@ import (
 	"fmt"
 
 	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/iter-x/iter-x/pkg/storage"
+	"github.com/iter-x/iter-x/pkg/storage/ali"
+	"github.com/iter-x/iter-x/pkg/storage/local"
 	_ "github.com/lib/pq"
 	"go.uber.org/zap"
 
@@ -23,9 +26,10 @@ type (
 	}
 
 	Data struct {
-		Tx    *Tx
-		Cache cache.Cacher
-		Es    *Es
+		Tx      *Tx
+		Cache   cache.Cacher
+		Es      *Es
+		Storage storage.FileManager
 	}
 )
 
@@ -38,7 +42,18 @@ func newEs(cli *elasticsearch.Client) *Es {
 	return &Es{Cli: cli}
 }
 
-func NewConnection(c *conf.Data, logger *zap.SugaredLogger) (*Data, func(), error) {
+func newStorage(c *conf.Storage) (storage.FileManager, error) {
+	switch c.Driver {
+	case conf.Storage_LOCAL:
+		return local.NewLocalOSS(c.GetLocal())
+	case conf.Storage_ALIYUN:
+		return ali.NewOSS(c.GetAli())
+	default:
+		return nil, fmt.Errorf("unsupported driver: %q", c.Driver)
+	}
+}
+
+func NewConnection(c *conf.Data, storageConf *conf.Storage, logger *zap.SugaredLogger) (*Data, func(), error) {
 	logger = logger.Named("repo")
 
 	client, err := ent.Open(c.Database.Driver, c.Database.Source)
@@ -64,10 +79,17 @@ func NewConnection(c *conf.Data, logger *zap.SugaredLogger) (*Data, func(), erro
 	//}
 	//defer res.Body.Close()
 
+	fileManager, err := newStorage(storageConf)
+	if err != nil {
+		logger.Error("failed to create storage client: ", err)
+		return nil, nil, err
+	}
+
 	d := &Data{
-		Tx:    newTx(client),
-		Cache: cache.NewCache(c),
-		Es:    newEs(esCli),
+		Tx:      newTx(client),
+		Cache:   cache.NewCache(c),
+		Es:      newEs(esCli),
+		Storage: fileManager,
 	}
 
 	cleanup := func() {

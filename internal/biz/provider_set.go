@@ -8,4 +8,5 @@ var ProviderSet = wire.NewSet(
 	NewTrip,
 	NewPointsOfInterest,
 	NewGeo,
+	NewStorage,
 )
