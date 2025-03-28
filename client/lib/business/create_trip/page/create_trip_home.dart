@@ -23,6 +23,7 @@ class _CreateTripHomePageState extends BaseState<CreateTripHomePage> {
   final FocusNode _focusNode = FocusNode();
   bool _hasFocus = false;
   bool _selectOneHasFocus = false;
+  String recognizedText = ''; // 用于存储识别到的文本
 
   @override
   void initState() {
@@ -36,6 +37,13 @@ class _CreateTripHomePageState extends BaseState<CreateTripHomePage> {
     _focusNode.dispose();
     _controller.dispose();
     super.dispose();
+  }
+
+  void onTextRecognized(String text) {
+    setState(() {
+      recognizedText = text;
+      print('语音向外传输:$text');
+    });
   }
 
   @override
@@ -180,6 +188,8 @@ class _CreateTripHomePageState extends BaseState<CreateTripHomePage> {
               CreatePhotoWidget(
                 onTap: () {},
               )
+            else
+              CreateVoiceWidget(onTextRecognized: onTextRecognized)
           ],
         ),
       ),
