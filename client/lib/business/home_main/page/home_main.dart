@@ -1,7 +1,7 @@
 import 'package:client/app/routes.dart';
 import 'package:client/business/home/page/home.dart';
 import 'package:client/business/home_main/widgets/widgets.dart';
-import 'package:client/business/mine/page/mine.dart';
+import 'package:client/business/mine/page/mine_page.dart';
 import 'package:client/common/material/app.dart';
 import 'package:client/common/material/state.dart';
 import 'package:client/common/utils/color.dart';
@@ -54,7 +54,9 @@ class _HomeMainPageState extends BaseState<HomeMainPage> {
                         Expanded(
                           child: Center(
                             child: ItemHomeBottomWidget(
-                              img: selectIndex == 0 ? 'ic_home_selected.png' : 'ic_home.png',
+                              img: selectIndex == 0
+                                  ? 'ic_home_selected.png'
+                                  : 'ic_home.png',
                               onTap: () {
                                 setState(() {
                                   selectIndex = 0;
@@ -76,7 +78,9 @@ class _HomeMainPageState extends BaseState<HomeMainPage> {
                         Expanded(
                           child: Center(
                             child: ItemHomeBottomWidget(
-                              img: selectIndex == 1 ? 'ic_mine_selected.png' : 'ic_mine.png',
+                              img: selectIndex == 1
+                                  ? 'ic_mine_selected.png'
+                                  : 'ic_mine.png',
                               onTap: () {
                                 setState(() {
                                   selectIndex = 1;

@@ -17,15 +17,14 @@
 
 import 'package:client/business/common/widgets/buttom_widgets.dart';
 import 'package:client/common/material/image.dart';
+import 'package:client/common/material/iter_text.dart';
 import 'package:client/common/utils/color.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 
 import '../../../common/material/app.dart';
-import '../../../common/material/iter_text.dart';
-import '../../common/widgets/buttom_widgets.dart';
 
 class CardSelectionPage extends StatefulWidget {
   const CardSelectionPage({super.key});
@@ -333,8 +332,9 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                                   },
                                   child: Container(
                                       alignment: Alignment.center,
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 15), // 内间距
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 15),
+                                      // 内间距
                                       height: 38.h,
                                       decoration: BoxDecoration(
                                         borderRadius:
