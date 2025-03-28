@@ -184,6 +184,10 @@ func (l *Local) GeneratePublicURL(objectKey string, exp time.Duration) (string, 
 	return localURL, nil
 }
 
+func (l *Local) DeleteObject(objectKey string) error {
+	return os.RemoveAll(filepath.Join(l.root, objectKey))
+}
+
 func generateUploadID(objectKey string) string {
 	h := md5.New()
 	h.Write([]byte(objectKey))

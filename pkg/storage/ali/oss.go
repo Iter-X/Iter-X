@@ -151,3 +151,7 @@ func (a *aliCloud) GeneratePublicURL(objectKey string, exp time.Duration) (strin
 
 	return signedURL, nil
 }
+
+func (a *aliCloud) DeleteObject(objectKey string) error {
+	return a.bucket.DeleteObject(objectKey)
+}

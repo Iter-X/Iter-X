@@ -39,4 +39,5 @@ type FileManager interface {
 	GenerateUploadPartURL(uploadID, objectKey string, partNumber int, expires time.Duration) (*UploadPartInfo, error)
 	CompleteMultipartUpload(uploadID, objectKey string, parts []UploadPart) (*CompleteMultipartUploadResult, error)
 	GeneratePublicURL(objectKey string, exp time.Duration) (string, error)
+	DeleteObject(objectKey string) error
 }
