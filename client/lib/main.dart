@@ -61,7 +61,7 @@ class _MyAppState extends BaseState<MyApp> {
       context: context,
       title: Constants.appName,
       configTheme: () {
-        return BaseThemeData.create();
+        return BaseThemeData.create(fontFamily: 'AlibabaPuHuiTi3');
       },
       configRouter: (router) {
         Routes.config(router);

@@ -3,7 +3,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:client/app/events/events.dart';
+import 'package:client/app/notifier/user.dart';
 import 'package:client/common/material/state.dart';
+import 'package:client/common/utils/api_util.dart';
+import 'package:client/common/utils/logger.dart';
+import 'package:client/common/utils/util.dart';
 import 'package:client/main.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
@@ -12,10 +16,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
-import '../../app/notifier/user.dart';
-import '../utils/api_util.dart';
-import '../utils/logger.dart';
-import '../utils/util.dart';
 import 'app_network_config.dart';
 import 'http_result_bean.dart';
 

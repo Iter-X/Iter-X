@@ -12,6 +12,7 @@ require (
 	github.com/alibabacloud-go/tea v1.3.4
 	github.com/alibabacloud-go/tea-utils/v2 v2.0.7
 	github.com/alicebob/miniredis/v2 v2.34.0
+	github.com/aliyun/aliyun-oss-go-sdk v3.0.2+incompatible
 	github.com/bytedance/sonic v1.13.2
 	github.com/elastic/go-elasticsearch/v8 v8.17.1
 	github.com/emicklei/proto v1.14.0
@@ -101,6 +102,7 @@ require (
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
 	golang.org/x/mod v0.24.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/time v0.11.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250313205543-e70fdf4c4cb4 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

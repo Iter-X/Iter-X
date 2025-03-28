@@ -1,3 +1,5 @@
+import 'package:client/app/notifier/user.dart';
+import 'package:client/app/routes.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,8 +8,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-import '../../app/notifier/user.dart';
-import '../../app/routes.dart';
 import 'over_scroll.dart';
 
 class SafeAreaX extends StatefulWidget {

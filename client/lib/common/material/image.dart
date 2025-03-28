@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:client/common/utils/asset.dart';
+import 'package:client/common/utils/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../utils/asset.dart';
-import '../utils/color.dart';
 
 class BaseImage {
   BaseImage._();

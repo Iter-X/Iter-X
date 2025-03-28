@@ -11,6 +11,7 @@ import (
 	authV1 "github.com/iter-x/iter-x/internal/api/auth/v1"
 	geoV1 "github.com/iter-x/iter-x/internal/api/geo/v1"
 	poiV1 "github.com/iter-x/iter-x/internal/api/poi/v1"
+	storageV1 "github.com/iter-x/iter-x/internal/api/storage/v1"
 	tripV1 "github.com/iter-x/iter-x/internal/api/trip/v1"
 	userV1 "github.com/iter-x/iter-x/internal/api/user/v1"
 	"github.com/iter-x/iter-x/internal/conf"
@@ -33,8 +34,9 @@ func NewGRPCServer(
 	trip *service.Trip,
 	poi *service.PointsOfInterestService,
 	geo *service.GeoService,
-	logger *zap.SugaredLogger,
 	user *service.User,
+	storageService *service.Storage,
+	logger *zap.SugaredLogger,
 ) *GRPCServer {
 	server := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
@@ -48,6 +50,7 @@ func NewGRPCServer(
 	poiV1.RegisterPointsOfInterestServiceServer(server, poi)
 	geoV1.RegisterGeoServiceServer(server, geo)
 	userV1.RegisterUserServiceServer(server, user)
+	storageV1.RegisterStorageServer(server, storageService)
 	interceptor.LoadMethodOptions(server)
 	return &GRPCServer{
 		Server:  server,
