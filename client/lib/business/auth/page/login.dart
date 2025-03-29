@@ -2,6 +2,7 @@ import 'package:client/app/routes.dart';
 import 'package:client/common/material/image.dart';
 import 'package:client/common/material/state.dart';
 import 'package:client/common/utils/color.dart';
+import 'package:client/common/utils/toast.dart';
 import 'package:client/common/widgets/base_button.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -217,6 +218,7 @@ class _LoginPageState extends BaseState<LoginPage> {
   void wxOrPhone(int type) {
     if (type == 0) {
       // TODO: wechat login
+      ToastX.showTODO();
     } else {
       go(Routes.phoneLogin);
     }

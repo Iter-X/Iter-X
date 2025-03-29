@@ -18,7 +18,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 
-
 class PhoneLoginPage extends StatefulWidget {
   const PhoneLoginPage({super.key});
 
@@ -148,11 +147,11 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
     }
     String phoneNumber = _controller.text.trim();
     if (BaseUtil.isEmpty(phoneNumber)) {
-      Toast.show('请输入手机号');
+      ToastX.show('请输入手机号');
       return;
     }
     if (phoneNumber.length != 11) {
-      Toast.show('请输入正确的手机号');
+      ToastX.show('请输入正确的手机号');
       return;
     }
     setState(() {
@@ -299,7 +298,8 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
       if (mounted) {
         BaseLogger.i('oneClickLogin token: $token');
         // guard the use of BuildContext with the mounted check
-        UserNotifier userNotifier = Provider.of<UserNotifier>(context, listen: false);
+        UserNotifier userNotifier =
+            Provider.of<UserNotifier>(context, listen: false);
         await userNotifier.login(token: token);
         await userNotifier.refreshUserInfo();
       }
