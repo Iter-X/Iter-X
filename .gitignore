@@ -68,3 +68,5 @@ Temporary Items
 /bin
 
 /cache
+storage
+.cursor

@@ -1,8 +1,8 @@
+import 'package:client/app/events/events.dart';
+import 'package:client/common/material/state.dart';
+import 'package:client/common/utils/toast.dart';
 import 'package:dio/dio.dart';
 
-import '../../app/events/events.dart';
-import '../material/state.dart';
-import '../utils/toast.dart';
 import 'http_result_bean.dart';
 
 /// 网络请求库配置
@@ -38,13 +38,12 @@ class AppNetworkConfig {
       } else {
         if (responseCode == 401) {
           eventBus.fire(EventUnauthorized(code: 401));
-          Toast.show('登录信息失效');
+          ToastX.show('登录信息失效');
         } else if (responseCode == 500) {
-          Toast.show('服务器异常');
+          ToastX.show('服务器异常');
         }
         resultData = HttpResultBean.fromJson(responseResult);
       }
-
     } catch (exception) {
       resultData = HttpResultBean(code: response.statusCode, msg: "解析错误");
     }

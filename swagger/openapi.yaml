@@ -492,6 +492,95 @@ components:
                         $ref: '#/components/schemas/poi.v1.PointOfInterest'
                     type: array
             type: object
+        storage.v1.CompleteUploadReply:
+            example:
+                bucket: ""
+                etag: ""
+                expiration: 0
+                key: ""
+                location: ""
+                privateUrl: ""
+                publicUrl: ""
+            properties:
+                bucket:
+                    type: string
+                etag:
+                    type: string
+                expiration:
+                    format: int64
+                    type: integer
+                key:
+                    type: string
+                location:
+                    type: string
+                privateUrl:
+                    type: string
+                publicUrl:
+                    type: string
+            type: object
+        storage.v1.CompleteUploadRequest:
+            example:
+                objectKey: ""
+                parts: null
+                uploadId: ""
+            properties:
+                objectKey:
+                    type: string
+                parts:
+                    items:
+                        $ref: '#/components/schemas/storage.v1.CompleteUploadRequest_UploadPart'
+                    type: array
+                uploadId:
+                    type: string
+            type: object
+        storage.v1.CompleteUploadRequest_UploadPart:
+            example:
+                etag: ""
+                partNumber: 0
+            properties:
+                etag:
+                    type: string
+                partNumber:
+                    format: int32
+                    type: integer
+            type: object
+        storage.v1.GenerateUploadPartURLReply:
+            example:
+                bucketName: ""
+                expirationTime: 0
+                objectKey: ""
+                partNumber: 0
+                uploadId: ""
+                uploadUrl: ""
+            properties:
+                bucketName:
+                    type: string
+                expirationTime:
+                    format: int64
+                    type: integer
+                objectKey:
+                    type: string
+                partNumber:
+                    format: int32
+                    type: integer
+                uploadId:
+                    type: string
+                uploadUrl:
+                    type: string
+            type: object
+        storage.v1.InitUploadReply:
+            example:
+                bucketName: ""
+                objectKey: ""
+                uploadId: ""
+            properties:
+                bucketName:
+                    type: string
+                objectKey:
+                    type: string
+                uploadId:
+                    type: string
+            type: object
         trip.v1.CreateDailyTripRequest:
             example:
                 date: 1741589979
@@ -777,6 +866,102 @@ info:
     version: 1.0.0
 openapi: 3.0.0
 paths:
+    /api/storage/v1/complete-upload:
+        post:
+            operationId: Storage_CompleteUpload
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/storage.v1.CompleteUploadRequest'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/storage.v1.CompleteUploadReply'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - Storage
+    /api/storage/v1/generate-upload-part-url:
+        get:
+            operationId: Storage_GenerateUploadPartURL
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/storage.v1.GenerateUploadPartURLReply'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - Storage
+    /api/storage/v1/init-upload:
+        get:
+            operationId: Storage_InitUpload
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/storage.v1.InitUploadReply'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - Storage
     /api/v1/auth/one-click-login:
         post:
             operationId: AuthService_OneClickLogin
@@ -1760,6 +1945,8 @@ tags:
       name: GeoService
     - description: ""
       name: PointsOfInterestService
+    - description: ""
+      name: Storage
     - description: ""
       name: TripService
     - description: ""

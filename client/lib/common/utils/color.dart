@@ -28,6 +28,19 @@ class BaseColor {
   static const Color content = Color(0xFF111111);
   static const Color hint = Color(0xFF535A5F);
 
+  static const Color primary = Color(0xFF1D1F1E);
+  static const Color secondary = Color(0xFFF2F2F2);
+  static const Color highlight = Color(0xFF375F77);
+  static const Color white = Color(0xFFFFFFFF);
+
+  static const Color borderLine = Color(0xFF1D1F1E);
+  static const Color buttonGrayBG = Color(0xFFE3E3E3);
+  static const Color inputGrayBG = Color(0xFFE3E3E3);
+
+  static const Color primaryFont = Color(0xFF1D1F1E);
+  static const Color grayFont = Color(0xFF888888);
+  static const Color bg = Color(0xFFF2F2F2);
+
   static const Color bottomBar = Color(0xFFFFFFFF);
   static const Color bottomBarLine = Color(0xFFEBEBEB);
 

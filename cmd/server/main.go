@@ -47,7 +47,7 @@ func run(cfgPath string) {
 
 	logger.Info("Iter X Server initialized successfully, starting the server...")
 
-	app, cleanup, err := wireApp(cfg.Environment, cfg.I18N, cfg.Server.Grpc, cfg.Server.Http, cfg.Data, cfg.Auth, cfg.Agent, logger)
+	app, cleanup, err := wireApp(cfg.Environment, cfg.I18N, cfg.Server.Grpc, cfg.Server.Http, cfg.Data, cfg.Auth, cfg.Storage, cfg.Agent, logger)
 	if err != nil {
 		logger.Error("Failed to init the app: ", err)
 		os.Exit(1)
