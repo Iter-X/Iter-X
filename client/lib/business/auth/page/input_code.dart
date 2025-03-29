@@ -41,6 +41,7 @@ class _InputCodePageState extends BaseState<InputCodePage> {
   Timer? _timer;
   int time = 60;
   bool isLoading = false;
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -52,18 +53,24 @@ class _InputCodePageState extends BaseState<InputCodePage> {
     });
     super.initState();
     startTimer();
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        _focusNode.requestFocus();
+      }
+    });
   }
 
   @override
   void dispose() {
     cancelTimer();
+    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,

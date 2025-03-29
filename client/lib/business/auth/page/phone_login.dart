@@ -24,23 +24,32 @@ class PhoneLoginPage extends StatefulWidget {
 class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
   late TextEditingController _controller;
   bool isLoading = false;
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
     _controller = TextEditingController();
     super.initState();
+
+    // get focus after 100ms
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        _focusNode.requestFocus();
+      }
+    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -96,6 +105,7 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
                   Expanded(
                     child: BaseTextFieldWidget(
                       controller: _controller,
+                      focusNode: _focusNode,
                       contentPadding: EdgeInsets.only(
                         left: 24.w,
                         right: 24.w,
