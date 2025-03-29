@@ -73,7 +73,14 @@ class UserNotifier with ChangeNotifier, DiagnosticableTreeMixin {
     try {
       final newToken = await AuthService.refreshToken(_token!.refreshToken!);
       if (newToken != null) {
-        _token = newToken;
+        _token = TokenEntity(
+          token: newToken.token,
+          refreshToken: _token!.refreshToken,
+          expiresIn: newToken.expiresIn,
+          expiresAt: DateTime.now()
+              .add(Duration(seconds: newToken.expiresIn!))
+              .millisecondsSinceEpoch,
+        );
         await _storage.write(
             key: _kToken, value: json.encode(_token!.toJson()));
         notifyListeners();
@@ -90,7 +97,6 @@ class UserNotifier with ChangeNotifier, DiagnosticableTreeMixin {
 
   // 检查并确保 token 有效
   Future<bool> ensureValidToken() async {
-    if (_token == null) return false;
     if (!isTokenExpired) return true;
     return _handleTokenExpiration();
   }
