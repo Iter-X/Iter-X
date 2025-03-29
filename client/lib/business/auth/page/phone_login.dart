@@ -2,6 +2,7 @@ import 'package:client/app/routes.dart';
 import 'package:client/business/auth/page/input_code.dart';
 import 'package:client/business/auth/service/auth_service.dart';
 import 'package:client/business/common/widgets/buttom_widgets.dart';
+import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/loading.dart';
 import 'package:client/common/material/state.dart';
 import 'package:client/common/material/text_field.dart';
@@ -10,7 +11,6 @@ import 'package:client/common/utils/toast.dart';
 import 'package:client/common/utils/util.dart';
 import 'package:client/common/widgets/base_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 
@@ -48,19 +48,11 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.dark,
-          statusBarBrightness: Brightness.light,
-        ),
-        leading: ButtonBackWidget(),
-      ),
-      body: Container(
+    return AppBarWithSafeArea(
+      hasAppBar: true,
+      backgroundColor: BaseColor.bg,
+      leading: ButtonBackWidget(),
+      child: Container(
         margin: EdgeInsets.symmetric(horizontal: 72.w),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -129,16 +121,16 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
             ),
             Container(
               margin: EdgeInsets.only(top: 40.h),
-              child: isLoading
-                  ? const LoadingWidget(
-                      color: BaseColor.primary,
-                    )
-                  : BaseButton(
-                      text: '发送短信验证码',
-                      textSize: 18.sp,
-                      textColor: BaseColor.secondary,
-                      onTap: () => codeLogin(),
-                    ),
+              child: BaseButton(
+                text: '发送短信验证码',
+                isLoading: isLoading,
+                loadingWidget: const LoadingWidget(
+                  color: BaseColor.secondary,
+                ),
+                textSize: 18.sp,
+                textColor: BaseColor.secondary,
+                onTap: () => codeLogin(),
+              ),
             ),
           ],
         ),

@@ -18,6 +18,8 @@ class BaseButton extends StatelessWidget {
   final VoidCallback? onTap;
   final double borderRadius;
   final double gap;
+  final bool isLoading;
+  final Widget? loadingWidget;
 
   BaseButton({
     super.key,
@@ -34,6 +36,8 @@ class BaseButton extends StatelessWidget {
     this.onTap,
     double? borderRadius,
     double? gap,
+    this.isLoading = false,
+    this.loadingWidget,
   })  : iconSize = iconSize?.w ?? 26.w,
         textSize = textSize?.sp ?? 18.sp,
         textColor = textColor ?? BaseColor.primary,
@@ -71,13 +75,15 @@ class BaseButton extends StatelessWidget {
               ),
               Gap(gap),
             ],
-            Text(
-              text,
-              style: TextStyle(
-                color: textColor,
-                fontSize: textSize,
-              ),
-            )
+            isLoading
+                ? loadingWidget ?? CircularProgressIndicator()
+                : Text(
+                    text,
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: textSize,
+                    ),
+                  )
           ],
         ),
       ),

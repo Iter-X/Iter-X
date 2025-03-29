@@ -2,100 +2,11 @@ import 'package:client/app/notifier/user.dart';
 import 'package:client/app/routes.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 import 'over_scroll.dart';
-
-class SafeAreaX extends StatefulWidget {
-  final Widget child;
-  final Color? topColor;
-  final Color? bottomColor;
-  final bool top;
-  final bool bottom;
-  final bool left;
-  final bool right;
-  final Brightness? statusBarIconBrightness;
-  final Brightness? statusBarBrightness;
-
-  const SafeAreaX({
-    super.key,
-    required this.child,
-    this.topColor,
-    this.bottomColor,
-    this.top = true,
-    this.bottom = true,
-    this.left = true,
-    this.right = true,
-    this.statusBarIconBrightness,
-    this.statusBarBrightness,
-  });
-
-  @override
-  State<SafeAreaX> createState() => _SafeAreaXState();
-}
-
-class _SafeAreaXState extends State<SafeAreaX> {
-  @override
-  void initState() {
-    super.initState();
-    _updateStatusBarStyle();
-  }
-
-  @override
-  void didUpdateWidget(SafeAreaX oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _updateStatusBarStyle();
-  }
-
-  void _updateStatusBarStyle() {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness:
-          widget.statusBarIconBrightness ?? Brightness.dark,
-      statusBarBrightness: widget.statusBarBrightness ?? Brightness.light,
-    ));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        if (widget.top)
-          Container(
-            color: widget.topColor ?? Colors.transparent,
-            child: SafeArea(
-              bottom: false,
-              left: widget.left,
-              right: widget.right,
-              child: Container(),
-            ),
-          ),
-        Expanded(
-          child: SafeArea(
-            top: false,
-            bottom: false,
-            left: widget.left,
-            right: widget.right,
-            child: widget.child,
-          ),
-        ),
-        if (widget.bottom)
-          Container(
-            color: widget.bottomColor ?? Colors.transparent,
-            child: SafeArea(
-              top: false,
-              left: widget.left,
-              right: widget.right,
-              child: Container(),
-            ),
-          ),
-      ],
-    );
-  }
-}
 
 final router = FluroRouter();
 
