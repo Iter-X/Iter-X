@@ -24,7 +24,7 @@ type IBeforeGeneratePublicURL interface {
 	BeforeGeneratePublicURL(objectKey string) error
 }
 
-type AfterGeneratePublicURL interface {
+type IAfterGeneratePublicURL interface {
 	AfterGeneratePublicURL(url string) error
 }
 
@@ -42,6 +42,34 @@ type IBeforeDeleteObject interface {
 
 type IAfterDeleteObject interface {
 	AfterDeleteObject(objectKey string) error
+}
+
+type IFileManagerHook interface {
+	IBeforeInitiateMultipartUpload
+	IBeforeCompleteMultipartUpload
+	IBeforeGeneratePublicURL
+	IBeforeGenerateUploadPartURL
+	IBeforeDeleteObject
+	IAfterInitiateMultipartUpload
+	IAfterCompleteMultipartUpload
+	IAfterGeneratePublicURL
+	IAfterGenerateUploadPartURL
+	IAfterDeleteObject
+}
+
+func WithFileManagerHook(f IFileManagerHook) FileManagerHookOption {
+	return func(fm *fileManagerWithHook) {
+		fm.BeforeInitiateMultipartUpload = f.BeforeInitiateMultipartUpload
+		fm.BeforeCompleteMultipartUpload = f.BeforeCompleteMultipartUpload
+		fm.BeforeGeneratePublicURL = f.BeforeGeneratePublicURL
+		fm.BeforeGenerateUploadPartURL = f.BeforeGenerateUploadPartURL
+		fm.BeforeDeleteObject = f.BeforeDeleteObject
+		fm.AfterInitiateMultipartUpload = f.AfterInitiateMultipartUpload
+		fm.AfterCompleteMultipartUpload = f.AfterCompleteMultipartUpload
+		fm.AfterGeneratePublicURL = f.AfterGeneratePublicURL
+		fm.AfterGenerateUploadPartURL = f.AfterGenerateUploadPartURL
+		fm.AfterDeleteObject = f.AfterDeleteObject
+	}
 }
 
 func WithBeforeInitiateMultipartUpload(f IBeforeInitiateMultipartUpload) FileManagerHookOption {
@@ -104,7 +132,7 @@ func WithBeforeGeneratePublicURLFun(f func(objectKey string) error) FileManagerH
 	}
 }
 
-func WithAfterGeneratePublicURL(f AfterGeneratePublicURL) FileManagerHookOption {
+func WithAfterGeneratePublicURL(f IAfterGeneratePublicURL) FileManagerHookOption {
 	return func(fm *fileManagerWithHook) {
 		fm.AfterGeneratePublicURL = f.AfterGeneratePublicURL
 	}
