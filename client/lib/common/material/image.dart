@@ -5,6 +5,7 @@ import 'package:client/common/utils/asset.dart';
 import 'package:client/common/utils/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class BaseImage {
   BaseImage._();
@@ -75,19 +76,32 @@ class BaseImage {
     double? circular,
     double? borderWidth,
     Color? borderColor,
-    Color? imageColor,
+    Color? color,
     Rect? centerSlice,
     BoxFit? fit,
   }) {
     width ??= size;
     height ??= size;
+    bool isSvg = name.toLowerCase().endsWith('.svg');
+
     return create(
-      Image.asset(
-        '$base/$name',
-        fit: fit ?? getBoxFit(width: size, height: height),
-        color: imageColor,
-        centerSlice: centerSlice,
-      ),
+      isSvg
+          ? SvgPicture.asset(
+              '$base/$name',
+              width: double.infinity,
+              height: double.infinity,
+              fit: fit ?? getBoxFit(width: width, height: height),
+              colorFilter: color != null
+                  ? ColorFilter.mode(color, BlendMode.srcIn)
+                  : null,
+              allowDrawingOutsideViewBox: true,
+            )
+          : Image.asset(
+              '$base/$name',
+              fit: fit ?? getBoxFit(width: width, height: height),
+              color: color,
+              centerSlice: centerSlice,
+            ),
       aspectRatio: aspectRatio,
       width: width,
       height: height,
@@ -150,7 +164,9 @@ class BaseImage {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(circular ?? 0),
-        child: getBoxFit(width: width, height: height) == BoxFit.cover ? AspectRatio(aspectRatio: aspectRatio ?? 1, child: child) : child,
+        child: getBoxFit(width: width, height: height) == BoxFit.cover
+            ? AspectRatio(aspectRatio: aspectRatio ?? 1, child: child)
+            : child,
       ),
     );
   }

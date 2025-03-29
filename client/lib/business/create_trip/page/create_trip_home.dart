@@ -1,10 +1,10 @@
 import 'package:client/app/routes.dart';
-import 'package:client/business/common/widgets/buttom_widgets.dart';
 import 'package:client/business/create_trip/widgets/bottom_create_widgets.dart';
 import 'package:client/business/create_trip/widgets/widgets.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/state.dart';
 import 'package:client/common/utils/color.dart';
+import 'package:client/common/widgets/return_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -51,7 +51,7 @@ class _CreateTripHomePageState extends BaseState<CreateTripHomePage> {
     return AppBarWithSafeArea(
       backgroundColor: BaseColor.bg,
       hasAppBar: true,
-      leading: ButtonBackWidget(),
+      leading: ReturnButton(),
       child: Column(
         children: [
           Expanded(

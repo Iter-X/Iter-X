@@ -15,11 +15,11 @@
  * @LastEditTime: 2025-03-23 22:32:11
  */
 
-import 'package:client/business/common/widgets/buttom_widgets.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/image.dart';
 import 'package:client/common/material/iter_text.dart';
 import 'package:client/common/utils/color.dart';
+import 'package:client/common/widgets/return_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
@@ -183,7 +183,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
       backgroundColor: BaseColor.bg,
       hasAppBar: true,
       title: selectionLevel == 0 ? '选择目的国家' : '选择目的城市',
-      leading: ButtonBackWidget(onTap: () {
+      leading: ReturnButton(onTap: () {
         if (selectionLevel == 1) {
           setState(() {
             selectionLevel = 0;

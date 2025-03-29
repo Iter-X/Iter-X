@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:client/app/notifier/user.dart';
 import 'package:client/app/routes.dart';
 import 'package:client/business/auth/service/auth_service.dart';
-import 'package:client/business/common/widgets/buttom_widgets.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/loading.dart';
 import 'package:client/common/material/state.dart';
 import 'package:client/common/utils/color.dart';
 import 'package:client/common/widgets/base_button.dart';
+import 'package:client/common/widgets/return_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
@@ -72,7 +72,7 @@ class _InputCodePageState extends BaseState<InputCodePage> {
     return AppBarWithSafeArea(
       hasAppBar: true,
       backgroundColor: BaseColor.bg,
-      leading: ButtonBackWidget(),
+      leading: ReturnButton(),
       child: SizedBox(
         width: double.infinity,
         child: Column(
