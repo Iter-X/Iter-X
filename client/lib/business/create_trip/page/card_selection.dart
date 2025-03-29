@@ -4,7 +4,7 @@
  * @Autor: GiottoLLL7
  * @Date: 2025-03-23 20:35:12
  * @LastEditors: GiottoLLL7
- * @LastEditTime: 2025-03-27 17:54:06
+ * @LastEditTime: 2025-03-29 14:12:00
  */
 /*
  * @Description: 图卡选择页
@@ -283,7 +283,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                                       fontWeight: FontWeight.w900,
                                     ),
                                     borders: BorderProperties(
-                                      width: 2,
+                                      width: 2.w,
                                       color: isSelected
                                           ? BaseColor.c_f2f2f2
                                           : BaseColor.c_1D1F1E,
@@ -307,8 +307,8 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                     width: double.infinity,
                     child: Wrap(
                       alignment: WrapAlignment.start,
-                      spacing: 10, // 水平间距
-                      runSpacing: 10, // 垂直间距
+                      spacing: 10.w, // 水平间距
+                      runSpacing: 10.w, // 垂直间距
                       children: [
                         ..._continentList
                             .map((tag) => IntrinsicWidth(
@@ -333,7 +333,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                                   child: Container(
                                       alignment: Alignment.center,
                                       padding: EdgeInsets.symmetric(
-                                          horizontal: 15), // 内间距
+                                          horizontal: 15.w), // 内间距
                                       height: 38.h,
                                       decoration: BoxDecoration(
                                         borderRadius:
@@ -373,7 +373,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                   // 已选城市滚动区
                   Container(
                     width: double.infinity,
@@ -390,7 +390,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                                     height: 42.w,
                                     alignment: Alignment.center,
                                     padding:
-                                        EdgeInsets.symmetric(horizontal: 15),
+                                        EdgeInsets.symmetric(horizontal: 15.w),
                                     decoration: BoxDecoration(
                                       color: BaseColor.c_E3E3E3,
                                       borderRadius: BorderRadius.only(
@@ -435,7 +435,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                   GestureDetector(
                     onTap: () => {print('点击')},
                     child: Container(
