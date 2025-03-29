@@ -35,19 +35,25 @@ class _LoginPageState extends BaseState<LoginPage> {
             width: 245.w,
           ),
           Gap(200.h),
-          BaseButton(
-            iconName: 'ic_wx.png',
-            text: '微信登录',
-            textColor: BaseColor.secondary,
-            backgroundColor: BaseColor.primary,
-            onTap: () => loginType(0),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 72.w),
+            child: BaseButton(
+              iconName: 'ic_wx.png',
+              text: '微信登录',
+              textColor: BaseColor.secondary,
+              backgroundColor: BaseColor.primary,
+              onTap: () => loginType(0),
+            ),
           ),
           Gap(15.h),
-          BaseButton(
-            iconName: 'ic_phone.png',
-            text: '手机登录',
-            hasBorder: true,
-            onTap: () => loginType(1),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 72.w),
+            child: BaseButton(
+              iconName: 'ic_phone.png',
+              text: '手机登录',
+              hasBorder: true,
+              onTap: () => loginType(1),
+            ),
           ),
           Container(
             margin: EdgeInsets.only(
@@ -175,10 +181,11 @@ class _LoginPageState extends BaseState<LoginPage> {
                   Container(
                     margin: EdgeInsets.only(
                       top: 20.h,
+                      left: 32.w,
+                      right: 32.w,
                     ),
                     child: BaseButton(
                       text: '同意',
-                      width: 240.w,
                       height: 42.h,
                       textColor: Colors.white,
                       backgroundColor: BaseColor.primary,
@@ -194,10 +201,11 @@ class _LoginPageState extends BaseState<LoginPage> {
                   Container(
                     margin: EdgeInsets.only(
                       top: 10.h,
+                      left: 32.w,
+                      right: 32.w,
                     ),
                     child: BaseButton(
                       text: '取消',
-                      width: 240.w,
                       height: 42.h,
                       hasBorder: true,
                       onTap: () => Navigator.pop(context),

@@ -37,7 +37,7 @@ class BaseButton extends StatelessWidget {
   })  : iconSize = iconSize?.w ?? 26.w,
         textSize = textSize?.sp ?? 18.sp,
         textColor = textColor ?? BaseColor.primary,
-        width = width?.w ?? 285.w,
+        width = width?.w ?? double.infinity,
         height = height?.h ?? 52.h,
         borderColor = borderColor ?? BaseColor.primary,
         borderRadius = borderRadius?.r ?? 24.r,

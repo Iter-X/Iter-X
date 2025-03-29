@@ -3,10 +3,13 @@ import 'dart:async';
 import 'package:client/app/notifier/user.dart';
 import 'package:client/app/routes.dart';
 import 'package:client/business/auth/service/auth_service.dart';
+import 'package:client/business/common/widgets/buttom_widgets.dart';
 import 'package:client/common/material/loading.dart';
 import 'package:client/common/material/state.dart';
 import 'package:client/common/utils/color.dart';
+import 'package:client/common/widgets/base_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
@@ -61,6 +64,16 @@ class _InputCodePageState extends BaseState<InputCodePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+        ),
+        leading: ButtonBackWidget(),
+      ),
       body: SizedBox(
         width: double.infinity,
         child: Column(
@@ -70,24 +83,24 @@ class _InputCodePageState extends BaseState<InputCodePage> {
               '验证码已发送至',
               style: TextStyle(
                 fontSize: 16.sp,
-                color: BaseColor.c_1D1F1E,
+                color: BaseColor.primaryFont,
               ),
             ),
-            Gap(7.h),
+            Gap(10.h),
             Text(
               '+86 ${widget.argument.phone}',
               style: TextStyle(
-                fontSize: 30.sp,
-                color: BaseColor.c_1D1F1E,
-                fontWeight: FontWeight.w600,
+                fontSize: 28.sp,
+                color: BaseColor.primaryFont,
+                fontWeight: FontWeight.w500,
               ),
             ),
             Container(
               margin: EdgeInsets.only(
                 left: 70.w,
                 right: 70.w,
-                top: 26.h,
-                bottom: 17.h,
+                top: 20.h,
+                bottom: 10.h,
               ),
               child: PinCodeTextField(
                 length: 6,
@@ -98,13 +111,23 @@ class _InputCodePageState extends BaseState<InputCodePage> {
                   borderRadius: BorderRadius.circular(12.w),
                   fieldHeight: 52.h,
                   fieldWidth: 42.w,
-                  activeFillColor: BaseColor.c_F2F2F2,
-                  selectedColor: BaseColor.c_1D1F1E,
-                  inactiveColor: BaseColor.c_1D1F1E,
-                  activeColor: BaseColor.c_1D1F1E,
+                  selectedColor: BaseColor.inputGrayBG,
+                  inactiveColor: BaseColor.inputGrayBG,
+                  activeColor: BaseColor.inputGrayBG,
+                  selectedFillColor: BaseColor.inputGrayBG,
+                  activeFillColor: BaseColor.inputGrayBG,
+                  inactiveFillColor: BaseColor.inputGrayBG,
+                ),
+                textStyle: TextStyle(
+                  fontSize: 28.sp,
+                  color: BaseColor.primaryFont,
+                  fontWeight: FontWeight.w400,
                 ),
                 animationDuration: Duration(milliseconds: 300),
-                enableActiveFill: false,
+                cursorColor: BaseColor.primary,
+                cursorWidth: 2,
+                cursorHeight: 28.h,
+                enableActiveFill: true,
                 controller: _codeController,
                 onCompleted: (v) {},
                 onChanged: (value) {},
@@ -125,37 +148,26 @@ class _InputCodePageState extends BaseState<InputCodePage> {
                 style: TextStyle(
                   fontSize: 16.sp,
                   color: BaseColor.c_1D1F1E,
-                  fontWeight: timeStr == '重新发送' ? FontWeight.w600 : FontWeight.w400,
+                  fontWeight:
+                      timeStr == '重新发送' ? FontWeight.w500 : FontWeight.w400,
                 ),
               ),
             ),
-            GestureDetector(
-              onTap: () {
-                verifyLogin();
-              },
-              child: Container(
-                width: double.infinity,
-                height: 52.h,
-                margin: EdgeInsets.only(
-                  top: 32.h,
-                  left: 73.w,
-                  right: 73.w,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24.w),
-                  color: BaseColor.c_1D1F1E,
-                ),
-                alignment: Alignment.center,
-                child: isLoading
-                    ? const LoadingWidget()
-                    : Text(
-                        '登录',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20.sp,
-                        ),
-                      ),
+            Container(
+              margin: EdgeInsets.only(
+                top: 20.h,
+                left: 72.w,
+                right: 72.w,
               ),
+              child: isLoading
+                  ? const LoadingWidget()
+                  : BaseButton(
+                      text: '登录',
+                      textSize: 18.sp,
+                      textColor: Colors.white,
+                      backgroundColor: BaseColor.c_1D1F1E,
+                      onTap: () => verifyLogin(),
+                    ),
             ),
           ],
         ),
@@ -206,7 +218,8 @@ class _InputCodePageState extends BaseState<InputCodePage> {
     if (token != null) {
       if (mounted) {
         // guard the use of BuildContext with the mounted check
-        UserNotifier userNotifier = Provider.of<UserNotifier>(context, listen: false);
+        UserNotifier userNotifier =
+            Provider.of<UserNotifier>(context, listen: false);
         await userNotifier.login(token: token);
         await userNotifier.refreshUserInfo();
       }

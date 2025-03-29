@@ -33,6 +33,10 @@ class BaseColor {
   static const Color highlight = Color(0xFF375F77);
   static const Color white = Color(0xFFFFFFFF);
 
+  static const Color borderLine = Color(0xFF1D1F1E);
+  static const Color buttonGrayBG = Color(0xFFE3E3E3);
+  static const Color inputGrayBG = Color(0xFFE3E3E3);
+
   static const Color primaryFont = Color(0xFF1D1F1E);
   static const Color grayFont = Color(0xFF888888);
   static const Color bg = Color(0xFFF2F2F2);
