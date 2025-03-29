@@ -41,6 +41,24 @@
   - No line breaks within logical blocks (use comments instead of line breaks)
 - Import Statements: Can use aliases (e.g., import 'package:flutter/material.dart' as m;)
 
+### Adaptive Scaling Guidelines
+This project uses `flutter_screenutil` for adaptive scaling. Therefore, when setting font sizes, use `number.sp`, and when setting width, height, padding, or margin, use `number.w` and `number.h`.
+
+In the project, all numbers need to have the corresponding suffix. One thing to note is that in the case of a square, the same unit should be used, such as `width: 100.w, height: 100.w` or `width: 100.h, height: 100.h`.
+
+### Example
+```dart
+TextStyle agreementTextStyle = TextStyle(
+  color: BaseColor.bg,
+  fontSize: 16.sp,
+);
+
+child: Container(
+  width: 285.w,
+  height: 52.h,
+);
+```
+
 ### Dart Language Guidelines
 - String Interpolation: Prefer String interpolation over + concatenation
   ```dart

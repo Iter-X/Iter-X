@@ -41,6 +41,26 @@
   - 逻辑块内无空行（可以通过使用注释 // 代替空行）
 - 导入语句：可以使用 as 别名（如 import 'package:flutter/material.dart' as m;）
 
+### 自适应缩放规范
+
+本项目采用了 `flutter_screenutil` 进行自适应缩放，因此在设置字体大小需要使用 `数字.sp`，而在设置宽高、padding 或 margin 之类的需要使用 `数字.w` 和 `数字.h`
+
+也就是说在项目中涉及数字的都需要带上响应的后缀，其中有一个需要特别注意的就是正方形的情况下，设置成同一个单位，如 `width: 100.w, height: 100.w`，或者 `width: 100.h, height: 100.h`
+
+#### 示例
+
+```dart
+TextStyle agreementTextStyle = TextStyle(
+  color: BaseColor.bg,
+  fontSize: 16.sp,
+);
+
+child: Container(
+  width: 285.w,
+  height: 52.h,
+);
+```
+
 ### Dart 语言规范
 - 字符串插值：优先使用 String interpolation，而非 + 拼接
   ```dart
@@ -53,7 +73,7 @@
   ```
 - 集合操作：使用 isEmpty 代替 length == 0
 
-## 二、项目结构规范
+## 项目结构规范
 
 ### 基础目录结构
 ```
