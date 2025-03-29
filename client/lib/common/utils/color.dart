@@ -31,6 +31,7 @@ class BaseColor {
   static const Color primary = Color(0xFF1D1F1E);
   static const Color secondary = Color(0xFFF2F2F2);
   static const Color highlight = Color(0xFF375F77);
+  static const Color white = Color(0xFFFFFFFF);
 
   static const Color primaryFont = Color(0xFF1D1F1E);
   static const Color grayFont = Color(0xFF888888);
