@@ -322,9 +322,11 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
                   return const Center(
                       child: CircularProgressIndicator()); // TODO: skeleton
                 }
-                return ListView(
-                  children:
-                      service.poiList.map((poi) => _buildPoiCard(poi)).toList(),
+                return ListView.builder(
+                  padding: EdgeInsets.all(0),
+                  itemCount: service.poiList.length,
+                  itemBuilder: (context, index) =>
+                      _buildPoiCard(service.poiList[index]),
                 );
               },
             ),
