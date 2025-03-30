@@ -3,7 +3,10 @@ import 'package:client/business/mine/widgets/profile_header.dart';
 import 'package:client/business/mine/widgets/section_header.dart';
 import 'package:client/business/mine/widgets/stats_card.dart';
 import 'package:client/business/mine/widgets/trip_preview_card.dart';
+import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/utils/color.dart';
+import 'package:client/common/widgets/preference_button.dart';
+import 'package:client/common/widgets/return_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -25,9 +28,13 @@ class _MinePageState extends State<MinePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppBarWithSafeArea(
       backgroundColor: BaseColor.bg,
-      body: Consumer<ProfileService>(
+      bottom: false,
+      hasAppBar: true,
+      leading: ReturnButton(),
+      actions: [PreferenceButton()],
+      child: Consumer<ProfileService>(
         builder: (context, service, child) {
           if (service.isLoading) {
             return const Center(child: CircularProgressIndicator());

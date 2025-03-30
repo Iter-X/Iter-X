@@ -22,13 +22,14 @@ class _HomeMainPageState extends BaseState<HomeMainPage> {
   Widget build(BuildContext context) {
     return AppBarWithSafeArea(
       hasAppBar: false,
+      top: false,
       backgroundColor: BaseColor.bg,
       bottomColor: BaseColor.bottomBar,
       child: Column(
         children: [
           Expanded(
             child: Container(
-              color: BaseColor.c_f2f2f2,
+              color: BaseColor.bg,
               child: selectIndex == 0 ? HomePage() : MinePage(),
             ),
           ),
