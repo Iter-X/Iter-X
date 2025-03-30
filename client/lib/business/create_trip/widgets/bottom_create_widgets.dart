@@ -2,10 +2,10 @@ import 'package:client/common/material/image.dart';
 import 'package:client/common/material/text_field.dart';
 import 'package:client/common/utils/app_config.dart';
 import 'package:client/common/utils/color.dart';
+import 'package:client/common/widgets/base_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_speech/flutter_speech.dart';
-import 'package:gap/gap.dart';
 
 // 手动创建和外部链接 底部样式
 class CreateManuallyWidget extends StatelessWidget {
@@ -60,35 +60,22 @@ class CreateManuallyWidget extends StatelessWidget {
               ),
             ),
           ),
-          GestureDetector(
-            onTap: () => onTap.call(),
-            child: Container(
+          Container(
+            margin: EdgeInsets.only(right: 6.w),
+            child: BaseButton(
               width: 107.w,
               height: 46.h,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(AppConfig.cornerRadius),
-                color: BaseColor.primary,
-              ),
-              margin: EdgeInsets.only(right: 6.w),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  BaseImage.asset(
-                    name: 'ic_create_picard.png',
-                    size: 18.w,
-                  ),
-                  Gap(5.w),
-                  Text(
-                    selectIndex == 0 ? '图卡选择' : '粘贴',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: BaseColor.secondaryFont,
-                    ),
-                  )
-                ],
-              ),
+              iconName: 'ic_create_picard.png',
+              iconSize: 18.w,
+              text: selectIndex == 0 ? '图卡选择' : '粘贴',
+              textSize: 14.sp,
+              textColor: BaseColor.secondaryFont,
+              backgroundColor: BaseColor.primary,
+              borderRadius: AppConfig.cornerRadius,
+              gap: 5.w,
+              onTap: () => onTap.call(),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -106,38 +93,24 @@ class CreatePhotoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => onTap.call(),
-      child: Container(
-        width: double.infinity,
+    return Container(
+      margin: EdgeInsets.only(
+        top: 20.h,
+        bottom: 20.h,
+        left: 35.w,
+        right: 35.w,
+      ),
+      child: BaseButton(
         height: 52.h,
-        margin: EdgeInsets.only(
-          top: 20.h,
-          bottom: 20.h,
-          left: 35.w,
-          right: 35.w,
-        ),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppConfig.cornerRadius),
-          color: BaseColor.primary,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            BaseImage.asset(
-              name: 'ic_select_photo.png',
-              size: 24.w,
-            ),
-            Gap(10.w),
-            Text(
-              '选择照片上传',
-              style: TextStyle(
-                fontSize: 18.sp,
-                color: BaseColor.c_f2f2f2,
-              ),
-            )
-          ],
-        ),
+        iconName: 'ic_select_photo.png',
+        iconSize: 24.w,
+        text: '选择照片上传',
+        textSize: 18.sp,
+        textColor: BaseColor.secondaryFont,
+        backgroundColor: BaseColor.primary,
+        borderRadius: AppConfig.cornerRadius,
+        gap: 10.w,
+        onTap: () => onTap.call(),
       ),
     );
   }

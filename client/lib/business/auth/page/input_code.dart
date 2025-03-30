@@ -160,15 +160,17 @@ class _InputCodePageState extends BaseState<InputCodePage> {
                 left: 72.w,
                 right: 72.w,
               ),
-              child: isLoading
-                  ? const LoadingWidget()
-                  : BaseButton(
-                      text: '登录',
-                      textSize: 18.sp,
-                      textColor: Colors.white,
-                      backgroundColor: BaseColor.c_1D1F1E,
-                      onTap: () => verifyLogin(),
-                    ),
+              child: BaseButton(
+                text: '登录',
+                isLoading: isLoading,
+                loadingWidget: const LoadingWidget(
+                  color: BaseColor.secondary,
+                ),
+                textSize: 18.sp,
+                textColor: Colors.white,
+                backgroundColor: BaseColor.c_1D1F1E,
+                onTap: () => verifyLogin(),
+              ),
             ),
           ],
         ),
