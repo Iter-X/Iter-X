@@ -1,4 +1,5 @@
 import 'package:client/app/constants.dart';
+import 'package:client/business/create_trip/service/poi_search_service.dart';
 import 'package:client/common/material/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -43,6 +44,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => userNotifier),
         ChangeNotifierProvider(create: (_) => ProfileService()),
+        ChangeNotifierProvider(create: (_) => PoiSearchService()),
       ],
       child: const MyApp(),
     ),
