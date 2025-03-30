@@ -1,3 +1,4 @@
+import 'package:client/common/utils/app_config.dart';
 import 'package:client/common/utils/color.dart';
 import 'package:flutter/material.dart';
 
@@ -20,7 +21,7 @@ class SectionHeader extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(AppConfig.borderRadius),
         ),
         child: Padding(
           padding: const EdgeInsets.all(15),
@@ -30,7 +31,7 @@ class SectionHeader extends StatelessWidget {
                 emoji,
                 style: const TextStyle(
                   fontSize: 22,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: AppFontWeight.semiBold,
                 ),
               ),
               const SizedBox(width: 5),
@@ -38,7 +39,7 @@ class SectionHeader extends StatelessWidget {
                 title,
                 style: const TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: AppFontWeight.semiBold,
                   color: BaseColor.primaryFont,
                   letterSpacing: 0.5,
                 ),

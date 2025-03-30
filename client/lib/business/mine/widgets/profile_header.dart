@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:client/common/utils/app_config.dart';
 import 'package:client/common/utils/color.dart';
 import 'package:flutter/material.dart';
 
@@ -28,7 +29,7 @@ class ProfileHeader extends StatelessWidget {
                   'Hi, $name 👋',
                   style: const TextStyle(
                     fontSize: 30,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: AppFontWeight.semiBold,
                     color: BaseColor.primaryFont,
                   ),
                 ),
@@ -37,7 +38,7 @@ class ProfileHeader extends StatelessWidget {
                   'Explore the world',
                   style: TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: AppFontWeight.medium,
                     color: BaseColor.grayFont,
                     letterSpacing: 0.5,
                   ),

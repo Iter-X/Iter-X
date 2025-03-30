@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'color.dart';
 
 class BaseStyle {
-
   // app bar start
   static AppBarTheme appBarTheme = AppBarTheme(
     elevation: 0,
@@ -26,7 +25,6 @@ class BaseStyle {
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.w)),
   );
 
-  //
   static ButtonStyle outlinedButtonStyle = OutlinedButton.styleFrom(
     elevation: 0,
     backgroundColor: BaseColor.theme,

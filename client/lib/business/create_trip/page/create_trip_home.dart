@@ -3,6 +3,7 @@ import 'package:client/business/create_trip/widgets/bottom_create_widgets.dart';
 import 'package:client/business/create_trip/widgets/widgets.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/state.dart';
+import 'package:client/common/utils/app_config.dart';
 import 'package:client/common/utils/color.dart';
 import 'package:client/common/widgets/return_button.dart';
 import 'package:flutter/material.dart';
@@ -69,8 +70,8 @@ class _CreateTripHomePageState extends BaseState<CreateTripHomePage> {
                       _selectOneHasFocus ? '你想去哪？' : 'Hi, Leo',
                       style: TextStyle(
                         fontSize: 30.sp,
-                        color: BaseColor.c_1D1F1E,
-                        fontWeight: FontWeight.w600,
+                        color: BaseColor.primaryFont,
+                        fontWeight: AppFontWeight.bold,
                       ),
                     ),
                     Text(
@@ -79,7 +80,7 @@ class _CreateTripHomePageState extends BaseState<CreateTripHomePage> {
                           : '世界是一本书，那些不旅行的人只读了其中的一页\n——Danny Kaye',
                       style: TextStyle(
                         fontSize: 18.sp,
-                        color: const Color(0xFF888888),
+                        color: BaseColor.grayFont,
                       ),
                     ),
                     Gap(70.h),

@@ -1,5 +1,6 @@
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/image.dart';
+import 'package:client/common/utils/app_config.dart';
 import 'package:client/common/utils/asset.dart';
 import 'package:client/common/utils/color.dart';
 import 'package:flutter/cupertino.dart';
@@ -41,7 +42,7 @@ class _HomePageState extends State<HomePage> {
                       style: TextStyle(
                         fontSize: 30.sp,
                         color: BaseColor.c_1D1F1E,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: AppFontWeight.semiBold,
                       ),
                     ),
                     Text(

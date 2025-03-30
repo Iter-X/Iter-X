@@ -4,6 +4,7 @@ import 'package:client/business/mine/widgets/section_header.dart';
 import 'package:client/business/mine/widgets/stats_card.dart';
 import 'package:client/business/mine/widgets/trip_preview_card.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
+import 'package:client/common/utils/app_config.dart';
 import 'package:client/common/utils/color.dart';
 import 'package:client/common/widgets/preference_button.dart';
 import 'package:client/common/widgets/return_button.dart';
@@ -104,7 +105,7 @@ class _MinePageState extends State<MinePage> {
                 margin: const EdgeInsets.symmetric(horizontal: 15),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(AppConfig.borderRadius),
                 ),
                 child: SectionHeader(
                   title: '人生地图',
@@ -119,7 +120,7 @@ class _MinePageState extends State<MinePage> {
                 margin: const EdgeInsets.symmetric(horizontal: 15),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(AppConfig.borderRadius),
                 ),
                 child: Column(
                   children: [

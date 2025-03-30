@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:client/common/material/iter_text.dart';
+import 'package:client/common/utils/app_config.dart';
 import 'package:client/common/utils/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -66,7 +67,7 @@ class TripPreviewCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 22.sp,
                   color: BaseColor.secondary,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: AppFontWeight.black,
                 ),
                 borders: BorderProperties(
                   width: 2.sp,

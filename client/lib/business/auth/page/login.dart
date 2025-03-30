@@ -1,6 +1,7 @@
 import 'package:client/app/routes.dart';
 import 'package:client/common/material/image.dart';
 import 'package:client/common/material/state.dart';
+import 'package:client/common/utils/app_config.dart';
 import 'package:client/common/utils/color.dart';
 import 'package:client/common/utils/toast.dart';
 import 'package:client/common/widgets/base_button.dart';
@@ -139,7 +140,7 @@ class _LoginPageState extends BaseState<LoginPage> {
                 bottom: 35.h,
               ),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24.w),
+                borderRadius: BorderRadius.circular(AppConfig.borderRadius),
                 color: BaseColor.secondary,
               ),
               child: Column(
@@ -149,7 +150,7 @@ class _LoginPageState extends BaseState<LoginPage> {
                     style: TextStyle(
                       color: BaseColor.primary,
                       fontSize: 18.sp,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: AppFontWeight.semiBold,
                     ),
                   ),
                   Container(

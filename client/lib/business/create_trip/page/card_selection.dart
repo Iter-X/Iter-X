@@ -18,6 +18,7 @@
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/image.dart';
 import 'package:client/common/material/iter_text.dart';
+import 'package:client/common/utils/app_config.dart';
 import 'package:client/common/utils/color.dart';
 import 'package:client/common/widgets/return_button.dart';
 import 'package:flutter/material.dart';
@@ -253,7 +254,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                                 color: isSelected
                                     ? BaseColor.c_1D1F1E
                                     : BaseColor.c_f2f2f2,
-                                fontWeight: FontWeight.w900,
+                                fontWeight: AppFontWeight.black,
                               ),
                               borders: BorderProperties(
                                 width: 2,
@@ -270,7 +271,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                                   color: isSelected
                                       ? BaseColor.c_1D1F1E
                                       : BaseColor.c_f2f2f2,
-                                  fontWeight: FontWeight.w900,
+                                  fontWeight: AppFontWeight.black,
                                 ),
                                 borders: BorderProperties(
                                   width: 2,

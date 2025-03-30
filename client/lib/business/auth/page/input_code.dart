@@ -6,6 +6,7 @@ import 'package:client/business/auth/service/auth_service.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/loading.dart';
 import 'package:client/common/material/state.dart';
+import 'package:client/common/utils/app_config.dart';
 import 'package:client/common/utils/color.dart';
 import 'package:client/common/widgets/base_button.dart';
 import 'package:client/common/widgets/return_button.dart';
@@ -91,7 +92,7 @@ class _InputCodePageState extends BaseState<InputCodePage> {
               style: TextStyle(
                 fontSize: 28.sp,
                 color: BaseColor.primaryFont,
-                fontWeight: FontWeight.w500,
+                fontWeight: AppFontWeight.medium,
               ),
             ),
             Container(
@@ -120,7 +121,7 @@ class _InputCodePageState extends BaseState<InputCodePage> {
                 textStyle: TextStyle(
                   fontSize: 28.sp,
                   color: BaseColor.primaryFont,
-                  fontWeight: FontWeight.w400,
+                  fontWeight: AppFontWeight.regular,
                 ),
                 animationDuration: Duration(milliseconds: 300),
                 cursorColor: BaseColor.primary,
@@ -147,8 +148,9 @@ class _InputCodePageState extends BaseState<InputCodePage> {
                 style: TextStyle(
                   fontSize: 16.sp,
                   color: BaseColor.c_1D1F1E,
-                  fontWeight:
-                      timeStr == '重新发送' ? FontWeight.w500 : FontWeight.w400,
+                  fontWeight: timeStr == '重新发送'
+                      ? AppFontWeight.medium
+                      : AppFontWeight.regular,
                 ),
               ),
             ),

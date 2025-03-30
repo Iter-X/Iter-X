@@ -1,5 +1,6 @@
 import 'package:client/common/material/image.dart';
 import 'package:client/common/material/text_field.dart';
+import 'package:client/common/utils/app_config.dart';
 import 'package:client/common/utils/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -36,7 +37,7 @@ class CreateManuallyWidget extends StatelessWidget {
         right: 35.w,
       ),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28.w),
+        borderRadius: BorderRadius.circular(AppConfig.cornerRadius),
         color: BaseColor.c_E3E3E3,
       ),
       child: Row(
@@ -66,8 +67,8 @@ class CreateManuallyWidget extends StatelessWidget {
               width: 107.w,
               height: 46.h,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24.w),
-                color: BaseColor.c_1D1F1E,
+                borderRadius: BorderRadius.circular(AppConfig.cornerRadius),
+                color: BaseColor.primary,
               ),
               margin: EdgeInsets.only(right: 6.w),
               child: Row(
@@ -82,7 +83,7 @@ class CreateManuallyWidget extends StatelessWidget {
                     selectIndex == 0 ? '图卡选择' : '粘贴',
                     style: TextStyle(
                       fontSize: 14.sp,
-                      color: BaseColor.c_f2f2f2,
+                      color: BaseColor.secondaryFont,
                     ),
                   )
                 ],

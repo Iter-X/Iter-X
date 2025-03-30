@@ -5,6 +5,7 @@ import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/loading.dart';
 import 'package:client/common/material/state.dart';
 import 'package:client/common/material/text_field.dart';
+import 'package:client/common/utils/app_config.dart';
 import 'package:client/common/utils/color.dart';
 import 'package:client/common/utils/toast.dart';
 import 'package:client/common/utils/util.dart';
@@ -62,7 +63,7 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
               style: TextStyle(
                 color: BaseColor.primaryFont,
                 fontSize: 28.w,
-                fontWeight: FontWeight.w600,
+                fontWeight: AppFontWeight.semiBold,
               ),
             ),
             Gap(10.h),
@@ -106,12 +107,12 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
                       hintStyle: TextStyle(
                         color: BaseColor.hint,
                         fontSize: 18.sp,
-                        fontWeight: FontWeight.w400,
+                        fontWeight: AppFontWeight.regular,
                       ),
                       style: TextStyle(
                         color: BaseColor.c_1D1F1E,
                         fontSize: 18.sp,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: AppFontWeight.medium,
                       ),
                       lengthLimit: 11,
                     ),
