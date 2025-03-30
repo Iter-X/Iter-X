@@ -60,11 +60,25 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
-                  child: Image.network(
-                    poi.imageUrl,
-                    width: 142.w,
-                    height: 142.w,
-                    fit: BoxFit.cover,
+                  child: Stack(
+                    children: [
+                      Image.network(
+                        poi.imageUrl,
+                        width: 142.w,
+                        height: 142.w,
+                        fit: BoxFit.cover,
+                      ),
+                      if (isSelected)
+                        Positioned(
+                          right: 2.w,
+                          bottom: 2.w,
+                          child: Icon(
+                            Icons.verified,
+                            color: BaseColor.secondary,
+                            size: 33.sp,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 Expanded(
