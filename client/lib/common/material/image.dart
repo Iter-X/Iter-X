@@ -1,8 +1,7 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:client/common/utils/asset.dart';
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -39,7 +38,7 @@ class BaseImage {
                 child: placeholderChild ??
                     CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        progressColor ?? BaseColor.scaffoldBackgroundColor,
+                        progressColor ?? AppColor.scaffoldBackgroundColor,
                       ),
                     ),
               ),
@@ -47,7 +46,7 @@ class BaseImage {
                   placeholderChild ??
                   Icon(
                     Icons.error,
-                    color: progressColor ?? BaseColor.scaffoldBackgroundColor,
+                    color: progressColor ?? AppColor.scaffoldBackgroundColor,
                     size: 15.w,
                   ),
             )
@@ -67,7 +66,7 @@ class BaseImage {
   }
 
   static Widget asset({
-    String base = AssetUtil.base,
+    String base = AppConfig.assetBaseDir,
     required String name,
     double? aspectRatio,
     double? size,
@@ -112,7 +111,7 @@ class BaseImage {
   }
 
   static Widget file({
-    String base = AssetUtil.base,
+    String base = AppConfig.assetBaseDir,
     required String name,
     double? aspectRatio,
     double? size,

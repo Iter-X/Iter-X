@@ -1,5 +1,4 @@
-import 'package:client/common/utils/app_config.dart';
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -36,7 +35,7 @@ class ClickableButton extends StatelessWidget {
         width: width,
         padding: EdgeInsets.all(9.w),
         decoration: BoxDecoration(
-          color: BaseColor.secondary,
+          color: AppColor.secondary,
           borderRadius: BorderRadius.circular(AppConfig.cornerRadius),
         ),
         child: Row(
@@ -47,7 +46,7 @@ class ClickableButton extends StatelessWidget {
               child: Text(
                 text,
                 style: TextStyle(
-                  color: BaseColor.primary,
+                  color: AppColor.primary,
                   fontSize: 16.sp,
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -61,7 +60,7 @@ class ClickableButton extends StatelessWidget {
                 angle: rotationAngle,
                 child: Icon(
                   icon ?? Icons.cancel,
-                  color: iconColor ?? BaseColor.primary,
+                  color: iconColor ?? AppColor.primary,
                   size: 22.sp,
                 ),
               ),

@@ -1,7 +1,6 @@
+import 'package:client/app/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-import 'color.dart';
 
 class BaseStyle {
   // app bar start
@@ -15,7 +14,7 @@ class BaseStyle {
   // button start
   static ButtonStyle elevatedButtonStyle = ElevatedButton.styleFrom(
     elevation: 0,
-    backgroundColor: BaseColor.theme,
+    backgroundColor: AppColor.theme,
     minimumSize: const Size(0, 0),
     shadowColor: Colors.transparent,
     splashFactory: NoSplash.splashFactory,
@@ -27,7 +26,7 @@ class BaseStyle {
 
   static ButtonStyle outlinedButtonStyle = OutlinedButton.styleFrom(
     elevation: 0,
-    backgroundColor: BaseColor.theme,
+    backgroundColor: AppColor.theme,
     minimumSize: const Size(0, 0),
     shadowColor: Colors.transparent,
     splashFactory: NoSplash.splashFactory,
@@ -35,6 +34,6 @@ class BaseStyle {
     padding: const EdgeInsets.symmetric(vertical: 8),
     textStyle: TextStyle(fontSize: 16.sp, color: Colors.black),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.w)),
-    side: const BorderSide(width: 1, color: BaseColor.theme),
+    side: const BorderSide(width: 1, color: AppColor.theme),
   );
 }

@@ -15,11 +15,11 @@
  * @LastEditTime: 2025-03-23 22:32:11
  */
 
+import 'package:client/app/constants.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/image.dart';
 import 'package:client/common/material/iter_text.dart';
-import 'package:client/common/utils/app_config.dart';
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:client/common/widgets/return_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -181,7 +181,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
   @override
   Widget build(BuildContext context) {
     return AppBarWithSafeArea(
-      backgroundColor: BaseColor.bg,
+      backgroundColor: AppColor.bg,
       hasAppBar: true,
       title: selectionLevel == 0 ? '选择目的国家' : '选择目的城市',
       leading: ReturnButton(onTap: () {
@@ -252,15 +252,15 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                               style: TextStyle(
                                 fontSize: 22.sp,
                                 color: isSelected
-                                    ? BaseColor.c_1D1F1E
-                                    : BaseColor.c_f2f2f2,
+                                    ? AppColor.c_1D1F1E
+                                    : AppColor.c_f2f2f2,
                                 fontWeight: AppFontWeight.black,
                               ),
                               borders: BorderProperties(
                                 width: 2,
                                 color: isSelected
-                                    ? BaseColor.c_f2f2f2
-                                    : BaseColor.c_1D1F1E,
+                                    ? AppColor.c_f2f2f2
+                                    : AppColor.c_1D1F1E,
                               )),
                           if (country['englishName'] != null &&
                               country['englishName'].isNotEmpty)
@@ -269,15 +269,15 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                                 style: TextStyle(
                                   fontSize: 22.sp,
                                   color: isSelected
-                                      ? BaseColor.c_1D1F1E
-                                      : BaseColor.c_f2f2f2,
+                                      ? AppColor.c_1D1F1E
+                                      : AppColor.c_f2f2f2,
                                   fontWeight: AppFontWeight.black,
                                 ),
                                 borders: BorderProperties(
                                   width: 2,
                                   color: isSelected
-                                      ? BaseColor.c_f2f2f2
-                                      : BaseColor.c_1D1F1E,
+                                      ? AppColor.c_f2f2f2
+                                      : AppColor.c_1D1F1E,
                                 )),
                         ],
                       ),
@@ -291,7 +291,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
         // 大洲Tab
         Container(
           padding: EdgeInsets.all(20),
-          color: BaseColor.c_F2F2F2,
+          color: AppColor.c_F2F2F2,
           child: Column(
             children: [
               Container(
@@ -331,8 +331,8 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                                     color: selectionLevel == 0 &&
                                             _selectedContinentId ==
                                                 tag['continentId']
-                                        ? BaseColor.c_1D1F1E
-                                        : BaseColor.c_E3E3E3,
+                                        ? AppColor.c_1D1F1E
+                                        : AppColor.c_E3E3E3,
                                   ),
                                   child: Row(
                                       mainAxisAlignment:
@@ -353,8 +353,8 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                                             color: selectionLevel == 0 &&
                                                     _selectedContinentId ==
                                                         tag['continentId']
-                                                ? BaseColor.c_F2F2F2
-                                                : BaseColor.c_1D1F1E,
+                                                ? AppColor.c_F2F2F2
+                                                : AppColor.c_1D1F1E,
                                           ),
                                         ),
                                       ])),
@@ -381,7 +381,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                                 alignment: Alignment.center,
                                 padding: EdgeInsets.symmetric(horizontal: 15),
                                 decoration: BoxDecoration(
-                                  color: BaseColor.c_E3E3E3,
+                                  color: AppColor.c_E3E3E3,
                                   borderRadius: BorderRadius.only(
                                     topLeft: Radius.circular(5.sp),
                                     bottomLeft: Radius.circular(5.sp),
@@ -391,7 +391,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                                   country['name'],
                                   style: TextStyle(
                                     fontSize: 16.sp,
-                                    color: BaseColor.c_1D1F1E,
+                                    color: AppColor.c_1D1F1E,
                                   ),
                                 ),
                               )),
@@ -405,7 +405,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                                   child: Container(
                                     alignment: Alignment.center,
                                     decoration: BoxDecoration(
-                                      color: BaseColor.c_1D1F1E,
+                                      color: AppColor.c_1D1F1E,
                                       borderRadius: BorderRadius.only(
                                         topRight: Radius.circular(5.sp),
                                         bottomRight: Radius.circular(5.sp),
@@ -432,7 +432,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                   height: 52.h,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(28.w),
-                    color: BaseColor.c_1D1F1E,
+                    color: AppColor.c_1D1F1E,
                   ),
                   margin: EdgeInsets.only(right: 6.w),
                   child: Row(
@@ -447,7 +447,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                         "已选${_selectedCountries.length}",
                         style: TextStyle(
                           fontSize: 18.sp,
-                          color: BaseColor.c_f2f2f2,
+                          color: AppColor.c_f2f2f2,
                         ),
                       ),
                       Gap(10.w),
@@ -465,7 +465,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                         "生成行程",
                         style: TextStyle(
                           fontSize: 18.sp,
-                          color: BaseColor.c_f2f2f2,
+                          color: AppColor.c_f2f2f2,
                         ),
                       )
                     ],

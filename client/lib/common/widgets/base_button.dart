@@ -1,5 +1,5 @@
 import 'package:client/common/material/image.dart';
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
@@ -40,10 +40,10 @@ class BaseButton extends StatelessWidget {
     this.loadingWidget,
   })  : iconSize = iconSize?.w ?? 26.w,
         textSize = textSize?.sp ?? 18.sp,
-        textColor = textColor ?? BaseColor.primary,
+        textColor = textColor ?? AppColor.primary,
         width = width?.w ?? double.infinity,
         height = height?.h ?? 52.h,
-        borderColor = borderColor ?? BaseColor.primary,
+        borderColor = borderColor ?? AppColor.primary,
         borderRadius = borderRadius?.r ?? 24.r,
         gap = gap?.w ?? 20.w;
 
@@ -56,7 +56,7 @@ class BaseButton extends StatelessWidget {
         height: height,
         decoration: BoxDecoration(
           color: backgroundColor ??
-              (hasBorder ? Colors.transparent : BaseColor.primary),
+              (hasBorder ? Colors.transparent : AppColor.primary),
           borderRadius: BorderRadius.circular(borderRadius),
           border: hasBorder
               ? Border.all(

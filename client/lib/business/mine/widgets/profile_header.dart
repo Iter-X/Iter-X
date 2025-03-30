@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:client/common/utils/app_config.dart';
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:flutter/material.dart';
 
 class ProfileHeader extends StatelessWidget {
@@ -30,7 +29,7 @@ class ProfileHeader extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 30,
                     fontWeight: AppFontWeight.semiBold,
-                    color: BaseColor.primaryFont,
+                    color: AppColor.primaryFont,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -39,7 +38,7 @@ class ProfileHeader extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: AppFontWeight.medium,
-                    color: BaseColor.grayFont,
+                    color: AppColor.grayFont,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -50,7 +49,7 @@ class ProfileHeader extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: BaseColor.highlight,
+                color: AppColor.highlight,
                 width: 1,
               ),
             ),

@@ -4,7 +4,7 @@ import 'package:client/business/home_main/widgets/widgets.dart';
 import 'package:client/business/mine/page/mine_page.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/state.dart';
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -23,18 +23,18 @@ class _HomeMainPageState extends BaseState<HomeMainPage> {
     return AppBarWithSafeArea(
       hasAppBar: false,
       top: false,
-      backgroundColor: BaseColor.bg,
-      bottomColor: BaseColor.bottomBar,
+      backgroundColor: AppColor.bg,
+      bottomColor: AppColor.bottomBar,
       child: Column(
         children: [
           Expanded(
             child: Container(
-              color: BaseColor.bg,
+              color: AppColor.bg,
               child: selectIndex == 0 ? HomePage() : MinePage(),
             ),
           ),
           Container(
-            color: BaseColor.bottomBar,
+            color: AppColor.bottomBar,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -44,7 +44,7 @@ class _HomeMainPageState extends BaseState<HomeMainPage> {
                   decoration: BoxDecoration(
                     border: Border(
                       top: BorderSide(
-                        color: BaseColor.bottomBarLine,
+                        color: AppColor.bottomBarLine,
                         width: 1,
                       ),
                     ),

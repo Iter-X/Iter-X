@@ -1,7 +1,7 @@
+import 'package:client/app/constants.dart';
 import 'package:client/common/material/image.dart';
 import 'package:client/common/material/text_field.dart';
-import 'package:client/common/utils/app_config.dart';
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:client/common/widgets/base_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -37,7 +37,7 @@ class CreateManuallyWidget extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppConfig.cornerRadius),
-        color: BaseColor.inputGrayBG,
+        color: AppColor.inputGrayBG,
       ),
       child: Row(
         children: [
@@ -48,11 +48,11 @@ class CreateManuallyWidget extends StatelessWidget {
               hintText: selectIndex == 0 ? '输入目的地开始规划行程' : '粘贴外部链接，智能识别规划',
               hintStyle: TextStyle(
                 fontSize: 15.sp,
-                color: BaseColor.c_999999,
+                color: AppColor.c_999999,
               ),
               style: TextStyle(
                 fontSize: 15.sp,
-                color: BaseColor.c_1D1F1E,
+                color: AppColor.c_1D1F1E,
               ),
               contentPadding: EdgeInsets.only(
                 left: 24.w,
@@ -69,8 +69,8 @@ class CreateManuallyWidget extends StatelessWidget {
               iconSize: 18.w,
               text: selectIndex == 0 ? '图卡选择' : '粘贴',
               textSize: 14.sp,
-              textColor: BaseColor.secondaryFont,
-              backgroundColor: BaseColor.primary,
+              textColor: AppColor.secondaryFont,
+              backgroundColor: AppColor.primary,
               borderRadius: AppConfig.cornerRadius,
               gap: 5.w,
               onTap: () => onTap.call(),
@@ -106,8 +106,8 @@ class CreatePhotoWidget extends StatelessWidget {
         iconSize: 24.w,
         text: '选择照片上传',
         textSize: 18.sp,
-        textColor: BaseColor.secondaryFont,
-        backgroundColor: BaseColor.primary,
+        textColor: AppColor.secondaryFont,
+        backgroundColor: AppColor.primary,
         borderRadius: AppConfig.cornerRadius,
         gap: 10.w,
         onTap: () => onTap.call(),
@@ -200,7 +200,7 @@ class _CreateVoiceWidgetState extends State<CreateVoiceWidget> {
           _recognizedText,
           style: TextStyle(
             fontSize: 16.sp,
-            color: BaseColor.c_1D1F1E,
+            color: AppColor.c_1D1F1E,
           ),
         ),
       Container(

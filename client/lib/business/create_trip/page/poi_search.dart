@@ -1,7 +1,7 @@
+import 'package:client/app/constants.dart';
 import 'package:client/business/create_trip/service/poi_search_service.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
-import 'package:client/common/utils/app_config.dart';
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:client/common/widgets/base_button.dart';
 import 'package:client/common/widgets/clickable_button.dart';
 import 'package:client/common/widgets/preference_button.dart';
@@ -74,7 +74,7 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
                           bottom: 2.w,
                           child: Icon(
                             Icons.verified,
-                            color: BaseColor.secondary,
+                            color: AppColor.secondary,
                             size: 33.sp,
                           ),
                         ),
@@ -86,7 +86,7 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
                     padding: EdgeInsets.only(left: 10.w, right: 10.w),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? BaseColor.selectedItem
+                          ? AppColor.selectedItem
                           : Colors.transparent,
                     ),
                     child: SizedBox(
@@ -98,7 +98,7 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
                           Text(
                             poi.name,
                             style: TextStyle(
-                              color: BaseColor.primaryFont,
+                              color: AppColor.primaryFont,
                               fontSize: 18.sp,
                               fontWeight: AppFontWeight.medium,
                             ),
@@ -108,7 +108,7 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
                           Text(
                             poi.englishName,
                             style: TextStyle(
-                              color: BaseColor.primaryFont,
+                              color: AppColor.primaryFont,
                               fontSize: 14.sp,
                             ),
                             maxLines: 2,
@@ -120,20 +120,20 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
                               ...List.generate(5, (index) {
                                 if (index < poi.rating.floor()) {
                                   return Icon(Icons.star,
-                                      color: BaseColor.highlight, size: 18.sp);
+                                      color: AppColor.highlight, size: 18.sp);
                                 } else if (index == poi.rating.floor() &&
                                     poi.rating % 1 > 0) {
                                   return Icon(Icons.star_half,
-                                      color: BaseColor.highlight, size: 18.sp);
+                                      color: AppColor.highlight, size: 18.sp);
                                 }
                                 return Icon(Icons.star_border,
-                                    color: BaseColor.highlight, size: 18.sp);
+                                    color: AppColor.highlight, size: 18.sp);
                               }),
                               Gap(8.w),
                               Text(
                                 poi.reviews,
                                 style: TextStyle(
-                                  color: BaseColor.grayFont,
+                                  color: AppColor.grayFont,
                                   fontSize: 14.sp,
                                 ),
                               ),
@@ -146,14 +146,14 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
                               Text(
                                 poi.duration,
                                 style: TextStyle(
-                                  color: BaseColor.grayFont,
+                                  color: AppColor.grayFont,
                                   fontSize: 14.sp,
                                 ),
                               ),
                               Text(
                                 poi.popularity,
                                 style: TextStyle(
-                                  color: BaseColor.grayFont,
+                                  color: AppColor.grayFont,
                                   fontSize: 14.sp,
                                 ),
                               ),
@@ -200,7 +200,7 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
                       text: poi.name,
                       onTapIcon: () => service.removeSelectedPoi(poi),
                       icon: Icons.cancel,
-                      iconColor: BaseColor.closeButton,
+                      iconColor: AppColor.closeButton,
                     );
                   }),
                   if (hasMore)
@@ -210,7 +210,7 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
                           : '+ ${selectedPois.length - maxVisiblePois}',
                       onTapIcon: () => isExpanded.value = !isExpanded.value,
                       icon: Icons.expand_circle_down,
-                      iconColor: BaseColor.highlight,
+                      iconColor: AppColor.highlight,
                       gap: expanded ? 0 : 5.w,
                       rotationAngle: expanded ? 0 : 1 * 3.14,
                     ),
@@ -238,7 +238,7 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: BaseColor.bg,
+                    color: AppColor.bg,
                     borderRadius: BorderRadius.circular(AppConfig.cornerRadius),
                   ),
                   child: TextField(
@@ -254,12 +254,12 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
                     decoration: InputDecoration(
                       hintText: '输入搜索',
                       hintStyle: TextStyle(
-                        color: BaseColor.inputPlaceholder,
+                        color: AppColor.inputPlaceholder,
                         fontSize: 16.sp,
                       ),
                       prefixIcon: Icon(
                         Icons.travel_explore,
-                        color: BaseColor.primaryFont,
+                        color: AppColor.primaryFont,
                         size: 28.sp,
                       ),
                       border: InputBorder.none,
@@ -279,7 +279,7 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
                         : selectedCount > 0
                             ? '已选$selectedCount 确认增加'
                             : '暂不添加',
-                    textColor: BaseColor.secondaryFont,
+                    textColor: AppColor.secondaryFont,
                     width: 146.w,
                     textSize: 16.sp,
                     onTap: () {
@@ -308,8 +308,8 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
   @override
   Widget build(BuildContext context) {
     return AppBarWithSafeArea(
-      backgroundColor: BaseColor.bg,
-      bottomColor: BaseColor.bottomBar,
+      backgroundColor: AppColor.bg,
+      bottomColor: AppColor.bottomBar,
       leading: ReturnButton(),
       title: '洛杉矶Los Angeles',
       actions: [PreferenceButton()],

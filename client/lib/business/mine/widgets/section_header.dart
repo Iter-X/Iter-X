@@ -1,5 +1,4 @@
-import 'package:client/common/utils/app_config.dart';
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:flutter/material.dart';
 
 class SectionHeader extends StatelessWidget {
@@ -21,7 +20,7 @@ class SectionHeader extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+          borderRadius: BorderRadius.circular(AppConfig.boxRadius),
         ),
         child: Padding(
           padding: const EdgeInsets.all(15),
@@ -40,7 +39,7 @@ class SectionHeader extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: AppFontWeight.semiBold,
-                  color: BaseColor.primaryFont,
+                  color: AppColor.primaryFont,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -48,7 +47,7 @@ class SectionHeader extends StatelessWidget {
               const Icon(
                 Icons.arrow_forward_ios,
                 size: 16,
-                color: BaseColor.grayFont,
+                color: AppColor.grayFont,
               ),
             ],
           ),

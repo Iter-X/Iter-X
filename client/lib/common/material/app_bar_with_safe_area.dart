@@ -1,5 +1,4 @@
-import 'package:client/common/utils/app_config.dart';
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -64,7 +63,7 @@ class AppBarWithSafeArea extends StatelessWidget {
               title: title != null
                   ? Text(
                       style: TextStyle(
-                        color: BaseColor.primaryFont,
+                        color: AppColor.primaryFont,
                         fontSize: 18.sp,
                         fontWeight: AppFontWeight.medium,
                       ),
