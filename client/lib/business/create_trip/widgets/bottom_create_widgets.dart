@@ -26,19 +26,18 @@ class CreateManuallyWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double bottomPadding = MediaQuery.of(context).viewInsets.bottom;
-
     return Container(
       width: double.infinity,
       height: 56.h,
       margin: EdgeInsets.only(
-        bottom: bottomPadding + (bottomPadding > 0 ? 10.h : 90.h),
+        top: 20.h,
+        bottom: 20.h,
         left: 35.w,
         right: 35.w,
       ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppConfig.cornerRadius),
-        color: BaseColor.c_E3E3E3,
+        color: BaseColor.inputGrayBG,
       ),
       child: Row(
         children: [
@@ -113,13 +112,14 @@ class CreatePhotoWidget extends StatelessWidget {
         width: double.infinity,
         height: 52.h,
         margin: EdgeInsets.only(
-          bottom: 90.h,
+          top: 20.h,
+          bottom: 20.h,
           left: 35.w,
           right: 35.w,
         ),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(28.w),
-          color: BaseColor.c_1D1F1E,
+          borderRadius: BorderRadius.circular(AppConfig.cornerRadius),
+          color: BaseColor.primary,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
