@@ -20,6 +20,9 @@ enum ClientError {
   SMS_CODE_EXPIRED = 9;
   SMS_CODE_INVALID = 10;
   INVALID_CREATION_METHOD = 11;
+  INVALID_TIME_RANGE = 12;
+  MISSING_CITY = 13;
+  MISSING_LINK = 14;
 }
 
 enum UnauthorizedError {

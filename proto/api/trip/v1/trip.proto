@@ -9,9 +9,21 @@ import "validatex/validatex.proto";
 option go_package = "github.com/iter-x/iter-x/internal/api/trip/v1;v1";
 
 service TripService {
-  rpc CreateTrip(CreateTripRequest) returns (CreateTripResponse) {
+  rpc CreateTripManually(CreateTripManuallyRequest) returns (CreateTripResponse) {
     option (google.api.http) = {
-      post: "/api/v1/trips"
+      post: "/api/v1/trips/manual"
+      body: "*"
+    };
+  }
+  rpc CreateTripFromCard(CreateTripFromCardRequest) returns (CreateTripResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/trips/card"
+      body: "*"
+    };
+  }
+  rpc CreateTripFromExternalLink(CreateTripFromExternalLinkRequest) returns (CreateTripResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/trips/external-link"
       body: "*"
     };
   }
@@ -77,23 +89,26 @@ message Trip {
   google.protobuf.Timestamp end_ts = 8;
 }
 
-
-// Define the enum type for trip creation methods
-enum TripCreationMethod {
-  TRIP_CREATION_METHOD_UNSPECIFIED = 0;
-  MANUAL = 1; // Manual creation
-  CARD = 2; // Card-based creation
-  EXTERNAL_LINK = 3; // External link creation
-  IMAGE = 4; // Image-based creation
-  VOICE = 5; // Voice-based creation
+message CreateTripManuallyRequest {
+  string destination = 1;
+  google.protobuf.Timestamp start_ts = 2;
+  google.protobuf.Timestamp end_ts = 3;
+  int32 duration = 4;
 }
 
-message CreateTripRequest {
-  TripCreationMethod creation_method = 1;
-  string destination = 2;
+message CreateTripFromCardRequest {
+  repeated int32 city_ids = 1 [(validatex.rules).repeated.min_items = 1];
+  repeated string poi_ids = 2;
   google.protobuf.Timestamp start_ts = 3;
   google.protobuf.Timestamp end_ts = 4;
   int32 duration = 5;
+}
+
+message CreateTripFromExternalLinkRequest {
+  string link_url = 1 [(validatex.rules).string.non_empty = true];
+  google.protobuf.Timestamp start_ts = 2;
+  google.protobuf.Timestamp end_ts = 3;
+  int32 duration = 4;
 }
 
 message CreateTripResponse {

@@ -34,6 +34,15 @@ other = "SMS code invalid"
 [INVALID_CREATION_METHOD]
 other = "Invalid creation method"
 
+[INVALID_TIME_RANGE]
+other = "Invalid time parameters, must choose days or time range"
+
+[MISSING_CITY]
+other = "Must choose at least one city"
+
+[MISSING_LINK]
+other = "External link cannot be empty"
+
 [UNAUTHORIZED]
 other = "Unauthorized"
 

@@ -632,24 +632,59 @@ components:
                 dailyTrip:
                     $ref: '#/components/schemas/trip.v1.DailyTrip'
             type: object
-        trip.v1.CreateTripRequest:
+        trip.v1.CreateTripFromCardRequest:
             example:
-                creationMethod: TRIP_CREATION_METHOD_UNSPECIFIED
+                cityIds: 0
+                duration: 0
+                endTs: 1741589979
+                poiIds: ""
+                startTs: 1741589979
+            properties:
+                cityIds:
+                    items:
+                        format: int32
+                        type: integer
+                    type: array
+                duration:
+                    format: int32
+                    type: integer
+                endTs:
+                    format: int32
+                    type: integer
+                poiIds:
+                    items:
+                        type: string
+                    type: array
+                startTs:
+                    format: int32
+                    type: integer
+            type: object
+        trip.v1.CreateTripFromExternalLinkRequest:
+            example:
+                duration: 0
+                endTs: 1741589979
+                linkUrl: ""
+                startTs: 1741589979
+            properties:
+                duration:
+                    format: int32
+                    type: integer
+                endTs:
+                    format: int32
+                    type: integer
+                linkUrl:
+                    type: string
+                startTs:
+                    format: int32
+                    type: integer
+            type: object
+        trip.v1.CreateTripManuallyRequest:
+            example:
                 destination: ""
                 duration: 0
                 endTs: 1741589979
                 startTs: 1741589979
             properties:
-                creationMethod:
-                    enum:
-                        - TRIP_CREATION_METHOD_UNSPECIFIED
-                        - MANUAL
-                        - CARD
-                        - EXTERNAL_LINK
-                        - IMAGE
-                        - VOICE
-                    format: enum
-                    type: string
                 destination:
                     type: string
                 duration:
@@ -1532,41 +1567,6 @@ paths:
                     description: Internal Server Error
             tags:
                 - TripService
-        post:
-            operationId: TripService_CreateTrip
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/trip.v1.CreateTripRequest'
-                required: true
-            responses:
-                "200":
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/trip.v1.CreateTripResponse'
-                    description: OK
-                "400":
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/BadRequest'
-                    description: Bad Request
-                "401":
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Unauthorized'
-                    description: Unauthorized
-                "500":
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/InternalServerError'
-                    description: Internal Server Error
-            tags:
-                - TripService
     /api/v1/trips/{id}:
         delete:
             operationId: TripService_DeleteTrip
@@ -1873,6 +1873,114 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/trip.v1.UpdateDailyTripResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - TripService
+    /api/v1/trips/card:
+        post:
+            operationId: TripService_CreateTripFromCard
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/trip.v1.CreateTripFromCardRequest'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.CreateTripResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - TripService
+    /api/v1/trips/external-link:
+        post:
+            operationId: TripService_CreateTripFromExternalLink
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/trip.v1.CreateTripFromExternalLinkRequest'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.CreateTripResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - TripService
+    /api/v1/trips/manual:
+        post:
+            operationId: TripService_CreateTripManually
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/trip.v1.CreateTripManuallyRequest'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.CreateTripResponse'
                     description: OK
                 "400":
                     content:

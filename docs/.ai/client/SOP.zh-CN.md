@@ -41,3 +41,6 @@
 
 ## flutter_screenutil
 我们使用 `flutter_screenutil` 进行屏幕适配，在设置字体大小的时候，使用`number.sp`，在设置宽高间距的时候，使用`number.w`和`number.h`，正方形的情况下，使用同一个单位，如`width: 100.w, height: 100.w`或`width: 100.h, height: 100.h`
+
+## 代码注释
+通常不需要代码注释，更多是用规范的命令来表现意图，不过有一些地方必须要有注释的请用英文注释
