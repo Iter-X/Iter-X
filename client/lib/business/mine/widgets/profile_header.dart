@@ -1,5 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:flutter/material.dart';
 
 class ProfileHeader extends StatelessWidget {
@@ -28,8 +28,8 @@ class ProfileHeader extends StatelessWidget {
                   'Hi, $name 👋',
                   style: const TextStyle(
                     fontSize: 30,
-                    fontWeight: FontWeight.w600,
-                    color: BaseColor.primaryFont,
+                    fontWeight: AppFontWeight.semiBold,
+                    color: AppColor.primaryFont,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -37,8 +37,8 @@ class ProfileHeader extends StatelessWidget {
                   'Explore the world',
                   style: TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: BaseColor.grayFont,
+                    fontWeight: AppFontWeight.medium,
+                    color: AppColor.grayFont,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -49,7 +49,7 @@ class ProfileHeader extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: BaseColor.highlight,
+                color: AppColor.highlight,
                 width: 1,
               ),
             ),

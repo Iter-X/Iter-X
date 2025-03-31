@@ -1,4 +1,4 @@
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:flutter/material.dart';
 
 class StatsCard extends StatelessWidget {
@@ -19,7 +19,7 @@ class StatsCard extends StatelessWidget {
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(AppConfig.boxRadius),
       ),
       child: Row(
         children: [
@@ -27,7 +27,7 @@ class StatsCard extends StatelessWidget {
             emoji,
             style: const TextStyle(
               fontSize: 35,
-              fontWeight: FontWeight.w600,
+              fontWeight: AppFontWeight.semiBold,
             ),
           ),
           const SizedBox(width: 10),
@@ -39,8 +39,8 @@ class StatsCard extends StatelessWidget {
                   label,
                   style: const TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: BaseColor.grayFont,
+                    fontWeight: AppFontWeight.semiBold,
+                    color: AppColor.grayFont,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -48,8 +48,8 @@ class StatsCard extends StatelessWidget {
                   value,
                   style: const TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: BaseColor.highlight,
+                    fontWeight: AppFontWeight.extraBold,
+                    color: AppColor.highlight,
                     letterSpacing: 0.5,
                   ),
                 ),

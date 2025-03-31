@@ -9,7 +9,6 @@ import 'package:client/common/utils/logger.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-
 const String _kToken = 'token';
 const String _kUserInfo = 'user_info';
 
@@ -20,15 +19,18 @@ class UserNotifier with ChangeNotifier, DiagnosticableTreeMixin {
   TokenEntity? _token;
 
   UserInfoEntity? get user => _user;
+
   TokenEntity? get token => _token;
 
   // 检查 token 是否过期
   bool get isTokenExpired {
     if (_token == null || _token!.expiresAt == null) return true;
-    
-    final expirationTime = DateTime.fromMillisecondsSinceEpoch(_token!.expiresAt!);
+
+    final expirationTime =
+        DateTime.fromMillisecondsSinceEpoch(_token!.expiresAt!);
     // 提前5分钟认为过期，以便有时间刷新
-    return DateTime.now().isAfter(expirationTime.subtract(Duration(minutes: 5)));
+    return DateTime.now()
+        .isAfter(expirationTime.subtract(Duration(minutes: 5)));
   }
 
   Future<void> loadUserInfo() async {
@@ -71,8 +73,16 @@ class UserNotifier with ChangeNotifier, DiagnosticableTreeMixin {
     try {
       final newToken = await AuthService.refreshToken(_token!.refreshToken!);
       if (newToken != null) {
-        _token = newToken;
-        await _storage.write(key: _kToken, value: json.encode(_token!.toJson()));
+        _token = TokenEntity(
+          token: newToken.token,
+          refreshToken: _token!.refreshToken,
+          expiresIn: newToken.expiresIn,
+          expiresAt: DateTime.now()
+              .add(Duration(seconds: newToken.expiresIn!))
+              .millisecondsSinceEpoch,
+        );
+        await _storage.write(
+            key: _kToken, value: json.encode(_token!.toJson()));
         notifyListeners();
         return true;
       }
@@ -87,7 +97,6 @@ class UserNotifier with ChangeNotifier, DiagnosticableTreeMixin {
 
   // 检查并确保 token 有效
   Future<bool> ensureValidToken() async {
-    if (_token == null) return false;
     if (!isTokenExpired) return true;
     return _handleTokenExpiration();
   }
@@ -97,12 +106,13 @@ class UserNotifier with ChangeNotifier, DiagnosticableTreeMixin {
     BaseLogger.i('token valid: ${!isTokenExpired}');
     // 确保 token 有效
     if (!await ensureValidToken()) return;
-    
+
     try {
       UserInfoEntity? updatedUser = await AuthService.getUserInfo();
       if (updatedUser != null) {
         _user = updatedUser;
-        await _storage.write(key: _kUserInfo, value: json.encode(_user!.toJson()));
+        await _storage.write(
+            key: _kUserInfo, value: json.encode(_user!.toJson()));
         notifyListeners();
       }
     } catch (e) {
@@ -119,14 +129,16 @@ class UserNotifier with ChangeNotifier, DiagnosticableTreeMixin {
         token: token.token,
         refreshToken: token.refreshToken,
         expiresIn: token.expiresIn,
-        expiresAt: DateTime.now().add(Duration(seconds: token.expiresIn!)).millisecondsSinceEpoch,
+        expiresAt: DateTime.now()
+            .add(Duration(seconds: token.expiresIn!))
+            .millisecondsSinceEpoch,
       );
     } else {
       _token = token;
     }
 
     BaseLogger.i('login token: ${_token!.toJson()}');
-    
+
     await _storage.write(key: _kToken, value: json.encode(_token!.toJson()));
 
     notifyListeners();

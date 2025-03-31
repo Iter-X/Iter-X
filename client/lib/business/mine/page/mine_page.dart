@@ -1,9 +1,11 @@
+import 'package:client/app/constants.dart';
 import 'package:client/business/mine/service/profile_service.dart';
 import 'package:client/business/mine/widgets/profile_header.dart';
 import 'package:client/business/mine/widgets/section_header.dart';
 import 'package:client/business/mine/widgets/stats_card.dart';
 import 'package:client/business/mine/widgets/trip_preview_card.dart';
-import 'package:client/common/utils/color.dart';
+import 'package:client/common/material/app_bar_with_safe_area.dart';
+import 'package:client/common/widgets/preference_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -25,9 +27,12 @@ class _MinePageState extends State<MinePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: BaseColor.bg,
-      body: Consumer<ProfileService>(
+    return AppBarWithSafeArea(
+      backgroundColor: AppColor.bg,
+      bottom: false,
+      hasAppBar: true,
+      actions: [PreferenceButton()],
+      child: Consumer<ProfileService>(
         builder: (context, service, child) {
           if (service.isLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -97,7 +102,7 @@ class _MinePageState extends State<MinePage> {
                 margin: const EdgeInsets.symmetric(horizontal: 15),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(AppConfig.boxRadius),
                 ),
                 child: SectionHeader(
                   title: '人生地图',
@@ -112,7 +117,7 @@ class _MinePageState extends State<MinePage> {
                 margin: const EdgeInsets.symmetric(horizontal: 15),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(AppConfig.boxRadius),
                 ),
                 child: Column(
                   children: [

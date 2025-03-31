@@ -1,7 +1,8 @@
+import 'package:client/app/constants.dart';
 import 'package:client/app/routes.dart';
 import 'package:client/common/material/image.dart';
 import 'package:client/common/material/state.dart';
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:client/common/utils/toast.dart';
 import 'package:client/common/widgets/base_button.dart';
 import 'package:flutter/gestures.dart';
@@ -18,7 +19,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends BaseState<LoginPage> {
   TextStyle agreementTextStyle = TextStyle(
-    color: BaseColor.primary,
+    color: AppColor.primary,
     fontSize: 14.sp,
   );
 
@@ -40,8 +41,8 @@ class _LoginPageState extends BaseState<LoginPage> {
             child: BaseButton(
               iconName: 'ic_wx.png',
               text: '微信登录',
-              textColor: BaseColor.secondary,
-              backgroundColor: BaseColor.primary,
+              textColor: AppColor.secondary,
+              backgroundColor: AppColor.primary,
               onTap: () => loginType(0),
             ),
           ),
@@ -139,17 +140,17 @@ class _LoginPageState extends BaseState<LoginPage> {
                 bottom: 35.h,
               ),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24.w),
-                color: BaseColor.secondary,
+                borderRadius: BorderRadius.circular(AppConfig.boxRadius),
+                color: AppColor.secondary,
               ),
               child: Column(
                 children: [
                   Text(
                     '阅读以下协议并同意',
                     style: TextStyle(
-                      color: BaseColor.primary,
+                      color: AppColor.primary,
                       fontSize: 18.sp,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: AppFontWeight.semiBold,
                     ),
                   ),
                   Container(
@@ -188,7 +189,7 @@ class _LoginPageState extends BaseState<LoginPage> {
                       text: '同意',
                       height: 42.h,
                       textColor: Colors.white,
-                      backgroundColor: BaseColor.primary,
+                      backgroundColor: AppColor.primary,
                       onTap: () {
                         setState(() {
                           isSelect = !isSelect;

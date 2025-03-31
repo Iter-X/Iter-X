@@ -1,11 +1,13 @@
 import 'package:client/common/material/image.dart';
+import 'package:client/app/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-// 返回按钮
-class ButtonBackWidget extends StatelessWidget {
+class ReturnButton extends StatelessWidget {
   final VoidCallback? onTap;
-  const ButtonBackWidget({super.key, this.onTap});
+  final Color? color;
+
+  const ReturnButton({super.key, this.onTap, this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -18,11 +20,14 @@ class ButtonBackWidget extends StatelessWidget {
         }
       },
       child: Container(
-        padding: EdgeInsets.all(20.w),
+        margin: EdgeInsets.only(left: 20.w),
+        width: 28.w,
+        height: 28.w,
+        alignment: Alignment.center,
         child: BaseImage.asset(
-          name: 'return_btn.png',
-          width: 28.w,
-          fit: BoxFit.fitWidth,
+          name: 'return_btn.svg',
+          size: 28.w,
+          color: color ?? AppColor.primaryFont,
         ),
       ),
     );

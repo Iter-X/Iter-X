@@ -1,15 +1,16 @@
 import 'dart:async';
 
+import 'package:client/app/constants.dart';
 import 'package:client/app/notifier/user.dart';
 import 'package:client/app/routes.dart';
 import 'package:client/business/auth/service/auth_service.dart';
-import 'package:client/business/common/widgets/buttom_widgets.dart';
+import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/loading.dart';
 import 'package:client/common/material/state.dart';
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:client/common/widgets/base_button.dart';
+import 'package:client/common/widgets/return_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
@@ -41,6 +42,7 @@ class _InputCodePageState extends BaseState<InputCodePage> {
   Timer? _timer;
   int time = 60;
   bool isLoading = false;
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -52,29 +54,27 @@ class _InputCodePageState extends BaseState<InputCodePage> {
     });
     super.initState();
     startTimer();
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        _focusNode.requestFocus();
+      }
+    });
   }
 
   @override
   void dispose() {
     cancelTimer();
+    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.dark,
-          statusBarBrightness: Brightness.light,
-        ),
-        leading: ButtonBackWidget(),
-      ),
-      body: SizedBox(
+    return AppBarWithSafeArea(
+      hasAppBar: true,
+      backgroundColor: AppColor.bg,
+      leading: ReturnButton(),
+      child: SizedBox(
         width: double.infinity,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -83,7 +83,7 @@ class _InputCodePageState extends BaseState<InputCodePage> {
               '验证码已发送至',
               style: TextStyle(
                 fontSize: 16.sp,
-                color: BaseColor.primaryFont,
+                color: AppColor.primaryFont,
               ),
             ),
             Gap(10.h),
@@ -91,8 +91,8 @@ class _InputCodePageState extends BaseState<InputCodePage> {
               '+86 ${widget.argument.phone}',
               style: TextStyle(
                 fontSize: 28.sp,
-                color: BaseColor.primaryFont,
-                fontWeight: FontWeight.w500,
+                color: AppColor.primaryFont,
+                fontWeight: AppFontWeight.medium,
               ),
             ),
             Container(
@@ -111,20 +111,20 @@ class _InputCodePageState extends BaseState<InputCodePage> {
                   borderRadius: BorderRadius.circular(12.w),
                   fieldHeight: 52.h,
                   fieldWidth: 42.w,
-                  selectedColor: BaseColor.inputGrayBG,
-                  inactiveColor: BaseColor.inputGrayBG,
-                  activeColor: BaseColor.inputGrayBG,
-                  selectedFillColor: BaseColor.inputGrayBG,
-                  activeFillColor: BaseColor.inputGrayBG,
-                  inactiveFillColor: BaseColor.inputGrayBG,
+                  selectedColor: AppColor.inputGrayBG,
+                  inactiveColor: AppColor.inputGrayBG,
+                  activeColor: AppColor.inputGrayBG,
+                  selectedFillColor: AppColor.inputGrayBG,
+                  activeFillColor: AppColor.inputGrayBG,
+                  inactiveFillColor: AppColor.inputGrayBG,
                 ),
                 textStyle: TextStyle(
                   fontSize: 28.sp,
-                  color: BaseColor.primaryFont,
-                  fontWeight: FontWeight.w400,
+                  color: AppColor.primaryFont,
+                  fontWeight: AppFontWeight.regular,
                 ),
                 animationDuration: Duration(milliseconds: 300),
-                cursorColor: BaseColor.primary,
+                cursorColor: AppColor.primary,
                 cursorWidth: 2,
                 cursorHeight: 28.h,
                 enableActiveFill: true,
@@ -147,9 +147,10 @@ class _InputCodePageState extends BaseState<InputCodePage> {
                 timeStr,
                 style: TextStyle(
                   fontSize: 16.sp,
-                  color: BaseColor.c_1D1F1E,
-                  fontWeight:
-                      timeStr == '重新发送' ? FontWeight.w500 : FontWeight.w400,
+                  color: AppColor.c_1D1F1E,
+                  fontWeight: timeStr == '重新发送'
+                      ? AppFontWeight.medium
+                      : AppFontWeight.regular,
                 ),
               ),
             ),
@@ -159,15 +160,17 @@ class _InputCodePageState extends BaseState<InputCodePage> {
                 left: 72.w,
                 right: 72.w,
               ),
-              child: isLoading
-                  ? const LoadingWidget()
-                  : BaseButton(
-                      text: '登录',
-                      textSize: 18.sp,
-                      textColor: Colors.white,
-                      backgroundColor: BaseColor.c_1D1F1E,
-                      onTap: () => verifyLogin(),
-                    ),
+              child: BaseButton(
+                text: '登录',
+                isLoading: isLoading,
+                loadingWidget: const LoadingWidget(
+                  color: AppColor.secondary,
+                ),
+                textSize: 18.sp,
+                textColor: Colors.white,
+                backgroundColor: AppColor.c_1D1F1E,
+                onTap: () => verifyLogin(),
+              ),
             ),
           ],
         ),
