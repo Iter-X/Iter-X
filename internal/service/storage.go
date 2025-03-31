@@ -60,6 +60,7 @@ func (s *Storage) CompleteUpload(ctx context.Context, request *storageV1.Complet
 		UploadID:  request.GetUploadId(),
 		ObjectKey: request.GetObjectKey(),
 		Parts:     make([]bo.UploadPart, 0),
+		FileSize:  request.GetFileSize(),
 	}
 	for _, part := range request.GetParts() {
 		params.Parts = append(params.Parts, bo.UploadPart{
@@ -79,5 +80,6 @@ func (s *Storage) CompleteUpload(ctx context.Context, request *storageV1.Complet
 		PrivateUrl: reply.PrivateURL,
 		PublicUrl:  reply.PublicURL,
 		Expiration: reply.Expiration,
+		FileId:     uint64(reply.FileId),
 	}, nil
 }
