@@ -57,7 +57,7 @@ func (c *countryRepositoryImpl) SearchPointsOfInterest(ctx context.Context, para
 	limit := params.Limit
 	rows, err := cli.Query().
 		Where(country.Or(
-			country.NameContains(keyword),
+			country.NameLocalContains(keyword),
 			country.NameCnContains(keyword),
 			country.NameEnContains(keyword),
 			country.CodeContains(keyword),
@@ -110,15 +110,15 @@ func (c *countryRepositoryImpl) ListCountries(ctx context.Context, params *bo.Li
 	query = query.WithContinent()
 
 	// Execute query
-	countries, err := query.Order(ent.Asc(country.FieldName)).All(ctx)
+	countries, err := query.Order(ent.Asc(country.FieldNameEn)).All(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
 
 	// Convert to domain objects
 	result := make([]*do.Country, len(countries))
-	for i, country := range countries {
-		result[i] = c.ToEntity(country)
+	for i, v := range countries {
+		result[i] = c.ToEntity(v)
 	}
 
 	return result, int64(total), nil

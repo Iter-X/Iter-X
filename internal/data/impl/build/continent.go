@@ -13,7 +13,7 @@ func ContinentRepositoryImplToEntity(po *ent.Continent) *do.Continent {
 		ID:        po.ID,
 		CreatedAt: po.CreatedAt,
 		UpdatedAt: po.UpdatedAt,
-		Name:      po.Name,
+		NameLocal: po.NameLocal,
 		NameEn:    po.NameEn,
 		NameCn:    po.NameCn,
 		Code:      po.Code,

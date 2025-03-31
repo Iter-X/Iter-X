@@ -52,7 +52,7 @@ func (s *stateRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params
 	limit := params.Limit
 	rows, err := cli.Query().
 		Where(state.Or(
-			state.NameContains(keyword),
+			state.NameLocalContains(keyword),
 			state.NameCnContains(keyword),
 			state.NameEnContains(keyword),
 		)).
@@ -107,7 +107,7 @@ func (s *stateRepositoryImpl) ListStates(ctx context.Context, params *bo.ListSta
 	query = query.WithCountry()
 
 	// Execute query
-	states, err := query.Order(ent.Asc(state.FieldName)).All(ctx)
+	states, err := query.Order(ent.Asc(state.FieldNameEn)).All(ctx)
 	if err != nil {
 		return nil, 0, err
 	}

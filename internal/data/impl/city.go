@@ -51,7 +51,7 @@ func (r *cityRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params 
 	limit := params.Limit
 	rows, err := cli.Query().
 		Where(city.Or(
-			city.NameContains(keyword),
+			city.NameLocalContains(keyword),
 			city.NameCnContains(keyword),
 			city.NameEnContains(keyword),
 			city.CodeContains(keyword),
@@ -109,7 +109,7 @@ func (r *cityRepositoryImpl) ListCities(ctx context.Context, params *bo.ListCiti
 	query = query.WithState()
 
 	// Execute query
-	cities, err := query.Order(ent.Asc(city.FieldName)).All(ctx)
+	cities, err := query.Order(ent.Asc(city.FieldNameEn)).All(ctx)
 	if err != nil {
 		return nil, 0, err
 	}

@@ -13,7 +13,7 @@ func PointsOfInterestRepositoryImplToEntity(po *ent.PointsOfInterest) *do.Points
 		ID:                         po.ID,
 		CreatedAt:                  po.CreatedAt,
 		UpdatedAt:                  po.UpdatedAt,
-		Name:                       po.Name,
+		NameLocal:                  po.NameLocal,
 		NameEn:                     po.NameEn,
 		NameCn:                     po.NameCn,
 		Description:                po.Description,

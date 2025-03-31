@@ -38,7 +38,7 @@ func (s *GeoService) ListContinents(ctx context.Context, req *geoV1.ListContinen
 
 	return &geoV1.ListContinentsResponse{
 		Total:      total,
-		Continents: build.ToContinentsProto(continents),
+		Continents: build.ToContinentsProto(ctx, continents),
 	}, nil
 }
 
@@ -60,7 +60,7 @@ func (s *GeoService) ListCountries(ctx context.Context, req *geoV1.ListCountries
 
 	return &geoV1.ListCountriesResponse{
 		Total:     total,
-		Countries: build.ToCountriesProto(countries),
+		Countries: build.ToCountriesProto(ctx, countries),
 	}, nil
 }
 
@@ -82,7 +82,7 @@ func (s *GeoService) ListStates(ctx context.Context, req *geoV1.ListStatesReques
 
 	return &geoV1.ListStatesResponse{
 		Total:  total,
-		States: build.ToStatesProto(states),
+		States: build.ToStatesProto(ctx, states),
 	}, nil
 }
 
@@ -104,6 +104,6 @@ func (s *GeoService) ListCities(ctx context.Context, req *geoV1.ListCitiesReques
 
 	return &geoV1.ListCitiesResponse{
 		Total:  total,
-		Cities: build.ToCitiesProto(cities),
+		Cities: build.ToCitiesProto(ctx, cities),
 	}, nil
 }

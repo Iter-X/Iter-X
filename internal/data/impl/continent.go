@@ -50,7 +50,7 @@ func (c *continentRepositoryImpl) SearchPointsOfInterest(ctx context.Context, pa
 	limit := params.Limit
 	rows, err := cli.Query().
 		Where(continent.Or(
-			continent.NameContains(keyword),
+			continent.NameLocalContains(keyword),
 			continent.NameCnContains(keyword),
 			continent.NameEnContains(keyword),
 			continent.CodeContains(keyword),
@@ -85,7 +85,7 @@ func (c *continentRepositoryImpl) ListContinents(ctx context.Context, params *bo
 	query = query.Offset(params.GetOffset4Db()).Limit(params.GetLimit4Db())
 
 	// Execute query
-	continents, err := query.Order(ent.Asc(continent.FieldName)).All(ctx)
+	continents, err := query.Order(ent.Asc(continent.FieldNameEn)).All(ctx)
 	if err != nil {
 		return nil, 0, err
 	}

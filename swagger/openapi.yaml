@@ -284,6 +284,7 @@ components:
                 name: ""
                 nameCn: ""
                 nameEn: ""
+                nameLocal: ""
                 state: null
                 stateId: 0
             properties:
@@ -298,6 +299,8 @@ components:
                     type: string
                 nameEn:
                     type: string
+                nameLocal:
+                    type: string
                 state:
                     $ref: '#/components/schemas/geo.v1.State'
                 stateId:
@@ -311,6 +314,7 @@ components:
                 name: ""
                 nameCn: ""
                 nameEn: ""
+                nameLocal: ""
             properties:
                 code:
                     type: string
@@ -323,6 +327,8 @@ components:
                     type: string
                 nameEn:
                     type: string
+                nameLocal:
+                    type: string
             type: object
         geo.v1.Country:
             example:
@@ -333,6 +339,7 @@ components:
                 name: ""
                 nameCn: ""
                 nameEn: ""
+                nameLocal: ""
             properties:
                 code:
                     type: string
@@ -349,6 +356,8 @@ components:
                 nameCn:
                     type: string
                 nameEn:
+                    type: string
+                nameLocal:
                     type: string
             type: object
         geo.v1.ListCitiesResponse:
@@ -412,6 +421,7 @@ components:
                 name: ""
                 nameCn: ""
                 nameEn: ""
+                nameLocal: ""
             properties:
                 code:
                     type: string
@@ -429,6 +439,8 @@ components:
                     type: string
                 nameEn:
                     type: string
+                nameLocal:
+                    type: string
             type: object
         poi.v1.PointOfInterest:
             example:
@@ -443,6 +455,7 @@ components:
                 name: ""
                 nameCn: ""
                 nameEn: ""
+                nameLocal: ""
                 rating: 0
                 recommendedDurationMinutes: 0
                 state: ""
@@ -471,6 +484,8 @@ components:
                 nameCn:
                     type: string
                 nameEn:
+                    type: string
+                nameLocal:
                     type: string
                 rating:
                     format: float

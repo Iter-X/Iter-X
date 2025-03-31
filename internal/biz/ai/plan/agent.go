@@ -142,7 +142,7 @@ func getRound2Prompt(prompt core.Prompt, input *do.PlanAgentInput, pois []*do.Po
 	for _, poi := range pois {
 		tpl.POIs = append(tpl.POIs, briefPOI{
 			ID:   poi.ID.String(),
-			Name: poi.Name,
+			Name: poi.NameEn,
 		})
 	}
 
