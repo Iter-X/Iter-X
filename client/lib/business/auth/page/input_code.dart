@@ -15,6 +15,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class InputCodeArgument {
   final String phone;
@@ -53,10 +54,14 @@ class _InputCodePageState extends BaseState<InputCodePage> {
       }
     });
     super.initState();
-    startTimer();
+    restoreTimerState();
+    if (time == 60) {
+      sendSmsCode();
+    }
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
         _focusNode.requestFocus();
+        print('Focus requested: ${_focusNode.hasFocus}');
       }
     });
   }
@@ -103,6 +108,8 @@ class _InputCodePageState extends BaseState<InputCodePage> {
                 bottom: 10.h,
               ),
               child: PinCodeTextField(
+                controller: _codeController,
+                focusNode: _focusNode,
                 length: 6,
                 obscureText: false,
                 animationType: AnimationType.fade,
@@ -128,19 +135,19 @@ class _InputCodePageState extends BaseState<InputCodePage> {
                 cursorWidth: 2,
                 cursorHeight: 28.h,
                 enableActiveFill: true,
-                controller: _codeController,
                 onCompleted: (v) {},
                 onChanged: (value) {},
                 beforeTextPaste: (text) {
                   return true;
                 },
                 appContext: context,
+                keyboardType: TextInputType.number, // 不设置会导致无法调起小键盘
               ),
             ),
             GestureDetector(
               onTap: () {
                 if (timeStr == '重新发送') {
-                  startTimer();
+                  sendSmsCode();
                 }
               },
               child: Text(
@@ -189,11 +196,13 @@ class _InputCodePageState extends BaseState<InputCodePage> {
           });
           time = 60;
           cancelTimer();
+          saveTimerState();
         } else {
           time--;
           setState(() {
             timeStr = '${time}s';
           });
+          saveTimerState();
         }
       },
     );
@@ -202,6 +211,19 @@ class _InputCodePageState extends BaseState<InputCodePage> {
   void cancelTimer() {
     _timer?.cancel();
     _timer = null;
+  }
+
+  void sendSmsCode() async {
+    setState(() {
+      isLoading = true;
+    });
+    bool result = await AuthService.getSendSmsCode(widget.argument.phone);
+    setState(() {
+      isLoading = false;
+    });
+    if (result) {
+      startTimer();
+    }
   }
 
   void verifyLogin() async {
@@ -228,6 +250,22 @@ class _InputCodePageState extends BaseState<InputCodePage> {
       }
 
       go(Routes.homeMain, clearStack: true);
+    }
+  }
+
+  Future<void> saveTimerState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('smsTimer', time);
+  }
+
+  Future<void> restoreTimerState() async {
+    final prefs = await SharedPreferences.getInstance();
+    time = prefs.getInt('smsTimer') ?? 60;
+    if (time < 60) {
+      setState(() {
+        timeStr = '${time}s';
+      });
+      startTimer();
     }
   }
 }

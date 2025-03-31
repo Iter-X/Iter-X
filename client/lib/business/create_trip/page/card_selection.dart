@@ -4,18 +4,18 @@
  * @Autor: GiottoLLL7
  * @Date: 2025-03-18 00:30:03
  * @LastEditors: GiottoLLL7
- * @LastEditTime: 2025-03-23 22:32:11
+ * @LastEditTime: 2025-03-31 18:54:55
  */
 
 import 'package:client/app/constants.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/image.dart';
 import 'package:client/common/material/iter_text.dart';
-import 'package:client/app/constants.dart';
 import 'package:client/common/widgets/return_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/services.dart';
+import 'package:client/common/widgets/clickable_button.dart';
 import 'package:gap/gap.dart';
 
 class CardSelectionPage extends StatefulWidget {
@@ -196,97 +196,100 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
       }),
       child: Column(children: [
         Expanded(
-            child: SingleChildScrollView(
-                child: GridView.builder(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 4,
-            mainAxisSpacing: 4,
-          ),
-          itemCount: _continentCountList.length,
-          itemBuilder: (context, index) {
-            final country = _continentCountList[index];
-            final isSelected = _selectedCountries.contains(country['cityId']);
-            return GestureDetector(
-              onTap: () {
-                setState(() {
-                  if (selectionLevel == 0) {
-                    _continentCountList = _allCityList
-                        .where(
-                            (city) => city['countryId'] == country['countryId'])
-                        .toList();
-                    selectionLevel = 1;
-                  } else {
-                    if (isSelected) {
-                      _selectedCountries.remove(country['cityId']);
-                    } else {
-                      _selectedCountries.add(country['cityId']);
-                    }
-                  }
-                });
-              },
-              child: Container(
-                child: Stack(
-                  children: [
-                    BaseImage.asset(
-                      name: country['image'],
-                      width: 142.w,
-                      fit: BoxFit.cover,
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 8.w,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          IterText(country['name'],
-                              style: TextStyle(
-                                fontSize: 22.sp,
-                                color: isSelected
-                                    ? AppColor.c_1D1F1E
-                                    : AppColor.c_f2f2f2,
-                                fontWeight: AppFontWeight.black,
-                              ),
-                              borders: BorderProperties(
-                                width: 2,
-                                color: isSelected
-                                    ? AppColor.c_f2f2f2
-                                    : AppColor.c_1D1F1E,
-                              )),
-                          if (country['englishName'] != null &&
-                              country['englishName'].isNotEmpty)
-                            IterText(country['englishName'],
-                                textAlign: TextAlign.end, // 文字居中
-                                style: TextStyle(
-                                  fontSize: 22.sp,
-                                  color: isSelected
-                                      ? AppColor.c_1D1F1E
-                                      : AppColor.c_f2f2f2,
-                                  fontWeight: AppFontWeight.black,
-                                ),
-                                borders: BorderProperties(
-                                  width: 2,
-                                  color: isSelected
-                                      ? AppColor.c_f2f2f2
-                                      : AppColor.c_1D1F1E,
-                                )),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+          child: SingleChildScrollView(
+            child: GridView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 4,
+                mainAxisSpacing: 4,
               ),
-            );
-          },
-        ))),
-        // 大洲Tab
+              itemCount: _continentCountList.length,
+              itemBuilder: (context, index) {
+                final country = _continentCountList[index];
+                final isSelected =
+                    _selectedCountries.contains(country['cityId']);
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      if (selectionLevel == 0) {
+                        _continentCountList = _allCityList
+                            .where((city) =>
+                                city['countryId'] == country['countryId'])
+                            .toList();
+                        selectionLevel = 1;
+                      } else {
+                        if (isSelected) {
+                          _selectedCountries.remove(country['cityId']);
+                        } else {
+                          _selectedCountries.add(country['cityId']);
+                        }
+                      }
+                    });
+                  },
+                  child: Container(
+                    child: Stack(
+                      children: [
+                        BaseImage.asset(
+                          name: country['image'],
+                          width: 142.w,
+                          fit: BoxFit.cover,
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: 8.w,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              IterText(country['name'],
+                                  style: TextStyle(
+                                    fontSize: 22.sp,
+                                    color: isSelected
+                                        ? AppColor.c_1D1F1E
+                                        : AppColor.c_f2f2f2,
+                                    fontWeight: AppFontWeight.black,
+                                  ),
+                                  borders: BorderProperties(
+                                    width: 2,
+                                    color: isSelected
+                                        ? AppColor.c_f2f2f2
+                                        : AppColor.c_1D1F1E,
+                                  )),
+                              if (country['englishName'] != null &&
+                                  country['englishName'].isNotEmpty)
+                                IterText(country['englishName'],
+                                    textAlign: TextAlign.end, // 文字居中
+                                    style: TextStyle(
+                                      fontSize: 22.sp,
+                                      color: isSelected
+                                          ? AppColor.c_1D1F1E
+                                          : AppColor.c_f2f2f2,
+                                      fontWeight: AppFontWeight.black,
+                                    ),
+                                    borders: BorderProperties(
+                                      width: 2,
+                                      color: isSelected
+                                          ? AppColor.c_f2f2f2
+                                          : AppColor.c_1D1F1E,
+                                    )),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
         Container(
           padding: EdgeInsets.all(20),
-          color: AppColor.c_F2F2F2,
+          color: AppColor.bottomBar,
           child: Column(
             children: [
+              // 大洲Tab
               Container(
                 width: double.infinity,
                 child: Wrap(
@@ -295,8 +298,9 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                   runSpacing: 10, // 垂直间距
                   children: [
                     ..._continentList
-                        .map((tag) => IntrinsicWidth(
-                                child: GestureDetector(
+                        .map(
+                          (tag) => IntrinsicWidth(
+                            child: GestureDetector(
                               onTap: () => {
                                 setState(() {
                                   _selectedContinentId = tag['continentId'];
@@ -315,43 +319,45 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                                 })
                               },
                               child: Container(
-                                  alignment: Alignment.center,
-                                  padding: EdgeInsets.symmetric(horizontal: 15),
-                                  // 内间距
-                                  height: 38.h,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(28.w),
-                                    color: selectionLevel == 0 &&
-                                            _selectedContinentId ==
-                                                tag['continentId']
-                                        ? AppColor.c_1D1F1E
-                                        : AppColor.c_E3E3E3,
-                                  ),
-                                  child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        if (selectionLevel == 0 &&
-                                            _selectedContinentId ==
-                                                tag['continentId'])
-                                          BaseImage.asset(
-                                            name: 'ic_create_picard.png',
-                                            size: 18.w,
-                                          ),
-                                        Gap(5.w),
-                                        Text(
-                                          tag['name'],
-                                          style: TextStyle(
-                                            fontSize: 14.sp,
-                                            color: selectionLevel == 0 &&
-                                                    _selectedContinentId ==
-                                                        tag['continentId']
-                                                ? AppColor.c_F2F2F2
-                                                : AppColor.c_1D1F1E,
-                                          ),
+                                alignment: Alignment.center,
+                                padding: EdgeInsets.symmetric(horizontal: 15),
+                                // 内间距
+                                height: 38.h,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(28.w),
+                                  color: selectionLevel == 0 &&
+                                          _selectedContinentId ==
+                                              tag['continentId']
+                                      ? AppColor.c_1D1F1E
+                                      : AppColor.c_E3E3E3,
+                                ),
+                                child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      if (selectionLevel == 0 &&
+                                          _selectedContinentId ==
+                                              tag['continentId'])
+                                        BaseImage.asset(
+                                          name: 'ic_create_picard.png',
+                                          size: 18.w,
                                         ),
-                                      ])),
-                            )))
+                                      Gap(5.w),
+                                      Text(
+                                        tag['name'],
+                                        style: TextStyle(
+                                          fontSize: 14.sp,
+                                          color: selectionLevel == 0 &&
+                                                  _selectedContinentId ==
+                                                      tag['continentId']
+                                              ? AppColor.c_F2F2F2
+                                              : AppColor.c_1D1F1E,
+                                        ),
+                                      ),
+                                    ]),
+                              ),
+                            ),
+                          ),
+                        )
                         .toList()
                   ],
                 ),
@@ -367,52 +373,64 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                     children: _selectedCountries
                         .map((id) => _allCityList
                             .firstWhere((item) => item['cityId'] == id))
-                        .map((country) => Row(children: [
-                              IntrinsicWidth(
-                                  child: Container(
-                                height: 42.w,
-                                alignment: Alignment.center,
-                                padding: EdgeInsets.symmetric(horizontal: 15),
-                                decoration: BoxDecoration(
-                                  color: AppColor.c_E3E3E3,
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(5.sp),
-                                    bottomLeft: Radius.circular(5.sp),
-                                  ),
-                                ),
-                                child: Text(
-                                  country['name'],
-                                  style: TextStyle(
-                                    fontSize: 16.sp,
-                                    color: AppColor.c_1D1F1E,
-                                  ),
-                                ),
-                              )),
-                              GestureDetector(
-                                  onTap: () => {
-                                        setState(() {
-                                          _selectedCountries
-                                              .remove(country['cityId']);
-                                        })
-                                      },
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      color: AppColor.c_1D1F1E,
-                                      borderRadius: BorderRadius.only(
-                                        topRight: Radius.circular(5.sp),
-                                        bottomRight: Radius.circular(5.sp),
-                                      ),
-                                    ),
-                                    margin: EdgeInsets.only(right: 10.w),
-                                    width: 38.w,
-                                    height: 42.w,
-                                    child: BaseImage.asset(
-                                      name: 'ic_card_cancel.png',
-                                      size: 26.w,
-                                    ),
-                                  ))
-                            ]))
+                        .map((country) => ClickableButton(
+                                  text: country['name'],
+                                  onTapIcon: () => {
+                                    setState(() {
+                                      _selectedCountries
+                                          .remove(country['cityId']);
+                                    })
+                                  },
+                                  icon: Icons.cancel,
+                                  iconColor: AppColor.closeButton,
+                                )
+                            // Row(children: [
+                            //       IntrinsicWidth(
+                            //           child: Container(
+                            //         height: 42.w,
+                            //         alignment: Alignment.center,
+                            //         padding: EdgeInsets.symmetric(horizontal: 15),
+                            //         decoration: BoxDecoration(
+                            //           color: AppColor.c_E3E3E3,
+                            //           borderRadius: BorderRadius.only(
+                            //             topLeft: Radius.circular(5.sp),
+                            //             bottomLeft: Radius.circular(5.sp),
+                            //           ),
+                            //         ),
+                            //         child: Text(
+                            //           country['name'],
+                            //           style: TextStyle(
+                            //             fontSize: 16.sp,
+                            //             color: AppColor.c_1D1F1E,
+                            //           ),
+                            //         ),
+                            //       )),
+                            //       GestureDetector(
+                            //           onTap: () => {
+                            //                 setState(() {
+                            //                   _selectedCountries
+                            //                       .remove(country['cityId']);
+                            //                 })
+                            //               },
+                            //           child: Container(
+                            //             alignment: Alignment.center,
+                            //             decoration: BoxDecoration(
+                            //               color: AppColor.c_1D1F1E,
+                            //               borderRadius: BorderRadius.only(
+                            //                 topRight: Radius.circular(5.sp),
+                            //                 bottomRight: Radius.circular(5.sp),
+                            //               ),
+                            //             ),
+                            //             margin: EdgeInsets.only(right: 10.w),
+                            //             width: 38.w,
+                            //             height: 42.w,
+                            //             child: BaseImage.asset(
+                            //               name: 'ic_card_cancel.png',
+                            //               size: 26.w,
+                            //             ),
+                            //           ))
+                            //     ])
+                            )
                         .toList(),
                   ),
                 ),
