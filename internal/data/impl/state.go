@@ -94,12 +94,6 @@ func (s *stateRepositoryImpl) ListStates(ctx context.Context, params *bo.ListSta
 		query = query.Where(state.CountryID(params.CountryID))
 	}
 
-	// Set pagination
-	limit := int(params.Limit)
-	if limit <= 0 {
-		limit = 10 // Default to 10 records per page
-	}
-
 	// Get total count
 	total, err := query.Count(ctx)
 	if err != nil {
@@ -107,7 +101,7 @@ func (s *stateRepositoryImpl) ListStates(ctx context.Context, params *bo.ListSta
 	}
 
 	// Apply pagination
-	query = query.Offset(params.Offset).Limit(limit)
+	query = query.Offset(params.GetOffset4Db()).Limit(params.GetLimit4Db())
 
 	// Load related country information
 	query = query.WithCountry()

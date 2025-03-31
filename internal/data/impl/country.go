@@ -97,12 +97,6 @@ func (c *countryRepositoryImpl) ListCountries(ctx context.Context, params *bo.Li
 		query = query.Where(country.ContinentID(params.ContinentID))
 	}
 
-	// Set pagination
-	limit := int(params.Limit)
-	if limit <= 0 {
-		limit = 10 // Default to 10 records per page
-	}
-
 	// Get total count
 	total, err := query.Count(ctx)
 	if err != nil {
@@ -110,7 +104,7 @@ func (c *countryRepositoryImpl) ListCountries(ctx context.Context, params *bo.Li
 	}
 
 	// Apply pagination
-	query = query.Offset(params.Offset).Limit(limit)
+	query = query.Offset(params.GetOffset4Db()).Limit(params.GetLimit4Db())
 
 	// Load related continent information
 	query = query.WithContinent()

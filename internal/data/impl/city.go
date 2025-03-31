@@ -2,7 +2,6 @@ package impl
 
 import (
 	"context"
-
 	"go.uber.org/zap"
 
 	"github.com/iter-x/iter-x/internal/biz/bo"
@@ -97,13 +96,6 @@ func (r *cityRepositoryImpl) ListCities(ctx context.Context, params *bo.ListCiti
 	if params.StateID > 0 {
 		query = query.Where(city.StateID(params.StateID))
 	}
-
-	// Set pagination
-	limit := int(params.Limit)
-	if limit <= 0 {
-		limit = 10 // Default to 10 records per page
-	}
-
 	// Get total count
 	total, err := query.Count(ctx)
 	if err != nil {
@@ -111,7 +103,7 @@ func (r *cityRepositoryImpl) ListCities(ctx context.Context, params *bo.ListCiti
 	}
 
 	// Apply pagination
-	query = query.Offset(params.Offset).Limit(limit)
+	query = query.Offset(params.GetOffset4Db()).Limit(params.GetLimit4Db())
 
 	// Load related state information
 	query = query.WithState()
