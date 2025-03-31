@@ -87,8 +87,8 @@ migrate:
 # generate all
 all:
 	make stringer;
-	make generate;
 	make config;
+	make generate;
 	make common;
 	make errors;
 	make api;
