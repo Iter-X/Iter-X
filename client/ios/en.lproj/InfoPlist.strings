@@ -1,1 +1,4 @@
 CFBundleDisplayName = "Iter-X";
+NSMicrophoneUsageDescription = "This application needs to access your microphone";
+NSSpeechRecognitionUsageDescription = "This application needs the speech recognition permission";
+

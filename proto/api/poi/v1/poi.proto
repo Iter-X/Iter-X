@@ -47,6 +47,7 @@ message PointOfInterest {
   float rating = 11;
   int64 recommended_duration_minutes = 12;
   string city = 13;
-  string state = 16;
+  string state = 14;
   string country = 15;
+  string name_local = 16;
 }

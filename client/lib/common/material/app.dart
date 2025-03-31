@@ -2,100 +2,11 @@ import 'package:client/app/notifier/user.dart';
 import 'package:client/app/routes.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 import 'over_scroll.dart';
-
-class SafeAreaX extends StatefulWidget {
-  final Widget child;
-  final Color? topColor;
-  final Color? bottomColor;
-  final bool top;
-  final bool bottom;
-  final bool left;
-  final bool right;
-  final Brightness? statusBarIconBrightness;
-  final Brightness? statusBarBrightness;
-
-  const SafeAreaX({
-    super.key,
-    required this.child,
-    this.topColor,
-    this.bottomColor,
-    this.top = true,
-    this.bottom = true,
-    this.left = true,
-    this.right = true,
-    this.statusBarIconBrightness,
-    this.statusBarBrightness,
-  });
-
-  @override
-  State<SafeAreaX> createState() => _SafeAreaXState();
-}
-
-class _SafeAreaXState extends State<SafeAreaX> {
-  @override
-  void initState() {
-    super.initState();
-    _updateStatusBarStyle();
-  }
-
-  @override
-  void didUpdateWidget(SafeAreaX oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _updateStatusBarStyle();
-  }
-
-  void _updateStatusBarStyle() {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: widget.statusBarIconBrightness ?? Brightness.dark,
-      statusBarBrightness: widget.statusBarBrightness ?? Brightness.light,
-    ));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        if (widget.top)
-          Container(
-            color: widget.topColor ?? Colors.transparent,
-            child: SafeArea(
-              bottom: false,
-              left: widget.left,
-              right: widget.right,
-              child: Container(),
-            ),
-          ),
-        Expanded(
-          child: SafeArea(
-            top: false,
-            bottom: false,
-            left: widget.left,
-            right: widget.right,
-            child: widget.child,
-          ),
-        ),
-        if (widget.bottom)
-          Container(
-            color: widget.bottomColor ?? Colors.transparent,
-            child: SafeArea(
-              top: false,
-              left: widget.left,
-              right: widget.right,
-              child: Container(),
-            ),
-          ),
-      ],
-    );
-  }
-}
 
 final router = FluroRouter();
 
@@ -151,7 +62,7 @@ class BaseApp {
     }
 
     const designSize = Size(430, 932);
-    
+
     return ScreenUtilInit(
       designSize: designSize,
       fontSizeResolver: (fontSize, instance) {
@@ -165,39 +76,35 @@ class BaseApp {
       builder: (BuildContext context, Widget? child) {
         // check login status
         final userNotifier = context.watch<UserNotifier>();
-        final effectiveInitialRoute = initialRoute ?? 
+        final effectiveInitialRoute = initialRoute ??
             (userNotifier.isTokenExpired ? Routes.login : Routes.homeMain);
 
         return MaterialApp(
           key: key,
           navigatorKey: navigatorKey,
           scaffoldMessengerKey: scaffoldMessengerKey,
-          home: null, // use routes instead of home
+          home: null,
+          // use routes instead of home
           routes: const <String, WidgetBuilder>{},
           initialRoute: effectiveInitialRoute,
           onGenerateRoute: (settings) {
             // 如果路由需要登录但用户未登录，重定向到登录页
             if (!Routes.requiresLogin(settings.name) &&
                 userNotifier.isTokenExpired) {
-              return router.generator(
-                RouteSettings(name: Routes.login)
-              );
+              return router.generator(RouteSettings(name: Routes.login));
             }
             return router.generator(settings);
           },
           onGenerateInitialRoutes: (String initialRoute) {
             return [
-              router.generator(
-                RouteSettings(name: initialRoute)
-              ),
+              router.generator(RouteSettings(name: initialRoute)),
             ].whereType<Route<dynamic>>().toList();
           },
           onUnknownRoute: onUnknownRoute,
           navigatorObservers: navigatorObservers ?? const <NavigatorObserver>[],
           builder: (context, child) {
             if (child == null) return const SizedBox.shrink();
-            
-            child = EasyLoading.init()(context, child);
+
             return Scaffold(
               resizeToAvoidBottomInset: false,
               body: GestureDetector(

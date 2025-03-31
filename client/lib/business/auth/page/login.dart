@@ -1,12 +1,14 @@
+import 'package:client/app/constants.dart';
 import 'package:client/app/routes.dart';
 import 'package:client/common/material/image.dart';
 import 'package:client/common/material/state.dart';
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
+import 'package:client/common/utils/toast.dart';
+import 'package:client/common/widgets/base_button.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -17,8 +19,8 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends BaseState<LoginPage> {
   TextStyle agreementTextStyle = TextStyle(
-    color: BaseColor.c_1D1F1E,
-    fontSize: 16.sp,
+    color: AppColor.primary,
+    fontSize: 14.sp,
   );
 
   bool isSelect = false;
@@ -34,65 +36,24 @@ class _LoginPageState extends BaseState<LoginPage> {
             width: 245.w,
           ),
           Gap(200.h),
-          GestureDetector(
-            onTap: () => loginType(0),
-            child: Container(
-              width: 285.w,
-              height: 52.h,
-              decoration: BoxDecoration(
-                color: BaseColor.c_1D1F1E,
-                borderRadius: BorderRadius.circular(24.r),
-              ),
-              padding: EdgeInsets.only(left: 37.w),
-              child: Row(
-                children: [
-                  BaseImage.asset(
-                    name: 'ic_wx.png',
-                    size: 30.w,
-                  ),
-                  Gap(49.w),
-                  Text(
-                    '微信登录',
-                    style: TextStyle(
-                      color: BaseColor.c_F2F2F2,
-                      fontSize: 20.sp,
-                    ),
-                  )
-                ],
-              ),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 72.w),
+            child: BaseButton(
+              iconName: 'ic_wx.png',
+              text: '微信登录',
+              textColor: AppColor.secondary,
+              backgroundColor: AppColor.primary,
+              onTap: () => loginType(0),
             ),
           ),
-          GestureDetector(
-            onTap: () => loginType(1),
-            child: Container(
-              width: 285.w,
-              height: 52.h,
-              margin: EdgeInsets.only(top: 15.h),
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.circular(24.r),
-                border: Border.all(
-                  width: 1.w,
-                  color: BaseColor.c_1D1F1E,
-                ),
-              ),
-              padding: EdgeInsets.only(left: 37.w),
-              child: Row(
-                children: [
-                  BaseImage.asset(
-                    name: 'ic_phone.png',
-                    size: 30.w,
-                  ),
-                  Gap(49.w),
-                  Text(
-                    '手机登录',
-                    style: TextStyle(
-                      color: BaseColor.c_1D1F1E,
-                      fontSize: 20.sp,
-                    ),
-                  )
-                ],
-              ),
+          Gap(15.h),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 72.w),
+            child: BaseButton(
+              iconName: 'ic_phone.png',
+              text: '手机登录',
+              hasBorder: true,
+              onTap: () => loginType(1),
             ),
           ),
           Container(
@@ -119,7 +80,7 @@ class _LoginPageState extends BaseState<LoginPage> {
                     ),
                   ),
                 ),
-                Gap(12.w),
+                Gap(5.w),
                 Expanded(
                   child: RichText(
                     text: TextSpan(
@@ -175,21 +136,21 @@ class _LoginPageState extends BaseState<LoginPage> {
               width: double.infinity,
               margin: EdgeInsets.symmetric(horizontal: 60.w),
               padding: EdgeInsets.only(
-                top: 29.h,
-                bottom: 26.h,
+                top: 35.h,
+                bottom: 35.h,
               ),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12.w),
-                color: BaseColor.c_F2F2F2,
+                borderRadius: BorderRadius.circular(AppConfig.boxRadius),
+                color: AppColor.secondary,
               ),
               child: Column(
                 children: [
                   Text(
                     '阅读以下协议并同意',
                     style: TextStyle(
-                      color: BaseColor.c_1D1F1E,
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.w600,
+                      color: AppColor.primary,
+                      fontSize: 18.sp,
+                      fontWeight: AppFontWeight.semiBold,
                     ),
                   ),
                   Container(
@@ -218,62 +179,37 @@ class _LoginPageState extends BaseState<LoginPage> {
                       style: agreementTextStyle,
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        isSelect = !isSelect;
-                      });
-                      Navigator.pop(context);
-                      wxOrPhone(type);
-                    },
-                    child: Container(
-                      width: double.infinity,
+                  Container(
+                    margin: EdgeInsets.only(
+                      top: 20.h,
+                      left: 32.w,
+                      right: 32.w,
+                    ),
+                    child: BaseButton(
+                      text: '同意',
                       height: 42.h,
-                      margin: EdgeInsets.only(
-                        left: 31.w,
-                        right: 31.w,
-                        top: 20.h,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24.w),
-                        color: BaseColor.c_1D1F1E,
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '同意',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20.sp,
-                        ),
-                      ),
+                      textColor: Colors.white,
+                      backgroundColor: AppColor.primary,
+                      onTap: () {
+                        setState(() {
+                          isSelect = !isSelect;
+                        });
+                        Navigator.pop(context);
+                        wxOrPhone(type);
+                      },
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      width: double.infinity,
+                  Container(
+                    margin: EdgeInsets.only(
+                      top: 10.h,
+                      left: 32.w,
+                      right: 32.w,
+                    ),
+                    child: BaseButton(
+                      text: '取消',
                       height: 42.h,
-                      margin: EdgeInsets.only(
-                        left: 31.w,
-                        right: 31.w,
-                        top: 11.h,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24.w),
-                        color: Colors.transparent,
-                        border: Border.all(
-                          width: 1.w,
-                          color: BaseColor.c_1D1F1E,
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '取消',
-                        style: TextStyle(
-                          color: BaseColor.c_1D1F1E,
-                          fontSize: 20.sp,
-                        ),
-                      ),
+                      hasBorder: true,
+                      onTap: () => Navigator.pop(context),
                     ),
                   ),
                 ],
@@ -290,7 +226,8 @@ class _LoginPageState extends BaseState<LoginPage> {
   // 微信登录or手机号登录
   void wxOrPhone(int type) {
     if (type == 0) {
-
+      // TODO: wechat login
+      ToastX.showTODO();
     } else {
       go(Routes.phoneLogin);
     }

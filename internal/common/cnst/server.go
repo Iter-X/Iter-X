@@ -6,4 +6,8 @@ const (
 	HttpHeaderAuthorization = "Authorization"
 
 	CtxKeyClaims = "claims"
+	CtxKeyLang   = "lang"
+
+	LangEn   = "en"
+	LangZhCn = "zh-CN"
 )

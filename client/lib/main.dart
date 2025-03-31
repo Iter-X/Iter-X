@@ -1,4 +1,5 @@
 import 'package:client/app/constants.dart';
+import 'package:client/business/create_trip/service/poi_search_service.dart';
 import 'package:client/common/material/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'app/events/events.dart';
 import 'app/notifier/user.dart';
 import 'app/routes.dart';
+import 'business/mine/service/profile_service.dart';
 import 'common/material/app.dart';
 import 'common/material/state.dart';
 import 'common/utils/api_util.dart';
@@ -41,6 +43,8 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => userNotifier),
+        ChangeNotifierProvider(create: (_) => ProfileService()),
+        ChangeNotifierProvider(create: (_) => PoiSearchService()),
       ],
       child: const MyApp(),
     ),

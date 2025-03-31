@@ -43,7 +43,7 @@ type LocalizedNameMixin struct {
 
 func (LocalizedNameMixin) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").NotEmpty().MaxLen(255),
+		field.String("name_local").NotEmpty().MaxLen(255),
 		field.String("name_en").MaxLen(255),
 		field.String("name_cn").MaxLen(255),
 	}

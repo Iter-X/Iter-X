@@ -1,17 +1,18 @@
+import 'package:client/app/constants.dart';
 import 'package:client/common/material/image.dart';
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 
 // 创建行程按钮样式
 class ItemCreateWidget extends StatelessWidget {
-  bool isSelected;
-  Function onTap;
-  String img;
-  String text;
+  final bool isSelected;
+  final Function onTap;
+  final String img;
+  final String text;
 
-  ItemCreateWidget({
+  const ItemCreateWidget({
     super.key,
     required this.isSelected,
     required this.onTap,
@@ -27,8 +28,8 @@ class ItemCreateWidget extends StatelessWidget {
         width: 170.w,
         height: 70.h,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12.w),
-          color: isSelected ? BaseColor.c_1D1F1E : BaseColor.c_E3E3E3,
+          borderRadius: BorderRadius.circular(AppConfig.boxRadius),
+          color: isSelected ? AppColor.primary : AppColor.buttonGrayBG,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -42,7 +43,8 @@ class ItemCreateWidget extends StatelessWidget {
               text,
               style: TextStyle(
                 fontSize: 18.sp,
-                color: isSelected ? Colors.white : BaseColor.c_1D1F1E,
+                color:
+                    isSelected ? AppColor.secondaryFont : AppColor.primaryFont,
               ),
             )
           ],

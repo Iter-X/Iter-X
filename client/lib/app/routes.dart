@@ -11,7 +11,9 @@ import 'package:client/business/auth/page/login.dart';
 import 'package:client/business/auth/page/phone_login.dart';
 import 'package:client/business/create_trip/page/card_selection.dart';
 import 'package:client/business/create_trip/page/create_trip_home.dart';
+import 'package:client/business/create_trip/page/poi_search.dart';
 import 'package:client/business/home_main/page/home_main.dart';
+import 'package:client/business/mine/page/mine_page.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 
@@ -27,6 +29,8 @@ class Routes {
   static const String homeMain = '/home_main/home_main';
   static const String createTripHome = '/create_trip/create_trip_home';
   static const String cardSelection = '/create_trip/card_selection';
+  static const String profile = '/mine/profile';
+  static const String poiSearch = '/create_trip/poi_search';
 
   // 无需登录即可访问的页面
   static final List<String> _routesWithoutLogin = [
@@ -39,7 +43,8 @@ class Routes {
   static final Map<String, Handler> _routeHandlers = {
     root: Handler(handlerFunc: (context, params) => const HomeMainPage()),
     login: Handler(handlerFunc: (context, params) => const LoginPage()),
-    phoneLogin: Handler(handlerFunc: (context, params) => const PhoneLoginPage()),
+    phoneLogin:
+        Handler(handlerFunc: (context, params) => const PhoneLoginPage()),
     inputCode: Handler(handlerFunc: (context, params) {
       if (context?.settings?.arguments is! InputCodeArgument) {
         return const LoginPage(); // 如果参数不正确，返回登录页
@@ -48,8 +53,12 @@ class Routes {
       return InputCodePage(argument: args);
     }),
     homeMain: Handler(handlerFunc: (context, params) => const HomeMainPage()),
-    createTripHome: Handler(handlerFunc: (context, params) => const CreateTripHomePage()),
-    cardSelection: Handler(handlerFunc: (context, params) => const CardSelectionPage()),
+    createTripHome:
+        Handler(handlerFunc: (context, params) => const CreateTripHomePage()),
+    cardSelection:
+        Handler(handlerFunc: (context, params) => const CardSelectionPage()),
+    profile: Handler(handlerFunc: (context, params) => const MinePage()),
+    poiSearch: Handler(handlerFunc: (context, params) => const PoiSearchPage()),
   };
 
   // 404路由处理器

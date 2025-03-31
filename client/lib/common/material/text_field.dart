@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -12,7 +12,7 @@ class BaseTextField {
     isDense: false,
     hintText: '请输入',
     hintStyle: TextStyle(
-      color: BaseColor.hint,
+      color: AppColor.hint,
       fontSize: 16.sp,
     ),
     border: InputBorder.none,
@@ -148,7 +148,7 @@ class _BaseTextFieldWidgetState extends State<BaseTextFieldWidget> {
               keyboardType: widget.keyboardType,
               style: widget.style ??
                   TextStyle(
-                    color: BaseColor.c_1D1F1E,
+                    color: AppColor.c_1D1F1E,
                     fontSize: 16.sp,
                   ),
               enabled: widget.enabled,
@@ -195,7 +195,7 @@ class _BaseTextFieldWidgetState extends State<BaseTextFieldWidget> {
                     child: widget.clearWidget ??
                         Icon(
                           Icons.close,
-                          color: widget.clearColor ?? BaseColor.hint,
+                          color: widget.clearColor ?? AppColor.hint,
                           size: 18,
                         ),
                   ),

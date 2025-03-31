@@ -47,5 +47,14 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This application needs to access your microphone</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>This application needs the speech recognition permission</string>
 </dict>
 </plist>
