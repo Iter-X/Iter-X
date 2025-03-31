@@ -29,3 +29,7 @@
 ## 错误
 错误码在 `proto/xerr/xerr.proto` 中定义，然后通过 `make errors && make generate` 生成对应的错误码，我们通过 `i18n/*.toml` 来进行错误码的国际化，所以有新的错误生成的时候需要补充对应语言的错误提示。在 `biz` 层应该拦截所有的错误，并返回对应的 `xerr` 错误给到 `service` 层，这样避免把错误信息暴露给到客户端
 
+## 数据库
+目前我们使用的是 `Postgres` ，Go里用的是 `ent` 这个ORM，所有的数据操作都是通过 `ent` 这个库来进行的，所以如果有新的表需要创建，需要在 `internal/data/ent/schema/` 下创建对应的 `*.go` 文件，然后运行 `make all` 生成对应的代码，然后在 `data` 层进行对应的实现。
+
+schema里有一个 `mixin.go` 有需要的话可以用
