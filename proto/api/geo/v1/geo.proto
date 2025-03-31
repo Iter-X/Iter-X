@@ -13,19 +13,19 @@ service GeoService {
       get: "/api/v1/geo/continents"
     };
   }
-  
+
   rpc ListCountries(ListCountriesRequest) returns (ListCountriesResponse) {
     option (google.api.http) = {
       get: "/api/v1/geo/countries"
     };
   }
-  
+
   rpc ListStates(ListStatesRequest) returns (ListStatesResponse) {
     option (google.api.http) = {
       get: "/api/v1/geo/states"
     };
   }
-  
+
   rpc ListCities(ListCitiesRequest) returns (ListCitiesResponse) {
     option (google.api.http) = {
       get: "/api/v1/geo/cities"
@@ -33,7 +33,7 @@ service GeoService {
   }
 }
 
-message Pagination {
+message ListContinentsRequest {
   int32 size = 1 [(validatex.rules).numeric = {
     gte: 0,
     lte: 100,
@@ -43,10 +43,6 @@ message Pagination {
   }];
 }
 
-message ListContinentsRequest {
-  Pagination pagination = 1;
-}
-
 message ListContinentsResponse {
   repeated Continent continents = 1;
   int64 total = 2;
@@ -54,7 +50,13 @@ message ListContinentsResponse {
 
 message ListCountriesRequest {
   uint32 continent_id = 1;
-  Pagination pagination = 2;
+  int32 size = 2 [(validatex.rules).numeric = {
+    gte: 0,
+    lte: 100,
+  }];
+  int32 page = 3 [(validatex.rules).numeric = {
+    gte: 0
+  }];
 }
 
 message ListCountriesResponse {
@@ -64,7 +66,13 @@ message ListCountriesResponse {
 
 message ListStatesRequest {
   uint32 country_id = 1;
-  Pagination pagination = 2;
+  int32 size = 2 [(validatex.rules).numeric = {
+    gte: 0,
+    lte: 100,
+  }];
+  int32 page = 3 [(validatex.rules).numeric = {
+    gte: 0
+  }];
 }
 
 message ListStatesResponse {
@@ -74,7 +82,13 @@ message ListStatesResponse {
 
 message ListCitiesRequest {
   uint32 state_id = 1;
-  Pagination pagination = 2;
+  int32 size = 2 [(validatex.rules).numeric = {
+    gte: 0,
+    lte: 100,
+  }];
+  int32 page = 3 [(validatex.rules).numeric = {
+    gte: 0
+  }];
 }
 
 message ListCitiesResponse {
@@ -85,41 +99,42 @@ message ListCitiesResponse {
 message Continent {
   uint32 id = 1;
   string name = 2;
-  string name_en = 3;
-  string name_cn = 4;
-  string code = 5;
-  string name_local = 8;
+  string name_local = 3;
+  string name_en = 4;
+  string name_cn = 5;
+  string code = 6;
 }
 
 message Country {
   uint32 id = 1;
   string name = 2;
-  string name_en = 3;
-  string name_cn = 4;
-  string code = 5;
-  uint32 continent_id = 6;
-  Continent continent = 7;
-  string name_local = 8;
+  string name_local = 3;
+  string name_en = 4;
+  string name_cn = 5;
+  string code = 6;
+  uint32 continent_id = 7;
+  Continent continent = 8;
+  string image_url = 9;
 }
 
 message State {
   uint32 id = 1;
   string name = 2;
-  string name_en = 3;
-  string name_cn = 4;
-  string code = 5;
-  uint32 country_id = 6;
-  Country country = 7;
-  string name_local = 8;
+  string name_local = 3;
+  string name_en = 4;
+  string name_cn = 5;
+  string code = 6;
+  uint32 country_id = 7;
+  Country country = 8;
 }
 
 message City {
   uint32 id = 1;
   string name = 2;
-  string name_en = 3;
-  string name_cn = 4;
-  string code = 5;
-  uint32 state_id = 6;
-  State state = 7;
-  string name_local = 8;
-} 
+  string name_local = 3;
+  string name_en = 4;
+  string name_cn = 5;
+  string code = 6;
+  uint32 state_id = 7;
+  State state = 8;
+}

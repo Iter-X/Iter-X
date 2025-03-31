@@ -54,4 +54,6 @@ type PointsOfInterest struct {
 	Continent *Continent `json:"continent,omitempty"`
 	// DailyItinerary holds the value of the daily_itinerary edge.
 	DailyItinerary []*DailyItinerary `json:"daily_itinerary,omitempty"`
+	// PoiFiles holds the value of the poi_files edge.
+	PoiFiles []*PointsOfInterestFiles `json:"poi_files,omitempty"`
 }

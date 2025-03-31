@@ -22,9 +22,7 @@ func (File) Fields() []ent.Field {
 		field.UUID("user_id", uuid.UUID{}).Comment("user id"),
 		field.String("name").MaxLen(255).Comment("file name"),
 		field.String("object_key").MaxLen(255).Comment("file object key"),
-		field.Uint("size").Comment("file size in bytes"),
-		field.String("url").MaxLen(255).Comment("file url"),
-		field.String("star").MaxLen(255).Comment("file star"),
+		field.Uint("size").Optional().Comment("file size in bytes"),
 		field.String("ext").MaxLen(255).Comment("file extension"),
 	}
 }

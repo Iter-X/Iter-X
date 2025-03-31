@@ -15,11 +15,12 @@ func ToContinentProto(ctx context.Context, continent *do.Continent) *geoV1.Conti
 	}
 
 	return &geoV1.Continent{
-		Id:     uint32(continent.ID),
-		Name:   util.GetLocalizedName(ctx, continent.NameEn, continent.NameCn),
-		NameEn: continent.NameEn,
-		NameCn: continent.NameCn,
-		Code:   continent.Code,
+		Id:        uint32(continent.ID),
+		Name:      util.GetLocalizedName(ctx, continent.NameEn, continent.NameCn),
+		NameLocal: continent.NameLocal,
+		NameEn:    continent.NameEn,
+		NameCn:    continent.NameCn,
+		Code:      continent.Code,
 	}
 }
 
@@ -44,10 +45,12 @@ func ToCountryProto(ctx context.Context, country *do.Country) *geoV1.Country {
 	countryProto := &geoV1.Country{
 		Id:          uint32(country.ID),
 		Name:        util.GetLocalizedName(ctx, country.NameEn, country.NameCn),
+		NameLocal:   country.NameLocal,
 		NameEn:      country.NameEn,
 		NameCn:      country.NameCn,
 		Code:        country.Code,
 		ContinentId: uint32(country.ContinentID),
+		ImageUrl:    country.ImageUrl,
 	}
 
 	if country.Continent != nil {
@@ -78,6 +81,7 @@ func ToStateProto(ctx context.Context, state *do.State) *geoV1.State {
 	stateProto := &geoV1.State{
 		Id:        uint32(state.ID),
 		Name:      util.GetLocalizedName(ctx, state.NameEn, state.NameCn),
+		NameLocal: state.NameLocal,
 		NameEn:    state.NameEn,
 		NameCn:    state.NameCn,
 		Code:      state.Code,

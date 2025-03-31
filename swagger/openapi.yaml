@@ -336,6 +336,7 @@ components:
                 continent: null
                 continentId: 0
                 id: 0
+                imageUrl: ""
                 name: ""
                 nameCn: ""
                 nameEn: ""
@@ -351,6 +352,8 @@ components:
                 id:
                     format: int32
                     type: integer
+                imageUrl:
+                    type: string
                 name:
                     type: string
                 nameCn:

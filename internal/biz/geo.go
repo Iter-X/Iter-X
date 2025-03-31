@@ -2,6 +2,9 @@ package biz
 
 import (
 	"context"
+	"github.com/iter-x/iter-x/internal/data"
+	"github.com/iter-x/iter-x/pkg/storage"
+	"time"
 
 	"go.uber.org/zap"
 
@@ -17,6 +20,7 @@ type Geo struct {
 	countryRepo   repository.CountryRepo
 	stateRepo     repository.StateRepo
 	cityRepo      repository.CityRepo
+	store         storage.FileManager
 	logger        *zap.SugaredLogger
 }
 
@@ -26,6 +30,7 @@ func NewGeo(
 	countryRepo repository.CountryRepo,
 	stateRepo repository.StateRepo,
 	cityRepo repository.CityRepo,
+	d *data.Data,
 	logger *zap.SugaredLogger,
 ) *Geo {
 	return &Geo{
@@ -33,6 +38,7 @@ func NewGeo(
 		countryRepo:   countryRepo,
 		stateRepo:     stateRepo,
 		cityRepo:      cityRepo,
+		store:         d.Storage,
 		logger:        logger.Named("biz.geo"),
 	}
 }
@@ -53,6 +59,13 @@ func (g *Geo) ListCountries(ctx context.Context, params *bo.ListCountriesParams)
 	if err != nil {
 		g.logger.Errorw("failed to list countries", "err", err)
 		return nil, 0, xerr.ErrorGetCountriesListFailed()
+	}
+	for _, ctr := range countries {
+		if ctr.Image != nil && ctr.Image.ObjectKey != "" {
+			if url, err := g.store.GeneratePublicURL(ctr.Image.ObjectKey, time.Hour*24); err == nil {
+				ctr.ImageUrl = url
+			}
+		}
 	}
 	return countries, total, nil
 }

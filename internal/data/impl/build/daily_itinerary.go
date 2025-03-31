@@ -23,13 +23,13 @@ func DailyItineraryRepositoryImplToEntity(po *ent.DailyItinerary) *do.DailyItine
 	}
 }
 
-func DailyItineraryRepositoryImplToEntities(pos []*ent.DailyItinerary) []*do.DailyItinerary {
-	if pos == nil {
+func DailyItineraryRepositoryImplToEntities(pois []*ent.DailyItinerary) []*do.DailyItinerary {
+	if pois == nil {
 		return nil
 	}
-	list := make([]*do.DailyItinerary, 0, len(pos))
-	for _, v := range pos {
-		list = append(list, DailyItineraryRepositoryImplToEntity(v))
+	list := make([]*do.DailyItinerary, 0, len(pois))
+	for _, poi := range pois {
+		list = append(list, DailyItineraryRepositoryImplToEntity(poi))
 	}
 	return list
 }

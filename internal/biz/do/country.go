@@ -28,4 +28,7 @@ type Country struct {
 	State []*State `json:"state,omitempty"`
 	// Continent holds the value of the continent edge.
 	Continent *Continent `json:"continent,omitempty"`
+	// Image holds the value of the image edge.
+	Image    *File  `json:"image,omitempty"`
+	ImageUrl string `json:"image_url,omitempty"`
 }

@@ -21,10 +21,6 @@ type File struct {
 	ObjectKey string `json:"object_key,omitempty"`
 	// file size in bytes
 	Size uint `json:"size,omitempty"`
-	// file url
-	URL string `json:"url,omitempty"`
-	// file star
-	Star string `json:"star,omitempty"`
 	// file extension
 	Ext string `json:"ext,omitempty"`
 

@@ -36,13 +36,13 @@ func PointsOfInterestRepositoryImplToEntity(po *ent.PointsOfInterest) *do.Points
 	}
 }
 
-func PointsOfInterestRepositoryImplToEntities(pos []*ent.PointsOfInterest) []*do.PointsOfInterest {
-	if len(pos) == 0 {
+func PointsOfInterestRepositoryImplToEntities(pois []*ent.PointsOfInterest) []*do.PointsOfInterest {
+	if pois == nil {
 		return nil
 	}
-	list := make([]*do.PointsOfInterest, 0, len(pos))
-	for _, v := range pos {
-		list = append(list, PointsOfInterestRepositoryImplToEntity(v))
+	list := make([]*do.PointsOfInterest, 0, len(pois))
+	for _, poi := range pois {
+		list = append(list, PointsOfInterestRepositoryImplToEntity(poi))
 	}
 	return list
 }

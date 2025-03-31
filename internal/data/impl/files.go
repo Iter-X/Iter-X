@@ -63,8 +63,7 @@ func (f *fileRepositoryImpl) Complete(ctx context.Context, fileSize int64, compl
 	complete.FileId = fileDo.ID
 	mutation := f.GetTx(ctx).File.Update().
 		Where(file.ID(fileDo.ID)).
-		SetSize(uint(fileSize)).
-		SetURL(complete.PrivateURL)
+		SetSize(uint(fileSize))
 	return mutation.Exec(ctx)
 }
 

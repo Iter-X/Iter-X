@@ -15,7 +15,7 @@ func FromPageAndSize(page, size int32) *Pagination {
 
 	return &Pagination{
 		Limit:  size,
-		Offset: page * size,
+		Offset: (page - 1) * size,
 	}
 }
 

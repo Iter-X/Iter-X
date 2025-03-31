@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-
 	geoV1 "github.com/iter-x/iter-x/internal/api/geo/v1"
 	"github.com/iter-x/iter-x/internal/biz"
 	"github.com/iter-x/iter-x/internal/biz/bo"
@@ -25,9 +24,8 @@ func NewGeo(geoBiz *biz.Geo) *GeoService {
 // ListContinents lists all continents
 func (s *GeoService) ListContinents(ctx context.Context, req *geoV1.ListContinentsRequest) (*geoV1.ListContinentsResponse, error) {
 	// Convert PB to BO
-	params := &bo.ListContinentsParams{}
-	if req.Pagination != nil {
-		params.Pagination = bo.FromPageAndSize(req.Pagination.Page, req.Pagination.Size)
+	params := &bo.ListContinentsParams{
+		Pagination: bo.FromPageAndSize(req.Page, req.Size),
 	}
 
 	// Call biz
@@ -47,9 +45,7 @@ func (s *GeoService) ListCountries(ctx context.Context, req *geoV1.ListCountries
 	// Convert PB to BO
 	params := &bo.ListCountriesParams{
 		ContinentID: uint(req.ContinentId),
-	}
-	if req.Pagination != nil {
-		params.Pagination = bo.FromPageAndSize(req.Pagination.Page, req.Pagination.Size)
+		Pagination:  bo.FromPageAndSize(req.Page, req.Size),
 	}
 
 	// Call biz
@@ -68,10 +64,8 @@ func (s *GeoService) ListCountries(ctx context.Context, req *geoV1.ListCountries
 func (s *GeoService) ListStates(ctx context.Context, req *geoV1.ListStatesRequest) (*geoV1.ListStatesResponse, error) {
 	// Convert PB to BO
 	params := &bo.ListStatesParams{
-		CountryID: uint(req.CountryId),
-	}
-	if req.Pagination != nil {
-		params.Pagination = bo.FromPageAndSize(req.Pagination.Page, req.Pagination.Size)
+		CountryID:  uint(req.CountryId),
+		Pagination: bo.FromPageAndSize(req.Page, req.Size),
 	}
 
 	// Call biz
@@ -90,10 +84,8 @@ func (s *GeoService) ListStates(ctx context.Context, req *geoV1.ListStatesReques
 func (s *GeoService) ListCities(ctx context.Context, req *geoV1.ListCitiesRequest) (*geoV1.ListCitiesResponse, error) {
 	// Convert PB to BO
 	params := &bo.ListCitiesParams{
-		StateID: uint(req.StateId),
-	}
-	if req.Pagination != nil {
-		params.Pagination = bo.FromPageAndSize(req.Pagination.Page, req.Pagination.Size)
+		StateID:    uint(req.StateId),
+		Pagination: bo.FromPageAndSize(req.Page, req.Size),
 	}
 
 	// Call biz

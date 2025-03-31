@@ -30,34 +30,3 @@ func PoiFilesRepositoryImplToEntities(pos []*ent.PointsOfInterestFiles) []*do.Po
 	}
 	return list
 }
-
-func FileRepositoryImplToEntity(po *ent.File) *do.File {
-	if po == nil {
-		return nil
-	}
-	return &do.File{
-		ID:        po.ID,
-		CreatedAt: po.CreatedAt,
-		UpdatedAt: po.UpdatedAt,
-		UserID:    po.UserID,
-		Name:      po.Name,
-		ObjectKey: po.ObjectKey,
-		Size:      po.Size,
-		URL:       po.URL,
-		Star:      po.Star,
-		Ext:       po.Ext,
-		User:      AuthRepositoryImplToEntity(po.Edges.User),
-		PoiFiles:  PoiFilesRepositoryImplToEntities(po.Edges.PoiFiles),
-	}
-}
-
-func FileRepositoryImplToEntities(pos []*ent.File) []*do.File {
-	if pos == nil {
-		return nil
-	}
-	list := make([]*do.File, 0, len(pos))
-	for _, po := range pos {
-		list = append(list, FileRepositoryImplToEntity(po))
-	}
-	return list
-}

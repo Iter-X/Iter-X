@@ -2,7 +2,6 @@ package impl
 
 import (
 	"context"
-
 	"go.uber.org/zap"
 
 	"github.com/iter-x/iter-x/internal/biz/bo"
@@ -106,8 +105,7 @@ func (c *countryRepositoryImpl) ListCountries(ctx context.Context, params *bo.Li
 	// Apply pagination
 	query = query.Offset(params.GetOffset4Db()).Limit(params.GetLimit4Db())
 
-	// Load related continent information
-	query = query.WithContinent()
+	query = query.WithImage()
 
 	// Execute query
 	countries, err := query.Order(ent.Asc(country.FieldNameEn)).All(ctx)
