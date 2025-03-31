@@ -1,4 +1,4 @@
-# 项目结构
+# Standard Operating Procedures (SOP) Manual
 1. 客户端语言是Flutter，代码在 `client` 目录下，主要代码都在 `client/lib` 目录下
 2. 所有页面位于 `client/lib/bussiness` 目录下，如 `client/lib/bussiness/auth`
 3. 通常每个页面下会包含这么几个目录（当不存在时你可以自己根据情况选择创建）：
