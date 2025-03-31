@@ -1,12 +1,9 @@
 import 'package:client/app/constants.dart';
 import 'package:client/app/routes.dart';
 import 'package:client/business/auth/page/input_code.dart';
-import 'package:client/business/auth/service/auth_service.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
-import 'package:client/common/material/loading.dart';
 import 'package:client/common/material/state.dart';
 import 'package:client/common/material/text_field.dart';
-import 'package:client/app/constants.dart';
 import 'package:client/common/utils/toast.dart';
 import 'package:client/common/utils/util.dart';
 import 'package:client/common/widgets/base_button.dart';
@@ -24,7 +21,6 @@ class PhoneLoginPage extends StatefulWidget {
 
 class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
   late TextEditingController _controller;
-  bool isLoading = false;
   final FocusNode _focusNode = FocusNode();
 
   @override
@@ -33,7 +29,7 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
     super.initState();
 
     // get focus after 100ms
-    Future.delayed(const Duration(milliseconds: 100), () {
+    Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) {
         _focusNode.requestFocus();
       }
@@ -124,13 +120,9 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
               margin: EdgeInsets.only(top: 40.h),
               child: BaseButton(
                 text: '发送短信验证码',
-                isLoading: isLoading,
-                loadingWidget: const LoadingWidget(
-                  color: AppColor.secondary,
-                ),
                 textSize: 18.sp,
                 textColor: AppColor.secondary,
-                onTap: () => codeLogin(),
+                onTap: () => goToInputCodePage(),
               ),
             ),
           ],
@@ -139,10 +131,7 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
     );
   }
 
-  Future<void> codeLogin() async {
-    if (isLoading) {
-      return;
-    }
+  void goToInputCodePage() {
     String phoneNumber = _controller.text.trim();
     if (BaseUtil.isEmpty(phoneNumber)) {
       ToastX.show('请输入手机号');
@@ -152,18 +141,9 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
       ToastX.show('请输入正确的手机号');
       return;
     }
-    setState(() {
-      isLoading = true;
-    });
-    bool result = await AuthService.getSendSmsCode(phoneNumber);
-    setState(() {
-      isLoading = false;
-    });
-    if (result) {
-      go(
-        Routes.inputCode,
-        arguments: InputCodeArgument(phone: phoneNumber),
-      );
-    }
+    go(
+      Routes.inputCode,
+      arguments: InputCodeArgument(phone: phoneNumber),
+    );
   }
 }

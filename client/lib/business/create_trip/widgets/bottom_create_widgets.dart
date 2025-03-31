@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_speech/flutter_speech.dart';
 
+import '../../../common/material/image.dart';
+import '../../../common/material/text_field.dart';
+
 // 手动创建和外部链接 底部样式
 class CreateManuallyWidget extends StatelessWidget {
   final TextEditingController controller;
