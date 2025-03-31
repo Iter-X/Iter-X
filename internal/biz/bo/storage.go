@@ -34,6 +34,7 @@ type CompleteUploadRequest struct {
 	UploadID  string       `json:"uploadId"`
 	ObjectKey string       `json:"objectKey"`
 	Parts     []UploadPart `json:"parts"`
+	FileSize  int64        `json:"fileSize"`
 }
 
 type CompleteUploadReply struct {
@@ -44,4 +45,5 @@ type CompleteUploadReply struct {
 	PrivateURL string `json:"privateURL"`
 	PublicURL  string `json:"publicURL"`
 	Expiration int64  `json:"expiration"`
+	FileId     uint   `json:"fileId"`
 }

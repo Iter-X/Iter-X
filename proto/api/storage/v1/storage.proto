@@ -57,6 +57,7 @@ message CompleteUploadRequest {
   string upload_id = 1 [(validatex.rules).string.min_len = 1];
   string object_key = 2 [(validatex.rules).string.min_len = 1];
   repeated UploadPart parts = 3 [(validatex.rules).repeated.min_items = 1];
+  int64 file_size = 4 [(validatex.rules).numeric.gt = 0];
 }
 message CompleteUploadReply {
   string location = 1;
@@ -66,4 +67,5 @@ message CompleteUploadReply {
   string private_url = 5;
   string public_url = 6;
   int64 expiration = 7;
+  uint64 file_id = 8;
 }

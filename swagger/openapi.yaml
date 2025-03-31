@@ -497,6 +497,7 @@ components:
                 bucket: ""
                 etag: ""
                 expiration: 0
+                fileId: 0
                 key: ""
                 location: ""
                 privateUrl: ""
@@ -507,6 +508,9 @@ components:
                 etag:
                     type: string
                 expiration:
+                    format: int64
+                    type: integer
+                fileId:
                     format: int64
                     type: integer
                 key:
@@ -520,10 +524,14 @@ components:
             type: object
         storage.v1.CompleteUploadRequest:
             example:
+                fileSize: 0
                 objectKey: ""
                 parts: null
                 uploadId: ""
             properties:
+                fileSize:
+                    format: int64
+                    type: integer
                 objectKey:
                     type: string
                 parts:
