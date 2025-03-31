@@ -12,6 +12,7 @@ class ClickableButton extends StatelessWidget {
   final Color? iconColor;
   final double rotationAngle;
   final double? gap;
+  final EdgeInsetsGeometry? margin;
 
   const ClickableButton({
     super.key,
@@ -24,6 +25,7 @@ class ClickableButton extends StatelessWidget {
     this.iconColor,
     this.rotationAngle = 0.0,
     this.gap,
+    this.margin,
   });
 
   @override
@@ -31,6 +33,7 @@ class ClickableButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTapText,
       child: Container(
+        margin: margin,
         height: height,
         width: width,
         padding: EdgeInsets.all(9.w),

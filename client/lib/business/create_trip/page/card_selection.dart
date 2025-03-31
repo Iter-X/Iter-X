@@ -4,7 +4,7 @@
  * @Autor: GiottoLLL7
  * @Date: 2025-03-18 00:30:03
  * @LastEditors: GiottoLLL7
- * @LastEditTime: 2025-03-31 18:54:55
+ * @LastEditTime: 2025-03-31 21:55:07
  */
 
 import 'package:client/app/constants.dart';
@@ -374,63 +374,16 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                         .map((id) => _allCityList
                             .firstWhere((item) => item['cityId'] == id))
                         .map((country) => ClickableButton(
-                                  text: country['name'],
-                                  onTapIcon: () => {
-                                    setState(() {
-                                      _selectedCountries
-                                          .remove(country['cityId']);
-                                    })
-                                  },
-                                  icon: Icons.cancel,
-                                  iconColor: AppColor.closeButton,
-                                )
-                            // Row(children: [
-                            //       IntrinsicWidth(
-                            //           child: Container(
-                            //         height: 42.w,
-                            //         alignment: Alignment.center,
-                            //         padding: EdgeInsets.symmetric(horizontal: 15),
-                            //         decoration: BoxDecoration(
-                            //           color: AppColor.c_E3E3E3,
-                            //           borderRadius: BorderRadius.only(
-                            //             topLeft: Radius.circular(5.sp),
-                            //             bottomLeft: Radius.circular(5.sp),
-                            //           ),
-                            //         ),
-                            //         child: Text(
-                            //           country['name'],
-                            //           style: TextStyle(
-                            //             fontSize: 16.sp,
-                            //             color: AppColor.c_1D1F1E,
-                            //           ),
-                            //         ),
-                            //       )),
-                            //       GestureDetector(
-                            //           onTap: () => {
-                            //                 setState(() {
-                            //                   _selectedCountries
-                            //                       .remove(country['cityId']);
-                            //                 })
-                            //               },
-                            //           child: Container(
-                            //             alignment: Alignment.center,
-                            //             decoration: BoxDecoration(
-                            //               color: AppColor.c_1D1F1E,
-                            //               borderRadius: BorderRadius.only(
-                            //                 topRight: Radius.circular(5.sp),
-                            //                 bottomRight: Radius.circular(5.sp),
-                            //               ),
-                            //             ),
-                            //             margin: EdgeInsets.only(right: 10.w),
-                            //             width: 38.w,
-                            //             height: 42.w,
-                            //             child: BaseImage.asset(
-                            //               name: 'ic_card_cancel.png',
-                            //               size: 26.w,
-                            //             ),
-                            //           ))
-                            //     ])
-                            )
+                              text: country['name'],
+                              onTapIcon: () => {
+                                setState(() {
+                                  _selectedCountries.remove(country['cityId']);
+                                })
+                              },
+                              icon: Icons.cancel,
+                              iconColor: AppColor.closeButton,
+                              margin: EdgeInsets.only(right: 10),
+                            ))
                         .toList(),
                   ),
                 ),
