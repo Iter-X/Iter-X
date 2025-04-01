@@ -17,7 +17,9 @@ COPY --from=builder /iterx/swagger /iterx/swagger
 
 WORKDIR /iterx
 
-RUN apt update && apt install -y ca-certificates curl wget vim && \
+RUN apt update && apt install -y ca-certificates curl wget vim tzdata && \
+    ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    dpkg-reconfigure -f noninteractive tzdata && \
     update-ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
