@@ -14,6 +14,7 @@ import 'package:client/business/create_trip/page/create_trip_home.dart';
 import 'package:client/business/create_trip/page/poi_search.dart';
 import 'package:client/business/home_main/page/home_main.dart';
 import 'package:client/business/mine/page/mine_page.dart';
+import 'package:client/business/trip/page/trip_main_page.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 
@@ -31,6 +32,7 @@ class Routes {
   static const String cardSelection = '/create_trip/card_selection';
   static const String profile = '/mine/profile';
   static const String poiSearch = '/create_trip/poi_search';
+  static const String tripOverview = '/trip/overview';
 
   // 无需登录即可访问的页面
   static final List<String> _routesWithoutLogin = [
@@ -59,6 +61,8 @@ class Routes {
         Handler(handlerFunc: (context, params) => const CardSelectionPage()),
     profile: Handler(handlerFunc: (context, params) => const MinePage()),
     poiSearch: Handler(handlerFunc: (context, params) => const PoiSearchPage()),
+    tripOverview:
+        Handler(handlerFunc: (context, params) => const TripMainPage()),
   };
 
   // 404路由处理器

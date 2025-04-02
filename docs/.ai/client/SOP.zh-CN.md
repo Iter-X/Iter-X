@@ -29,9 +29,9 @@
 
 ## 全局配置
 全局配置在 `client/lib/app/constants.dart` 中，可以在这里定义一些全局的常量，比如颜色、字体等：
-- 字号可以直接AppFontWeight.normal进行调用，不要直接写w300这种数字
-- 颜色可以直接AppColor.primary进行调用，不要直接写颜色值
-- 如果有圆角间距之类直接从AppConfig中调用，比如AppConfig.boxRadius就是通用圆角，而AppConfig.cornerRadius就是按钮的圆角（全圆）
+- 字号可以直接调用 `AppFontWeight.*` 类似 `AppFontWeight.regular`, `AppFontWeight.black` 进行调用，不要直接写 `w300` 这种数字
+- 颜色可以直接 `AppColor.primary` 进行调用，不要直接写颜色值
+- 如果有圆角间距之类直接从 `AppConfig` 中调用，比如 `AppConfig.boxRadius` 就是通用圆角，而 `AppConfig.cornerRadius` 就是按钮的圆角（全圆）
 
 ## SafeArea & AppBar
 我们自己定义了 `AppBarWithSafeArea` 在 `lib/common/material/app_bar_with_safe_area.dart` 中，这个是带有安全区域的AppBar，使用的时候直接调用这个组件即可，具体用法参考代码或者其他页面的使用，这个是可以单独开启AppBar，单独设置上下安全距离是否开启，上下背景之类的

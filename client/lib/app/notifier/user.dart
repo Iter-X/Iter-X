@@ -29,6 +29,7 @@ class UserNotifier with ChangeNotifier, DiagnosticableTreeMixin {
     final expirationTime =
         DateTime.fromMillisecondsSinceEpoch(_token!.expiresAt!);
     // 提前5分钟认为过期，以便有时间刷新
+    // TODO: fix bug
     return DateTime.now()
         .isAfter(expirationTime.subtract(Duration(minutes: 5)));
   }

@@ -1,4 +1,5 @@
 import 'package:client/app/constants.dart';
+import 'package:client/common/material/bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -23,6 +24,9 @@ class AppBarWithSafeArea extends StatelessWidget {
   final double? toolbarHeight;
   final bool centerTitle;
 
+  // Bottom navigation bar config
+  final BottomNavConfig? bottomBarCfg;
+
   const AppBarWithSafeArea({
     super.key,
     required this.child,
@@ -43,6 +47,7 @@ class AppBarWithSafeArea extends StatelessWidget {
     this.appBarBottom,
     this.toolbarHeight,
     this.centerTitle = true,
+    this.bottomBarCfg,
   });
 
   @override
@@ -84,7 +89,13 @@ class AppBarWithSafeArea extends StatelessWidget {
         right: right,
         statusBarIconBrightness: statusBarIconBrightness,
         statusBarBrightness: statusBarBrightness,
-        child: child,
+        child: Column(
+          children: [
+            Expanded(child: child),
+            if (bottom && bottomBarCfg != null)
+              BottomNavBar(config: bottomBarCfg!),
+          ],
+        ),
       ),
     );
   }
