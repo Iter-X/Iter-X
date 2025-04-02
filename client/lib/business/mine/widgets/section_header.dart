@@ -1,5 +1,6 @@
 import 'package:client/app/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SectionHeader extends StatelessWidget {
   final String title;
@@ -23,30 +24,30 @@ class SectionHeader extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppConfig.boxRadius),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(15),
+          padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
           child: Row(
             children: [
               Text(
                 emoji,
-                style: const TextStyle(
-                  fontSize: 22,
+                style: TextStyle(
+                  fontSize: 22.sp,
                   fontWeight: AppFontWeight.semiBold,
                 ),
               ),
-              const SizedBox(width: 5),
+              SizedBox(width: 5.w),
               Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 16,
+                style: TextStyle(
+                  fontSize: 16.sp,
                   fontWeight: AppFontWeight.semiBold,
                   color: AppColor.primaryFont,
-                  letterSpacing: 0.5,
+                  letterSpacing: 0.5.sp,
                 ),
               ),
               const Spacer(),
-              const Icon(
+              Icon(
                 Icons.arrow_forward_ios,
-                size: 16,
+                size: 16.sp,
                 color: AppColor.grayFont,
               ),
             ],
