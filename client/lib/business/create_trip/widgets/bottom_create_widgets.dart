@@ -188,49 +188,61 @@ class _CreateVoiceWidgetState extends State<CreateVoiceWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-      if (_isListening)
-        Container(
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 35.w),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          if (_isListening)
+            Container(
+              margin: EdgeInsets.only(bottom: 10.h),
+              child: BaseImage.asset(
+                name: 'ic_create_voice_black.png',
+                width: 50.w,
+                height: 50.h,
+                fit: BoxFit.cover,
+              ),
+            ),
+          if (_recognizedText.isNotEmpty)
+            Container(
+              margin: EdgeInsets.only(bottom: 10.h),
+              child: Text(
+                _recognizedText,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  color: AppColor.c_1D1F1E,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          Container(
             margin: EdgeInsets.only(bottom: 20.h),
-            child: BaseImage.asset(
-              name: 'ic_create_voice_black.png',
-              width: 50.w,
-              height: 50.h,
-              fit: BoxFit.cover,
-            )),
-      if (_recognizedText != '')
-        Text(
-          _recognizedText,
-          style: TextStyle(
-            fontSize: 16.sp,
-            color: AppColor.c_1D1F1E,
-          ),
-        ),
-      Container(
-        margin: EdgeInsets.only(bottom: 90.h, top: 20.h),
-        child: GestureDetector(
-          onLongPress: () {
-            _recognizedText = '';
-            _scale = 1.2;
-            _speechRecognition.listen();
-          },
-          onLongPressEnd: (_) {
-            setState(() {
-              _scale = 1.0;
-            });
-            _speechRecognition.stop();
-          },
-          child: Transform.scale(
-            scale: _scale,
-            child: BaseImage.asset(
-              name: 'btn_create_voice.png',
-              width: 100.w,
-              height: 100.h,
-              fit: BoxFit.cover,
+            child: GestureDetector(
+              onLongPress: () {
+                _recognizedText = '';
+                _scale = 1.2;
+                _speechRecognition.listen();
+              },
+              onLongPressEnd: (_) {
+                setState(() {
+                  _scale = 1.0;
+                });
+                _speechRecognition.stop();
+              },
+              child: Transform.scale(
+                scale: _scale,
+                child: BaseImage.asset(
+                  name: 'btn_create_voice.png',
+                  width: 100.w,
+                  height: 100.h,
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
           ),
-        ),
-      )
-    ]);
+        ],
+      ),
+    );
   }
 }
