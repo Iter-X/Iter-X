@@ -29,9 +29,14 @@ class UserNotifier with ChangeNotifier, DiagnosticableTreeMixin {
     final expirationTime =
         DateTime.fromMillisecondsSinceEpoch(_token!.expiresAt!);
     // 提前5分钟认为过期，以便有时间刷新
-    // TODO: fix bug
     return DateTime.now()
         .isAfter(expirationTime.subtract(Duration(minutes: 5)));
+  }
+
+  // 检查 token 是否真的过期（包括尝试刷新）
+  Future<bool> checkTokenExpired() async {
+    if (!isTokenExpired) return false;
+    return !(await _handleTokenExpiration());
   }
 
   Future<void> loadUserInfo() async {
@@ -58,8 +63,8 @@ class UserNotifier with ChangeNotifier, DiagnosticableTreeMixin {
     }
 
     // 检查 token 是否过期，如果过期尝试刷新
-    if (isTokenExpired) {
-      await _handleTokenExpiration();
+    if (await checkTokenExpired()) {
+      eventBus.fire(EventUnauthorized());
     }
   }
 
@@ -92,7 +97,6 @@ class UserNotifier with ChangeNotifier, DiagnosticableTreeMixin {
     }
 
     await logout();
-    eventBus.fire(EventUnauthorized());
     return false;
   }
 
@@ -104,9 +108,10 @@ class UserNotifier with ChangeNotifier, DiagnosticableTreeMixin {
 
   Future<void> refreshUserInfo() async {
     BaseLogger.i('token: $token');
-    BaseLogger.i('token valid: ${!isTokenExpired}');
+    final isExpired = await checkTokenExpired();
+    BaseLogger.i('token expired: $isExpired');
     // 确保 token 有效
-    if (!await ensureValidToken()) return;
+    if (isExpired) return;
 
     try {
       UserInfoEntity? updatedUser = await AuthService.getUserInfo();

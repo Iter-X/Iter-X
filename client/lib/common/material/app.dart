@@ -76,6 +76,8 @@ class BaseApp {
       builder: (BuildContext context, Widget? child) {
         // check login status
         final userNotifier = context.watch<UserNotifier>();
+        // 由于 MaterialApp 的 builder 不能是 async 的，我们需要先用 isTokenExpired 做初步判断
+        // 后续的路由判断会使用 checkTokenExpired 进行更准确的检查
         final effectiveInitialRoute = initialRoute ??
             (userNotifier.isTokenExpired ? Routes.login : Routes.homeMain);
 
@@ -88,7 +90,8 @@ class BaseApp {
           routes: const <String, WidgetBuilder>{},
           initialRoute: effectiveInitialRoute,
           onGenerateRoute: (settings) {
-            // 如果路由需要登录但用户未登录，重定向到登录页
+            // 如果路由需要登录，先用 isTokenExpired 做快速检查
+            // 实际跳转时会通过 go 方法进行更严格的 checkTokenExpired 检查
             if (!Routes.requiresLogin(settings.name) &&
                 userNotifier.isTokenExpired) {
               return router.generator(RouteSettings(name: Routes.login));
