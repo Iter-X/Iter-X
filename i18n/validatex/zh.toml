@@ -29,13 +29,13 @@ other = "不能为零"
 other = "必须是正数"
 
 [RepeatedExact]
-other = "必须恰好有{{.ExactItems}}个项目"
+other = "必须恰好有{{.ExactItems}}个"
 
 [RepeatedMax]
-other = "最多只能有{{.MaxItems}}个项目"
+other = "最多只能有{{.MaxItems}}个"
 
 [RepeatedMin]
-other = "至少需要{{.MinItems}}个项目"
+other = "至少需要{{.MinItems}}个"
 
 [RepeatedUnique]
 other = "所有项目必须唯一"

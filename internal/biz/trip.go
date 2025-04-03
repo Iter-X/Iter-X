@@ -98,7 +98,7 @@ func (b *Trip) CreateTrip(ctx context.Context, req *bo.CreateTripRequest) (*do.T
 		// Get the TripPlanner from the agentHub
 		tripPlanner, err := b.agentHub.GetAgent(cnst.AgentTripPlanner)
 		if err != nil {
-			b.logger.Errorw("failed to get PlanAgent", "err", err)
+			b.logger.Errorw("failed to get TripPlanner", "err", err)
 			return nil, xerr.ErrorCreateTripFailed()
 		}
 
@@ -173,7 +173,7 @@ func (b *Trip) CreateTrip(ctx context.Context, req *bo.CreateTripRequest) (*do.T
 	case cnst.TripCreationMethodCard:
 		tripPlanner, err := b.agentHub.GetAgent(cnst.AgentTripPlanner)
 		if err != nil {
-			b.logger.Errorw("failed to get PlanAgent", "err", err)
+			b.logger.Errorw("failed to get TripPlanner", "err", err)
 			return nil, xerr.ErrorCreateTripFailed()
 		}
 
@@ -213,7 +213,7 @@ func (b *Trip) CreateTrip(ctx context.Context, req *bo.CreateTripRequest) (*do.T
 
 		tripPlannerOutput, err := tripPlanner.Execute(ctx, tripPlannerInput)
 		if err != nil {
-			b.logger.Errorw("failed to plan trip with PlanAgent", "err", err)
+			b.logger.Errorw("failed to plan trip with TripPlanner", "err", err)
 			return nil, xerr.ErrorCreateTripFailed()
 		}
 

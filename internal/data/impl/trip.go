@@ -60,7 +60,14 @@ func (r *tripRepositoryImpl) CreateTrip(ctx context.Context, trip *do.Trip) (*do
 func (r *tripRepositoryImpl) GetTrip(ctx context.Context, id uuid.UUID) (*do.Trip, error) {
 	cli := r.GetTx(ctx).Trip
 
-	row, err := cli.Get(ctx, id)
+	row, err := cli.Query().
+		Where(trip.ID(id)).
+		WithDailyTrip(func(q *ent.DailyTripQuery) {
+			q.WithDailyItinerary(func(q *ent.DailyItineraryQuery) {
+				q.WithPoi()
+			})
+		}).
+		Only(ctx)
 	return r.ToEntity(row), err
 }
 

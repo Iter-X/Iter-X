@@ -75,7 +75,7 @@ agent:
       description: "大语言模型补全工具"
       base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1/"
       api_key: "${X_COMPLETION_API_KEY}"
-      model: "qwq-plus"
+      model: "qwen-turbo"
   llm_use_tools:
     - name: InducingCreateTrip
       type: function
