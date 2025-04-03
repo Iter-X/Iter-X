@@ -52,7 +52,7 @@ func (r *cityRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params 
 	limit := params.Limit
 	rows, err := cli.Query().
 		Where(city.Or(
-			city.NameContains(keyword),
+			city.NameLocalContains(keyword),
 			city.NameCnContains(keyword),
 			city.NameEnContains(keyword),
 			city.CodeContains(keyword),
@@ -97,13 +97,6 @@ func (r *cityRepositoryImpl) ListCities(ctx context.Context, params *bo.ListCiti
 	if params.StateID > 0 {
 		query = query.Where(city.StateID(params.StateID))
 	}
-
-	// Set pagination
-	limit := int(params.Limit)
-	if limit <= 0 {
-		limit = 10 // Default to 10 records per page
-	}
-
 	// Get total count
 	total, err := query.Count(ctx)
 	if err != nil {
@@ -111,13 +104,13 @@ func (r *cityRepositoryImpl) ListCities(ctx context.Context, params *bo.ListCiti
 	}
 
 	// Apply pagination
-	query = query.Offset(params.Offset).Limit(limit)
+	query = query.Offset(params.GetOffset4Db()).Limit(params.GetLimit4Db())
 
 	// Load related state information
 	query = query.WithState()
 
 	// Execute query
-	cities, err := query.Order(ent.Asc(city.FieldName)).All(ctx)
+	cities, err := query.Order(ent.Asc(city.FieldNameEn)).All(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -129,4 +122,32 @@ func (r *cityRepositoryImpl) ListCities(ctx context.Context, params *bo.ListCiti
 	}
 
 	return result, int64(total), nil
+}
+
+func (r *cityRepositoryImpl) GetCityIdByName(ctx context.Context, cityName string) (int32, error) {
+	cli := r.GetTx(ctx).City
+
+	// 先尝试精确匹配本地名称
+	row, err := cli.Query().
+		Where(city.NameLocalEQ(cityName)).
+		First(ctx)
+	if err != nil {
+		// 如果精确匹配失败，尝试模糊匹配
+		row, err = cli.Query().
+			Where(city.NameLocalContains(cityName)).
+			Order(ent.Asc(city.FieldNameLocal)). // 按名称排序，确保结果一致性
+			First(ctx)
+		if err != nil {
+			// 如果本地名称都匹配失败，尝试英文名称
+			row, err = cli.Query().
+				Where(city.NameEnContains(cityName)).
+				Order(ent.Asc(city.FieldNameEn)).
+				First(ctx)
+			if err != nil {
+				return 0, err
+			}
+		}
+	}
+
+	return int32(row.ID), nil
 }

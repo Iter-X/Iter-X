@@ -1,6 +1,6 @@
-import 'package:client/common/utils/app_config.dart';
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class StatsCard extends StatelessWidget {
   final String value;
@@ -17,41 +17,41 @@ class StatsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(15),
+      padding: EdgeInsets.all(15.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+        borderRadius: BorderRadius.circular(AppConfig.boxRadius),
       ),
       child: Row(
         children: [
           Text(
             emoji,
-            style: const TextStyle(
-              fontSize: 35,
+            style: TextStyle(
+              fontSize: 35.sp,
               fontWeight: AppFontWeight.semiBold,
             ),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: 10.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
-                    fontSize: 14,
+                  style: TextStyle(
+                    fontSize: 14.sp,
                     fontWeight: AppFontWeight.semiBold,
-                    color: BaseColor.grayFont,
-                    letterSpacing: 0.5,
+                    color: AppColor.grayFont,
+                    letterSpacing: 0.5.sp,
                   ),
                 ),
                 Text(
                   value,
-                  style: const TextStyle(
-                    fontSize: 18,
+                  style: TextStyle(
+                    fontSize: 18.sp,
                     fontWeight: AppFontWeight.extraBold,
-                    color: BaseColor.highlight,
-                    letterSpacing: 0.5,
+                    color: AppColor.highlight,
+                    letterSpacing: 0.5.sp,
                   ),
                 ),
               ],

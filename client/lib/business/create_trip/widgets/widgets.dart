@@ -1,6 +1,6 @@
+import 'package:client/app/constants.dart';
 import 'package:client/common/material/image.dart';
-import 'package:client/common/utils/app_config.dart';
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
@@ -28,8 +28,8 @@ class ItemCreateWidget extends StatelessWidget {
         width: 170.w,
         height: 70.h,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-          color: isSelected ? BaseColor.primary : BaseColor.buttonGrayBG,
+          borderRadius: BorderRadius.circular(AppConfig.boxRadius),
+          color: isSelected ? AppColor.primary : AppColor.buttonGrayBG,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -43,9 +43,8 @@ class ItemCreateWidget extends StatelessWidget {
               text,
               style: TextStyle(
                 fontSize: 18.sp,
-                color: isSelected
-                    ? BaseColor.secondaryFont
-                    : BaseColor.primaryFont,
+                color:
+                    isSelected ? AppColor.secondaryFont : AppColor.primaryFont,
               ),
             )
           ],

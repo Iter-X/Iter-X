@@ -1,4 +1,4 @@
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -10,8 +10,8 @@ class ToastX {
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.TOP,
       timeInSecForIosWeb: 1,
-      backgroundColor: BaseColor.primary.withOpacity(0.8),
-      textColor: BaseColor.secondary,
+      backgroundColor: AppColor.primary.withOpacity(0.8),
+      textColor: AppColor.secondary,
       fontSize: 16.sp,
     );
   }

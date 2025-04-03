@@ -14,7 +14,7 @@ func CountryRepositoryImplToEntity(po *ent.Country) *do.Country {
 		ID:          po.ID,
 		CreatedAt:   po.CreatedAt,
 		UpdatedAt:   po.UpdatedAt,
-		Name:        po.Name,
+		NameLocal:   po.NameLocal,
 		NameEn:      po.NameEn,
 		NameCn:      po.NameCn,
 		Code:        po.Code,
@@ -22,6 +22,7 @@ func CountryRepositoryImplToEntity(po *ent.Country) *do.Country {
 		Poi:         PointsOfInterestRepositoryImplToEntities(po.Edges.Poi),
 		State:       StateRepositoryImplToEntities(po.Edges.State),
 		Continent:   ContinentRepositoryImplToEntity(po.Edges.Continent),
+		Image:       FileRepositoryImplToEntity(po.Edges.Image),
 	}
 }
 

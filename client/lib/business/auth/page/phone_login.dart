@@ -1,12 +1,9 @@
+import 'package:client/app/constants.dart';
 import 'package:client/app/routes.dart';
 import 'package:client/business/auth/page/input_code.dart';
-import 'package:client/business/auth/service/auth_service.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
-import 'package:client/common/material/loading.dart';
 import 'package:client/common/material/state.dart';
 import 'package:client/common/material/text_field.dart';
-import 'package:client/common/utils/app_config.dart';
-import 'package:client/common/utils/color.dart';
 import 'package:client/common/utils/toast.dart';
 import 'package:client/common/utils/util.dart';
 import 'package:client/common/widgets/base_button.dart';
@@ -24,7 +21,6 @@ class PhoneLoginPage extends StatefulWidget {
 
 class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
   late TextEditingController _controller;
-  bool isLoading = false;
   final FocusNode _focusNode = FocusNode();
 
   @override
@@ -33,7 +29,7 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
     super.initState();
 
     // get focus after 100ms
-    Future.delayed(const Duration(milliseconds: 100), () {
+    Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) {
         _focusNode.requestFocus();
       }
@@ -51,7 +47,7 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
   Widget build(BuildContext context) {
     return AppBarWithSafeArea(
       hasAppBar: true,
-      backgroundColor: BaseColor.bg,
+      backgroundColor: AppColor.bg,
       leading: ReturnButton(),
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 72.w),
@@ -61,7 +57,7 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
             Text(
               '请输入手机号',
               style: TextStyle(
-                color: BaseColor.primaryFont,
+                color: AppColor.primaryFont,
                 fontSize: 28.w,
                 fontWeight: AppFontWeight.semiBold,
               ),
@@ -70,7 +66,7 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
             Text(
               '首次登录自动创建账号',
               style: TextStyle(
-                color: BaseColor.primaryFont,
+                color: AppColor.primaryFont,
                 fontSize: 16.w,
               ),
             ),
@@ -81,7 +77,7 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30.r),
                 border: Border.all(
-                  color: BaseColor.borderLine,
+                  color: AppColor.borderLine,
                   width: 1.w,
                 ),
               ),
@@ -91,7 +87,7 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
                   Text(
                     '+86',
                     style: TextStyle(
-                      color: BaseColor.primaryFont,
+                      color: AppColor.primaryFont,
                       fontSize: 18.sp,
                     ),
                   ),
@@ -105,12 +101,12 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
                       ),
                       hintText: '输入手机号',
                       hintStyle: TextStyle(
-                        color: BaseColor.hint,
+                        color: AppColor.hint,
                         fontSize: 18.sp,
                         fontWeight: AppFontWeight.regular,
                       ),
                       style: TextStyle(
-                        color: BaseColor.c_1D1F1E,
+                        color: AppColor.c_1D1F1E,
                         fontSize: 18.sp,
                         fontWeight: AppFontWeight.medium,
                       ),
@@ -124,13 +120,9 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
               margin: EdgeInsets.only(top: 40.h),
               child: BaseButton(
                 text: '发送短信验证码',
-                isLoading: isLoading,
-                loadingWidget: const LoadingWidget(
-                  color: BaseColor.secondary,
-                ),
                 textSize: 18.sp,
-                textColor: BaseColor.secondary,
-                onTap: () => codeLogin(),
+                textColor: AppColor.secondary,
+                onTap: () => goToInputCodePage(),
               ),
             ),
           ],
@@ -139,10 +131,7 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
     );
   }
 
-  Future<void> codeLogin() async {
-    if (isLoading) {
-      return;
-    }
+  void goToInputCodePage() {
     String phoneNumber = _controller.text.trim();
     if (BaseUtil.isEmpty(phoneNumber)) {
       ToastX.show('请输入手机号');
@@ -152,18 +141,9 @@ class _PhoneLoginPageState extends BaseState<PhoneLoginPage> {
       ToastX.show('请输入正确的手机号');
       return;
     }
-    setState(() {
-      isLoading = true;
-    });
-    bool result = await AuthService.getSendSmsCode(phoneNumber);
-    setState(() {
-      isLoading = false;
-    });
-    if (result) {
-      go(
-        Routes.inputCode,
-        arguments: InputCodeArgument(phone: phoneNumber),
-      );
-    }
+    go(
+      Routes.inputCode,
+      arguments: InputCodeArgument(phone: phoneNumber),
+    );
   }
 }

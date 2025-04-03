@@ -5,19 +5,22 @@ import (
 	"time"
 
 	"github.com/iter-x/iter-x/internal/biz/bo"
+	"github.com/iter-x/iter-x/internal/biz/repository"
 	"github.com/iter-x/iter-x/internal/data"
 	"github.com/iter-x/iter-x/internal/helper/auth"
 	"github.com/iter-x/iter-x/pkg/storage"
 )
 
-func NewStorage(d *data.Data) *Storage {
+func NewStorage(d *data.Data, fileRepo repository.FilesRepo) *Storage {
 	return &Storage{
-		storage: d.Storage,
+		storage:  d.Storage,
+		fileRepo: fileRepo,
 	}
 }
 
 type Storage struct {
-	storage storage.FileManager
+	storage  storage.FileManager
+	fileRepo repository.FilesRepo
 }
 
 func (s *Storage) InitUpload(ctx context.Context, request *bo.InitUploadRequest) (*bo.InitUploadReply, error) {
@@ -29,6 +32,9 @@ func (s *Storage) InitUpload(ctx context.Context, request *bo.InitUploadRequest)
 	}
 	uploadResult, err := s.storage.InitiateMultipartUpload(request.Filename, claims.UID.String())
 	if err != nil {
+		return nil, err
+	}
+	if err := s.fileRepo.Init(ctx, request.Filename, uploadResult.ObjectKey); err != nil {
 		return nil, err
 	}
 	return &bo.InitUploadReply{
@@ -54,7 +60,7 @@ func (s *Storage) GenerateUploadPartURL(_ context.Context, request *bo.GenerateU
 	}, nil
 }
 
-func (s *Storage) CompleteUpload(_ context.Context, request *bo.CompleteUploadRequest) (*bo.CompleteUploadReply, error) {
+func (s *Storage) CompleteUpload(ctx context.Context, request *bo.CompleteUploadRequest) (*bo.CompleteUploadReply, error) {
 	parts := make([]storage.UploadPart, 0, len(request.Parts))
 	for _, part := range request.Parts {
 		parts = append(parts, storage.UploadPart{
@@ -66,7 +72,7 @@ func (s *Storage) CompleteUpload(_ context.Context, request *bo.CompleteUploadRe
 	if err != nil {
 		return nil, err
 	}
-	return &bo.CompleteUploadReply{
+	reply := &bo.CompleteUploadReply{
 		Bucket:     completeMultipartUpload.Bucket,
 		ETag:       completeMultipartUpload.ETag,
 		Expiration: completeMultipartUpload.Expiration,
@@ -74,5 +80,9 @@ func (s *Storage) CompleteUpload(_ context.Context, request *bo.CompleteUploadRe
 		Location:   completeMultipartUpload.Location,
 		PrivateURL: completeMultipartUpload.PrivateURL,
 		PublicURL:  completeMultipartUpload.PublicURL,
-	}, nil
+	}
+	if err := s.fileRepo.Complete(ctx, request.FileSize, reply); err != nil {
+		return nil, err
+	}
+	return reply, nil
 }

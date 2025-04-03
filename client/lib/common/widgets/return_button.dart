@@ -1,5 +1,5 @@
 import 'package:client/common/material/image.dart';
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -27,7 +27,7 @@ class ReturnButton extends StatelessWidget {
         child: BaseImage.asset(
           name: 'return_btn.svg',
           size: 28.w,
-          color: color ?? BaseColor.primaryFont,
+          color: color ?? AppColor.primaryFont,
         ),
       ),
     );

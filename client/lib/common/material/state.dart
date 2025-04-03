@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:client/app/notifier/user.dart';
 import 'package:client/app/routes.dart';
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:client/common/utils/logger.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:easy_refresh/easy_refresh.dart';
@@ -107,16 +107,17 @@ abstract class BaseState<T extends StatefulWidget> extends State<T> with Event {
     bool replace = false,
     bool clearStack = false,
     TransitionType? transition,
-  }) {
+  }) async {
     BaseLogger.i('go path: $path');
     // 关闭键盘
     FocusScope.of(context).unfocus();
     needLogin ??= Routes.requiresLogin(path);
     BaseLogger.i('needLogin: $needLogin');
-    BaseLogger.i('isTokenExpired: ${context.read<UserNotifier>().isTokenExpired}');
-    if (needLogin && context.read<UserNotifier>().isTokenExpired) {
-      return go(Routes.login, clearStack: true).then((value) {
-        if (!context.read<UserNotifier>().isTokenExpired) {
+    final isExpired = await context.read<UserNotifier>().checkTokenExpired();
+    BaseLogger.i('isTokenExpired: $isExpired');
+    if (needLogin && isExpired) {
+      return go(Routes.login, clearStack: true).then((value) async {
+        if (!await context.read<UserNotifier>().checkTokenExpired()) {
           return router.navigateTo(
             context, path, //路径
             replace: replace,
@@ -172,6 +173,6 @@ buildFooter({String? loadedText}) {
     failedText: '加载失败',
     noMoreText: '没有更多数据',
     showText: false,
-    textStyle: TextStyle(color: BaseColor.hint),
+    textStyle: TextStyle(color: AppColor.hint),
   );
 }

@@ -53,4 +53,9 @@ type DailyTrip struct {
 	Date time.Time `json:"date,omitempty"`
 	// Notes holds the value of the "notes" field.
 	Notes string `json:"notes,omitempty"`
+
+	// Trip holds the value of the trip edge.
+	Trip *Trip `json:"trip,omitempty"`
+	// DailyItinerary holds the value of the daily_itinerary edge.
+	DailyItinerary []*DailyItinerary `json:"daily_itinerary,omitempty"`
 }

@@ -7,7 +7,7 @@ storage:
     previewURL: "${X_STORAGE_LOCAL_PREVIEW_URL:/storage/preview}"
     endpoint: "${X_STORAGE_LOCAL_ENDPOINT:http://localhost:8080}"
   ali:
-    endpoint: "${X_STORAGE_ALI_ENDPOINT:oss-cn-beijing.aliyuncs.com}"
-    access_key_id: "${X_STORAGE_ALI_ACCESS_KEY_ID:}"
-    access_key_secret: "${X_STORAGE_ALI_ACCESS_KEY_SECRET:}"
-    bucket_name: "${X_STORAGE_ALI_BUCKET:}"
+    endpoint: "${X_STORAGE_ALI_ENDPOINT}"
+    access_key_id: "${X_STORAGE_ALI_ACCESS_KEY_ID}"
+    access_key_secret: "${X_STORAGE_ALI_ACCESS_KEY_SECRET}"
+    bucket_name: "${X_STORAGE_ALI_BUCKET}"

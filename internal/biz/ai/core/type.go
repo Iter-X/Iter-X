@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"github.com/iter-x/iter-x/internal/biz/do"
 )
 
 // Prompt defines the interface for a prompt
@@ -32,5 +33,7 @@ type (
 		// Description returns the description of the tool
 		Description() string
 		Execute(context.Context, any) (any, error)
+		// GetDefinition returns the definition of the tool, only for function call tools
+		GetDefinition() (*do.FunctionCallTool, error)
 	}
 )

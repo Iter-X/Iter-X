@@ -1,10 +1,9 @@
+import 'package:client/app/constants.dart';
 import 'package:client/app/routes.dart';
 import 'package:client/business/create_trip/widgets/bottom_create_widgets.dart';
 import 'package:client/business/create_trip/widgets/widgets.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/state.dart';
-import 'package:client/common/utils/app_config.dart';
-import 'package:client/common/utils/color.dart';
 import 'package:client/common/widgets/return_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -116,7 +115,7 @@ class _CreateTripHomePageState extends BaseState<CreateTripHomePage> {
             _selectOneHasFocus ? '你想去哪？' : 'Hi, Leo',
             style: TextStyle(
               fontSize: 30.sp,
-              color: BaseColor.primaryFont,
+              color: AppColor.primaryFont,
               fontWeight: AppFontWeight.bold,
             ),
           ),
@@ -126,7 +125,7 @@ class _CreateTripHomePageState extends BaseState<CreateTripHomePage> {
                 : '世界是一本书，那些不旅行的人只读了其中的一页\n——Danny Kaye',
             style: TextStyle(
               fontSize: 18.sp,
-              color: BaseColor.grayFont,
+              color: AppColor.grayFont,
             ),
           ),
         ],
@@ -167,7 +166,7 @@ class _CreateTripHomePageState extends BaseState<CreateTripHomePage> {
   @override
   Widget build(BuildContext context) {
     return AppBarWithSafeArea(
-      backgroundColor: BaseColor.bg,
+      backgroundColor: AppColor.bg,
       hasAppBar: true,
       leading: ReturnButton(
         onTap: () {
@@ -185,7 +184,7 @@ class _CreateTripHomePageState extends BaseState<CreateTripHomePage> {
             child: _buildHeaderSection(),
           ),
           Gap(20.h),
-          if (!_selectOneHasFocus) ...[
+          if (!_selectOneHasFocus)
             Flexible(
               flex: 3,
               child: Container(
@@ -193,8 +192,7 @@ class _CreateTripHomePageState extends BaseState<CreateTripHomePage> {
                 child: _buildButtonGroup(),
               ),
             ),
-            Gap(20.h),
-          ],
+          if (!_selectOneHasFocus) Gap(20.h),
           Flexible(
             flex: 2,
             child: _buildBottomSection(),

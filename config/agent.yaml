@@ -1,6 +1,6 @@
 agent:
   agents:
-    - name: "PlanAgent"
+    - name: CityPlanner
       enabled: true
       version: "0.0.1"
       prompt:
@@ -28,6 +28,15 @@ agent:
               {{if .Budget}}预算：{{.Budget}}{{end}}
               
               **请直接返回 JSON 代码，不要有任何额外的内容。**
+      tools:
+        - name: Completion
+          type: CodeUse
+          enabled: true
+    - name: TripPlanner
+      enabled: true
+      version: "0.0.1"
+      prompt:
+        rounds:
           - system: |
               你是一个专业的行程规划助手，可以根据用户的需求生成完整的行程计划。  
               你需要考虑用户的预算、时间、偏好等因素，生成合理的行程安排。
@@ -56,10 +65,47 @@ agent:
               **请严格按照 JSON 格式返回，不要包含任何额外的文字。**
       tools:
         - name: Completion
+          type: CodeUse
+          enabled: true
+        - name: InducingCreateTrip
+          type: LLMUse
           enabled: true
   tools:
     - name: Completion
       description: "大语言模型补全工具"
       base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1/"
       api_key: "${X_COMPLETION_API_KEY}"
-      model: "qwen-max-2025-01-25"
+      model: "qwen-turbo"
+  llm_use_tools:
+    - name: InducingCreateTrip
+      type: function
+      function:
+        name: create_trip
+        description: "创建一个完整的行程计划,包含每日行程和景点安排"
+        parameters:
+          type: object
+          properties:
+            title:
+              type: string
+              description: "行程标题"
+            description:
+              type: string
+              description: "行程描述"
+            start_date:
+              type: string
+              description: "开始日期"
+            end_date:
+              type: string
+              description: "结束日期"
+            total_days:
+              type: integer
+              description: "行程总天数"
+            daily_schedule:
+              type: string
+              description: "每日行程安排，JSON字符串格式，格式为：[{day: 1, date: '2024-03-20', notes: '备注', pois: [{id: 'xxx', notes: 'xxx'}]}]"
+          required:
+            - title
+            - start_date
+            - end_date
+            - total_days
+            - daily_schedule

@@ -11,6 +11,7 @@ import (
 	"github.com/iter-x/iter-x/internal/common/cnst"
 	"github.com/iter-x/iter-x/internal/common/xerr"
 	"github.com/iter-x/iter-x/internal/service/build"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type Trip struct {
@@ -24,27 +25,70 @@ func NewTrip(tripBiz *biz.Trip) *Trip {
 	}
 }
 
-func to(method tripV1.TripCreationMethod) cnst.TripCreationMethod {
-	switch method {
-	case tripV1.TripCreationMethod_MANUAL:
-		return cnst.TripCreationMethodManual
-	case tripV1.TripCreationMethod_CARD:
-		return cnst.TripCreationMethodCard
-	case tripV1.TripCreationMethod_EXTERNAL_LINK:
-		return cnst.TripCreationMethodExternalLink
-	case tripV1.TripCreationMethod_IMAGE:
-		return cnst.TripCreationMethodImage
-	case tripV1.TripCreationMethod_VOICE:
-		return cnst.TripCreationMethodVoice
-	default:
-		return cnst.TripCreationMethodUnspecified
+func validateTimeParams(duration int32, startTs, endTs *timestamppb.Timestamp) error {
+	hasDuration := duration > 0
+	hasTimeRange := startTs != nil && endTs != nil
+
+	if !hasDuration && !hasTimeRange {
+		return xerr.ErrorInvalidTimeRange()
 	}
+	if hasTimeRange && startTs.AsTime().After(endTs.AsTime()) {
+		return xerr.ErrorInvalidTimeRange()
+	}
+	return nil
 }
 
-func (s *Trip) CreateTrip(ctx context.Context, req *tripV1.CreateTripRequest) (*tripV1.CreateTripResponse, error) {
+func (s *Trip) CreateTripManually(ctx context.Context, req *tripV1.CreateTripManuallyRequest) (*tripV1.CreateTripResponse, error) {
+	if err := validateTimeParams(req.Duration, req.StartTs, req.EndTs); err != nil {
+		return nil, err
+	}
+
 	trip, err := s.tripBiz.CreateTrip(ctx, &bo.CreateTripRequest{
-		CreationMethod: to(req.CreationMethod),
+		CreationMethod: cnst.TripCreationMethodManual,
 		Destination:    req.Destination,
+		StartDate:      req.StartTs.AsTime(),
+		EndDate:        req.EndTs.AsTime(),
+		Duration:       int(req.Duration),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &tripV1.CreateTripResponse{Trip: build.ToTripProto(trip)}, nil
+}
+
+func (s *Trip) CreateTripFromCard(ctx context.Context, req *tripV1.CreateTripFromCardRequest) (*tripV1.CreateTripResponse, error) {
+	if err := validateTimeParams(req.Duration, req.StartTs, req.EndTs); err != nil {
+		return nil, err
+	}
+	if len(req.CityIds) == 0 {
+		return nil, xerr.ErrorMissingCity()
+	}
+
+	trip, err := s.tripBiz.CreateTrip(ctx, &bo.CreateTripRequest{
+		CreationMethod: cnst.TripCreationMethodCard,
+		CityIds:        req.CityIds,
+		PoiIds:         req.PoiIds,
+		StartDate:      req.StartTs.AsTime(),
+		EndDate:        req.EndTs.AsTime(),
+		Duration:       int(req.Duration),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &tripV1.CreateTripResponse{Trip: build.ToTripProto(trip)}, nil
+}
+
+func (s *Trip) CreateTripFromExternalLink(ctx context.Context, req *tripV1.CreateTripFromExternalLinkRequest) (*tripV1.CreateTripResponse, error) {
+	if err := validateTimeParams(req.Duration, req.StartTs, req.EndTs); err != nil {
+		return nil, err
+	}
+	if req.LinkUrl == "" {
+		return nil, xerr.ErrorMissingLink()
+	}
+
+	trip, err := s.tripBiz.CreateTrip(ctx, &bo.CreateTripRequest{
+		CreationMethod: cnst.TripCreationMethodExternalLink,
+		LinkURL:        req.LinkUrl,
 		StartDate:      req.StartTs.AsTime(),
 		EndDate:        req.EndTs.AsTime(),
 		Duration:       int(req.Duration),

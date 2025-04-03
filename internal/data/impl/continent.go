@@ -50,7 +50,7 @@ func (c *continentRepositoryImpl) SearchPointsOfInterest(ctx context.Context, pa
 	limit := params.Limit
 	rows, err := cli.Query().
 		Where(continent.Or(
-			continent.NameContains(keyword),
+			continent.NameLocalContains(keyword),
 			continent.NameCnContains(keyword),
 			continent.NameEnContains(keyword),
 			continent.CodeContains(keyword),
@@ -75,12 +75,6 @@ func (c *continentRepositoryImpl) SearchPointsOfInterest(ctx context.Context, pa
 func (c *continentRepositoryImpl) ListContinents(ctx context.Context, params *bo.ListContinentsParams) ([]*do.Continent, int64, error) {
 	query := c.GetTx(ctx).Continent.Query()
 
-	// Set pagination
-	limit := int(params.Limit)
-	if limit <= 0 {
-		limit = 10 // Default to 10 records per page
-	}
-
 	// Get total count
 	total, err := query.Count(ctx)
 	if err != nil {
@@ -88,18 +82,18 @@ func (c *continentRepositoryImpl) ListContinents(ctx context.Context, params *bo
 	}
 
 	// Apply pagination
-	query = query.Offset(params.Offset).Limit(limit)
+	query = query.Offset(params.GetOffset4Db()).Limit(params.GetLimit4Db())
 
 	// Execute query
-	continents, err := query.Order(ent.Asc(continent.FieldName)).All(ctx)
+	continents, err := query.Order(ent.Asc(continent.FieldNameEn)).All(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
 
 	// Convert to domain objects
 	result := make([]*do.Continent, len(continents))
-	for i, continent := range continents {
-		result[i] = c.ToEntity(continent)
+	for i, v := range continents {
+		result[i] = c.ToEntity(v)
 	}
 
 	return result, int64(total), nil

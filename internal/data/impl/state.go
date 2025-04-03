@@ -52,7 +52,7 @@ func (s *stateRepositoryImpl) SearchPointsOfInterest(ctx context.Context, params
 	limit := params.Limit
 	rows, err := cli.Query().
 		Where(state.Or(
-			state.NameContains(keyword),
+			state.NameLocalContains(keyword),
 			state.NameCnContains(keyword),
 			state.NameEnContains(keyword),
 		)).
@@ -94,12 +94,6 @@ func (s *stateRepositoryImpl) ListStates(ctx context.Context, params *bo.ListSta
 		query = query.Where(state.CountryID(params.CountryID))
 	}
 
-	// Set pagination
-	limit := int(params.Limit)
-	if limit <= 0 {
-		limit = 10 // Default to 10 records per page
-	}
-
 	// Get total count
 	total, err := query.Count(ctx)
 	if err != nil {
@@ -107,13 +101,13 @@ func (s *stateRepositoryImpl) ListStates(ctx context.Context, params *bo.ListSta
 	}
 
 	// Apply pagination
-	query = query.Offset(params.Offset).Limit(limit)
+	query = query.Offset(params.GetOffset4Db()).Limit(params.GetLimit4Db())
 
 	// Load related country information
 	query = query.WithCountry()
 
 	// Execute query
-	states, err := query.Order(ent.Asc(state.FieldName)).All(ctx)
+	states, err := query.Order(ent.Asc(state.FieldNameEn)).All(ctx)
 	if err != nil {
 		return nil, 0, err
 	}

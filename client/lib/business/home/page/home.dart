@@ -1,8 +1,7 @@
+import 'package:client/app/constants.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/image.dart';
-import 'package:client/common/utils/app_config.dart';
 import 'package:client/common/utils/asset.dart';
-import 'package:client/common/utils/color.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -19,7 +18,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return AppBarWithSafeArea(
-      backgroundColor: BaseColor.bg,
+      backgroundColor: AppColor.bg,
       top: true,
       bottom: false,
       hasAppBar: false,
@@ -41,7 +40,7 @@ class _HomePageState extends State<HomePage> {
                       'Hi, Leo',
                       style: TextStyle(
                         fontSize: 30.sp,
-                        color: BaseColor.c_1D1F1E,
+                        color: AppColor.c_1D1F1E,
                         fontWeight: AppFontWeight.semiBold,
                       ),
                     ),

@@ -21,12 +21,21 @@ func NewToolHub(cfg *conf.Agent) (*Hub, error) {
 		tools: make(map[string]core.Tool),
 	}
 
+	// Register code use tools
 	for _, toolCfg := range cfg.GetTools() {
 		t, err := createTool(toolCfg)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create tool %s: %v", toolCfg.GetName(), err)
 		}
 
+		if err := hub.RegisterTool(t); err != nil {
+			return nil, fmt.Errorf("failed to register tool %s: %v", toolCfg.GetName(), err)
+		}
+	}
+
+	// Register LLM use tools
+	for _, toolCfg := range cfg.GetLlmUseTools() {
+		t := tools.NewLLMUse(toolCfg)
 		if err := hub.RegisterTool(t); err != nil {
 			return nil, fmt.Errorf("failed to register tool %s: %v", toolCfg.GetName(), err)
 		}
@@ -54,6 +63,8 @@ func createTool(cfg *conf.Agent_ToolConfig) (core.Tool, error) {
 	switch cfg.GetName() {
 	case conf.Agent_Completion:
 		return tools.NewCompletion(cfg), nil
+	case conf.Agent_InducingCreateTrip:
+		return tools.NewLLMUse(cfg.GetLlmUseConfig()), nil
 	default:
 		return nil, fmt.Errorf("unknown tool: %s", cfg.GetName())
 	}

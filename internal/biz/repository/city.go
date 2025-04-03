@@ -15,6 +15,8 @@ type City[T *ent.City, R *do.City] interface {
 
 	// ListCities lists cities, optionally filtered by state/province
 	ListCities(ctx context.Context, params *bo.ListCitiesParams) ([]*do.City, int64, error)
+
+	GetCityIdByName(ctx context.Context, cityName string) (int32, error)
 }
 
 type CityRepo = City[*ent.City, *do.City]

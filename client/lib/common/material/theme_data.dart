@@ -1,4 +1,4 @@
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:client/common/utils/style.dart';
 import 'package:flutter/material.dart';
 
@@ -9,7 +9,7 @@ class BaseThemeData {
     var theme = ThemeData();
     TextSelectionThemeData textSelectionTheme =
         const TextSelectionThemeData().copyWith(
-      cursorColor: BaseColor.hint, // 输入框 光标颜色
+      cursorColor: AppColor.hint, // 输入框 光标颜色
     );
     CardTheme cardTheme = const CardTheme().copyWith(
       elevation: 0,
@@ -24,7 +24,7 @@ class BaseThemeData {
     TextButtonThemeData textButtonTheme = TextButtonThemeData(
       style: TextButton.styleFrom(
         elevation: 0,
-        backgroundColor: BaseColor.theme,
+        backgroundColor: AppColor.theme,
         minimumSize: const Size(0, 0),
         shadowColor: Colors.transparent,
         splashFactory: NoSplash.splashFactory,
@@ -36,16 +36,16 @@ class BaseThemeData {
       style: BaseStyle.outlinedButtonStyle,
     );
     DividerThemeData dividerTheme = theme.dividerTheme.copyWith(
-      color: BaseColor.divider,
+      color: AppColor.divider,
       space: 0.5,
       thickness: 0.5,
     );
     return ThemeData(
-      primarySwatch: BaseColor.themeMaterialColor,
-      primaryColor: BaseColor.theme,
-      primaryColorLight: BaseColor.theme,
-      primaryColorDark: BaseColor.theme,
-      scaffoldBackgroundColor: BaseColor.scaffoldBackgroundColor,
+      primarySwatch: AppColor.themeMaterialColor,
+      primaryColor: AppColor.theme,
+      primaryColorLight: AppColor.theme,
+      primaryColorDark: AppColor.theme,
+      scaffoldBackgroundColor: AppColor.scaffoldBackgroundColor,
       appBarTheme: BaseStyle.appBarTheme,
       cardTheme: cardTheme,
       elevatedButtonTheme: elevatedButtonTheme,
