@@ -5,6 +5,7 @@ package trip.v1;
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 import "validatex/validatex.proto";
+import "poi/v1/poi.proto";
 
 option go_package = "github.com/iter-x/iter-x/internal/api/trip/v1;v1";
 
@@ -87,6 +88,7 @@ message Trip {
   string description = 6;
   google.protobuf.Timestamp start_ts = 7;
   google.protobuf.Timestamp end_ts = 8;
+  repeated DailyTrip daily_trips = 9;
 }
 
 message CreateTripManuallyRequest {
@@ -208,4 +210,29 @@ message DailyTrip {
   int32 day = 5;
   google.protobuf.Timestamp date = 6;
   string notes = 7;
+  repeated DailyItinerary daily_itineraries = 8;
+}
+
+message DailyItinerary {
+  string id = 1;
+  string trip_id = 2;
+  string daily_trip_id = 3;
+  string poi_id = 4;
+  string notes = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+  poi.v1.PointOfInterest poi = 8;
+}
+
+message PointsOfInterest {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string address = 4;
+  double latitude = 5;
+  double longitude = 6;
+  string city_name = 7;
+  string country_name = 8;
+  string state_name = 9;
+  string image_url = 10;
 }

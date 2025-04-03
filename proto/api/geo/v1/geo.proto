@@ -36,7 +36,7 @@ service GeoService {
 message ListContinentsRequest {
   int32 size = 1 [(validatex.rules).numeric = {
     gte: 0,
-    lte: 100,
+    lte: 200,
   }];
   int32 page = 2 [(validatex.rules).numeric = {
     gte: 0
