@@ -2,7 +2,6 @@ package impl
 
 import (
 	"context"
-
 	"go.uber.org/zap"
 
 	"github.com/iter-x/iter-x/internal/biz/bo"
@@ -57,7 +56,7 @@ func (c *countryRepositoryImpl) SearchPointsOfInterest(ctx context.Context, para
 	limit := params.Limit
 	rows, err := cli.Query().
 		Where(country.Or(
-			country.NameContains(keyword),
+			country.NameLocalContains(keyword),
 			country.NameCnContains(keyword),
 			country.NameEnContains(keyword),
 			country.CodeContains(keyword),
@@ -97,12 +96,6 @@ func (c *countryRepositoryImpl) ListCountries(ctx context.Context, params *bo.Li
 		query = query.Where(country.ContinentID(params.ContinentID))
 	}
 
-	// Set pagination
-	limit := int(params.Limit)
-	if limit <= 0 {
-		limit = 10 // Default to 10 records per page
-	}
-
 	// Get total count
 	total, err := query.Count(ctx)
 	if err != nil {
@@ -110,21 +103,20 @@ func (c *countryRepositoryImpl) ListCountries(ctx context.Context, params *bo.Li
 	}
 
 	// Apply pagination
-	query = query.Offset(params.Offset).Limit(limit)
+	query = query.Offset(params.GetOffset4Db()).Limit(params.GetLimit4Db())
 
-	// Load related continent information
-	query = query.WithContinent()
+	query = query.WithImage()
 
 	// Execute query
-	countries, err := query.Order(ent.Asc(country.FieldName)).All(ctx)
+	countries, err := query.Order(ent.Asc(country.FieldNameEn)).All(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
 
 	// Convert to domain objects
 	result := make([]*do.Country, len(countries))
-	for i, country := range countries {
-		result[i] = c.ToEntity(country)
+	for i, v := range countries {
+		result[i] = c.ToEntity(v)
 	}
 
 	return result, int64(total), nil

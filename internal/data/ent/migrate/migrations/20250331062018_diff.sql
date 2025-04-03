@@ -1,0 +1,10 @@
+-- Rename a column from "name" to "name_local"
+ALTER TABLE "cities" RENAME COLUMN "name" TO "name_local";
+-- Rename a column from "name" to "name_local"
+ALTER TABLE "continents" RENAME COLUMN "name" TO "name_local";
+-- Rename a column from "name" to "name_local"
+ALTER TABLE "countries" RENAME COLUMN "name" TO "name_local";
+-- Rename a column from "name" to "name_local"
+ALTER TABLE "points_of_interest" RENAME COLUMN "name" TO "name_local";
+-- Rename a column from "name" to "name_local"
+ALTER TABLE "states" RENAME COLUMN "name" TO "name_local";

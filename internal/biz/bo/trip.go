@@ -27,6 +27,9 @@ type (
 		StartDate      time.Time
 		EndDate        time.Time
 		Duration       int
+		CityIds        []int32  `json:"city_ids"`
+		PoiIds         []string `json:"poi_ids"`
+		LinkURL        string   `json:"link_url"`
 	}
 )
 

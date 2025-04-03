@@ -1,12 +1,14 @@
 import 'package:client/app/constants.dart';
 import 'package:client/business/mine/service/profile_service.dart';
 import 'package:client/business/mine/widgets/profile_header.dart';
+import 'package:client/business/mine/widgets/profile_skeleton.dart';
 import 'package:client/business/mine/widgets/section_header.dart';
 import 'package:client/business/mine/widgets/stats_card.dart';
 import 'package:client/business/mine/widgets/trip_preview_card.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/widgets/preference_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 class MinePage extends StatefulWidget {
@@ -35,24 +37,26 @@ class _MinePageState extends State<MinePage> {
       child: Consumer<ProfileService>(
         builder: (context, service, child) {
           if (service.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const ProfileSkeleton();
           }
 
           final profile = service.profile;
           if (profile == null) {
-            return const Center(child: Text('Failed to load profile'));
+            return Center(
+                child: Text('Failed to load profile',
+                    style: TextStyle(fontSize: 14.sp)));
           }
 
           return ListView(
-            padding: const EdgeInsets.only(bottom: 15),
+            padding: EdgeInsets.only(bottom: 15.h),
             children: [
               ProfileHeader(
                 name: profile.userInfo.nickname,
                 avatarUrl: profile.userInfo.avatarUrl,
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: Row(
                   children: [
                     Expanded(
@@ -62,7 +66,7 @@ class _MinePageState extends State<MinePage> {
                         emoji: '🌍',
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    SizedBox(width: 10.w),
                     Expanded(
                       child: StatsCard(
                         value: profile.exploredCities.toString(),
@@ -73,9 +77,9 @@ class _MinePageState extends State<MinePage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: 10.h),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: Row(
                   children: [
                     Expanded(
@@ -85,7 +89,7 @@ class _MinePageState extends State<MinePage> {
                         emoji: '🇺🇸',
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12.w),
                     Expanded(
                       child: StatsCard(
                         value:
@@ -97,9 +101,9 @@ class _MinePageState extends State<MinePage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               Container(
-                margin: const EdgeInsets.symmetric(horizontal: 15),
+                margin: EdgeInsets.symmetric(horizontal: 15.w),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(AppConfig.boxRadius),
@@ -112,9 +116,9 @@ class _MinePageState extends State<MinePage> {
                   },
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               Container(
-                margin: const EdgeInsets.symmetric(horizontal: 15),
+                margin: EdgeInsets.symmetric(horizontal: 15.w),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(AppConfig.boxRadius),

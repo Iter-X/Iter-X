@@ -15,4 +15,6 @@ var ProviderSet = wire.NewSet(
 	NewContinent,
 	NewCountry,
 	NewState,
+	NewFiles,
+	NewPoiFiles,
 )

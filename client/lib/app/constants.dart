@@ -53,6 +53,7 @@ class AppColor {
   static const Color secondary = Color(0xFFF2F2F2);
   static const Color highlight = Color(0xFF375F77);
   static const Color white = Color(0xFFFFFFFF);
+  static const Color transparent = Colors.transparent;
 
   static const Color borderLine = Color(0xFF1D1F1E);
   static const Color buttonGrayBG = Color(0xFFE3E3E3);

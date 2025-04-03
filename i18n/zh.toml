@@ -34,6 +34,15 @@ other = "短信验证码无效"
 [INVALID_CREATION_METHOD]
 other = "无效的模式"
 
+[INVALID_TIME_RANGE]
+other = "时间参数无效，必须选择天数或时间范围"
+
+[MISSING_CITY]
+other = "必须至少选择一个城市"
+
+[MISSING_LINK]
+other = "外部链接不能为空"
+
 [UNAUTHORIZED]
 other = "未授权"
 

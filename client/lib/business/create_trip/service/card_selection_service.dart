@@ -413,25 +413,25 @@ class CardSelectionService {
         'id': 1,
         'imageUrl': 'img_beijing.png',
         'name': '北京',
-        'countryId': 4,
+        'countryId': 36,
       },
       {
         'id': 2,
         'imageUrl': 'img_shanghai.png',
         'name': '上海',
-        'countryId': 4,
+        'countryId': 36,
       },
       {
         'id': 3,
         'imageUrl': 'img_guangzhou.png',
         'name': '广州',
-        'countryId': 4,
+        'countryId': 36,
       },
       {
         'id': 4,
         'imageUrl': 'img_chengdu.png',
         'name': '成都',
-        'countryId': 4,
+        'countryId': 36,
       }
     ];
   }

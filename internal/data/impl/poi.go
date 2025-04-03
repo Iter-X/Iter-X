@@ -163,7 +163,6 @@ func (r *pointsOfInterestRepositoryImpl) SearchPointsOfInterestByNamesFromES(ctx
 		}
 		poi := &do.PointsOfInterest{
 			ID:                         id,
-			Name:                       hit.Source.Name,
 			NameEn:                     hit.Source.NameEn,
 			NameCn:                     hit.Source.NameCn,
 			Description:                hit.Source.Description,
@@ -198,7 +197,7 @@ func (r *pointsOfInterestRepositoryImpl) SearchPointsOfInterest(ctx context.Cont
 	limit := params.Limit
 	rows, err := cli.Query().
 		Where(pointsofinterest.Or(
-			pointsofinterest.NameContains(keyword),
+			pointsofinterest.NameLocalContains(keyword),
 			pointsofinterest.NameCnContains(keyword),
 			pointsofinterest.NameEnContains(keyword),
 			pointsofinterest.DescriptionContains(keyword),
@@ -231,7 +230,7 @@ func (r *pointsOfInterestRepositoryImpl) GetByCityNames(ctx context.Context, cit
 	cli := r.GetTx(ctx).City
 	predicates := make([]predicate.City, 0, len(cityNames))
 	for _, name := range cityNames {
-		predicates = append(predicates, city.NameContains(name))
+		predicates = append(predicates, city.NameLocalContains(name))
 	}
 	cityRows, err := cli.Query().
 		Where(city.Or(predicates...)).

@@ -4,7 +4,6 @@ import 'package:client/business/create_trip/widgets/bottom_create_widgets.dart';
 import 'package:client/business/create_trip/widgets/widgets.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/state.dart';
-import 'package:client/app/constants.dart';
 import 'package:client/common/widgets/return_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -185,20 +184,14 @@ class _CreateTripHomePageState extends BaseState<CreateTripHomePage> {
             child: _buildHeaderSection(),
           ),
           Gap(20.h),
-          // 修改这里，使用Visibility组件控制显示隐藏，避免焦点丢失
-          Visibility(
-            visible: !_selectOneHasFocus,
-            maintainState: true, // 保持组件状态
-            maintainAnimation: true, // 保持动画状态
-            maintainSize: false, // 保持组件大小
-            child: Flexible(
+          if (!_selectOneHasFocus)
+            Flexible(
               flex: 3,
               child: Container(
                 margin: EdgeInsets.symmetric(horizontal: 35.w),
                 child: _buildButtonGroup(),
               ),
             ),
-          ),
           if (!_selectOneHasFocus) Gap(20.h),
           Flexible(
             flex: 2,

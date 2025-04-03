@@ -1,4 +1,4 @@
-# 项目结构
+# Standard Operating Procedures (SOP) Manual
 1. 客户端语言是Flutter，代码在 `client` 目录下，主要代码都在 `client/lib` 目录下
 2. 所有页面位于 `client/lib/bussiness` 目录下，如 `client/lib/bussiness/auth`
 3. 通常每个页面下会包含这么几个目录（当不存在时你可以自己根据情况选择创建）：
@@ -29,9 +29,9 @@
 
 ## 全局配置
 全局配置在 `client/lib/app/constants.dart` 中，可以在这里定义一些全局的常量，比如颜色、字体等：
-- 字号可以直接AppFontWeight.normal进行调用，不要直接写w300这种数字
-- 颜色可以直接AppColor.primary进行调用，不要直接写颜色值
-- 如果有圆角间距之类直接从AppConfig中调用，比如AppConfig.boxRadius就是通用圆角，而AppConfig.cornerRadius就是按钮的圆角（全圆）
+- 字号可以直接调用 `AppFontWeight.*` 类似 `AppFontWeight.regular`, `AppFontWeight.black` 进行调用，不要直接写 `w300` 这种数字
+- 颜色可以直接 `AppColor.primary` 进行调用，不要直接写颜色值
+- 如果有圆角间距之类直接从 `AppConfig` 中调用，比如 `AppConfig.boxRadius` 就是通用圆角，而 `AppConfig.cornerRadius` 就是按钮的圆角（全圆）
 
 ## SafeArea & AppBar
 我们自己定义了 `AppBarWithSafeArea` 在 `lib/common/material/app_bar_with_safe_area.dart` 中，这个是带有安全区域的AppBar，使用的时候直接调用这个组件即可，具体用法参考代码或者其他页面的使用，这个是可以单独开启AppBar，单独设置上下安全距离是否开启，上下背景之类的
@@ -41,3 +41,6 @@
 
 ## flutter_screenutil
 我们使用 `flutter_screenutil` 进行屏幕适配，在设置字体大小的时候，使用`number.sp`，在设置宽高间距的时候，使用`number.w`和`number.h`，正方形的情况下，使用同一个单位，如`width: 100.w, height: 100.w`或`width: 100.h, height: 100.h`
+
+## 代码注释
+通常不需要代码注释，更多是用规范的命令来表现意图，不过有一些地方必须要有注释的请用英文注释

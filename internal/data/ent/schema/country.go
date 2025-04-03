@@ -17,6 +17,7 @@ func (Country) Fields() []ent.Field {
 		field.Uint("id").Unique(),
 		field.String("code").MaxLen(20).Comment("country code"),
 		field.Uint("continent_id").Comment("continent id"),
+		field.Uint("file_id").Optional().Comment("country image file id"),
 	}
 }
 
@@ -27,6 +28,7 @@ func (Country) Edges() []ent.Edge {
 		edge.To("state", State.Type),
 		edge.From("continent", Continent.Type).Ref("country").Unique().Required().Field("continent_id"),
 		edge.To("daily_trip_location", DailyTripLocation.Type),
+		edge.To("image", File.Type).Unique().Field("file_id"),
 	}
 }
 

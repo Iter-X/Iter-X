@@ -30,5 +30,7 @@ func (s *PointsOfInterestService) SearchPointsOfInterest(ctx context.Context, re
 	if err != nil {
 		return nil, err
 	}
-	return &poiV1.SearchPointsOfInterestResponse{PointsOfInterest: build.ToPointsOfInterestsProto(pointsOfInterest)}, nil
+	return &poiV1.SearchPointsOfInterestResponse{
+		PointsOfInterest: build.ToPointsOfInterestsProto(ctx, pointsOfInterest),
+	}, nil
 }
