@@ -1,7 +1,7 @@
+import 'package:client/app/constants.dart';
 import 'package:client/business/create_trip/widgets/select_days_widget.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/image.dart';
-import 'package:client/common/utils/app_config.dart';
 import 'package:client/common/utils/date_time_util.dart';
 import 'package:client/common/utils/toast.dart';
 import 'package:client/common/widgets/base_button.dart';
@@ -13,8 +13,6 @@ import 'package:scrollable_clean_calendar/controllers/clean_calendar_controller.
 import 'package:scrollable_clean_calendar/scrollable_clean_calendar.dart';
 import 'package:scrollable_clean_calendar/utils/enums.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-import '../../../common/utils/color.dart';
 
 class SelectDatePage extends StatefulWidget {
   const SelectDatePage({super.key});
@@ -64,7 +62,7 @@ class _SelectDatePageState extends State<SelectDatePage> {
     return Stack(
       children: [
         AppBarWithSafeArea(
-          backgroundColor: BaseColor.bg,
+          backgroundColor: AppColor.bg,
           hasAppBar: true,
           leading: ReturnButton(),
           title: "选择出行时间",
@@ -80,7 +78,7 @@ class _SelectDatePageState extends State<SelectDatePage> {
                   child: Text(
                     day.substring(1, 2),
                     style: TextStyle(
-                      color: BaseColor.c_1D1F1E,
+                      color: AppColor.c_1D1F1E,
                       fontSize: 22.sp,
                     ),
                   ),
@@ -94,7 +92,7 @@ class _SelectDatePageState extends State<SelectDatePage> {
                   child: Text(
                     '$yearStr-${getChangeMonth(monthStr)}',
                     style: TextStyle(
-                      color: BaseColor.c_1D1F1E,
+                      color: AppColor.c_1D1F1E,
                       fontSize: 30.sp,
                       fontWeight: AppFontWeight.medium,
                     ),
@@ -117,14 +115,14 @@ class _SelectDatePageState extends State<SelectDatePage> {
                       Text(
                         day.text,
                         style: TextStyle(
-                          color: isWhiteText(day.selectedMinDate, day.selectedMaxDate, day.day) ? Colors.white : BaseColor.c_1D1F1E,
+                          color: isWhiteText(day.selectedMinDate, day.selectedMaxDate, day.day) ? Colors.white : AppColor.c_1D1F1E,
                           fontSize: 18.sp,
                         ),
                       ),
                       Text(
                         chineseDay,
                         style: TextStyle(
-                          color: isWhiteText(day.selectedMinDate, day.selectedMaxDate, day.day) ? Colors.white : BaseColor.c_1D1F1E,
+                          color: isWhiteText(day.selectedMinDate, day.selectedMaxDate, day.day) ? Colors.white : AppColor.c_1D1F1E,
                           fontSize: 13.sp,
                         ),
                       )
@@ -175,7 +173,7 @@ class _SelectDatePageState extends State<SelectDatePage> {
             Container(
               height: 186.h,
               padding: EdgeInsets.only(top: 30.h),
-              color: BaseColor.bg,
+              color: AppColor.bg,
               child: Column(
                 children: [
                   Container(
@@ -197,7 +195,7 @@ class _SelectDatePageState extends State<SelectDatePage> {
                                       text: startTime,
                                       style: TextStyle(
                                         fontSize: 18.sp,
-                                        color: BaseColor.c_1D1F1E,
+                                        color: AppColor.c_1D1F1E,
                                         fontWeight: AppFontWeight.bold,
                                       ),
                                     ),
@@ -205,7 +203,7 @@ class _SelectDatePageState extends State<SelectDatePage> {
                                       text: '出发 ',
                                       style: TextStyle(
                                         fontSize: 18.sp,
-                                        color: BaseColor.c_1D1F1E,
+                                        color: AppColor.c_1D1F1E,
                                       ),
                                     ),
                                   ],
@@ -219,14 +217,14 @@ class _SelectDatePageState extends State<SelectDatePage> {
                                     text: '出行',
                                     style: TextStyle(
                                       fontSize: 18.sp,
-                                      color: BaseColor.c_1D1F1E,
+                                      color: AppColor.c_1D1F1E,
                                     ),
                                   ),
                                   TextSpan(
                                     text: '${selectDays ?? selectRangeDays}',
                                     style: TextStyle(
                                       fontSize: 18.sp,
-                                      color: BaseColor.c_1D1F1E,
+                                      color: AppColor.c_1D1F1E,
                                       fontWeight: AppFontWeight.bold,
                                     ),
                                   ),
@@ -234,7 +232,7 @@ class _SelectDatePageState extends State<SelectDatePage> {
                                     text: '天',
                                     style: TextStyle(
                                       fontSize: 18.sp,
-                                      color: BaseColor.c_1D1F1E,
+                                      color: AppColor.c_1D1F1E,
                                     ),
                                   ),
                                 ],
@@ -254,7 +252,7 @@ class _SelectDatePageState extends State<SelectDatePage> {
                               Text(
                                 '灵活时间',
                                 style: TextStyle(
-                                  color: BaseColor.c_1D1F1E,
+                                  color: AppColor.c_1D1F1E,
                                   fontSize: 16.sp,
                                 ),
                               ),
@@ -327,7 +325,7 @@ class _SelectDatePageState extends State<SelectDatePage> {
     if (day1 == null && day2 == null) {
       if (DateTimeUtil.isSameDay(day3, DateTime.now())) {
         return BoxDecoration(
-          color: BaseColor.c_1D1F1E,
+          color: AppColor.c_1D1F1E,
           shape: BoxShape.circle,
         );
       }
@@ -336,14 +334,14 @@ class _SelectDatePageState extends State<SelectDatePage> {
     // 选中的日期范围是同一天
     if (DateTimeUtil.isSameDay(day1, day3) && DateTimeUtil.isSameDay(day2, day3)) {
       return BoxDecoration(
-        color: BaseColor.c_375F77,
+        color: AppColor.c_375F77,
         shape: BoxShape.circle,
       );
     }
     // 开始时间是当前选中的日期
     if (DateTimeUtil.isSameDay(day1, day3)) {
       return BoxDecoration(
-        color: BaseColor.c_375F77,
+        color: AppColor.c_375F77,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(56.w),
           bottomLeft: Radius.circular(56.w),
@@ -353,7 +351,7 @@ class _SelectDatePageState extends State<SelectDatePage> {
     // 结束时间是当前选中的日期
     if (DateTimeUtil.isSameDay(day2, day3)) {
       return BoxDecoration(
-        color: BaseColor.c_375F77,
+        color: AppColor.c_375F77,
         borderRadius: BorderRadius.only(
           topRight: Radius.circular(56.w),
           bottomRight: Radius.circular(56.w),
@@ -363,12 +361,12 @@ class _SelectDatePageState extends State<SelectDatePage> {
     // 日期范围是选中的日期
     if (day1 != null && day2 != null && day3.isAfter(day1) && day3.isBefore(day2)) {
       return BoxDecoration(
-        color: BaseColor.c_375F77,
+        color: AppColor.c_375F77,
       );
     }
     if (!DateTimeUtil.isSameDay(day1, day3) && !DateTimeUtil.isSameDay(day2, day3) && DateTimeUtil.isSameDay(day3, DateTime.now())) {
       return BoxDecoration(
-        color: BaseColor.c_1D1F1E,
+        color: AppColor.c_1D1F1E,
         shape: BoxShape.circle,
       );
     }
