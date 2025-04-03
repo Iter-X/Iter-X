@@ -15,6 +15,7 @@
  * @LastEditTime: 2025-03-23 22:32:11
  */
 
+import 'package:client/app/routes.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/image.dart';
 import 'package:client/common/material/iter_text.dart';
@@ -25,6 +26,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 
+import '../../../common/material/state.dart';
+
 class CardSelectionPage extends StatefulWidget {
   const CardSelectionPage({super.key});
 
@@ -32,7 +35,7 @@ class CardSelectionPage extends StatefulWidget {
   State<CardSelectionPage> createState() => _CardSelectionPageState();
 }
 
-class _CardSelectionPageState extends State<CardSelectionPage> {
+class _CardSelectionPageState extends BaseState<CardSelectionPage> {
   int selectionLevel = 0; // 0:国家 1:城市 2:景点
   var _selectedContinentId = '0'; // 选择的洲id
   final Set<String> _selectedCountries = {};
@@ -426,7 +429,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
               ),
               SizedBox(height: 20),
               GestureDetector(
-                onTap: () => {print('点击')},
+                onTap: () => go(Routes.selectDate),
                 child: Container(
                   width: 390.w,
                   height: 52.h,
