@@ -90,8 +90,9 @@ class Http {
     dio.interceptors.add(
       QueuedInterceptorsWrapper(
         onRequest: (options, handler) async {
-          String apiPath = options.path.substring(0, options.path.lastIndexOf('/'));
-          
+          String apiPath =
+              options.path.substring(0, options.path.lastIndexOf('/'));
+
           // 不需要 token 的接口直接放行
           if (apiPath.contains('/auth/') || options.path.contains('/auth/')) {
             return handler.next(options);
@@ -109,7 +110,7 @@ class Http {
           }
 
           final userNotifier = context.read<UserNotifier>();
-          
+
           // 检查是否有有效的 token
           if (!await userNotifier.ensureValidToken()) {
             return handler.reject(
@@ -122,8 +123,11 @@ class Http {
 
           // 添加 token 到请求头
           if (userNotifier.token != null) {
-            options.headers['Authorization'] = 'Bearer ${userNotifier.token!.token}';
+            options.headers['Authorization'] =
+                'Bearer ${userNotifier.token!.token}';
           }
+
+          options.headers['X-Lang'] = 'zh-CN';
 
           BaseLogger.i('request headers: ${json.encode(options.headers)}');
           try {
@@ -157,14 +161,19 @@ class Http {
     //源码会报错会报错  https://github.com/flutterchina/dio/issues/1133
     // 'You cannot set both contentType param and a content-type header',
     //会设置两次contentType  参考 option   651行  所以必须要移除
-    dio.options = dio.options.copyWith(headers: Map.from(dio.options.headers)..remove(Headers.contentTypeHeader), baseUrl: baseUrl);
+    dio.options = dio.options.copyWith(
+        headers: Map.from(dio.options.headers)
+          ..remove(Headers.contentTypeHeader),
+        baseUrl: baseUrl);
   }
 
   // 响应数据統一转换
-  Future<HttpResultBean> _handleResponseData(Response response, bool isShowLoading) async {
+  Future<HttpResultBean> _handleResponseData(
+      Response response, bool isShowLoading) async {
     hideLoading(isShowLoading);
     //回到APP业务层去处理
-    HttpResultBean result = await Http.instance.config.handleResponseData(response);
+    HttpResultBean result =
+        await Http.instance.config.handleResponseData(response);
     return result;
   }
 
@@ -188,7 +197,8 @@ class Http {
     params ??= HashMap<String, dynamic>();
     showLoading(isShowLoading);
     try {
-      Response<Map<String, dynamic>> response = await dio.get<Map<String, dynamic>>(
+      Response<Map<String, dynamic>> response =
+          await dio.get<Map<String, dynamic>>(
         path,
         queryParameters: params,
         options: options,
@@ -223,7 +233,8 @@ class Http {
     }
     showLoading(isShowLoading);
     try {
-      Response<Map<String, dynamic>> response = await dio.post<Map<String, dynamic>>(
+      Response<Map<String, dynamic>> response =
+          await dio.post<Map<String, dynamic>>(
         path,
         data: dataList ?? basicParam,
         queryParameters: queryParameters,
@@ -253,7 +264,8 @@ class Http {
     ProgressCallback? onReceiveProgress,
   }) async {
     showLoading(isShowLoading);
-    Response<Map<String, dynamic>> response = await dio.post<Map<String, dynamic>>(
+    Response<Map<String, dynamic>> response =
+        await dio.post<Map<String, dynamic>>(
       path,
       data: FormData.fromMap(data),
       queryParameters: queryParameters,
@@ -306,7 +318,8 @@ class Http {
     ProgressCallback? onReceiveProgress,
   }) async {
     try {
-      Response<Map<String, dynamic>> response = await dio.put<Map<String, dynamic>>(
+      Response<Map<String, dynamic>> response =
+          await dio.put<Map<String, dynamic>>(
         path,
         data: data,
         queryParameters: queryParameters,
@@ -333,7 +346,8 @@ class Http {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    Response<Map<String, dynamic>> response = await dio.patch<Map<String, dynamic>>(
+    Response<Map<String, dynamic>> response =
+        await dio.patch<Map<String, dynamic>>(
       path,
       data: data,
       queryParameters: queryParameters,
@@ -357,7 +371,8 @@ class Http {
     ProgressCallback? onReceiveProgress,
   }) async {
     try {
-      Response<Map<String, dynamic>> response = await dio.delete<Map<String, dynamic>>(
+      Response<Map<String, dynamic>> response =
+          await dio.delete<Map<String, dynamic>>(
         path,
         data: data,
         queryParameters: queryParameters,
