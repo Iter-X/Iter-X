@@ -43,6 +43,9 @@ other = "必须至少选择一个城市"
 [MISSING_LINK]
 other = "外部链接不能为空"
 
+[INVALID_TRIP_PARAMETERS]
+other = ""
+
 [UNAUTHORIZED]
 other = "未授权"
 

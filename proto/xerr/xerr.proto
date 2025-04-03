@@ -23,6 +23,7 @@ enum ClientError {
   INVALID_TIME_RANGE = 12;
   MISSING_CITY = 13;
   MISSING_LINK = 14;
+  INVALID_TRIP_PARAMETERS = 15;
 }
 
 enum UnauthorizedError {

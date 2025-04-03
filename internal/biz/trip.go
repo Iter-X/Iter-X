@@ -3,6 +3,7 @@ package biz
 import (
 	"context"
 	"fmt"
+	"github.com/ifuryst/lol"
 	"time"
 
 	"github.com/google/uuid"
@@ -20,13 +21,17 @@ import (
 
 type Trip struct {
 	tripRepo repository.TripRepo
+	poiRepo  repository.PointsOfInterestRepo
+	cityRepo repository.CityRepo
 	logger   *zap.SugaredLogger
 	agentHub *agent.Hub
 }
 
-func NewTrip(tripRepo repository.TripRepo, logger *zap.SugaredLogger, agentHub *agent.Hub) *Trip {
+func NewTrip(tripRepo repository.TripRepo, poiRepo repository.PointsOfInterestRepo, cityRepo repository.CityRepo, logger *zap.SugaredLogger, agentHub *agent.Hub) *Trip {
 	return &Trip{
 		tripRepo: tripRepo,
+		poiRepo:  poiRepo,
+		cityRepo: cityRepo,
 		logger:   logger.Named("biz.tripRepo"),
 		agentHub: agentHub,
 	}
@@ -40,29 +45,77 @@ func (b *Trip) CreateTrip(ctx context.Context, req *bo.CreateTripRequest) (*do.T
 
 	switch req.CreationMethod {
 	case cnst.TripCreationMethodManual:
-		// Get the PlanAgent from the agentHub
-		planAgent, err := b.agentHub.GetAgent("PlanAgent")
+		// Get the cityPlanner from the agentHub
+		cityPlanner, err := b.agentHub.GetAgent(cnst.AgentCityPlanner)
+		if err != nil {
+			b.logger.Errorw("failed to get CityPlanner", "err", err)
+			return nil, xerr.ErrorCreateTripFailed()
+		}
+
+		cityPlannerOutput, err := cityPlanner.Execute(ctx, &do.CityPlannerInput{
+			Destination: req.Destination,
+			StartDate:   req.StartDate,
+			EndDate:     req.EndDate,
+			Duration:    req.Duration,
+		})
+		if err != nil {
+			b.logger.Errorw("failed to plan cities with CityPlanner", "err", err)
+			return nil, xerr.ErrorCreateTripFailed()
+		}
+
+		rawCities, ok := cityPlannerOutput.(*do.CityPlannerOutput)
+		if !ok || len(*rawCities) == 0 {
+			b.logger.Errorw("failed to cast CityPlannerOutput", "err", err, "ok", ok, "rawCities", rawCities)
+			return nil, xerr.ErrorCreateTripFailed()
+		}
+
+		// Get cities IDs from city names
+		var cityIds []int32
+		for _, dailyCities := range *rawCities {
+			for _, cityName := range dailyCities {
+				cityId, err := b.cityRepo.GetCityIdByName(ctx, cityName)
+				if err != nil {
+					b.logger.Errorw("failed to get city id", "err", err)
+					return nil, xerr.ErrorCreateTripFailed()
+				}
+				cityIds = append(cityIds, cityId)
+			}
+		}
+
+		// Get top POIs for each city
+		pois, err := b.poiRepo.GetTopPOIsByCity(ctx, cityIds, 30)
+		if err != nil {
+			b.logger.Errorw("failed to get top POIs by city", "err", err)
+			return nil, xerr.ErrorCreateTripFailed()
+		}
+
+		// Extract POI IDs
+		poiIds := make([]string, 0, len(pois))
+		for _, poi := range pois {
+			poiIds = append(poiIds, poi.ID.String())
+		}
+
+		// Get the TripPlanner from the agentHub
+		tripPlanner, err := b.agentHub.GetAgent(cnst.AgentTripPlanner)
 		if err != nil {
 			b.logger.Errorw("failed to get PlanAgent", "err", err)
 			return nil, xerr.ErrorCreateTripFailed()
 		}
 
-		planAgentInput := &do.PlanAgentInput{
-			Destination: req.Destination,
-			StartDate:   req.StartDate,
-			EndDate:     req.EndDate,
-			Duration:    req.Duration,
-		}
-
-		planAgentOutput, err := planAgent.Execute(ctx, planAgentInput)
+		tripPlannerOutput, err := tripPlanner.Execute(ctx, &do.TripPlannerInput{
+			StartDate: req.StartDate,
+			EndDate:   req.EndDate,
+			Duration:  req.Duration,
+			POIs:      pois,
+		})
 		if err != nil {
-			b.logger.Errorw("failed to plan trip with PlanAgent", "err", err)
+			b.logger.Errorw("failed to plan trip with TripPlanner", "err", err)
 			return nil, xerr.ErrorCreateTripFailed()
 		}
 
-		rawTrip, ok := planAgentOutput.(*do.PlanAgentOutput)
-		if !ok {
-			b.logger.Errorw("failed to cast PlanAgentOutput", "err", err)
+		rawTrip, ok := tripPlannerOutput.(*do.TripPlannerOutput)
+		if !ok || len(*rawTrip) == 0 {
+			b.logger.Errorw("failed to cast TripPlannerOutput", "err", err, "ok", ok, "rawTrip", rawTrip)
 			return nil, xerr.ErrorCreateTripFailed()
 		}
 
@@ -118,8 +171,110 @@ func (b *Trip) CreateTrip(ctx context.Context, req *bo.CreateTripRequest) (*do.T
 
 		return createdTrip, nil
 	case cnst.TripCreationMethodCard:
-		// TODO: Handle card-based creation
-		return nil, xerr.ErrorCreateTripFailed()
+		tripPlanner, err := b.agentHub.GetAgent(cnst.AgentTripPlanner)
+		if err != nil {
+			b.logger.Errorw("failed to get PlanAgent", "err", err)
+			return nil, xerr.ErrorCreateTripFailed()
+		}
+
+		poiIds := make([]uuid.UUID, 0, len(req.PoiIds))
+		for _, poiId := range req.PoiIds {
+			parsedPoiId, err := uuid.Parse(poiId)
+			if err != nil {
+				continue
+			}
+			poiIds = append(poiIds, parsedPoiId)
+		}
+		poiIds = lol.UniqSlice(poiIds)
+
+		var pois []*do.PointsOfInterest
+		if len(poiIds) == 0 {
+			// get POIs by city IDs
+			pois, err = b.poiRepo.GetTopPOIsByCity(ctx, req.CityIds, 30)
+			if err != nil {
+				b.logger.Errorw("failed to get top POIs by city", "err", err)
+				return nil, xerr.ErrorCreateTripFailed()
+			}
+		} else {
+			// get POIs by IDs
+			pois, err = b.poiRepo.GetByIds(ctx, poiIds)
+			if err != nil {
+				b.logger.Errorw("failed to get POIs by ids", "err", err)
+				return nil, xerr.ErrorCreateTripFailed()
+			}
+		}
+
+		tripPlannerInput := &do.TripPlannerInput{
+			StartDate: req.StartDate,
+			EndDate:   req.EndDate,
+			Duration:  req.Duration,
+			POIs:      pois,
+		}
+
+		tripPlannerOutput, err := tripPlanner.Execute(ctx, tripPlannerInput)
+		if err != nil {
+			b.logger.Errorw("failed to plan trip with PlanAgent", "err", err)
+			return nil, xerr.ErrorCreateTripFailed()
+		}
+
+		rawTrip, ok := tripPlannerOutput.(*do.TripPlannerOutput)
+		if !ok {
+			b.logger.Errorw("failed to cast TripPlannerOutput", "err", err)
+			return nil, xerr.ErrorCreateTripFailed()
+		}
+
+		var days int8
+		if req.Duration > 0 {
+			days = int8(req.Duration)
+		} else {
+			days = int8(req.EndDate.Sub(req.StartDate).Hours()/24) + 1
+		}
+
+		trip := &do.Trip{
+			UserID:    claims.UID,
+			Title:     fmt.Sprintf("自定义%d日游", days),
+			StartDate: req.StartDate,
+			EndDate:   req.EndDate,
+			Days:      days,
+		}
+
+		createdTrip, err := b.tripRepo.CreateTrip(ctx, trip)
+		if err != nil {
+			b.logger.Errorw("failed to create trip", "err", err)
+			return nil, xerr.ErrorCreateTripFailed()
+		}
+
+		for _, dailyPlan := range *rawTrip {
+			dailyTrip := &do.DailyTrip{
+				TripID: createdTrip.ID,
+				Day:    int32(dailyPlan.Day),
+				Date:   dailyPlan.Date,
+				Notes:  dailyPlan.Title,
+			}
+
+			createdDailyTrip, err := b.tripRepo.CreateDailyTrip(ctx, dailyTrip)
+			if err != nil {
+				b.logger.Errorw("failed to create daily trip", "err", err)
+				return nil, xerr.ErrorCreateDailyTripFailed()
+			}
+
+			for _, poi := range dailyPlan.POIs {
+				dailyItinerary := &do.DailyItinerary{
+					TripID:      createdTrip.ID,
+					DailyTripID: createdDailyTrip.ID,
+					PoiID:       poi.Id,
+					Notes:       poi.Notes,
+				}
+
+				_, err = b.tripRepo.CreateDailyItinerary(ctx, dailyItinerary)
+				if err != nil {
+					b.logger.Errorw("failed to create daily itinerary", "err", err)
+					return nil, xerr.ErrorCreateDailyItineraryFailed()
+				}
+			}
+		}
+
+		return createdTrip, nil
 	case cnst.TripCreationMethodExternalLink:
 		// TODO: Handle external link creation
 		return nil, xerr.ErrorCreateTripFailed()

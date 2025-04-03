@@ -140,12 +140,18 @@ enum I18nFormat {
 
 message Agent {
   enum AgentName {
-    PlanAgent = 0;
+    TripPlanner = 0;
+    CityPlanner = 1;
   }
 
   message AgentToolConfig {
+    enum ToolType {
+      CodeUse = 0;
+      LLMUse = 1;
+    }
     ToolName name = 1;
     bool enabled = 2;
+    ToolType type = 3;
   }
 
   message AgentConfig {
@@ -168,6 +174,7 @@ message Agent {
   enum ToolName {
     Completion = 0;
     Browser = 1;
+    InducingCreateTrip = 2;
   }
 
   message ToolConfig {
@@ -176,10 +183,35 @@ message Agent {
     string base_url = 3;
     string api_key = 4;
     string model = 5;
+    LLMUseToolConfig llm_use_config = 6;
+  }
+
+  message LLMUseToolConfig {
+    string name = 1;
+    string type = 2;
+    FunctionConfig function = 3;
+  }
+
+  message FunctionConfig {
+    string name = 1;
+    string description = 2;
+    FunctionParameters parameters = 3;
+  }
+
+  message FunctionParameters {
+    message Property {
+      string type = 1;
+      string description = 2;
+    }
+
+    string type = 1;
+    map<string, Property> properties = 2;
+    repeated string required = 3;
   }
 
   repeated AgentConfig agents = 1;
   repeated ToolConfig tools = 2;
+  repeated LLMUseToolConfig llm_use_tools = 3;
 }
 
 message Storage {

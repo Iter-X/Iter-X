@@ -251,3 +251,49 @@ func (r *pointsOfInterestRepositoryImpl) GetByCityNames(ctx context.Context, cit
 	pois := r.ToEntities(rows)
 	return pois, nil
 }
+
+func (r *pointsOfInterestRepositoryImpl) GetTopPOIsByCity(ctx context.Context, cityIds []int32, limit int) ([]*do.PointsOfInterest, error) {
+	if len(cityIds) == 0 {
+		return nil, nil
+	}
+
+	// Convert []int32 to []uint
+	uintCityIds := make([]uint, len(cityIds))
+	for i, id := range cityIds {
+		uintCityIds[i] = uint(id)
+	}
+
+	rows, err := r.GetTx(ctx).PointsOfInterest.Query().
+		Where(pointsofinterest.CityIDIn(uintCityIds...)).
+		Order(ent.Desc(pointsofinterest.FieldRating)).
+		Limit(limit).
+		WithContinent().
+		WithCountry().
+		WithState().
+		WithCity().
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.ToEntities(rows), nil
+}
+
+func (r *pointsOfInterestRepositoryImpl) GetByIds(ctx context.Context, ids []uuid.UUID) ([]*do.PointsOfInterest, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+
+	rows, err := r.GetTx(ctx).PointsOfInterest.Query().
+		Where(pointsofinterest.IDIn(ids...)).
+		WithContinent().
+		WithCountry().
+		WithState().
+		WithCity().
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.ToEntities(rows), nil
+}

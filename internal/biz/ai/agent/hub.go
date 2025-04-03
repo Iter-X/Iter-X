@@ -2,12 +2,12 @@ package agent
 
 import (
 	"fmt"
+	"github.com/iter-x/iter-x/internal/biz/ai/planner/city"
+	"github.com/iter-x/iter-x/internal/biz/ai/planner/trip"
 	"sync"
 
 	"github.com/iter-x/iter-x/internal/biz/ai/core"
-	"github.com/iter-x/iter-x/internal/biz/ai/plan"
 	"github.com/iter-x/iter-x/internal/biz/ai/tool"
-	"github.com/iter-x/iter-x/internal/biz/repository"
 	"github.com/iter-x/iter-x/internal/conf"
 )
 
@@ -19,7 +19,7 @@ type Hub struct {
 }
 
 // NewHub initializes the AgentHub with configured agents
-func NewHub(cfg *conf.Agent, toolHub *tool.Hub, poiRepo repository.PointsOfInterestRepo) (*Hub, error) {
+func NewHub(cfg *conf.Agent, toolHub *tool.Hub) (*Hub, error) {
 	hub := &Hub{
 		agents:  make(map[string]core.Agent),
 		toolHub: toolHub,
@@ -42,7 +42,7 @@ func NewHub(cfg *conf.Agent, toolHub *tool.Hub, poiRepo repository.PointsOfInter
 		prompt := NewPrompt(rounds, agentCfg.GetVersion())
 
 		// Create agent
-		agent, err := createAgent(agentCfg, hub.toolHub, prompt, poiRepo)
+		agent, err := createAgent(agentCfg, hub.toolHub, prompt)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create agent %s: %v", agentCfg.GetName(), err)
 		}
@@ -57,10 +57,12 @@ func NewHub(cfg *conf.Agent, toolHub *tool.Hub, poiRepo repository.PointsOfInter
 }
 
 // createAgent creates an agent based on configuration
-func createAgent(cfg *conf.Agent_AgentConfig, toolHub *tool.Hub, prompt core.Prompt, poiRepo repository.PointsOfInterestRepo) (core.Agent, error) {
+func createAgent(cfg *conf.Agent_AgentConfig, toolHub *tool.Hub, prompt core.Prompt) (core.Agent, error) {
 	switch cfg.GetName() {
-	case conf.Agent_PlanAgent:
-		return plan.NewAgent(cfg.GetName().String(), toolHub, prompt, poiRepo), nil
+	case conf.Agent_TripPlanner:
+		return trip.NewTripPlanner(cfg.GetName().String(), toolHub, prompt), nil
+	case conf.Agent_CityPlanner:
+		return city.NewCityPlanner(cfg.GetName().String(), toolHub, prompt), nil
 	default:
 		return nil, fmt.Errorf("unsupported agent: %s", cfg.GetName())
 	}
