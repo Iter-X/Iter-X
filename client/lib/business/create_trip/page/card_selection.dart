@@ -1,22 +1,26 @@
 /*
- * @Description: 图卡选择页
+ * @Description: Card selection
  * @Version: 0.1
  * @Autor: GiottoLLL7
  * @Date: 2025-03-18 00:30:03
  * @LastEditors: GiottoLLL7
- * @LastEditTime: 2025-03-31 21:55:07
+ * @LastEditTime: 2025-04-03 15:41:39
  */
 
 import 'package:client/app/constants.dart';
+import 'package:client/app/routes.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/image.dart';
 import 'package:client/common/material/iter_text.dart';
+import 'package:client/common/material/state.dart';
 import 'package:client/common/widgets/return_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/services.dart';
 import 'package:client/common/widgets/clickable_button.dart';
 import 'package:gap/gap.dart';
+import '../service/card_selection_service.dart';
+import '../entity/geo_entity.dart';
 
 class CardSelectionPage extends StatefulWidget {
   const CardSelectionPage({super.key});
@@ -25,154 +29,57 @@ class CardSelectionPage extends StatefulWidget {
   State<CardSelectionPage> createState() => _CardSelectionPageState();
 }
 
-class _CardSelectionPageState extends State<CardSelectionPage> {
-  int selectionLevel = 0; // 0:国家 1:城市 2:景点
-  var _selectedContinentId = '0'; // 选择的洲id
-  final Set<String> _selectedCountries = {};
-  final List<Map<String, dynamic>> _continentList = [
-    {'continentId': '0', 'name': '热门', 'englishName': 'hot'},
-    {'continentId': '1', 'name': '亚洲', 'englishName': 'Asia'},
-    {'continentId': '2', 'name': '欧洲', 'englishName': 'Europe'},
-    {'continentId': '3', 'name': '北美洲', 'englishName': 'North America'},
-    {'continentId': '4', 'name': '南美洲', 'englishName': 'South America'},
-    {'continentId': '5', 'name': '非洲', 'englishName': 'Africa'},
-    {'continentId': '6', 'name': '大洋洲', 'englishName': 'Oceania'},
-  ];
-  final List<Map<String, dynamic>> _allCountryList = [
-    {
-      'countryId': '1',
-      'image': 'img_american.png',
-      'name': '美国',
-      'englishName': 'American',
-      'continentId': '3',
-      'isHot': true
-    },
-    {
-      'countryId': '2',
-      'image': 'img_denmark.png',
-      'name': '丹麦',
-      'englishName': 'Denmark',
-      'continentId': '2',
-      'isHot': true
-    },
-    {
-      'countryId': '3',
-      'image': 'img_australia.png',
-      'name': '澳大利亚',
-      'englishName': 'Australia',
-      'continentId': '4',
-      'isHot': true
-    },
-    {
-      'countryId': '4',
-      'image': 'img_china.png',
-      'name': '中国',
-      'englishName': 'China',
-      'continentId': '1',
-      'isHot': true
-    },
-    {
-      'countryId': '5',
-      'image': 'img_finland.png',
-      'name': '芬兰',
-      'englishName': 'Finland',
-      'continentId': '2',
-      'isHot': true
-    },
-    {
-      'countryId': '6',
-      'image': 'img_uk.png',
-      'name': '英国',
-      'englishName': 'UK',
-      'continentId': '2',
-      'isHot': true
-    },
-    {
-      'countryId': '7',
-      'image': 'img_france.png',
-      'name': '法国',
-      'englishName': 'France',
-      'continentId': '2',
-      'isHot': true
-    },
-    {
-      'countryId': '8',
-      'image': 'img_japan.png',
-      'name': '日本',
-      'englishName': 'Japan',
-      'continentId': '1',
-      'isHot': true
-    },
-    {
-      'countryId': '9',
-      'image': 'img_italy.png',
-      'name': '意大利',
-      'englishName': 'Italy',
-      'continentId': '2',
-      'isHot': true
-    },
-    {
-      'countryId': '10',
-      'image': 'img_thailand.png',
-      'name': '泰国',
-      'englishName': 'Thailand',
-      'continentId': '1',
-      'isHot': true
-    },
-    {
-      'countryId': '11',
-      'image': 'img_iceland.png',
-      'name': '冰岛',
-      'englishName': 'Iceland',
-      'continentId': '2',
-      'isHot': true
-    },
-    {
-      'countryId': '12',
-      'image': 'img_spain.png',
-      'name': '西班牙',
-      'englishName': 'Spain',
-      'continentId': '2',
-      'isHot': true
-    }
-  ];
-  final List<Map<String, dynamic>> _allCityList = [
-    {
-      'cityId': '1',
-      'image': 'img_beijing.png',
-      'name': '北京',
-      'countryId': '4',
-    },
-    {
-      'cityId': '2',
-      'image': 'img_shanghai.png',
-      'name': '上海',
-      'countryId': '4',
-    },
-    {
-      'cityId': '3',
-      'image': 'img_guangzhou.png',
-      'name': '广州',
-      'countryId': '4',
-    },
-    {
-      'cityId': '4',
-      'image': 'img_chengdu.png',
-      'name': '成都',
-      'countryId': '4',
-    }
-  ];
+class _CardSelectionPageState extends BaseState<CardSelectionPage> {
+  int selectionLevel = 0; // 0:countries 1:cities
+  int _selectedContinentId = 0;
+  final Set<int> _selectedCities = {};
+  late List<Continent> _continentList;
+  late int _total;
+  late List<Map<String, dynamic>> _countriesList;
+  late List<Map<String, dynamic>> _citiesList;
   late List<Map<String, dynamic>> _continentCountList;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _continentCountList =
-        _allCountryList.where((country) => country['isHot'] == true).toList();
+    _fetchData();
+  }
+
+  Future<void> _fetchData() async {
+    final continentEntity = await CardSelectionService.getContinentsData();
+    if (continentEntity != null) {
+      _continentList = continentEntity.continents;
+      _total = continentEntity.total;
+    }
+    _countriesList = await CardSelectionService.getCountriesData();
+    _citiesList = await CardSelectionService.getAllCityList();
+    _continentCountList = _selectedContinentId == 0
+        ? _countriesList.take(30).toList()
+        : _countriesList
+            .where((country) => country['continentId'] == _selectedContinentId)
+            .toList();
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return AppBarWithSafeArea(
+        backgroundColor: AppColor.bg,
+        hasAppBar: true,
+        title: '加载中...',
+        leading: ReturnButton(onTap: () {
+          Navigator.pop(context);
+        }),
+        child: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return AppBarWithSafeArea(
       backgroundColor: AppColor.bg,
       hasAppBar: true,
@@ -181,11 +88,9 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
         if (selectionLevel == 1) {
           setState(() {
             selectionLevel = 0;
-            _continentCountList = _selectedContinentId == '0'
-                ? _allCountryList
-                    .where((country) => country['isHot'] == true)
-                    .toList()
-                : _allCountryList
+            _continentCountList = _selectedContinentId == 0
+                ? _countriesList.take(30).toList()
+                : _countriesList
                     .where((country) =>
                         country['continentId'] == _selectedContinentId)
                     .toList();
@@ -207,23 +112,24 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
               ),
               itemCount: _continentCountList.length,
               itemBuilder: (context, index) {
-                final country = _continentCountList[index];
-                final isSelected =
-                    _selectedCountries.contains(country['cityId']);
+                final selectItem = _continentCountList[index];
+                final isSelected = _selectedCities.contains(selectItem['id']);
                 return GestureDetector(
                   onTap: () {
                     setState(() {
+                      print(selectItem);
+                      print(isSelected);
                       if (selectionLevel == 0) {
-                        _continentCountList = _allCityList
-                            .where((city) =>
-                                city['countryId'] == country['countryId'])
+                        _continentCountList = _citiesList
+                            .where(
+                                (city) => city['countryId'] == selectItem['id'])
                             .toList();
                         selectionLevel = 1;
                       } else {
                         if (isSelected) {
-                          _selectedCountries.remove(country['cityId']);
+                          _selectedCities.remove(selectItem['id']);
                         } else {
-                          _selectedCountries.add(country['cityId']);
+                          _selectedCities.add(selectItem['id']);
                         }
                       }
                     });
@@ -232,7 +138,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                     child: Stack(
                       children: [
                         BaseImage.asset(
-                          name: country['image'],
+                          name: selectItem['imageUrl'],
                           width: 142.w,
                           fit: BoxFit.cover,
                         ),
@@ -242,7 +148,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              IterText(country['name'],
+                              IterText(selectItem['name'],
                                   style: TextStyle(
                                     fontSize: 22.sp,
                                     color: isSelected
@@ -256,10 +162,10 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                                         ? AppColor.c_f2f2f2
                                         : AppColor.c_1D1F1E,
                                   )),
-                              if (country['englishName'] != null &&
-                                  country['englishName'].isNotEmpty)
-                                IterText(country['englishName'],
-                                    textAlign: TextAlign.end, // 文字居中
+                              if (selectItem['nameEn'] != null &&
+                                  selectItem['nameEn'].isNotEmpty)
+                                IterText(selectItem['nameEn'],
+                                    textAlign: TextAlign.end,
                                     style: TextStyle(
                                       fontSize: 22.sp,
                                       color: isSelected
@@ -286,16 +192,24 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
         ),
         Container(
           padding: EdgeInsets.all(20),
-          color: AppColor.bottomBar,
+          decoration: BoxDecoration(
+            color: AppColor.bottomBar,
+            border: Border(
+              top: BorderSide(
+                color: AppColor.bottomBarLine,
+                width: 1,
+              ),
+            ),
+          ),
           child: Column(
             children: [
-              // 大洲Tab
+              // continentTab
               Container(
                 width: double.infinity,
                 child: Wrap(
                   alignment: WrapAlignment.start,
-                  spacing: 10, // 水平间距
-                  runSpacing: 10, // 垂直间距
+                  spacing: 10,
+                  runSpacing: 10,
                   children: [
                     ..._continentList
                         .map(
@@ -303,14 +217,13 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                             child: GestureDetector(
                               onTap: () => {
                                 setState(() {
-                                  _selectedContinentId = tag['continentId'];
+                                  print(_selectedContinentId);
+                                  print(_countriesList[0]['continentId']);
+                                  _selectedContinentId = tag.id;
                                   _continentCountList =
-                                      _selectedContinentId == '0'
-                                          ? _allCountryList
-                                              .where((country) =>
-                                                  country['isHot'] == true)
-                                              .toList()
-                                          : _allCountryList
+                                      _selectedContinentId == 0
+                                          ? _countriesList.take(30).toList()
+                                          : _countriesList
                                               .where((country) =>
                                                   country['continentId'] ==
                                                   _selectedContinentId)
@@ -326,8 +239,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(28.w),
                                   color: selectionLevel == 0 &&
-                                          _selectedContinentId ==
-                                              tag['continentId']
+                                          _selectedContinentId == tag.id
                                       ? AppColor.c_1D1F1E
                                       : AppColor.c_E3E3E3,
                                 ),
@@ -335,20 +247,18 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       if (selectionLevel == 0 &&
-                                          _selectedContinentId ==
-                                              tag['continentId'])
+                                          _selectedContinentId == tag.id)
                                         BaseImage.asset(
                                           name: 'ic_create_picard.png',
                                           size: 18.w,
                                         ),
                                       Gap(5.w),
                                       Text(
-                                        tag['name'],
+                                        tag.nameCn,
                                         style: TextStyle(
                                           fontSize: 14.sp,
                                           color: selectionLevel == 0 &&
-                                                  _selectedContinentId ==
-                                                      tag['continentId']
+                                                  _selectedContinentId == tag.id
                                               ? AppColor.c_F2F2F2
                                               : AppColor.c_1D1F1E,
                                         ),
@@ -363,21 +273,21 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                 ),
               ),
               SizedBox(height: 20),
-              // 已选城市滚动区
+              // cityScrollView
               Container(
                 width: double.infinity,
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
-                    children: _selectedCountries
-                        .map((id) => _allCityList
-                            .firstWhere((item) => item['cityId'] == id))
-                        .map((country) => ClickableButton(
-                              text: country['name'],
+                    children: _selectedCities
+                        .map((id) =>
+                            _citiesList.firstWhere((item) => item['id'] == id))
+                        .map((city) => ClickableButton(
+                              text: city['name'],
                               onTapIcon: () => {
                                 setState(() {
-                                  _selectedCountries.remove(country['cityId']);
+                                  _selectedCities.remove(city['id']);
                                 })
                               },
                               icon: Icons.cancel,
@@ -390,7 +300,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
               ),
               SizedBox(height: 20),
               GestureDetector(
-                onTap: () => {print('点击')},
+                onTap: () => {go(Routes.poiSearch)},
                 child: Container(
                   width: 390.w,
                   height: 52.h,
@@ -408,7 +318,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
                       ),
                       Gap(5.w),
                       Text(
-                        "已选${_selectedCountries.length}",
+                        "已选${_selectedCities.length}",
                         style: TextStyle(
                           fontSize: 18.sp,
                           color: AppColor.c_f2f2f2,
