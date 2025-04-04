@@ -1,7 +1,7 @@
 import 'package:client/app/constants.dart';
+import 'package:client/business/create_trip/entity/geo_entity.dart';
 import 'package:client/business/create_trip/service/poi_search_service.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
-import 'package:client/app/constants.dart';
 import 'package:client/common/widgets/base_button.dart';
 import 'package:client/common/widgets/clickable_button.dart';
 import 'package:client/common/widgets/preference_button.dart';
@@ -22,13 +22,22 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   bool _hasFocus = false;
+  List<City>? _selectedCities;
+  int _currentCityIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _focusNode.addListener(_onFocusChange);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PoiSearchService>().searchPoi('');
+      _selectedCities =
+          ModalRoute.of(context)?.settings.arguments as List<City>?;
+      if (_selectedCities != null && _selectedCities!.isNotEmpty) {
+        context
+            .read<PoiSearchService>()
+            .setCurrentCity(_selectedCities![0].name);
+        context.read<PoiSearchService>().searchPoi('');
+      }
     });
   }
 
@@ -311,7 +320,9 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
       backgroundColor: AppColor.bg,
       bottomColor: AppColor.bottomBar,
       leading: ReturnButton(),
-      title: '洛杉矶Los Angeles',
+      title: _selectedCities != null && _selectedCities!.isNotEmpty
+          ? _selectedCities![_currentCityIndex].name
+          : '',
       actions: [PreferenceButton()],
       child: Column(
         children: [

@@ -223,7 +223,8 @@ class GeoState {
       nameLocal: json['nameLocal'] as String,
       code: json['code'] as String,
       countryId: json['countryId'] as int,
-      country: json['country'] != null ? Country.fromJson(json['country']) : null,
+      country:
+          json['country'] != null ? Country.fromJson(json['country']) : null,
       imageUrl: json['imageUrl'] as String? ?? '',
     );
   }
@@ -320,5 +321,10 @@ class City {
           : null,
       imageUrl: json['imageUrl'] as String? ?? '',
     );
+  }
+
+  @override
+  String toString() {
+    return 'City(id: $id, name: $name, nameLocal: $nameLocal, nameEn: $nameEn, nameCn: $nameCn, code: $code, stateId: $stateId, state: ${state?.toString()}, imageUrl: $imageUrl)';
   }
 }

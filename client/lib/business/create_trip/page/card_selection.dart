@@ -14,6 +14,7 @@ import 'package:client/business/create_trip/service/card_selection_service.dart'
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/image.dart';
 import 'package:client/common/material/iter_text.dart';
+import 'package:client/common/utils/toast.dart';
 import 'package:client/common/widgets/clickable_button.dart';
 import 'package:client/common/widgets/return_button.dart';
 import 'package:flutter/material.dart';
@@ -33,7 +34,7 @@ class CardSelectionPage extends StatefulWidget {
 class _CardSelectionPageState extends State<CardSelectionPage> {
   SelectionLevel _selectionLevel = SelectionLevel.country;
   int _selectedContinentId = 0;
-  final Set<int> _selectedCities = {};
+  Set<City> _selectedCities = {};
   bool _isLoading = true;
 
   ContinentEntity? _continentList;
@@ -44,10 +45,12 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
   @override
   void initState() {
     super.initState();
+    _selectedCities = {};
     _loadData();
   }
 
   Future<void> _loadData() async {
+    _selectedCities = {};
     final continents = await CardSelectionService.getContinentsData();
     final countries = await CardSelectionService.getCountriesData();
 
@@ -94,11 +97,11 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
       _loadCitiesByCountry((item as Country).id);
     } else {
       setState(() {
-        final id = (item as City).id;
-        if (_selectedCities.contains(id)) {
-          _selectedCities.remove(id);
+        final city = item as City;
+        if (_selectedCities.any((c) => c.id == city.id)) {
+          _selectedCities.removeWhere((c) => c.id == city.id);
         } else {
-          _selectedCities.add(id);
+          _selectedCities.add(city);
         }
       });
     }
@@ -182,7 +185,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
   Widget _buildGridItem(dynamic item) {
     final ItemData itemData = _getItemData(item);
     final isSelected =
-        item is City ? _selectedCities.contains(itemData.id) : false;
+        item is City ? _selectedCities.any((c) => c.id == itemData.id) : false;
 
     return GestureDetector(
       onTap: () => _handleItemTap(item),
@@ -307,12 +310,13 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: _selectedCities
-              .map((id) =>
-                  _citiesList!.cities.firstWhere((item) => item.id == id))
               .map((city) => ClickableButton(
                     text: city.name,
-                    onTapIcon: () =>
-                        setState(() => _selectedCities.remove(city.id)),
+                    onTapIcon: () {
+                      setState(() {
+                        _selectedCities.removeWhere((c) => c.id == city.id);
+                      });
+                    },
                     icon: Icons.cancel,
                     iconColor: AppColor.closeButton,
                     margin: const EdgeInsets.only(right: 10),
@@ -325,7 +329,19 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
 
   Widget _buildGenerateButton() {
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, Routes.poiSearch),
+      onTap: () {
+        if (_selectedCities.isEmpty) {
+          ToastX.show(
+            "请至少选择一个城市",
+          );
+          return;
+        }
+        Navigator.pushNamed(
+          context,
+          Routes.poiSearch,
+          arguments: _selectedCities.toList(),
+        );
+      },
       child: Container(
         width: 390.w,
         height: 52.h,
