@@ -11,6 +11,7 @@ import 'package:client/business/auth/page/login.dart';
 import 'package:client/business/auth/page/phone_login.dart';
 import 'package:client/business/create_trip/page/card_selection.dart';
 import 'package:client/business/create_trip/page/create_trip_home.dart';
+import 'package:client/business/create_trip/page/select_date.dart';
 import 'package:client/business/create_trip/page/poi_search.dart';
 import 'package:client/business/home_main/page/home_main.dart';
 import 'package:client/business/mine/page/mine_page.dart';
@@ -30,6 +31,7 @@ class Routes {
   static const String homeMain = '/home_main/home_main';
   static const String createTripHome = '/create_trip/create_trip_home';
   static const String cardSelection = '/create_trip/card_selection';
+  static const String selectDate = '/create_trip/select_date';
   static const String profile = '/mine/profile';
   static const String poiSearch = '/create_trip/poi_search';
   static const String tripOverview = '/trip/overview';
@@ -63,6 +65,7 @@ class Routes {
     poiSearch: Handler(handlerFunc: (context, params) => const PoiSearchPage()),
     tripOverview:
         Handler(handlerFunc: (context, params) => const TripMainPage()),
+    selectDate: Handler(handlerFunc: (context, params) => const SelectDatePage()),
   };
 
   // 404路由处理器

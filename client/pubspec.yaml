@@ -53,6 +53,10 @@ dependencies:
   flutter_speech: ^2.0.1
   flutter_svg: ^2.0.10
   shimmer_animation: 2.1.0
+  # 日历组件 https://pub-web.flutter-io.cn/packages/scrollable_clean_calendar
+  scrollable_clean_calendar: ^1.5.0
+  # 日历转换 https://pub.dev/packages/lunar
+  lunar: ^1.7.3
 
 dev_dependencies:
   flutter_test:
