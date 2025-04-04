@@ -85,8 +85,8 @@ func (s *GeoService) ListStates(ctx context.Context, req *geoV1.ListStatesReques
 func (s *GeoService) ListCities(ctx context.Context, req *geoV1.ListCitiesRequest) (*geoV1.ListCitiesResponse, error) {
 	// Convert PB to BO
 	params := &bo.ListCitiesParams{
-		StateID:    uint(req.StateId),
-		CountryID:  uint(req.CountryId),
+		StateId:    req.StateId,
+		CountryId:  req.CountryId,
 		Pagination: bo.FromPageAndSize(req.Page, req.Size),
 	}
 

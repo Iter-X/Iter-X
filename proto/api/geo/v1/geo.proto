@@ -81,8 +81,8 @@ message ListStatesResponse {
 }
 
 message ListCitiesRequest {
-  uint32 state_id = 1;
-  uint32 country_id = 2;
+  optional uint32 state_id = 1;
+  optional uint32 country_id = 2;
   int32 size = 3 [(validatex.rules).numeric = {
     gte: 0,
     lte: 100,

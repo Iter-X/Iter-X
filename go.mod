@@ -27,8 +27,8 @@ require (
 	github.com/nicksnyder/go-i18n/v2 v2.5.1
 	github.com/openai/openai-go v0.1.0-alpha.67
 	github.com/protoc-gen/protoc-gen-go-errors v0.3.2
-	github.com/protoc-gen/protoc-gen-openapiv3 v0.7.5
-	github.com/protoc-gen/protoc-gen-validatex v0.8.4
+	github.com/protoc-gen/protoc-gen-openapiv3 v0.7.6
+	github.com/protoc-gen/protoc-gen-validatex v0.8.5
 	github.com/redis/go-redis/v9 v9.7.3
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0

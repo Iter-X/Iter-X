@@ -95,13 +95,13 @@ func (r *cityRepositoryImpl) ListCities(ctx context.Context, params *bo.ListCiti
 	query := r.GetTx(ctx).City.Query()
 
 	// Filter by state if specified
-	if params.StateID > 0 {
-		query = query.Where(city.StateID(params.StateID))
+	if params.StateId != nil {
+		query = query.Where(city.StateID(uint(*params.StateId)))
 	}
 
 	// Filter by country if specified
-	if params.CountryID > 0 {
-		query = query.Where(city.HasStateWith(state.CountryID(params.CountryID)))
+	if params.CountryId != nil {
+		query = query.Where(city.HasStateWith(state.CountryID(uint(*params.CountryId))))
 	}
 
 	// Get total count
