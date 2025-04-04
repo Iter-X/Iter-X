@@ -164,7 +164,6 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
     }
   }
 
-  // 构建网格视图
   Widget _buildGridView() {
     return SingleChildScrollView(
       child: GridView.builder(
@@ -184,7 +183,8 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
 
   Widget _buildGridItem(dynamic item) {
     final ItemData itemData = _getItemData(item);
-    final isSelected = _selectedCities.contains(itemData.id);
+    final isSelected =
+        item is City ? _selectedCities.contains(itemData.id) : false;
 
     return GestureDetector(
       onTap: () => _handleItemTap(item),
@@ -195,8 +195,8 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
             width: 142.w,
           ),
           Positioned(
-            bottom: 0,
-            right: 8.w,
+            bottom: 2.w,
+            right: 6.w,
             child: _buildItemText(itemData, isSelected),
           ),
         ],
@@ -391,7 +391,6 @@ class ItemData {
 }
 
 extension _CardSelectionStateExt on _CardSelectionPageState {
-  // 获取列表项数据
   ItemData _getItemData(dynamic item) {
     if (item is Country) {
       return ItemData(
@@ -422,30 +421,48 @@ extension _CardSelectionStateExt on _CardSelectionPageState {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        IterText(
-          itemData.name,
-          style: TextStyle(
-            fontSize: 22.sp,
-            color: isSelected ? AppColor.c_1D1F1E : AppColor.c_f2f2f2,
-            fontWeight: AppFontWeight.black,
-          ),
-          borders: BorderProperties(
-            width: 2,
-            color: isSelected ? AppColor.c_f2f2f2 : AppColor.c_1D1F1E,
-          ),
-        ),
-        if (itemData.nameEn.isNotEmpty)
-          IterText(
-            itemData.nameEn,
+        SizedBox(
+          width: 120.w,
+          child: IterText(
+            itemData.name,
+            alignment: AlignmentDirectional.bottomEnd,
             textAlign: TextAlign.end,
             style: TextStyle(
               fontSize: 22.sp,
-              color: isSelected ? AppColor.c_1D1F1E : AppColor.c_f2f2f2,
+              color: isSelected ? AppColor.primaryFont : AppColor.secondaryFont,
               fontWeight: AppFontWeight.black,
             ),
+            maxLines: 2,
             borders: BorderProperties(
               width: 2,
-              color: isSelected ? AppColor.c_f2f2f2 : AppColor.c_1D1F1E,
+              color: isSelected ? AppColor.secondaryFont : AppColor.primaryFont,
+            ),
+          ),
+        ),
+        if (itemData.nameEn.isNotEmpty)
+          SizedBox(
+            width: 120.w,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: IterText(
+                itemData.nameEn,
+                textAlign: TextAlign.end,
+                style: TextStyle(
+                  fontSize: 22.sp,
+                  color: isSelected
+                      ? AppColor.primaryFont
+                      : AppColor.secondaryFont,
+                  fontWeight: AppFontWeight.black,
+                ),
+                maxLines: 2,
+                borders: BorderProperties(
+                  width: 2,
+                  color: isSelected
+                      ? AppColor.secondaryFont
+                      : AppColor.primaryFont,
+                ),
+              ),
             ),
           ),
       ],
