@@ -11,6 +11,7 @@ import (
 	"github.com/iter-x/iter-x/internal/data"
 	"github.com/iter-x/iter-x/internal/data/ent"
 	"github.com/iter-x/iter-x/internal/data/ent/city"
+	"github.com/iter-x/iter-x/internal/data/ent/state"
 	"github.com/iter-x/iter-x/internal/data/impl/build"
 )
 
@@ -97,6 +98,12 @@ func (r *cityRepositoryImpl) ListCities(ctx context.Context, params *bo.ListCiti
 	if params.StateID > 0 {
 		query = query.Where(city.StateID(params.StateID))
 	}
+
+	// Filter by country if specified
+	if params.CountryID > 0 {
+		query = query.Where(city.HasStateWith(state.CountryID(params.CountryID)))
+	}
+
 	// Get total count
 	total, err := query.Count(ctx)
 	if err != nil {

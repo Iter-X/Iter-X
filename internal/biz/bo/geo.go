@@ -23,5 +23,7 @@ type ListStatesParams struct {
 type ListCitiesParams struct {
 	// Optional state ID filter
 	StateID uint
+	// Optional country ID filter
+	CountryID uint
 	*Pagination
 }

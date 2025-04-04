@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+
 	geoV1 "github.com/iter-x/iter-x/internal/api/geo/v1"
 	"github.com/iter-x/iter-x/internal/biz"
 	"github.com/iter-x/iter-x/internal/biz/bo"
@@ -85,6 +86,7 @@ func (s *GeoService) ListCities(ctx context.Context, req *geoV1.ListCitiesReques
 	// Convert PB to BO
 	params := &bo.ListCitiesParams{
 		StateID:    uint(req.StateId),
+		CountryID:  uint(req.CountryId),
 		Pagination: bo.FromPageAndSize(req.Page, req.Size),
 	}
 
