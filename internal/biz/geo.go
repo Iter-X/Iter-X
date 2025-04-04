@@ -2,9 +2,10 @@ package biz
 
 import (
 	"context"
+	"time"
+
 	"github.com/iter-x/iter-x/internal/data"
 	"github.com/iter-x/iter-x/pkg/storage"
-	"time"
 
 	"go.uber.org/zap"
 
@@ -20,6 +21,7 @@ type Geo struct {
 	countryRepo   repository.CountryRepo
 	stateRepo     repository.StateRepo
 	cityRepo      repository.CityRepo
+	poiRepo       repository.PointsOfInterestRepo
 	store         storage.FileManager
 	logger        *zap.SugaredLogger
 }
@@ -30,6 +32,7 @@ func NewGeo(
 	countryRepo repository.CountryRepo,
 	stateRepo repository.StateRepo,
 	cityRepo repository.CityRepo,
+	poiRepo repository.PointsOfInterestRepo,
 	d *data.Data,
 	logger *zap.SugaredLogger,
 ) *Geo {
@@ -38,6 +41,7 @@ func NewGeo(
 		countryRepo:   countryRepo,
 		stateRepo:     stateRepo,
 		cityRepo:      cityRepo,
+		poiRepo:       poiRepo,
 		store:         d.Storage,
 		logger:        logger.Named("biz.geo"),
 	}
@@ -88,4 +92,21 @@ func (g *Geo) ListCities(ctx context.Context, params *bo.ListCitiesParams) ([]*d
 		return nil, 0, xerr.ErrorGetCitiesListFailed()
 	}
 	return cities, total, nil
+}
+
+// ListPOIs lists POIs, optionally filtered by city and keyword
+func (g *Geo) ListPOIs(ctx context.Context, params *bo.ListPOIsParams) ([]*do.PointsOfInterest, int64, error) {
+	pois, total, err := g.poiRepo.ListPOIs(ctx, params)
+	if err != nil {
+		g.logger.Errorw("failed to list POIs", "err", err)
+		return nil, 0, xerr.ErrorGetPoisListFailed()
+	}
+	for _, poi := range pois {
+		if len(poi.PoiFiles) > 0 && poi.PoiFiles[0].File != nil {
+			if url, err := g.store.GeneratePublicURL(poi.PoiFiles[0].File.ObjectKey, time.Hour*24); err == nil {
+				poi.ImageUrl = url
+			}
+		}
+	}
+	return pois, total, nil
 }

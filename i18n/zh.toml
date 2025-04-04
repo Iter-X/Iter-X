@@ -103,3 +103,6 @@ other = "获取省份/州列表失败"
 [GET_CITIES_LIST_FAILED]
 other = "获取城市列表失败"
 
+[GET_POIS_LIST_FAILED]
+other = "获取兴趣点位列表失败"
+

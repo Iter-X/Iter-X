@@ -27,3 +27,12 @@ type ListCitiesParams struct {
 	CountryId *uint32
 	*Pagination
 }
+
+// ListPOIsParams parameters for listing POIs
+type ListPOIsParams struct {
+	// Optional city ID filter
+	CityId *uint32
+	// Optional keyword filter
+	Keyword *string
+	*Pagination
+}

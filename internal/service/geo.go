@@ -101,3 +101,24 @@ func (s *GeoService) ListCities(ctx context.Context, req *geoV1.ListCitiesReques
 		Cities: build.ToCitiesProto(ctx, cities),
 	}, nil
 }
+
+// ListPOIs lists POIs, optionally filtered by city and keyword
+func (s *GeoService) ListPOIs(ctx context.Context, req *geoV1.ListPOIsRequest) (*geoV1.ListPOIsResponse, error) {
+	// Convert PB to BO
+	params := &bo.ListPOIsParams{
+		CityId:     req.CityId,
+		Keyword:    req.Keyword,
+		Pagination: bo.FromPageAndSize(req.Page, req.Size),
+	}
+
+	// Call biz
+	pois, total, err := s.geoBiz.ListPOIs(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+
+	return &geoV1.ListPOIsResponse{
+		Total: total,
+		Pois:  build.ToPOIsProto(ctx, pois),
+	}, nil
+}

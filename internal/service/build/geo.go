@@ -141,3 +141,45 @@ func ToCitiesProto(ctx context.Context, cities []*do.City) []*geoV1.City {
 	}
 	return result
 }
+
+// ToPOIProto converts a domain POI object to a protobuf POI
+func ToPOIProto(ctx context.Context, poi *do.PointsOfInterest) *geoV1.POI {
+	if poi == nil {
+		return nil
+	}
+
+	poiProto := &geoV1.POI{
+		Id:           poi.ID.String(),
+		Name:         util.GetLocalizedName(ctx, poi.NameEn, poi.NameCn),
+		NameLocal:    poi.NameLocal,
+		NameEn:       poi.NameEn,
+		NameCn:       poi.NameCn,
+		Description:  poi.Description,
+		ImageUrl:     poi.ImageUrl,
+		Rating:       float64(poi.Rating),
+		ReviewsCount: uint32(len(poi.PoiFiles)),
+		CityId:       uint32(poi.CityID),
+		Latitude:     poi.Latitude,
+		Longitude:    poi.Longitude,
+		Duration:     poi.RecommendedDurationMinutes,
+		Popularity:   50, // TODO: Add popularity calculation
+	}
+
+	if poi.City != nil {
+		poiProto.City = ToCityProto(ctx, poi.City)
+	}
+
+	return poiProto
+}
+
+// ToPOIsProto converts a slice of domain POI objects to protobuf POIs
+func ToPOIsProto(ctx context.Context, pois []*do.PointsOfInterest) []*geoV1.POI {
+	if pois == nil {
+		return nil
+	}
+	var result []*geoV1.POI
+	for _, poi := range pois {
+		result = append(result, ToPOIProto(ctx, poi))
+	}
+	return result
+}

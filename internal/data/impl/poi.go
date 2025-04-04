@@ -297,3 +297,41 @@ func (r *pointsOfInterestRepositoryImpl) GetByIds(ctx context.Context, ids []uui
 
 	return r.ToEntities(rows), nil
 }
+
+func (r *pointsOfInterestRepositoryImpl) ListPOIs(ctx context.Context, params *bo.ListPOIsParams) ([]*do.PointsOfInterest, int64, error) {
+	cli := r.GetTx(ctx).PointsOfInterest.Query()
+
+	if params.CityId != nil {
+		cli = cli.Where(pointsofinterest.CityID(uint(*params.CityId)))
+	}
+
+	if params.Keyword != nil && *params.Keyword != "" {
+		cli = cli.Where(pointsofinterest.Or(
+			pointsofinterest.NameLocalContains(*params.Keyword),
+			pointsofinterest.NameCnContains(*params.Keyword),
+			pointsofinterest.NameEnContains(*params.Keyword),
+			pointsofinterest.DescriptionContains(*params.Keyword),
+		))
+	}
+
+	total, err := cli.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	if params.Pagination != nil {
+		cli = cli.Offset(params.Pagination.GetOffset4Db()).Limit(params.Pagination.GetLimit4Db())
+	}
+
+	rows, err := cli.
+		//WithCity().
+		WithPoiFiles(func(query *ent.PointsOfInterestFilesQuery) {
+			query.WithFile()
+		}).
+		All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return r.ToEntities(rows), int64(total), nil
+}
