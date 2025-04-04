@@ -1,4 +1,4 @@
-import 'package:client/common/utils/color.dart';
+import 'package:client/app/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -22,7 +22,7 @@ class SelectDaysWidget extends StatelessWidget {
           topLeft: Radius.circular(10.w),
           topRight: Radius.circular(10.w),
         ),
-        color: BaseColor.c_F2F2F2,
+        color: AppColor.c_F2F2F2,
       ),
       child: GridView.builder(
         padding: EdgeInsets.only(top: 17.h),
@@ -39,12 +39,14 @@ class SelectDaysWidget extends StatelessWidget {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: selectDays == i + 1 ? BaseColor.c_375F77 : Colors.transparent,
+                color: selectDays == i + 1
+                    ? AppColor.c_375F77
+                    : Colors.transparent,
               ),
               child: Text(
                 '${i + 1}天',
                 style: TextStyle(
-                  color: selectDays == i + 1 ? Colors.white : BaseColor.c_1D1F1E,
+                  color: selectDays == i + 1 ? Colors.white : AppColor.c_1D1F1E,
                 ),
               ),
             ),
