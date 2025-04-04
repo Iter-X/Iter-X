@@ -16,33 +16,36 @@ class IterText extends StatelessWidget {
   final Locale? locale;
   final bool? softWrap;
   final TextOverflow? overflow;
-  final TextScaler? textScaler; // 修改为 TextScaler
+  final TextScaler? textScaler;
   final int? maxLines;
   final String? semanticsLabel;
   final TextWidthBasis? textWidthBasis;
   final TextHeightBehavior? textHeightBehavior;
   final BorderProperties? borders;
+  final AlignmentDirectional? alignment;
 
   const IterText(
     this.data, {
-    Key? key,
+    super.key,
     this.style,
     this.textAlign,
     this.textDirection,
     this.locale,
     this.softWrap,
     this.overflow,
-    this.textScaler, // 修改为 TextScaler
+    this.textScaler,
     this.maxLines,
     this.semanticsLabel,
     this.textWidthBasis,
     this.textHeightBehavior,
     this.borders,
-  }) : super(key: key);
+    this.alignment,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Stack(
+      alignment: alignment ?? AlignmentDirectional.center,
       children: [
         if (borders != null)
           Text(
@@ -58,7 +61,7 @@ class IterText extends StatelessWidget {
             locale: locale,
             softWrap: softWrap,
             overflow: overflow,
-            textScaler: textScaler, // 修改为 textScaler
+            textScaler: textScaler,
             maxLines: maxLines,
             semanticsLabel: semanticsLabel,
             textWidthBasis: textWidthBasis,
@@ -72,7 +75,7 @@ class IterText extends StatelessWidget {
           locale: locale,
           softWrap: softWrap,
           overflow: overflow,
-          textScaler: textScaler, // 修改为 textScaler
+          textScaler: textScaler,
           maxLines: maxLines,
           semanticsLabel: semanticsLabel,
           textWidthBasis: textWidthBasis,
