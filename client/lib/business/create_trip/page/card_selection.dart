@@ -296,7 +296,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
   }
 
   Widget _buildSelectedCities() {
-    if (_citiesList!.cities.isEmpty) {
+    if (_citiesList == null || _citiesList!.cities.isEmpty) {
       return SizedBox.shrink();
     }
 
@@ -436,7 +436,7 @@ extension _CardSelectionStateExt on _CardSelectionPageState {
             ),
             maxLines: 2,
             borders: BorderProperties(
-              width: 2,
+              width: 2.sp,
               color: isSelected ? AppColor.secondaryFont : AppColor.primaryFont,
             ),
           ),
@@ -459,7 +459,7 @@ extension _CardSelectionStateExt on _CardSelectionPageState {
                 ),
                 maxLines: 2,
                 borders: BorderProperties(
-                  width: 2,
+                  width: 2.sp,
                   color: isSelected
                       ? AppColor.secondaryFont
                       : AppColor.primaryFont,
