@@ -59,6 +59,7 @@ api:
  	       --openapiv3_out=paths=source_relative:. \
  	       --openapiv3_opt=openapi_out_path=./swagger \
  	       --openapiv3_opt=servers='http://localhost:8000|Local Server' \
+ 	       --experimental_allow_proto3_optional \
 	       $(API_PROTO_FILES)
 
 .PHONY: stringer
