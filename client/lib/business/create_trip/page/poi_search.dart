@@ -1,6 +1,7 @@
 import 'package:client/app/constants.dart';
 import 'package:client/business/create_trip/entity/geo_entity.dart';
 import 'package:client/business/create_trip/service/poi_search_service.dart';
+import 'package:client/business/create_trip/widgets/city_dropdown.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/widgets/base_button.dart';
 import 'package:client/common/widgets/clickable_button.dart';
@@ -24,21 +25,38 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
   bool _hasFocus = false;
   List<City>? _selectedCities;
   int _currentCityIndex = 0;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
     _focusNode.addListener(_onFocusChange);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
       _selectedCities =
           ModalRoute.of(context)?.settings.arguments as List<City>?;
       if (_selectedCities != null && _selectedCities!.isNotEmpty) {
-        context
-            .read<PoiSearchService>()
-            .setCurrentCity(_selectedCities![0].name);
-        context.read<PoiSearchService>().searchPoi('');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            context
+                .read<PoiSearchService>()
+                .setCurrentCity(_selectedCities![0].name);
+            context.read<PoiSearchService>().searchPoi('');
+            setState(() {
+              _isInitialized = true;
+            });
+          }
+        });
+      } else {
+        setState(() {
+          _isInitialized = true;
+        });
       }
-    });
+    }
   }
 
   @override
@@ -236,7 +254,7 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColor.bottomBar,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -316,13 +334,33 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      return const AppBarWithSafeArea(
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return AppBarWithSafeArea(
       backgroundColor: AppColor.bg,
       bottomColor: AppColor.bottomBar,
       leading: ReturnButton(),
       title: _selectedCities != null && _selectedCities!.isNotEmpty
-          ? _selectedCities![_currentCityIndex].name
-          : '',
+          ? CityDropdown(
+              cities: _selectedCities!,
+              selectedIndex: _currentCityIndex,
+              onCityChanged: (index) {
+                setState(() {
+                  _currentCityIndex = index;
+                });
+                context
+                    .read<PoiSearchService>()
+                    .setCurrentCity(_selectedCities![index].name);
+                context.read<PoiSearchService>().searchPoi('');
+              },
+            )
+          : null,
       actions: [PreferenceButton()],
       child: Column(
         children: [
