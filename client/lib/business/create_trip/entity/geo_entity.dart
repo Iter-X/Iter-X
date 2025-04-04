@@ -289,7 +289,7 @@ class City {
     required this.code,
     required this.stateId,
     this.state,
-    required this.imageUrl,
+    this.imageUrl = '',
   });
 
   Map<String, dynamic> toJson() {
@@ -309,16 +309,16 @@ class City {
   factory City.fromJson(Map<String, dynamic> json) {
     return City(
       id: int.parse(json['id'].toString()),
-      name: json['name'] as String,
-      nameLocal: json['nameLocal'] as String,
-      nameEn: json['nameEn'] as String,
-      nameCn: json['nameCn'] as String,
-      code: json['code'] as String,
-      stateId: int.parse(json['stateId'].toString()),
+      name: json['name'] as String? ?? '',
+      nameLocal: json['nameLocal'] as String? ?? '',
+      nameEn: json['nameEn'] as String? ?? '',
+      nameCn: json['nameCn'] as String? ?? '',
+      code: json['code'] as String? ?? '',
+      stateId: int.parse((json['stateId'] ?? 0).toString()),
       state: json['state'] != null
           ? GeoState.fromJson(json['state'] as Map<String, dynamic>)
           : null,
-      imageUrl: json['imageUrl'] as String,
+      imageUrl: json['imageUrl'] as String? ?? '',
     );
   }
 }

@@ -21,7 +21,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 
 /// 选择层级枚举
-enum SelectionLevel { country, state, city }
+enum SelectionLevel { country, city }
 
 class CardSelectionPage extends StatefulWidget {
   const CardSelectionPage({super.key});
@@ -39,7 +39,6 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
 
   ContinentEntity? _continentList;
   CountriesEntity? _countriesList;
-  StatesEntity? _statesList;
   CitiesEntity? _citiesList;
   late List<dynamic> _showItems = [];
 
@@ -63,37 +62,15 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
     }
   }
 
-  Future<void> _loadCountriesByContinent(int continentId) async {
-    final countries =
-        await CardSelectionService.getCountriesData(continentId: continentId);
-    if (mounted) {
-      setState(() {
-        _countriesList = countries;
-        _showItems = countries?.countries ?? [];
-      });
-    }
-  }
-
-  Future<void> _loadStatesByCountry(int countryId) async {
-    final states =
-        await CardSelectionService.getStatesData(countryId: countryId);
-    if (mounted) {
-      setState(() {
-        _statesList = states;
-        _showItems = states?.states ?? [];
-        _selectionLevel = SelectionLevel.state;
-        _selectedCountryId = countryId;
-      });
-    }
-  }
-
-  Future<void> _loadCitiesByState(int stateId) async {
-    final cities = await CardSelectionService.getCitiesData(stateId: stateId);
+  Future<void> _loadCitiesByCountry(int countryId) async {
+    final cities =
+        await CardSelectionService.getCitiesData(countryId: countryId);
     if (mounted) {
       setState(() {
         _citiesList = cities;
         _showItems = cities?.cities ?? [];
         _selectionLevel = SelectionLevel.city;
+        _selectedCountryId = countryId;
       });
     }
   }
@@ -101,11 +78,6 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
   // 处理返回按钮点击
   void _handleReturn() {
     if (_selectionLevel == SelectionLevel.city) {
-      setState(() {
-        _selectionLevel = SelectionLevel.state;
-        _showItems = _statesList?.states ?? [];
-      });
-    } else if (_selectionLevel == SelectionLevel.state) {
       setState(() {
         _selectionLevel = SelectionLevel.country;
         _showItems = _selectedContinentId == 0
@@ -120,20 +92,18 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
   }
 
   void _handleItemTap(dynamic item) {
-    setState(() {
-      if (_selectionLevel == SelectionLevel.country) {
-        _loadStatesByCountry((item as Country).id);
-      } else if (_selectionLevel == SelectionLevel.state) {
-        _loadCitiesByState((item as GeoState).id);
-      } else {
+    if (_selectionLevel == SelectionLevel.country) {
+      _loadCitiesByCountry((item as Country).id);
+    } else {
+      setState(() {
         final id = (item as City).id;
         if (_selectedCities.contains(id)) {
           _selectedCities.remove(id);
         } else {
           _selectedCities.add(id);
         }
-      }
-    });
+      });
+    }
   }
 
   // 处理大洲标签点击
@@ -189,8 +159,6 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
     switch (_selectionLevel) {
       case SelectionLevel.country:
         return '选择目的国家';
-      case SelectionLevel.state:
-        return '选择省份';
       case SelectionLevel.city:
         return '选择目的城市';
     }
@@ -292,8 +260,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
   }
 
   Widget _buildContinentTab(Continent tag) {
-    final bool isSelected = _selectionLevel == SelectionLevel.country &&
-        _selectedContinentId == tag.id;
+    final bool isSelected = _selectedContinentId == tag.id;
 
     return IntrinsicWidth(
       child: GestureDetector(

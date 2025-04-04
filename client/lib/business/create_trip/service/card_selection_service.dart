@@ -143,12 +143,12 @@ class CardSelectionService {
   }
 
   static Future<CitiesEntity?> getCitiesData({
-    required int stateId,
+    int? countryId,
     int? size = 100,
     int? page = 1,
   }) async {
     final params = <String, dynamic>{
-      'stateId': stateId,
+      if (countryId != null) 'countryId': countryId,
       if (size != null) 'size': size,
       if (page != null) 'page': page,
     };
