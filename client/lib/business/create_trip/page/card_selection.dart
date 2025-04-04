@@ -33,7 +33,6 @@ class CardSelectionPage extends StatefulWidget {
 class _CardSelectionPageState extends State<CardSelectionPage> {
   SelectionLevel _selectionLevel = SelectionLevel.country;
   int _selectedContinentId = 0;
-  int? _selectedCountryId;
   final Set<int> _selectedCities = {};
   bool _isLoading = true;
 
@@ -70,7 +69,6 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
         _citiesList = cities;
         _showItems = cities?.cities ?? [];
         _selectionLevel = SelectionLevel.city;
-        _selectedCountryId = countryId;
       });
     }
   }
@@ -234,11 +232,11 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
       ),
       child: Column(
         children: [
+          _buildSelectedCities(),
+          if (_selectedCities.isNotEmpty) const SizedBox(height: 20),
           if (_selectionLevel == SelectionLevel.country) _buildContinentTabs(),
           if (_selectionLevel == SelectionLevel.country)
             const SizedBox(height: 20),
-          _buildSelectedCities(),
-          if (_selectedCities.isNotEmpty) const SizedBox(height: 20),
           _buildGenerateButton(),
         ],
       ),
@@ -298,6 +296,10 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
   }
 
   Widget _buildSelectedCities() {
+    if (_citiesList!.cities.isEmpty) {
+      return SizedBox.shrink();
+    }
+
     return SizedBox(
       width: double.infinity,
       child: SingleChildScrollView(
