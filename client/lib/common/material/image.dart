@@ -17,7 +17,7 @@ class BaseImage {
   BaseImage._();
 
   static Widget net(
-    String? url, {
+    String url, {
     progressColor,
     double? aspectRatio,
     double? size,
@@ -61,10 +61,10 @@ class BaseImage {
     }
 
     return create(
-      url?.isNotEmpty == true
+      url.isNotEmpty == true
           ? CachedNetworkImage(
               fit: fit ?? getBoxFit(width: width, height: height),
-              imageUrl: url!,
+              imageUrl: url,
               memCacheWidth: (1080 * 0.8).toInt(),
               memCacheHeight: (1920 * 0.8).toInt(),
               maxWidthDiskCache: (1080 * 0.8).toInt(),
@@ -78,12 +78,10 @@ class BaseImage {
                     size: 15.w,
                   ),
             )
-          : assetName?.isNotEmpty == true
-              ? Image.asset(
-                  assetName!,
-                  fit: getBoxFit(width: size, height: height),
-                )
-              : Container(),
+          : asset(
+              name: assetName ?? 'placeholder.png',
+              fit: getBoxFit(width: size, height: height),
+            ),
       aspectRatio: aspectRatio,
       width: width,
       height: height,

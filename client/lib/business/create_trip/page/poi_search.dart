@@ -3,6 +3,7 @@ import 'package:client/business/create_trip/entity/geo_entity.dart';
 import 'package:client/business/create_trip/service/poi_search_service.dart';
 import 'package:client/business/create_trip/widgets/city_dropdown.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
+import 'package:client/common/material/image.dart';
 import 'package:client/common/widgets/base_button.dart';
 import 'package:client/common/widgets/clickable_button.dart';
 import 'package:client/common/widgets/preference_button.dart';
@@ -26,6 +27,14 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
   List<City>? _selectedCities;
   int _currentCityIndex = 0;
   bool _isInitialized = false;
+  final City defCity = City(
+      id: -1,
+      name: '所有已选城市',
+      nameEn: 'All Selected Cities',
+      nameLocal: '',
+      nameCn: '',
+      code: '',
+      stateId: 0);
 
   @override
   void initState() {
@@ -42,10 +51,10 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
       if (_selectedCities != null && _selectedCities!.isNotEmpty) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            context
-                .read<PoiSearchService>()
-                .setCurrentCity(_selectedCities![0].name);
-            context.read<PoiSearchService>().searchPoi('');
+            context.read<PoiSearchService>().setCurrentCity(
+                  '所有已选城市',
+                  allCityIds: _selectedCities!.map((city) => city.id).toList(),
+                );
             setState(() {
               _isInitialized = true;
             });
@@ -89,7 +98,7 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
                 ClipRRect(
                   child: Stack(
                     children: [
-                      Image.network(
+                      BaseImage.net(
                         poi.imageUrl,
                         width: 142.w,
                         height: 142.w,
@@ -312,9 +321,11 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
                     onTap: () {
                       if (_hasFocus) {
                         _focusNode.unfocus();
-                        context
-                            .read<PoiSearchService>()
-                            .searchPoi(_searchController.text);
+                        context.read<PoiSearchService>().searchPoi(
+                            _searchController.text,
+                            cityId: _currentCityIndex == 0
+                                ? null
+                                : _selectedCities![_currentCityIndex - 1].id);
                       } else {
                         if (selectedCount > 0) {
                           // TODO: add selected pois to trip
@@ -348,16 +359,21 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
       leading: ReturnButton(),
       title: _selectedCities != null && _selectedCities!.isNotEmpty
           ? CityDropdown(
-              cities: _selectedCities!,
+              cities: [defCity, ..._selectedCities!],
               selectedIndex: _currentCityIndex,
               onCityChanged: (index) {
                 setState(() {
                   _currentCityIndex = index;
                 });
-                context
-                    .read<PoiSearchService>()
-                    .setCurrentCity(_selectedCities![index].name);
-                context.read<PoiSearchService>().searchPoi('');
+                final selectedCity =
+                    index == 0 ? defCity : _selectedCities![index - 1];
+                context.read<PoiSearchService>().setCurrentCity(
+                      selectedCity.name,
+                      cityId: selectedCity.id == -1 ? null : selectedCity.id,
+                      allCityIds: selectedCity.id == -1
+                          ? _selectedCities!.map((city) => city.id).toList()
+                          : null,
+                    );
               },
             )
           : null,
