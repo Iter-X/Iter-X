@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:client/app/apis/geo_api.dart';
 import 'package:client/common/dio/http.dart';
 import 'package:client/common/dio/http_result_bean.dart';
@@ -11,6 +13,13 @@ class PoiSearchService extends ChangeNotifier {
   List<PoiItem> _poiList = [];
   String _searchQuery = '';
   final Set<PoiItem> _selectedPois = {};
+  Timer? _debounceTimer;
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
 
   bool _isPoiSelected(PoiItem poi) {
     return _selectedPois.any((item) => item.name == poi.name);
@@ -40,8 +49,23 @@ class PoiSearchService extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> searchPoi(String query, {int? cityId}) async {
+  Future<void> searchPoi(String query, {bool immediate = false}) async {
     _searchQuery = query;
+
+    // Cancel any existing timer
+    _debounceTimer?.cancel();
+
+    if (!immediate) {
+      // Create a new timer for debouncing
+      _debounceTimer = Timer(const Duration(milliseconds: 1000), () {
+        _executeSearch(query);
+      });
+    } else {
+      await _executeSearch(query);
+    }
+  }
+
+  Future<void> _executeSearch(String query) async {
     _isLoading = true;
     notifyListeners();
 
@@ -49,8 +73,8 @@ class PoiSearchService extends ChangeNotifier {
       final HttpResultBean result = await Http.instance.get(
         GeoApi.getPois,
         params: {
-          if (cityId != null)
-            'city_id': cityId
+          if (_currentCityId != null)
+            'city_id': _currentCityId
           else if (_allCityIds != null && _allCityIds!.isNotEmpty)
             'city_ids': _allCityIds,
           if (query.isNotEmpty) 'keyword': query,
@@ -78,7 +102,7 @@ class PoiSearchService extends ChangeNotifier {
     _currentCity = cityName;
     _currentCityId = cityId;
     _allCityIds = allCityIds;
-    searchPoi('', cityId: cityId);
+    searchPoi('');
     notifyListeners();
   }
 }

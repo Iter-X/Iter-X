@@ -285,7 +285,9 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
                     },
                     onSubmitted: (value) {
                       _focusNode.unfocus();
-                      context.read<PoiSearchService>().searchPoi(value);
+                      context
+                          .read<PoiSearchService>()
+                          .searchPoi(value, immediate: true);
                     },
                     decoration: InputDecoration(
                       hintText: '输入搜索',
@@ -321,11 +323,9 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
                     onTap: () {
                       if (_hasFocus) {
                         _focusNode.unfocus();
-                        context.read<PoiSearchService>().searchPoi(
-                            _searchController.text,
-                            cityId: _currentCityIndex == 0
-                                ? null
-                                : _selectedCities![_currentCityIndex - 1].id);
+                        context
+                            .read<PoiSearchService>()
+                            .searchPoi(_searchController.text);
                       } else {
                         if (selectedCount > 0) {
                           // TODO: add selected pois to trip
