@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:client/app/constants.dart';
 import 'package:client/app/routes.dart';
 import 'package:client/business/create_trip/entity/geo_entity.dart';
@@ -368,51 +370,82 @@ class _PoiSearchPageState extends BaseState<PoiSearchPage> {
       );
     }
 
-    return AppBarWithSafeArea(
-      backgroundColor: AppColor.bg,
-      bottomColor: AppColor.bottomBar,
-      leading: ReturnButton(),
-      title: _selectedCities != null && _selectedCities!.isNotEmpty
-          ? CityDropdown(
-              cities: [defCity, ..._selectedCities!],
-              selectedIndex: _currentCityIndex,
-              onCityChanged: (index) {
-                setState(() {
-                  _currentCityIndex = index;
-                });
-                final selectedCity =
-                    index == 0 ? defCity : _selectedCities![index - 1];
-                context.read<PoiSearchService>().setCurrentCity(
-                      selectedCity.name,
-                      cityId: selectedCity.id == -1 ? null : selectedCity.id,
-                      allCityIds: selectedCity.id == -1
-                          ? _selectedCities!.map((city) => city.id).toList()
-                          : null,
+    return Stack(
+      children: [
+        AppBarWithSafeArea(
+          backgroundColor: AppColor.bg,
+          bottomColor: AppColor.bottomBar,
+          leading: ReturnButton(),
+          title: _selectedCities != null && _selectedCities!.isNotEmpty
+              ? CityDropdown(
+                  cities: [defCity, ..._selectedCities!],
+                  selectedIndex: _currentCityIndex,
+                  onCityChanged: (index) {
+                    setState(() {
+                      _currentCityIndex = index;
+                    });
+                    final selectedCity =
+                        index == 0 ? defCity : _selectedCities![index - 1];
+                    context.read<PoiSearchService>().setCurrentCity(
+                          selectedCity.name,
+                          cityId:
+                              selectedCity.id == -1 ? null : selectedCity.id,
+                          allCityIds: selectedCity.id == -1
+                              ? _selectedCities!.map((city) => city.id).toList()
+                              : null,
+                        );
+                  },
+                )
+              : null,
+          actions: [PreferenceButton()],
+          child: Column(
+            children: [
+              Expanded(
+                child: Consumer<PoiSearchService>(
+                  builder: (context, service, child) {
+                    if (service.isLoading) {
+                      return const PoiSkeleton();
+                    }
+                    return ListView.builder(
+                      padding: EdgeInsets.all(0),
+                      itemCount: service.poiList.length,
+                      itemBuilder: (context, index) =>
+                          _buildPoiCard(service.poiList[index]),
                     );
-              },
-            )
-          : null,
-      actions: [PreferenceButton()],
-      child: Column(
-        children: [
-          Expanded(
-            child: Consumer<PoiSearchService>(
-              builder: (context, service, child) {
-                if (service.isLoading) {
-                  return const PoiSkeleton();
-                }
-                return ListView.builder(
-                  padding: EdgeInsets.all(0),
-                  itemCount: service.poiList.length,
-                  itemBuilder: (context, index) =>
-                      _buildPoiCard(service.poiList[index]),
-                );
-              },
-            ),
+                  },
+                ),
+              ),
+              _buildBottomBar(),
+            ],
           ),
-          _buildBottomBar(),
-        ],
-      ),
+        ),
+        if (_selectedCities != null && _selectedCities!.isNotEmpty)
+          ValueListenableBuilder<bool>(
+            valueListenable: CityDropdown.isExpandedNotifier,
+            builder: (context, isExpanded, child) {
+              if (!isExpanded) return const SizedBox.shrink();
+              return Positioned(
+                top: MediaQuery.of(context).padding.top + kToolbarHeight,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: GestureDetector(
+                  onTap: () {
+                    CityDropdown.isExpandedNotifier.value = false;
+                  },
+                  child: ClipRect(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
+                      child: Container(
+                        color: AppColor.primary.withOpacity(0.5),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+      ],
     );
   }
 }

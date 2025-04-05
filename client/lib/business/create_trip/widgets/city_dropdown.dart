@@ -8,6 +8,7 @@ class CityDropdown extends StatefulWidget {
   final List<City> cities;
   final int selectedIndex;
   final Function(int) onCityChanged;
+  static final ValueNotifier<bool> isExpandedNotifier = ValueNotifier<bool>(false);
 
   const CityDropdown({
     super.key,
@@ -38,6 +39,7 @@ class _CityDropdownState extends State<CityDropdown> {
     if (mounted) {
       setState(() {
         _isExpanded = false;
+        CityDropdown.isExpandedNotifier.value = false;
       });
     }
   }
@@ -45,6 +47,7 @@ class _CityDropdownState extends State<CityDropdown> {
   void _toggleDropdown() {
     setState(() {
       _isExpanded = !_isExpanded;
+      CityDropdown.isExpandedNotifier.value = _isExpanded;
       if (_isExpanded) {
         _overlayEntry = _createOverlayEntry();
         Overlay.of(context).insert(_overlayEntry!);

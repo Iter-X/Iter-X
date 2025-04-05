@@ -30,6 +30,7 @@ class _SelectDatePageState extends BaseState<SelectDatePage> {
   int? selectDays; // 灵活天数
   bool isShowSelectDays = false;
   int selectRangeDays = 0;
+  final GlobalKey _bottomBarKey = GlobalKey();
 
   late CleanCalendarController _calendarController;
 
@@ -134,15 +135,15 @@ class _SelectDatePageState extends BaseState<SelectDatePage> {
 
   @override
   Widget build(BuildContext context) {
-    return AppBarWithSafeArea(
-      backgroundColor: AppColor.bg,
-      bottomColor: AppColor.bottomBar,
-      hasAppBar: true,
-      leading: ReturnButton(),
-      title: "选择出行时间",
-      child: Stack(
-        children: [
-          Column(
+    return Stack(
+      children: [
+        AppBarWithSafeArea(
+          backgroundColor: AppColor.bg,
+          bottomColor: AppColor.bottomBar,
+          hasAppBar: true,
+          leading: ReturnButton(),
+          title: "选择出行时间",
+          child: Column(
             children: [
               Expanded(
                 child: _buildCalendar(),
@@ -150,44 +151,50 @@ class _SelectDatePageState extends BaseState<SelectDatePage> {
               _buildBottomContent(),
             ],
           ),
-          if (isShowSelectDays)
-            Positioned.fill(
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    isShowSelectDays = false;
-                  });
-                },
+        ),
+        if (isShowSelectDays)
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  isShowSelectDays = false;
+                });
+              },
+              child: ClipRect(
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                  filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
                   child: Container(
                     color: AppColor.primary.withOpacity(0.5),
                   ),
                 ),
               ),
             ),
-          if (isShowSelectDays)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SelectDaysWidget(
-                    onTap: (days) {
-                      _calendarController.clearSelectedDates();
-                      selectDays = days;
-                      isShowSelectDays = false;
-                      setState(() {});
-                    },
-                    selectDays: selectDays,
-                  ),
-                ],
+          ),
+        if (isShowSelectDays)
+          Column(
+            children: [
+              const Spacer(),
+              SelectDaysWidget(
+                onTap: (days) {
+                  _calendarController.clearSelectedDates();
+                  selectDays = days;
+                  isShowSelectDays = false;
+                  setState(() {});
+                },
+                selectDays: selectDays,
               ),
-            ),
-        ],
-      ),
+              _buildBottomContent(),
+              Container(
+                height: MediaQuery.of(context).padding.bottom,
+                color: AppColor.bottomBar,
+              )
+            ],
+          ),
+      ],
     );
   }
 
@@ -296,7 +303,9 @@ class _SelectDatePageState extends BaseState<SelectDatePage> {
                         ),
                       ),
                       Icon(
-                        Icons.keyboard_arrow_right,
+                        isShowSelectDays
+                            ? Icons.keyboard_arrow_up
+                            : Icons.keyboard_arrow_down,
                         color: AppColor.primaryFont,
                         size: 24.sp,
                       ),
