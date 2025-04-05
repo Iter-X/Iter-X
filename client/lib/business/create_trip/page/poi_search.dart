@@ -343,6 +343,7 @@ class _PoiSearchPageState extends BaseState<PoiSearchPage> {
                                   .toList(),
                             },
                           );
+                          return;
                         }
                         Navigator.pop(context);
                       }
