@@ -102,7 +102,7 @@ class PoiSearchService extends ChangeNotifier {
     _currentCity = cityName;
     _currentCityId = cityId;
     _allCityIds = allCityIds;
-    searchPoi('');
+    searchPoi('', immediate: true);
     notifyListeners();
   }
 }

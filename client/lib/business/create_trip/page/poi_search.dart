@@ -2,6 +2,7 @@ import 'package:client/app/constants.dart';
 import 'package:client/business/create_trip/entity/geo_entity.dart';
 import 'package:client/business/create_trip/service/poi_search_service.dart';
 import 'package:client/business/create_trip/widgets/city_dropdown.dart';
+import 'package:client/business/create_trip/widgets/poi_skeleton.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/image.dart';
 import 'package:client/common/widgets/base_button.dart';
@@ -384,8 +385,7 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
             child: Consumer<PoiSearchService>(
               builder: (context, service, child) {
                 if (service.isLoading) {
-                  return const Center(
-                      child: CircularProgressIndicator()); // TODO: skeleton
+                  return const PoiSkeleton();
                 }
                 return ListView.builder(
                   padding: EdgeInsets.all(0),
