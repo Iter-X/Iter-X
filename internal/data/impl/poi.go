@@ -303,6 +303,12 @@ func (r *pointsOfInterestRepositoryImpl) ListPOIs(ctx context.Context, params *b
 
 	if params.CityId != nil {
 		cli = cli.Where(pointsofinterest.CityID(uint(*params.CityId)))
+	} else if len(params.CityIds) > 0 {
+		cityIds := make([]uint, len(params.CityIds))
+		for i, id := range params.CityIds {
+			cityIds[i] = uint(id)
+		}
+		cli = cli.Where(pointsofinterest.CityIDIn(cityIds...))
 	}
 
 	if params.Keyword != nil && *params.Keyword != "" {

@@ -169,11 +169,12 @@ message POI {
 message ListPOIsRequest {
   optional uint32 city_id = 1;
   optional string keyword = 2;
-  int32 size = 3 [(validatex.rules).numeric = {
+  repeated uint32 city_ids = 3;
+  int32 size = 4 [(validatex.rules).numeric = {
     gte: 0,
     lte: 100,
   }];
-  int32 page = 4 [(validatex.rules).numeric = {
+  int32 page = 5 [(validatex.rules).numeric = {
     gte: 0
   }];
 }

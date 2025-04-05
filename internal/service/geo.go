@@ -108,6 +108,7 @@ func (s *GeoService) ListPOIs(ctx context.Context, req *geoV1.ListPOIsRequest) (
 	params := &bo.ListPOIsParams{
 		CityId:     req.CityId,
 		Keyword:    req.Keyword,
+		CityIds:    req.CityIds,
 		Pagination: bo.FromPageAndSize(req.Page, req.Size),
 	}
 

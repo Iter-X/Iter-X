@@ -34,5 +34,7 @@ type ListPOIsParams struct {
 	CityId *uint32
 	// Optional keyword filter
 	Keyword *string
+	// Optional city IDs filter
+	CityIds []uint32
 	*Pagination
 }
