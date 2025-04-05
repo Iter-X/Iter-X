@@ -16,6 +16,7 @@ import 'package:client/business/create_trip/page/poi_search.dart';
 import 'package:client/business/home_main/page/home_main.dart';
 import 'package:client/business/mine/page/mine_page.dart';
 import 'package:client/business/trip/page/trip_main_page.dart';
+import 'package:client/business/create_trip/page/creating_trip.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 
@@ -35,6 +36,7 @@ class Routes {
   static const String profile = '/mine/profile';
   static const String poiSearch = '/create_trip/poi_search';
   static const String tripOverview = '/trip/overview';
+  static const String creatingTrip = '/create_trip/creating_trip';
 
   // 无需登录即可访问的页面
   static final List<String> _routesWithoutLogin = [
@@ -66,6 +68,10 @@ class Routes {
     tripOverview:
         Handler(handlerFunc: (context, params) => const TripMainPage()),
     selectDate: Handler(handlerFunc: (context, params) => const SelectDatePage()),
+    creatingTrip: Handler(handlerFunc: (context, params) {
+      final args = context!.settings!.arguments as Map<String, dynamic>;
+      return CreatingTripPage(params: args['params']);
+    }),
   };
 
   // 404路由处理器

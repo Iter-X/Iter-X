@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:client/app/constants.dart';
+import 'package:client/app/routes.dart';
 import 'package:client/business/create_trip/widgets/select_days_widget.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/state.dart';
@@ -31,6 +32,8 @@ class _SelectDatePageState extends BaseState<SelectDatePage> {
   bool isShowSelectDays = false;
   int selectRangeDays = 0;
   final GlobalKey _bottomBarKey = GlobalKey();
+  List<int>? _cityIds;
+  List<String>? _poiIds;
 
   late CleanCalendarController _calendarController;
 
@@ -58,6 +61,17 @@ class _SelectDatePageState extends BaseState<SelectDatePage> {
       },
     );
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    if (args != null) {
+      _cityIds = args['cityIds'] as List<int>?;
+      _poiIds = args['poiIds'] as List<String>?;
+    }
   }
 
   Widget _buildCalendar() {
@@ -443,7 +457,21 @@ class _SelectDatePageState extends BaseState<SelectDatePage> {
         ToastX.show('请选择返程时间');
         return;
       }
-      ToastX.show("请选择出行时间");
     }
+
+    if (_cityIds == null || _cityIds!.isEmpty) {
+      ToastX.show('请选择城市');
+      return;
+    }
+
+    final params = {
+      'city_ids': _cityIds,
+      'poi_ids': _poiIds ?? [],
+      'start_ts': _startTime?.millisecondsSinceEpoch,
+      'end_ts': _endTime?.millisecondsSinceEpoch,
+      'duration': selectDays ?? selectRangeDays,
+    };
+
+    go(Routes.creatingTrip, arguments: {'params': params});
   }
 }
