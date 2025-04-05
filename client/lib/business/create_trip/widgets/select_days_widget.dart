@@ -16,13 +16,19 @@ class SelectDaysWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 250.h,
+      height: 350.h,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(10.w),
-          topRight: Radius.circular(10.w),
+          topLeft: Radius.circular(AppConfig.boxRadius),
+          topRight: Radius.circular(AppConfig.boxRadius),
         ),
-        color: AppColor.c_F2F2F2,
+        color: AppColor.bottomBar,
+        border: Border(
+          top: BorderSide(
+            color: AppColor.bottomBarLine,
+            width: 1.w,
+          ),
+        ),
       ),
       child: GridView.builder(
         padding: EdgeInsets.only(top: 17.h),
@@ -40,13 +46,16 @@ class SelectDaysWidget extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: selectDays == i + 1
-                    ? AppColor.c_375F77
+                    ? AppColor.highlight
                     : Colors.transparent,
               ),
               child: Text(
                 '${i + 1}天',
                 style: TextStyle(
-                  color: selectDays == i + 1 ? Colors.white : AppColor.c_1D1F1E,
+                  color: selectDays == i + 1
+                      ? AppColor.white
+                      : AppColor.primaryFont,
+                  fontSize: 18.sp,
                 ),
               ),
             ),

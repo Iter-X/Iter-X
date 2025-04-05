@@ -14,6 +14,7 @@ import 'package:client/business/create_trip/service/card_selection_service.dart'
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/image.dart';
 import 'package:client/common/material/iter_text.dart';
+import 'package:client/common/material/state.dart';
 import 'package:client/common/utils/toast.dart';
 import 'package:client/common/widgets/clickable_button.dart';
 import 'package:client/common/widgets/return_button.dart';
@@ -31,7 +32,7 @@ class CardSelectionPage extends StatefulWidget {
   State<CardSelectionPage> createState() => _CardSelectionPageState();
 }
 
-class _CardSelectionPageState extends State<CardSelectionPage> {
+class _CardSelectionPageState extends BaseState<CardSelectionPage> {
   SelectionLevel _selectionLevel = SelectionLevel.country;
   int _selectedContinentId = 0;
   Set<City> _selectedCities = {};
@@ -128,6 +129,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
 
     return AppBarWithSafeArea(
       backgroundColor: AppColor.bg,
+      topColor: AppColor.bg,
       bottomColor: AppColor.bottomBar,
       hasAppBar: true,
       title: _getPageTitle(),
@@ -336,8 +338,7 @@ class _CardSelectionPageState extends State<CardSelectionPage> {
           );
           return;
         }
-        Navigator.pushNamed(
-          context,
+        go(
           Routes.poiSearch,
           arguments: _selectedCities.toList(),
         );

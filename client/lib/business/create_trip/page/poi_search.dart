@@ -1,10 +1,12 @@
 import 'package:client/app/constants.dart';
+import 'package:client/app/routes.dart';
 import 'package:client/business/create_trip/entity/geo_entity.dart';
 import 'package:client/business/create_trip/service/poi_search_service.dart';
 import 'package:client/business/create_trip/widgets/city_dropdown.dart';
 import 'package:client/business/create_trip/widgets/poi_skeleton.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/image.dart';
+import 'package:client/common/material/state.dart';
 import 'package:client/common/widgets/base_button.dart';
 import 'package:client/common/widgets/clickable_button.dart';
 import 'package:client/common/widgets/preference_button.dart';
@@ -21,7 +23,7 @@ class PoiSearchPage extends StatefulWidget {
   State<PoiSearchPage> createState() => _PoiSearchPageState();
 }
 
-class _PoiSearchPageState extends State<PoiSearchPage> {
+class _PoiSearchPageState extends BaseState<PoiSearchPage> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   bool _hasFocus = false;
@@ -329,7 +331,18 @@ class _PoiSearchPageState extends State<PoiSearchPage> {
                             .searchPoi(_searchController.text);
                       } else {
                         if (selectedCount > 0) {
-                          // TODO: add selected pois to trip
+                          go(
+                            Routes.selectDate,
+                            arguments: {
+                              'cityIds': _selectedCities
+                                      ?.map((city) => city.id)
+                                      .toList() ??
+                                  [],
+                              'poiIds': service.selectedPois
+                                  .map((poi) => poi.id)
+                                  .toList(),
+                            },
+                          );
                         }
                         Navigator.pop(context);
                       }
