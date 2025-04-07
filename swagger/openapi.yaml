@@ -402,6 +402,19 @@ components:
                     format: int64
                     type: integer
             type: object
+        geo.v1.ListPOIsResponse:
+            example:
+                pois: null
+                total: 0
+            properties:
+                pois:
+                    items:
+                        $ref: '#/components/schemas/geo.v1.POI'
+                    type: array
+                total:
+                    format: int64
+                    type: integer
+            type: object
         geo.v1.ListStatesResponse:
             example:
                 states: null
@@ -413,6 +426,68 @@ components:
                     type: array
                 total:
                     format: int64
+                    type: integer
+            type: object
+        geo.v1.POI:
+            example:
+                city: null
+                cityId: 0
+                description: ""
+                descriptionCn: ""
+                descriptionEn: ""
+                duration: 0
+                id: ""
+                imageUrl: ""
+                latitude: 0
+                longitude: 0
+                name: ""
+                nameCn: ""
+                nameEn: ""
+                nameLocal: ""
+                popularity: 0
+                rating: 0
+                reviewsCount: 0
+            properties:
+                city:
+                    $ref: '#/components/schemas/geo.v1.City'
+                cityId:
+                    format: int32
+                    type: integer
+                description:
+                    type: string
+                descriptionCn:
+                    type: string
+                descriptionEn:
+                    type: string
+                duration:
+                    format: int64
+                    type: integer
+                id:
+                    type: string
+                imageUrl:
+                    type: string
+                latitude:
+                    format: double
+                    type: number
+                longitude:
+                    format: double
+                    type: number
+                name:
+                    type: string
+                nameCn:
+                    type: string
+                nameEn:
+                    type: string
+                nameLocal:
+                    type: string
+                popularity:
+                    format: double
+                    type: number
+                rating:
+                    format: double
+                    type: number
+                reviewsCount:
+                    format: int32
                     type: integer
             type: object
         geo.v1.State:
@@ -704,9 +779,40 @@ components:
                 trip:
                     $ref: '#/components/schemas/trip.v1.Trip'
             type: object
+        trip.v1.DailyItinerary:
+            example:
+                createdAt: 1741589979
+                dailyTripId: ""
+                id: ""
+                notes: ""
+                poi: null
+                poiId: ""
+                tripId: ""
+                updatedAt: 1741589979
+            properties:
+                createdAt:
+                    format: int32
+                    type: integer
+                dailyTripId:
+                    type: string
+                id:
+                    type: string
+                notes:
+                    type: string
+                poi:
+                    $ref: '#/components/schemas/poi.v1.PointOfInterest'
+                poiId:
+                    type: string
+                tripId:
+                    type: string
+                updatedAt:
+                    format: int32
+                    type: integer
+            type: object
         trip.v1.DailyTrip:
             example:
                 createdAt: 1741589979
+                dailyItineraries: null
                 date: 1741589979
                 day: 0
                 id: ""
@@ -717,6 +823,10 @@ components:
                 createdAt:
                     format: int32
                     type: integer
+                dailyItineraries:
+                    items:
+                        $ref: '#/components/schemas/trip.v1.DailyItinerary'
+                    type: array
                 date:
                     format: int32
                     type: integer
@@ -782,6 +892,7 @@ components:
         trip.v1.Trip:
             example:
                 createdAt: 1741589979
+                dailyTrips: null
                 description: ""
                 endTs: 1741589979
                 id: ""
@@ -793,6 +904,10 @@ components:
                 createdAt:
                     format: int32
                     type: integer
+                dailyTrips:
+                    items:
+                        $ref: '#/components/schemas/trip.v1.DailyTrip'
+                    type: array
                 description:
                     type: string
                 endTs:
@@ -1456,6 +1571,36 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/geo.v1.ListCountriesResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - GeoService
+    /api/v1/geo/pois:
+        get:
+            operationId: GeoService_ListPOIs
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/geo.v1.ListPOIsResponse'
                     description: OK
                 "400":
                     content:

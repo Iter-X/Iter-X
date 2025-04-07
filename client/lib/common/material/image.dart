@@ -5,12 +5,19 @@ import 'package:client/app/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
+
+// Loading type enum
+enum ImageLoadingType {
+  circular,
+  shimmer,
+}
 
 class BaseImage {
   BaseImage._();
 
   static Widget net(
-    String? url, {
+    String url, {
     progressColor,
     double? aspectRatio,
     double? size,
@@ -22,26 +29,47 @@ class BaseImage {
     String? assetName,
     Widget? placeholderChild,
     BoxFit? fit,
+    ImageLoadingType loadingType = ImageLoadingType.shimmer,
   }) {
     width ??= size;
     height ??= size;
+
+    Widget getLoadingWidget() {
+      switch (loadingType) {
+        case ImageLoadingType.circular:
+          return Center(
+            child: placeholderChild ??
+                CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    progressColor ?? AppColor.bg,
+                  ),
+                ),
+          );
+        case ImageLoadingType.shimmer:
+          return Shimmer(
+            colorOpacity: 0.3,
+            child: Container(
+              width: width,
+              height: height,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(circular ?? 0),
+              ),
+            ),
+          );
+      }
+    }
+
     return create(
-      url?.isNotEmpty == true
+      url.isNotEmpty == true
           ? CachedNetworkImage(
               fit: fit ?? getBoxFit(width: width, height: height),
-              imageUrl: url!,
+              imageUrl: url,
               memCacheWidth: (1080 * 0.8).toInt(),
               memCacheHeight: (1920 * 0.8).toInt(),
               maxWidthDiskCache: (1080 * 0.8).toInt(),
               maxHeightDiskCache: (1920 * 0.8).toInt(),
-              placeholder: (context, url) => Center(
-                child: placeholderChild ??
-                    CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        progressColor ?? AppColor.scaffoldBackgroundColor,
-                      ),
-                    ),
-              ),
+              placeholder: (context, url) => getLoadingWidget(),
               errorWidget: (context, url, error) =>
                   placeholderChild ??
                   Icon(
@@ -50,12 +78,10 @@ class BaseImage {
                     size: 15.w,
                   ),
             )
-          : assetName?.isNotEmpty == true
-              ? Image.asset(
-                  assetName!,
-                  fit: getBoxFit(width: size, height: height),
-                )
-              : Container(),
+          : asset(
+              name: assetName ?? 'placeholder.png',
+              fit: getBoxFit(width: size, height: height),
+            ),
       aspectRatio: aspectRatio,
       width: width,
       height: height,

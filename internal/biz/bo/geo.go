@@ -22,6 +22,19 @@ type ListStatesParams struct {
 // ListCitiesParams parameters for listing cities
 type ListCitiesParams struct {
 	// Optional state ID filter
-	StateID uint
+	StateId *uint32
+	// Optional country ID filter
+	CountryId *uint32
+	*Pagination
+}
+
+// ListPOIsParams parameters for listing POIs
+type ListPOIsParams struct {
+	// Optional city ID filter
+	CityId *uint32
+	// Optional keyword filter
+	Keyword *string
+	// Optional city IDs filter
+	CityIds []uint32
 	*Pagination
 }

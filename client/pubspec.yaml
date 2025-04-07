@@ -2,7 +2,7 @@ name: client
 description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+1
+version: 1.0.0+2
 
 environment:
   sdk: '>=2.18.2 <=3.5.0'
@@ -53,6 +53,11 @@ dependencies:
   flutter_speech: ^2.0.1
   flutter_svg: ^2.0.10
   shimmer_animation: 2.1.0
+  # 日历组件 https://pub-web.flutter-io.cn/packages/scrollable_clean_calendar
+  scrollable_clean_calendar: ^1.5.0
+  # 日历转换 https://pub.dev/packages/lunar
+  lunar: ^1.7.3
+  lottie: ^3.2.0
 
 dev_dependencies:
   flutter_test:
@@ -63,6 +68,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/lottie/
   fonts:
     - family: AlibabaPuHuiTi3
       fonts:

@@ -1,7 +1,6 @@
 import 'package:client/app/constants.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/image.dart';
-import 'package:client/common/utils/asset.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -53,10 +52,9 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-                BaseImage.net(
-                  null,
-                  size: 70.w,
-                  assetName: AssetUtil.getAsset('ic_default_head.png'),
+                BaseImage.asset(
+                  name: 'ic_default_head.png',
+                  width: 70.w,
                 ),
               ],
             ),

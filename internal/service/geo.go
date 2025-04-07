@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+
 	geoV1 "github.com/iter-x/iter-x/internal/api/geo/v1"
 	"github.com/iter-x/iter-x/internal/biz"
 	"github.com/iter-x/iter-x/internal/biz/bo"
@@ -84,7 +85,8 @@ func (s *GeoService) ListStates(ctx context.Context, req *geoV1.ListStatesReques
 func (s *GeoService) ListCities(ctx context.Context, req *geoV1.ListCitiesRequest) (*geoV1.ListCitiesResponse, error) {
 	// Convert PB to BO
 	params := &bo.ListCitiesParams{
-		StateID:    uint(req.StateId),
+		StateId:    req.StateId,
+		CountryId:  req.CountryId,
 		Pagination: bo.FromPageAndSize(req.Page, req.Size),
 	}
 
@@ -97,5 +99,27 @@ func (s *GeoService) ListCities(ctx context.Context, req *geoV1.ListCitiesReques
 	return &geoV1.ListCitiesResponse{
 		Total:  total,
 		Cities: build.ToCitiesProto(ctx, cities),
+	}, nil
+}
+
+// ListPOIs lists POIs, optionally filtered by city and keyword
+func (s *GeoService) ListPOIs(ctx context.Context, req *geoV1.ListPOIsRequest) (*geoV1.ListPOIsResponse, error) {
+	// Convert PB to BO
+	params := &bo.ListPOIsParams{
+		CityId:     req.CityId,
+		Keyword:    req.Keyword,
+		CityIds:    req.CityIds,
+		Pagination: bo.FromPageAndSize(req.Page, req.Size),
+	}
+
+	// Call biz
+	pois, total, err := s.geoBiz.ListPOIs(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+
+	return &geoV1.ListPOIsResponse{
+		Total: total,
+		Pois:  build.ToPOIsProto(ctx, pois),
 	}, nil
 }

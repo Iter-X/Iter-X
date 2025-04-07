@@ -251,3 +251,93 @@ func (r *pointsOfInterestRepositoryImpl) GetByCityNames(ctx context.Context, cit
 	pois := r.ToEntities(rows)
 	return pois, nil
 }
+
+func (r *pointsOfInterestRepositoryImpl) GetTopPOIsByCity(ctx context.Context, cityIds []int32, limit int) ([]*do.PointsOfInterest, error) {
+	if len(cityIds) == 0 {
+		return nil, nil
+	}
+
+	// Convert []int32 to []uint
+	uintCityIds := make([]uint, len(cityIds))
+	for i, id := range cityIds {
+		uintCityIds[i] = uint(id)
+	}
+
+	rows, err := r.GetTx(ctx).PointsOfInterest.Query().
+		Where(pointsofinterest.CityIDIn(uintCityIds...)).
+		Order(ent.Desc(pointsofinterest.FieldRating)).
+		Limit(limit).
+		WithContinent().
+		WithCountry().
+		WithState().
+		WithCity().
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.ToEntities(rows), nil
+}
+
+func (r *pointsOfInterestRepositoryImpl) GetByIds(ctx context.Context, ids []uuid.UUID) ([]*do.PointsOfInterest, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+
+	rows, err := r.GetTx(ctx).PointsOfInterest.Query().
+		Where(pointsofinterest.IDIn(ids...)).
+		WithContinent().
+		WithCountry().
+		WithState().
+		WithCity().
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.ToEntities(rows), nil
+}
+
+func (r *pointsOfInterestRepositoryImpl) ListPOIs(ctx context.Context, params *bo.ListPOIsParams) ([]*do.PointsOfInterest, int64, error) {
+	cli := r.GetTx(ctx).PointsOfInterest.Query()
+
+	if params.CityId != nil {
+		cli = cli.Where(pointsofinterest.CityID(uint(*params.CityId)))
+	} else if len(params.CityIds) > 0 {
+		cityIds := make([]uint, len(params.CityIds))
+		for i, id := range params.CityIds {
+			cityIds[i] = uint(id)
+		}
+		cli = cli.Where(pointsofinterest.CityIDIn(cityIds...))
+	}
+
+	if params.Keyword != nil && *params.Keyword != "" {
+		cli = cli.Where(pointsofinterest.Or(
+			pointsofinterest.NameLocalContains(*params.Keyword),
+			pointsofinterest.NameCnContains(*params.Keyword),
+			pointsofinterest.NameEnContains(*params.Keyword),
+			pointsofinterest.DescriptionContains(*params.Keyword),
+		))
+	}
+
+	total, err := cli.Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	if params.Pagination != nil {
+		cli = cli.Offset(params.Pagination.GetOffset4Db()).Limit(params.Pagination.GetLimit4Db())
+	}
+
+	rows, err := cli.
+		//WithCity().
+		WithPoiFiles(func(query *ent.PointsOfInterestFilesQuery) {
+			query.WithFile()
+		}).
+		All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return r.ToEntities(rows), int64(total), nil
+}

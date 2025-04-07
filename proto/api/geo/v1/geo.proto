@@ -31,12 +31,18 @@ service GeoService {
       get: "/api/v1/geo/cities"
     };
   }
+
+  rpc ListPOIs(ListPOIsRequest) returns (ListPOIsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/geo/pois"
+    };
+  }
 }
 
 message ListContinentsRequest {
   int32 size = 1 [(validatex.rules).numeric = {
     gte: 0,
-    lte: 100,
+    lte: 200,
   }];
   int32 page = 2 [(validatex.rules).numeric = {
     gte: 0
@@ -81,12 +87,13 @@ message ListStatesResponse {
 }
 
 message ListCitiesRequest {
-  uint32 state_id = 1;
-  int32 size = 2 [(validatex.rules).numeric = {
+  optional uint32 state_id = 1;
+  optional uint32 country_id = 2;
+  int32 size = 3 [(validatex.rules).numeric = {
     gte: 0,
     lte: 100,
   }];
-  int32 page = 3 [(validatex.rules).numeric = {
+  int32 page = 4 [(validatex.rules).numeric = {
     gte: 0
   }];
 }
@@ -137,4 +144,42 @@ message City {
   string code = 6;
   uint32 state_id = 7;
   State state = 8;
+}
+
+message POI {
+  string id = 1;
+  string name = 2;
+  string name_local = 3;
+  string name_en = 4;
+  string name_cn = 5;
+  string description = 6;
+  string description_en = 7;
+  string description_cn = 8;
+  string image_url = 9;
+  double rating = 10;
+  uint32 reviews_count = 11;
+  uint32 city_id = 12;
+  City city = 13;
+  double latitude = 14;
+  double longitude = 15;
+  int64 duration = 16;
+  double popularity = 17;
+}
+
+message ListPOIsRequest {
+  optional uint32 city_id = 1;
+  optional string keyword = 2;
+  repeated uint32 city_ids = 3;
+  int32 size = 4 [(validatex.rules).numeric = {
+    gte: 0,
+    lte: 100,
+  }];
+  int32 page = 5 [(validatex.rules).numeric = {
+    gte: 0
+  }];
+}
+
+message ListPOIsResponse {
+  repeated POI pois = 1;
+  int64 total = 2;
 }

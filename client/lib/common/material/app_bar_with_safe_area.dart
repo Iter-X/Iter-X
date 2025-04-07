@@ -15,7 +15,7 @@ class AppBarWithSafeArea extends StatelessWidget {
   final Brightness? statusBarIconBrightness;
   final Brightness? statusBarBrightness;
   final bool hasAppBar;
-  final String? title;
+  final dynamic title;
   final Widget? leading;
   final List<Widget>? actions;
   final Color? backgroundColor;
@@ -66,13 +66,16 @@ class AppBarWithSafeArea extends StatelessWidget {
               ),
               leading: leading,
               title: title != null
-                  ? Text(
-                      style: TextStyle(
-                        color: AppColor.primaryFont,
-                        fontSize: 18.sp,
-                        fontWeight: AppFontWeight.medium,
-                      ),
-                      title!)
+                  ? title is String
+                      ? Text(
+                          title,
+                          style: TextStyle(
+                            color: AppColor.primaryFont,
+                            fontSize: 18.sp,
+                            fontWeight: AppFontWeight.medium,
+                          ),
+                        )
+                      : title
                   : null,
               centerTitle: centerTitle,
               actions: actions,

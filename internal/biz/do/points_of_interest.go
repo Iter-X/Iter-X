@@ -56,4 +56,8 @@ type PointsOfInterest struct {
 	DailyItinerary []*DailyItinerary `json:"daily_itinerary,omitempty"`
 	// PoiFiles holds the value of the poi_files edge.
 	PoiFiles []*PointsOfInterestFiles `json:"poi_files,omitempty"`
+	// Image holds the value of the image edge.
+	Image *PointsOfInterestFiles `json:"image,omitempty"`
+	// ImageUrl holds the value of the image_url field.
+	ImageUrl string `json:"image_url,omitempty"`
 }

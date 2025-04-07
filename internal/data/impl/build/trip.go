@@ -42,13 +42,15 @@ func DailyTripRepositoryImplToEntity(po *ent.DailyTrip) *do.DailyTrip {
 		return nil
 	}
 	return &do.DailyTrip{
-		ID:        po.ID,
-		CreatedAt: po.CreatedAt,
-		UpdatedAt: po.UpdatedAt,
-		TripID:    po.TripID,
-		Day:       po.Day,
-		Date:      po.Date,
-		Notes:     po.Notes,
+		ID:             po.ID,
+		CreatedAt:      po.CreatedAt,
+		UpdatedAt:      po.UpdatedAt,
+		TripID:         po.TripID,
+		Day:            po.Day,
+		Date:           po.Date,
+		Notes:          po.Notes,
+		Trip:           TripRepositoryImplToEntity(po.Edges.Trip),
+		DailyItinerary: DailyItineraryRepositoryImplToEntities(po.Edges.DailyItinerary),
 	}
 }
 

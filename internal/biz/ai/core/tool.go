@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"fmt"
+	"github.com/iter-x/iter-x/internal/biz/do"
 )
 
 // BaseTool provides a basic implementation of the Tool interface
@@ -31,5 +32,10 @@ func (a *BaseTool) Description() string {
 
 // Execute provides a basic implementation that can be overridden by subclasses
 func (a *BaseTool) Execute(context.Context, any) (any, error) {
+	return nil, fmt.Errorf("not implemented")
+}
+
+// GetDefinition returns the definition of the tool, only for function call tools
+func (a *BaseTool) GetDefinition() (*do.FunctionCallTool, error) {
 	return nil, fmt.Errorf("not implemented")
 }

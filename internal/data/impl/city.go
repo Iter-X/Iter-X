@@ -2,6 +2,7 @@ package impl
 
 import (
 	"context"
+
 	"go.uber.org/zap"
 
 	"github.com/iter-x/iter-x/internal/biz/bo"
@@ -10,6 +11,7 @@ import (
 	"github.com/iter-x/iter-x/internal/data"
 	"github.com/iter-x/iter-x/internal/data/ent"
 	"github.com/iter-x/iter-x/internal/data/ent/city"
+	"github.com/iter-x/iter-x/internal/data/ent/state"
 	"github.com/iter-x/iter-x/internal/data/impl/build"
 )
 
@@ -93,9 +95,15 @@ func (r *cityRepositoryImpl) ListCities(ctx context.Context, params *bo.ListCiti
 	query := r.GetTx(ctx).City.Query()
 
 	// Filter by state if specified
-	if params.StateID > 0 {
-		query = query.Where(city.StateID(params.StateID))
+	if params.StateId != nil {
+		query = query.Where(city.StateID(uint(*params.StateId)))
 	}
+
+	// Filter by country if specified
+	if params.CountryId != nil {
+		query = query.Where(city.HasStateWith(state.CountryID(uint(*params.CountryId))))
+	}
+
 	// Get total count
 	total, err := query.Count(ctx)
 	if err != nil {
@@ -121,4 +129,32 @@ func (r *cityRepositoryImpl) ListCities(ctx context.Context, params *bo.ListCiti
 	}
 
 	return result, int64(total), nil
+}
+
+func (r *cityRepositoryImpl) GetCityIdByName(ctx context.Context, cityName string) (int32, error) {
+	cli := r.GetTx(ctx).City
+
+	// 先尝试精确匹配本地名称
+	row, err := cli.Query().
+		Where(city.NameLocalEQ(cityName)).
+		First(ctx)
+	if err != nil {
+		// 如果精确匹配失败，尝试模糊匹配
+		row, err = cli.Query().
+			Where(city.NameLocalContains(cityName)).
+			Order(ent.Asc(city.FieldNameLocal)). // 按名称排序，确保结果一致性
+			First(ctx)
+		if err != nil {
+			// 如果本地名称都匹配失败，尝试英文名称
+			row, err = cli.Query().
+				Where(city.NameEnContains(cityName)).
+				Order(ent.Asc(city.FieldNameEn)).
+				First(ctx)
+			if err != nil {
+				return 0, err
+			}
+		}
+	}
+
+	return int32(row.ID), nil
 }

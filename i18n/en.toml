@@ -103,3 +103,6 @@ other = "Get states failed"
 [GET_CITIES_LIST_FAILED]
 other = "Get cities failed"
 
+[GET_POIS_LIST_FAILED]
+other = "Get POIs failed"
+
