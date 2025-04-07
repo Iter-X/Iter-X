@@ -20,6 +20,7 @@ import (
 	"github.com/iter-x/iter-x/internal/common/cnst"
 	"github.com/iter-x/iter-x/internal/conf"
 	"github.com/iter-x/iter-x/internal/data"
+	"github.com/iter-x/iter-x/internal/server/interceptor"
 	"github.com/iter-x/iter-x/pkg/storage/local"
 )
 
@@ -74,7 +75,8 @@ func (s *HTTPServer) Start(ctx context.Context) error {
 	}
 
 	s.logger.Infof("http server listening on %s", s.cfg.Addr)
-	return http.ListenAndServe(s.cfg.Addr, s.mux)
+	handler := interceptor.HTTPLoggingMiddleware(s.logger.Desugar())(s.mux)
+	return http.ListenAndServe(s.cfg.Addr, handler)
 }
 
 func registerDoc(env conf.Environment, mux *runtime.ServeMux) error {

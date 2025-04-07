@@ -40,6 +40,7 @@ func NewGRPCServer(
 ) *GRPCServer {
 	server := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
+			interceptor.UnaryServerLogging(logger.Desugar()),
 			interceptor.I18n(i18nBundle),
 			interceptor.TokenValidation(auth),
 			interceptor.ValidateX(),
