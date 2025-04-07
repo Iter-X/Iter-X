@@ -20,6 +20,25 @@ service UserService {
       body: "*"
     };
   }
+
+  rpc GetUserPreferences (GetUserPreferencesRequest) returns (GetUserPreferencesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/user/preferences"
+    };
+  }
+
+  rpc UpdateUserPreferences (UpdateUserPreferencesRequest) returns (UpdateUserPreferencesResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/user/preferences"
+      body: "*"
+    };
+  }
+
+  rpc GetSupportedLanguages (GetSupportedLanguagesRequest) returns (GetSupportedLanguagesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/user/supported-languages"
+    };
+  }
 }
 
 message GetUserInfoRequest {}
@@ -48,3 +67,58 @@ message UpdateUserInfoRequest {
 }
 
 message UpdateUserInfoResponse {}
+
+enum TimeFormat {
+  H24 = 0;
+  H12 = 1;
+}
+
+enum DistanceUnit {
+  Kilometer = 0;
+  Mile = 1;
+}
+
+enum DarkMode {
+  System = 0;
+  Off = 1;
+  On = 2;
+}
+
+message UserPreference {
+  string app_language = 1 [(validatex.rules).string = {
+    max_len: 10
+  }];
+  string default_city = 2 [(validatex.rules).string = {
+    max_len: 50
+  }];
+  TimeFormat time_format = 3;
+  DistanceUnit distance_unit = 4;
+  DarkMode dark_mode = 5;
+  bool trip_reminder = 6;
+  bool community_notification = 7;
+  bool content_push = 8;
+}
+
+message GetUserPreferencesRequest {}
+
+message GetUserPreferencesResponse {
+  UserPreference preference = 1;
+}
+
+message UpdateUserPreferencesRequest {
+  UserPreference preference = 1;
+}
+
+message UpdateUserPreferencesResponse {}
+
+message GetSupportedLanguagesRequest {}
+
+message Language {
+  string code = 1;
+  string name = 2;
+  string native_name = 3;
+}
+
+message GetSupportedLanguagesResponse {
+  repeated Language languages = 1;
+}

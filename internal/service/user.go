@@ -2,6 +2,9 @@ package service
 
 import (
 	"context"
+	"github.com/iter-x/iter-x/internal/service/build"
+
+	"github.com/iter-x/iter-x/internal/common/xerr"
 
 	userV1 "github.com/iter-x/iter-x/internal/api/user/v1"
 	"github.com/iter-x/iter-x/internal/biz"
@@ -47,4 +50,58 @@ func (s *User) UpdateUserInfo(ctx context.Context, req *userV1.UpdateUserInfoReq
 		return nil, err
 	}
 	return &userV1.UpdateUserInfoResponse{}, nil
+}
+
+func (s *User) GetUserPreferences(ctx context.Context, _ *userV1.GetUserPreferencesRequest) (*userV1.GetUserPreferencesResponse, error) {
+	preferences, err := s.userBiz.GetUserPreferences(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &userV1.GetUserPreferencesResponse{
+		Preference: &userV1.UserPreference{
+			AppLanguage:           preferences.AppLanguage,
+			DefaultCity:           preferences.DefaultCity,
+			TimeFormat:            build.GetTimeFormatProto(preferences.TimeFormat),
+			DistanceUnit:          build.GetDistanceUnitProto(preferences.DistanceUnit),
+			DarkMode:              build.GetDarkModeProto(preferences.DarkMode),
+			TripReminder:          preferences.TripReminder,
+			CommunityNotification: preferences.CommunityNotification,
+			ContentPush:           preferences.RecommendContentPush,
+		},
+	}, nil
+}
+
+func (s *User) UpdateUserPreferences(ctx context.Context, req *userV1.UpdateUserPreferencesRequest) (*userV1.UpdateUserPreferencesResponse, error) {
+	pref := req.Preference
+	if pref == nil {
+		return nil, xerr.ErrorBadRequest()
+	}
+
+	err := s.userBiz.UpdateUserPreferences(ctx, &bo.UserPreference{
+		AppLanguage:           pref.AppLanguage,
+		DefaultCity:           pref.DefaultCity,
+		TimeFormat:            build.GetTimeFormatString(pref.TimeFormat),
+		DistanceUnit:          build.GetDistanceUnitString(pref.DistanceUnit),
+		DarkMode:              build.GetDarkModeString(pref.DarkMode),
+		TripReminder:          pref.TripReminder,
+		CommunityNotification: pref.CommunityNotification,
+		ContentPush:           pref.ContentPush,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &userV1.UpdateUserPreferencesResponse{}, nil
+}
+
+func (s *User) GetSupportedLanguages(ctx context.Context, _ *userV1.GetSupportedLanguagesRequest) (*userV1.GetSupportedLanguagesResponse, error) {
+	languages, err := s.userBiz.GetSupportedLanguages(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &userV1.GetSupportedLanguagesResponse{
+		Languages: languages,
+	}, nil
 }

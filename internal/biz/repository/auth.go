@@ -28,6 +28,12 @@ type Auth[T *ent.User, R *do.User] interface {
 	UpdateRefreshToken(ctx context.Context, val *do.RefreshToken) error
 
 	FindByPhone(ctx context.Context, phone string) (*do.User, error)
+
+	GetUserPreference(ctx context.Context, userId uuid.UUID) (*do.UserPreference, error)
+
+	CreateUserPreference(ctx context.Context, userId uuid.UUID, pref *do.UserPreference) error
+
+	UpdateUserPreference(ctx context.Context, userId uuid.UUID, pref *do.UserPreference) error
 }
 
 type AuthRepo = Auth[*ent.User, *do.User]

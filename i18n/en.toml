@@ -43,6 +43,9 @@ other = "Must choose at least one city"
 [MISSING_LINK]
 other = "External link cannot be empty"
 
+[INVALID_LANGUAGE]
+other = "Invalid language"
+
 [UNAUTHORIZED]
 other = "Unauthorized"
 

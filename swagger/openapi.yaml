@@ -985,6 +985,15 @@ components:
                 trip:
                     $ref: '#/components/schemas/trip.v1.Trip'
             type: object
+        user.v1.GetSupportedLanguagesResponse:
+            example:
+                languages: null
+            properties:
+                languages:
+                    items:
+                        $ref: '#/components/schemas/user.v1.Language'
+                    type: array
+            type: object
         user.v1.GetUserInfoResponse:
             example:
                 avatarUrl: ""
@@ -1015,6 +1024,26 @@ components:
                 username:
                     type: string
             type: object
+        user.v1.GetUserPreferencesResponse:
+            example:
+                preference: null
+            properties:
+                preference:
+                    $ref: '#/components/schemas/user.v1.UserPreference'
+            type: object
+        user.v1.Language:
+            example:
+                code: ""
+                name: ""
+                nativeName: ""
+            properties:
+                code:
+                    type: string
+                name:
+                    type: string
+                nativeName:
+                    type: string
+            type: object
         user.v1.UpdateUserInfoRequest:
             example:
                 avatarUrl: ""
@@ -1030,6 +1059,57 @@ components:
             type: object
         user.v1.UpdateUserInfoResponse:
             properties: {}
+            type: object
+        user.v1.UpdateUserPreferencesRequest:
+            example:
+                preference: null
+            properties:
+                preference:
+                    $ref: '#/components/schemas/user.v1.UserPreference'
+            type: object
+        user.v1.UpdateUserPreferencesResponse:
+            properties: {}
+            type: object
+        user.v1.UserPreference:
+            example:
+                appLanguage: ""
+                communityNotification: true
+                contentPush: true
+                darkMode: System
+                defaultCity: ""
+                distanceUnit: Kilometer
+                timeFormat: H24
+                tripReminder: true
+            properties:
+                appLanguage:
+                    type: string
+                communityNotification:
+                    type: boolean
+                contentPush:
+                    type: boolean
+                darkMode:
+                    enum:
+                        - System
+                        - "Off"
+                        - "On"
+                    format: enum
+                    type: string
+                defaultCity:
+                    type: string
+                distanceUnit:
+                    enum:
+                        - Kilometer
+                        - Mile
+                    format: enum
+                    type: string
+                timeFormat:
+                    enum:
+                        - H24
+                        - H12
+                    format: enum
+                    type: string
+                tripReminder:
+                    type: boolean
             type: object
     securitySchemes:
         BearerAuth:
@@ -2191,6 +2271,101 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/user.v1.UpdateUserInfoResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - UserService
+    /api/v1/user/preferences:
+        get:
+            operationId: UserService_GetUserPreferences
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.GetUserPreferencesResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - UserService
+        put:
+            operationId: UserService_UpdateUserPreferences
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.UpdateUserPreferencesRequest'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.UpdateUserPreferencesResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - UserService
+    /api/v1/user/supported-languages:
+        get:
+            operationId: UserService_GetSupportedLanguages
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.GetSupportedLanguagesResponse'
                     description: OK
                 "400":
                     content:

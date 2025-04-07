@@ -38,3 +38,18 @@ type User struct {
 	// Trip holds the value of the trip edge.
 	Trips []*Trip `json:"trip,omitempty"`
 }
+
+type UserPreference struct {
+	ID                    uuid.UUID
+	UserID                uuid.UUID
+	AppLanguage           string
+	DefaultCity           string
+	TimeFormat            string
+	DistanceUnit          string
+	DarkMode              string
+	TripReminder          bool
+	CommunityNotification bool
+	RecommendContentPush  bool
+	CreatedAt             time.Time
+	UpdatedAt             time.Time
+}

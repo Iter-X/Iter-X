@@ -15,6 +15,7 @@ import (
 	"github.com/iter-x/iter-x/internal/data/ent"
 	"github.com/iter-x/iter-x/internal/data/ent/refreshtoken"
 	"github.com/iter-x/iter-x/internal/data/ent/user"
+	"github.com/iter-x/iter-x/internal/data/ent/userpreference"
 	"github.com/iter-x/iter-x/internal/data/impl/build"
 )
 
@@ -138,4 +139,83 @@ func (r *authRepositoryImpl) FindByPhone(ctx context.Context, phone string) (*do
 		return nil, xerr.ErrorUserNotFound()
 	}
 	return r.ToEntity(usr), err
+}
+
+func (r *authRepositoryImpl) GetUserPreference(ctx context.Context, userId uuid.UUID) (*do.UserPreference, error) {
+	cli := r.GetTx(ctx).UserPreference
+	userPref, err := cli.Query().Where(userpreference.UserID(userId)).Only(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, err
+		}
+		r.logger.Errorw("failed to find user preference by id", "err", err)
+		return nil, xerr.ErrorInternalServerError()
+	}
+
+	return build.UserPreferenceRepositoryImplToEntity(userPref), nil
+}
+
+func (r *authRepositoryImpl) CreateUserPreference(ctx context.Context, userId uuid.UUID, pref *do.UserPreference) error {
+	cli := r.GetTx(ctx).UserPreference
+
+	// Check if preference already exists for this user
+	exists, err := cli.Query().Where(userpreference.UserID(userId)).Exist(ctx)
+	if err != nil {
+		r.logger.Errorw("failed to check user preference existence", "err", err)
+		return xerr.ErrorInternalServerError()
+	}
+	if exists {
+		r.logger.Errorw("user preference already exists", "userId", userId)
+		return xerr.ErrorBadRequest()
+	}
+
+	_, err = cli.Create().
+		SetUserID(userId).
+		SetAppLanguage(pref.AppLanguage).
+		SetDefaultCity(pref.DefaultCity).
+		SetTimeFormat(userpreference.TimeFormat(pref.TimeFormat)).
+		SetDistanceUnit(userpreference.DistanceUnit(pref.DistanceUnit)).
+		SetDarkMode(userpreference.DarkMode(pref.DarkMode)).
+		SetNotifyItinerary(pref.TripReminder).
+		SetNotifyCommunity(pref.CommunityNotification).
+		SetNotifyRecommendations(pref.RecommendContentPush).
+		Save(ctx)
+	if err != nil {
+		r.logger.Errorw("failed to create user preference", "err", err)
+		return xerr.ErrorInternalServerError()
+	}
+
+	return nil
+}
+
+func (r *authRepositoryImpl) UpdateUserPreference(ctx context.Context, userId uuid.UUID, pref *do.UserPreference) error {
+	cli := r.GetTx(ctx).UserPreference
+
+	// Check if the record exists first
+	userPref, err := cli.Query().Where(userpreference.UserID(userId)).Only(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			r.logger.Errorw("user preference not found", "userId", userId)
+			return xerr.ErrorBadRequest()
+		}
+		r.logger.Errorw("failed to check user preference existence", "err", err)
+		return xerr.ErrorInternalServerError()
+	}
+
+	_, err = cli.UpdateOneID(userPref.ID).
+		SetAppLanguage(pref.AppLanguage).
+		SetDefaultCity(pref.DefaultCity).
+		SetTimeFormat(userpreference.TimeFormat(pref.TimeFormat)).
+		SetDistanceUnit(userpreference.DistanceUnit(pref.DistanceUnit)).
+		SetDarkMode(userpreference.DarkMode(pref.DarkMode)).
+		SetNotifyItinerary(pref.TripReminder).
+		SetNotifyCommunity(pref.CommunityNotification).
+		SetNotifyRecommendations(pref.RecommendContentPush).
+		Save(ctx)
+	if err != nil {
+		r.logger.Errorw("failed to update user preference", "err", err)
+		return xerr.ErrorInternalServerError()
+	}
+
+	return nil
 }

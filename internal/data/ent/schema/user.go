@@ -36,6 +36,7 @@ func (User) Edges() []ent.Edge {
 		edge.To("trip", Trip.Type),
 		edge.From("collaborated_trips", Trip.Type).Ref("collaborators"),
 		edge.To("files", File.Type),
+		edge.To("preference", UserPreference.Type).Unique(),
 	}
 }
 
