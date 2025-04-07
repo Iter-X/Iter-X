@@ -2,7 +2,6 @@ import 'package:client/app/constants.dart';
 import 'package:client/app/routes.dart';
 import 'package:client/common/material/image.dart';
 import 'package:client/common/material/state.dart';
-import 'package:client/app/constants.dart';
 import 'package:client/common/utils/toast.dart';
 import 'package:client/common/widgets/base_button.dart';
 import 'package:flutter/gestures.dart';

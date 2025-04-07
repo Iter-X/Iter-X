@@ -4,7 +4,7 @@
  * @Autor: GiottoLLL7
  * @Date: 2025-03-18 00:30:03
  * @LastEditors: GiottoLLL7
- * @LastEditTime: 2025-04-03 15:41:39
+ * @LastEditTime: 2025-04-07 10:53:22
  */
 
 import 'package:client/app/constants.dart';
@@ -21,8 +21,6 @@ import 'package:client/common/widgets/return_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import '../service/card_selection_service.dart';
-import '../entity/geo_entity.dart';
 
 /// 选择层级枚举
 enum SelectionLevel { country, city }

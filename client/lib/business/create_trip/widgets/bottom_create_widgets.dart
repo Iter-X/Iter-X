@@ -1,14 +1,10 @@
 import 'package:client/app/constants.dart';
 import 'package:client/common/material/image.dart';
 import 'package:client/common/material/text_field.dart';
-import 'package:client/app/constants.dart';
 import 'package:client/common/widgets/base_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_speech/flutter_speech.dart';
-
-import '../../../common/material/image.dart';
-import '../../../common/material/text_field.dart';
 
 // 手动创建和外部链接 底部样式
 class CreateManuallyWidget extends StatelessWidget {

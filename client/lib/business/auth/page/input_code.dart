@@ -7,7 +7,6 @@ import 'package:client/business/auth/service/auth_service.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/loading.dart';
 import 'package:client/common/material/state.dart';
-import 'package:client/app/constants.dart';
 import 'package:client/common/widgets/base_button.dart';
 import 'package:client/common/widgets/return_button.dart';
 import 'package:flutter/material.dart';
