@@ -465,10 +465,10 @@ class _SelectDatePageState extends BaseState<SelectDatePage> {
     }
 
     final params = {
-      'city_ids': _cityIds,
-      'poi_ids': _poiIds ?? [],
-      'start_ts': _startTime?.millisecondsSinceEpoch,
-      'end_ts': _endTime?.millisecondsSinceEpoch,
+      'cityIds': _cityIds,
+      'poiIds': _poiIds ?? [],
+      'startTs': _startTime?.toUtc().toIso8601String(),
+      'endTs': _endTime?.toUtc().toIso8601String(),
       'duration': selectDays ?? selectRangeDays,
     };
 
