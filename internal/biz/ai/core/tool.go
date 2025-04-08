@@ -3,20 +3,24 @@ package core
 import (
 	"context"
 	"fmt"
+
 	"github.com/iter-x/iter-x/internal/biz/do"
+	"go.uber.org/zap"
 )
 
 // BaseTool provides a basic implementation of the Tool interface
 type BaseTool struct {
-	name string
-	desc string
+	name   string
+	desc   string
+	Logger *zap.SugaredLogger
 }
 
 // NewBaseTool creates a new BaseTool instance
-func NewBaseTool(name, desc string) *BaseTool {
+func NewBaseTool(name, desc string, logger *zap.SugaredLogger) *BaseTool {
 	return &BaseTool{
-		name: name,
-		desc: desc,
+		name:   name,
+		desc:   desc,
+		Logger: logger,
 	}
 }
 
@@ -38,4 +42,9 @@ func (a *BaseTool) Execute(context.Context, any) (any, error) {
 // GetDefinition returns the definition of the tool, only for function call tools
 func (a *BaseTool) GetDefinition() (*do.FunctionCallTool, error) {
 	return nil, fmt.Errorf("not implemented")
+}
+
+// GetLogger returns the logger instance
+func (a *BaseTool) GetLogger() *zap.SugaredLogger {
+	return a.Logger
 }

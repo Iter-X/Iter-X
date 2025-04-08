@@ -6,15 +6,17 @@ import (
 
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
+	"go.uber.org/zap"
 
 	"github.com/iter-x/iter-x/internal/biz/ai/core"
 	"github.com/iter-x/iter-x/internal/biz/do"
 	"github.com/iter-x/iter-x/internal/conf"
 )
 
-func NewCompletion(cfg *conf.Agent_ToolConfig) core.Tool {
+func NewCompletion(cfg *conf.Agent_ToolConfig, logger *zap.SugaredLogger) core.Tool {
+	logger = logger.Named("tool.completion")
 	return &completionImpl{
-		BaseTool: core.NewBaseTool(cfg.GetName().String(), cfg.GetDescription()),
+		BaseTool: core.NewBaseTool(cfg.GetName().String(), cfg.GetDescription(), logger),
 		cli: openai.NewClient(
 			option.WithAPIKey(cfg.GetApiKey()),
 			option.WithBaseURL(cfg.GetBaseUrl()),
@@ -36,19 +38,23 @@ func (l completionImpl) Execute(ctx context.Context, inputAny any) (any, error) 
 	)
 
 	if input, ok = inputAny.(*do.ToolCompletionInput); !ok {
+		l.Logger.Errorw("invalid input type", "type", fmt.Sprintf("%T", input))
 		return nil, fmt.Errorf("invalid input type: %T", input)
 	}
 
+	l.Logger.Debugw("executing completion", "model", l.model, "messages", input.Messages)
 	resp, err := l.cli.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Messages: convertMessages(input.Messages),
 		Model:    l.model,
 		Tools:    convertTools(input.Tools),
 	})
 	if err != nil {
+		l.Logger.Errorw("failed to execute completion", "err", err)
 		return nil, err
 	}
 
 	if len(resp.Choices) == 0 {
+		l.Logger.Warnw("no choices returned from completion")
 		return nil, nil
 	}
 
@@ -64,11 +70,13 @@ func (l completionImpl) Execute(ctx context.Context, inputAny any) (any, error) 
 				Type: string(t.Type),
 			})
 		}
+		l.Logger.Debugw("completion returned tool calls", "tool_calls", res)
 		return &do.ToolCompletionOutput[[]do.ToolCallOutput]{
 			Content: res,
 		}, nil
 	}
 
+	l.Logger.Debugw("completion returned content", "content", resp.Choices[0].Message.Content)
 	return &do.ToolCompletionOutput[string]{Content: resp.Choices[0].Message.Content}, nil
 }
 

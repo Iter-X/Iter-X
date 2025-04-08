@@ -7,12 +7,13 @@ import (
 	"github.com/iter-x/iter-x/internal/biz/ai/core"
 	"github.com/iter-x/iter-x/internal/biz/do"
 	"github.com/iter-x/iter-x/internal/conf"
+	"go.uber.org/zap"
 )
 
 // NewLLMUse creates a new LLMUse tool instance
-func NewLLMUse(cfg *conf.Agent_LLMUseToolConfig) core.Tool {
+func NewLLMUse(cfg *conf.Agent_LLMUseToolConfig, logger *zap.SugaredLogger) core.Tool {
 	return &llmUseImpl{
-		BaseTool: core.NewBaseTool(cfg.GetName(), cfg.GetType()),
+		BaseTool: core.NewBaseTool(cfg.GetName(), cfg.GetType(), logger.Named("tool.llm_use")),
 		function: cfg.GetFunction(),
 	}
 }
@@ -29,6 +30,7 @@ func (l *llmUseImpl) Execute(_ context.Context, inputAny any) (any, error) {
 	)
 
 	if input, ok = inputAny.(*do.ToolCompletionInput); !ok {
+		l.Logger.Errorw("invalid input type", "type", fmt.Sprintf("%T", input))
 		return nil, fmt.Errorf("invalid input type: %T", input)
 	}
 
@@ -42,6 +44,8 @@ func (l *llmUseImpl) Execute(_ context.Context, inputAny any) (any, error) {
 			Required:   l.function.GetParameters().GetRequired(),
 		},
 	}
+
+	l.Logger.Debugw("adding tool to input", "tool", tool)
 
 	// Add the tool to input.Tools
 	input.Tools = append(input.Tools, tool)
@@ -63,7 +67,7 @@ func convertProperties(props map[string]*conf.Agent_FunctionParameters_Property)
 }
 
 func (l *llmUseImpl) GetDefinition() (*do.FunctionCallTool, error) {
-	return &do.FunctionCallTool{
+	tool := &do.FunctionCallTool{
 		Name:        l.function.GetName(),
 		Description: l.function.GetDescription(),
 		Parameters: do.FunctionCallToolParameters{
@@ -71,5 +75,7 @@ func (l *llmUseImpl) GetDefinition() (*do.FunctionCallTool, error) {
 			Properties: convertProperties(l.function.GetParameters().GetProperties()),
 			Required:   l.function.GetParameters().GetRequired(),
 		},
-	}, nil
+	}
+	l.Logger.Debugw("getting tool definition", "tool", tool)
+	return tool, nil
 }

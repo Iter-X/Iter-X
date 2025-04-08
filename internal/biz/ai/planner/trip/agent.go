@@ -13,6 +13,7 @@ import (
 	"github.com/iter-x/iter-x/internal/biz/ai/tool"
 	"github.com/iter-x/iter-x/internal/biz/do"
 	"github.com/iter-x/iter-x/internal/common/cnst"
+	"go.uber.org/zap"
 )
 
 type (
@@ -20,6 +21,7 @@ type (
 	tripPlanner struct {
 		*core.BaseAgent
 		toolHub *tool.Hub
+		logger  *zap.SugaredLogger
 	}
 
 	createTripArgs struct {
@@ -59,10 +61,11 @@ type (
 )
 
 // NewTripPlanner creates a new trip planner agent
-func NewTripPlanner(name string, toolHub *tool.Hub, prompt core.Prompt, toolNames []string) core.Agent {
+func NewTripPlanner(name string, toolHub *tool.Hub, prompt core.Prompt, toolNames []string, logger *zap.SugaredLogger) core.Agent {
 	agent := &tripPlanner{
 		BaseAgent: core.NewBaseAgent(name, prompt, toolNames),
 		toolHub:   toolHub,
+		logger:    logger.Named("agent.trip_planner"),
 	}
 	return agent
 }
@@ -128,19 +131,22 @@ func getPrompt(prompt core.Prompt, input *do.TripPlannerInput, pois []*do.Points
 
 func getItineraries(ctx context.Context, completionTool core.Tool, prompt core.Prompt,
 	input *do.TripPlannerInput, pois []*do.PointsOfInterest, toolHub *tool.Hub,
-	toolNames []string) (*do.TripPlannerOutput, error) {
+	toolNames []string, logger *zap.SugaredLogger) (*do.TripPlannerOutput, error) {
 	completionInput, err := getPrompt(prompt, input, pois, toolHub, toolNames)
 	if err != nil {
+		logger.Errorw("failed to get prompt", "err", err)
 		return nil, err
 	}
 	resp, err := completionTool.Execute(ctx, completionInput)
 	if err != nil {
+		logger.Errorw("failed to execute completion", "err", err)
 		return nil, err
 	}
 
 	// Extract the raw trip plan from the completion tool
 	completionOutput, ok := resp.(*do.ToolCompletionOutput[[]do.ToolCallOutput])
 	if !ok {
+		logger.Errorw("invalid completion response type", "type", fmt.Sprintf("%T", resp))
 		return nil, fmt.Errorf("invalid completion response type: %T", resp)
 	}
 
@@ -153,22 +159,26 @@ func getItineraries(ctx context.Context, completionTool core.Tool, prompt core.P
 		}
 	}
 	if createTripCall == nil {
+		logger.Errorw("create_trip function call not found in response")
 		return nil, fmt.Errorf("create_trip function call not found in response")
 	}
 
 	// Parse create_trip arguments
 	var args createTripArgs
 	if err := json.Unmarshal([]byte(createTripCall.Function.Arguments), &args); err != nil {
+		logger.Errorw("failed to unmarshal create_trip arguments", "err", err)
 		return nil, fmt.Errorf("failed to unmarshal create_trip arguments: %v", err)
 	}
 
 	// Convert to TripPlannerOutput
 	startDate, err := time.Parse("2006-01-02", args.StartDate)
 	if err != nil {
+		logger.Errorw("failed to parse start date", "err", err)
 		return nil, fmt.Errorf("failed to parse start date: %v", err)
 	}
 	endDate, err := time.Parse("2006-01-02", args.EndDate)
 	if err != nil {
+		logger.Errorw("failed to parse end date", "err", err)
 		return nil, fmt.Errorf("failed to parse end date: %v", err)
 	}
 
@@ -185,6 +195,7 @@ func getItineraries(ctx context.Context, completionTool core.Tool, prompt core.P
 	for _, schedule := range args.DailyItinerary {
 		date, err := time.Parse("2006-01-02", schedule.Date)
 		if err != nil {
+			logger.Errorw("failed to parse schedule date", "err", err)
 			return nil, fmt.Errorf("failed to parse schedule date: %v", err)
 		}
 
@@ -198,6 +209,7 @@ func getItineraries(ctx context.Context, completionTool core.Tool, prompt core.P
 		for _, poi := range schedule.POIs {
 			poiID, err := uuid.Parse(poi.ID)
 			if err != nil {
+				logger.Errorw("failed to parse POI ID", "err", err)
 				return nil, fmt.Errorf("failed to parse POI ID: %v", err)
 			}
 
@@ -210,6 +222,7 @@ func getItineraries(ctx context.Context, completionTool core.Tool, prompt core.P
 		output.DailyItineraries = append(output.DailyItineraries, dailyItinerary)
 	}
 
+	logger.Debugw("created trip planner output", "output", output)
 	return output, nil
 }
 
@@ -217,18 +230,21 @@ func getItineraries(ctx context.Context, completionTool core.Tool, prompt core.P
 func (a *tripPlanner) Execute(ctx context.Context, inputAny any) (any, error) {
 	input, ok := inputAny.(*do.TripPlannerInput)
 	if !ok {
+		a.logger.Errorw("invalid input type", "type", fmt.Sprintf("%T", inputAny))
 		return nil, fmt.Errorf("invalid input type: %T", inputAny)
 	}
 
 	// get completion tool
 	completionTool, err := a.toolHub.GetTool(cnst.ToolCompletion)
 	if err != nil {
+		a.logger.Errorw("failed to get completion tool", "err", err)
 		return nil, err
 	}
 
 	// refine trip plan
-	itineraries, err := getItineraries(ctx, completionTool, a.GetPrompt(), input, input.POIs, a.toolHub, a.GetToolNames())
+	itineraries, err := getItineraries(ctx, completionTool, a.GetPrompt(), input, input.POIs, a.toolHub, a.GetToolNames(), a.logger)
 	if err != nil {
+		a.logger.Errorw("failed to get itineraries", "err", err)
 		return nil, err
 	}
 
