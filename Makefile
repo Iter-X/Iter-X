@@ -18,6 +18,7 @@ init:
 	go install github.com/google/wire/cmd/wire@v0.6.0
 	go install github.com/protoc-gen/protoc-gen-openapiv3@v0.7.6
 	go install mvdan.cc/gofumpt@latest
+	go install github.com/protoc-gen/i18n-gen@latest
 
 .PHONY: config
 # generate internal proto
@@ -43,6 +44,7 @@ errors:
            --go_out=paths=source_relative:./internal/common/xerr \
            --go-errors_out=paths=source_relative:./internal/common/xerr \
            ./proto/xerr/*.proto
+	make i18n
 
 .PHONY: api
 # generate api proto
@@ -74,6 +76,11 @@ ent:
 # generate
 generate:
 	go generate ./...
+
+.PHONY: i18n
+# i18n
+i18n:
+	i18n-gen -O ./i18n/ -P ./proto/xerr/xerr.proto
 
 .PHONY: wire
 wire:
