@@ -52,7 +52,24 @@ func (l completionImpl) Execute(ctx context.Context, inputAny any) (any, error) 
 		return nil, nil
 	}
 
-	return &do.ToolCompletionOutput{Content: resp.Choices[0].Message.Content}, nil
+	if resp.Choices[0].FinishReason == "function_call" || resp.Choices[0].FinishReason == "tool_calls" {
+		res := make([]do.ToolCallOutput, 0, len(resp.Choices[0].Message.ToolCalls))
+		for _, t := range resp.Choices[0].Message.ToolCalls {
+			res = append(res, do.ToolCallOutput{
+				ID: t.ID,
+				Function: do.ToolCallOutputFunction{
+					Arguments: t.Function.Arguments,
+					Name:      t.Function.Name,
+				},
+				Type: string(t.Type),
+			})
+		}
+		return &do.ToolCompletionOutput[[]do.ToolCallOutput]{
+			Content: res,
+		}, nil
+	}
+
+	return &do.ToolCompletionOutput[string]{Content: resp.Choices[0].Message.Content}, nil
 }
 
 func convertMessages(messages []do.ToolCompletionInputMessage) []openai.ChatCompletionMessageParamUnion {

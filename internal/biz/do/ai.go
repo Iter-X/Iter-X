@@ -28,18 +28,22 @@ type (
 		Budget      float64
 		POIs        []*PointsOfInterest
 	}
-	TripPlannerOutput []*DailyPlan
-	DailyPlan         struct {
+	TripPlannerOutput struct {
+		Title            string
+		Description      string
+		StartDate        time.Time
+		EndDate          time.Time
+		TotalDays        int
+		DailyItineraries []*TripPlannerOutputDailyItinerary
+	}
+	TripPlannerOutputDailyItinerary struct {
 		Day   int
 		Date  time.Time
-		Title string
-		POIs  []*DailyPlanPoi
+		Notes string
+		POIs  []*TripPlannerOutputDailyPlanPoi
 	}
-	DailyPlanPoi struct {
-		Id       uuid.UUID
-		Time     time.Time
-		Name     string
-		Duration time.Duration
-		Notes    string
+	TripPlannerOutputDailyPlanPoi struct {
+		Id    uuid.UUID
+		Notes string
 	}
 )

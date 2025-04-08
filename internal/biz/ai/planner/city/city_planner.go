@@ -32,14 +32,16 @@ type (
 )
 
 // NewCityPlanner creates a new city planner agent
-func NewCityPlanner(name string, toolHub *tool.Hub, prompt core.Prompt) core.Agent {
-	return &cityAgent{
-		BaseAgent: core.NewBaseAgent(name, prompt),
+func NewCityPlanner(name string, toolHub *tool.Hub, prompt core.Prompt, toolNames []string) core.Agent {
+	agent := &cityAgent{
+		BaseAgent: core.NewBaseAgent(name, prompt, toolNames),
 		toolHub:   toolHub,
 	}
+	return agent
 }
 
-func getPrompt(prompt core.Prompt, input *do.CityPlannerInput) (*do.ToolCompletionInput, error) {
+func getPrompt(prompt core.Prompt, input *do.CityPlannerInput, toolHub *tool.Hub,
+	toolNames []string) (*do.ToolCompletionInput, error) {
 	systemPrompt := prompt.GetSystemPrompt()
 	userPrompt := prompt.GetUserPrompt()
 	tmplData := r1UserPromptTpl{
@@ -60,6 +62,18 @@ func getPrompt(prompt core.Prompt, input *do.CityPlannerInput) (*do.ToolCompleti
 		return nil, fmt.Errorf("failed to execute user prompt template: %v", err)
 	}
 
+	// Get all tools from the agent's configuration
+	tools := make([]do.FunctionCallTool, 0, len(toolNames))
+	for _, name := range toolNames {
+		t, err := toolHub.GetTool(name)
+		if err != nil {
+			continue
+		}
+		if def, err := t.GetDefinition(); err == nil {
+			tools = append(tools, *def)
+		}
+	}
+
 	return &do.ToolCompletionInput{
 		Messages: []do.ToolCompletionInputMessage{
 			{
@@ -71,11 +85,13 @@ func getPrompt(prompt core.Prompt, input *do.CityPlannerInput) (*do.ToolCompleti
 				Content: userPromptBuf.String(),
 			},
 		},
+		Tools: tools,
 	}, nil
 }
 
-func getPotentialCities(ctx context.Context, completionTool core.Tool, prompt core.Prompt, input *do.CityPlannerInput) ([][]string, error) {
-	completionInput, err := getPrompt(prompt, input)
+func getPotentialCities(ctx context.Context, completionTool core.Tool, prompt core.Prompt, input *do.CityPlannerInput,
+	toolHub *tool.Hub, toolNames []string) ([][]string, error) {
+	completionInput, err := getPrompt(prompt, input, toolHub, toolNames)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +101,7 @@ func getPotentialCities(ctx context.Context, completionTool core.Tool, prompt co
 	}
 
 	// Extract the raw trip plan from the completion tool
-	completionOutput, ok := resp.(*do.ToolCompletionOutput)
+	completionOutput, ok := resp.(*do.ToolCompletionOutput[string])
 	if !ok {
 		return nil, fmt.Errorf("invalid completion response type: %T", resp)
 	}
@@ -108,7 +124,7 @@ func (a *cityAgent) Execute(ctx context.Context, inputAny any) (any, error) {
 	}
 
 	// get potential cities
-	potentialCities, err := getPotentialCities(ctx, completionTool, a.GetPrompt(), input)
+	potentialCities, err := getPotentialCities(ctx, completionTool, a.GetPrompt(), input, a.toolHub, a.GetToolNames())
 	if err != nil {
 		return nil, err
 	}

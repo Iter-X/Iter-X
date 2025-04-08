@@ -9,9 +9,10 @@ type (
 		Messages []ToolCompletionInputMessage
 		Tools    []FunctionCallTool
 	}
-	ToolCompletionOutput struct {
-		Content string
+	ToolCompletionOutput[T any] struct {
+		Content T
 	}
+
 	FunctionCallTool struct {
 		Name        string                     `json:"name"`
 		Description string                     `json:"description"`
@@ -25,6 +26,16 @@ type (
 	FunctionCallToolProperty struct {
 		Type        string `json:"type"`
 		Description string `json:"description"`
+	}
+
+	ToolCallOutput struct {
+		ID       string                 `json:"id"`
+		Function ToolCallOutputFunction `json:"function"`
+		Type     string                 `json:"type"`
+	}
+	ToolCallOutputFunction struct {
+		Arguments string `json:"arguments"`
+		Name      string `json:"name"`
 	}
 )
 

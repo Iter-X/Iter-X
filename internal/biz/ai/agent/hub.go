@@ -2,11 +2,11 @@ package agent
 
 import (
 	"fmt"
-	"github.com/iter-x/iter-x/internal/biz/ai/planner/city"
-	"github.com/iter-x/iter-x/internal/biz/ai/planner/trip"
 	"sync"
 
 	"github.com/iter-x/iter-x/internal/biz/ai/core"
+	"github.com/iter-x/iter-x/internal/biz/ai/planner/city"
+	"github.com/iter-x/iter-x/internal/biz/ai/planner/trip"
 	"github.com/iter-x/iter-x/internal/biz/ai/tool"
 	"github.com/iter-x/iter-x/internal/conf"
 )
@@ -58,11 +58,20 @@ func NewHub(cfg *conf.Agent, toolHub *tool.Hub) (*Hub, error) {
 
 // createAgent creates an agent based on configuration
 func createAgent(cfg *conf.Agent_AgentConfig, toolHub *tool.Hub, prompt core.Prompt) (core.Agent, error) {
+
+	toolNames := make([]string, 0)
+	for _, toolCfg := range cfg.GetTools() {
+		if toolCfg.Type != conf.Agent_AgentToolConfig_LLMUse {
+			continue
+		}
+		toolNames = append(toolNames, toolCfg.GetName().String())
+	}
+
 	switch cfg.GetName() {
 	case conf.Agent_TripPlanner:
-		return trip.NewTripPlanner(cfg.GetName().String(), toolHub, prompt), nil
+		return trip.NewTripPlanner(cfg.GetName().String(), toolHub, prompt, toolNames), nil
 	case conf.Agent_CityPlanner:
-		return city.NewCityPlanner(cfg.GetName().String(), toolHub, prompt), nil
+		return city.NewCityPlanner(cfg.GetName().String(), toolHub, prompt, toolNames), nil
 	default:
 		return nil, fmt.Errorf("unsupported agent: %s", cfg.GetName())
 	}

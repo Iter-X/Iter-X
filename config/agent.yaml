@@ -38,18 +38,14 @@ agent:
       prompt:
         rounds:
           - system: |
-              你是一个专业的行程规划助手，可以根据用户的需求生成完整的行程计划。  
+              你是一个专业的行程规划助手，可以根据用户的需求生成完整的行程计划。
               你需要考虑用户的预算、时间、偏好等因素，生成合理的行程安排。
-              **你的输出必须是 JSON 格式，不能有任何额外文本。**
-              
-              **JSON 输出格式如下：**
-              [{"day":1,"title":"外滩 & 城市地标探索","pois":[{"time":"09:00","id":"1","duration":10800,"notes":"步行欣赏黄浦江景，感受万国建筑群"},{"time":"12:00","id":"2","duration":5400,"notes":"体验繁华商业街，适合购物和小吃"}]}]
-              
+              **你规划好行程后调用对应的工具create_trip直接创建即可**
+
               **规则要求：**
-              1. **必须严格按照 JSON 格式返回**，不得有任何额外说明或解释。  
-              2. **所有 POI 只能从用户提供的 POI 列表中选择**，不得添加其他地点。  
-              3. **确保每个 POI 包含 `"time"`、`"id"`、`"duration"`、`"notes"`** 字段。  
-              4. **每天的行程必须合理分配**，避免时间冲突。
+              1. **所有 POI 只能从用户提供的 POI 列表中选择**，不得添加其他地点。
+              2. **每天的行程必须合理分配**
+              3. **注意POI归属的城市，动线要合理**
             user: |
               请根据以下需求规划行程：
               目的地：{{.Destination}}
@@ -59,10 +55,8 @@ agent:
               {{if .Preferences}}偏好：{{.Preferences}}{{end}}
               {{if .Budget}}预算：{{.Budget}}{{end}}
               
-              从以下这些城市中选择作为POI（id:name,id:name）：
-              {{- range .POIs }}{{ .ID }}:{{ .Name }},{{- end }}
-              
-              **请严格按照 JSON 格式返回，不要包含任何额外的文字。**
+              从以下这些城市中选择作为POI（id:name:affiliatedCity,id:name:affiliatedCity）：
+              {{- range .POIs }}{{ .ID }}:{{ .Name }}:{{ .City }},{{- end }}
       tools:
         - name: Completion
           type: CodeUse
@@ -100,12 +94,13 @@ agent:
             total_days:
               type: integer
               description: "行程总天数"
-            daily_schedule:
+            daily_itinerary:
               type: string
-              description: "每日行程安排，JSON字符串格式，格式为：[{day: 1, date: '2024-03-20', notes: '备注', pois: [{id: 'xxx', notes: 'xxx'}]}]"
+              description: "每日行程安排，格式是JSON而不是字符串，格式为：[{day: 1, date: '2024-03-20', notes: '备注', pois: [{id: 'xxx', notes: 'xxx'}]}]"
           required:
             - title
+            - description
             - start_date
             - end_date
             - total_days
-            - daily_schedule
+            - daily_itinerary

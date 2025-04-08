@@ -22,7 +22,7 @@ type llmUseImpl struct {
 	function *conf.Agent_FunctionConfig
 }
 
-func (l llmUseImpl) Execute(_ context.Context, inputAny any) (any, error) {
+func (l *llmUseImpl) Execute(_ context.Context, inputAny any) (any, error) {
 	var (
 		input *do.ToolCompletionInput
 		ok    bool
@@ -60,4 +60,16 @@ func convertProperties(props map[string]*conf.Agent_FunctionParameters_Property)
 	}
 
 	return result
+}
+
+func (l *llmUseImpl) GetDefinition() (*do.FunctionCallTool, error) {
+	return &do.FunctionCallTool{
+		Name:        l.function.GetName(),
+		Description: l.function.GetDescription(),
+		Parameters: do.FunctionCallToolParameters{
+			Type:       l.function.GetParameters().GetType(),
+			Properties: convertProperties(l.function.GetParameters().GetProperties()),
+			Required:   l.function.GetParameters().GetRequired(),
+		},
+	}, nil
 }
