@@ -1,14 +1,20 @@
 import 'package:client/app/constants.dart';
+import 'package:client/business/trip/entity/trip.dart';
 import 'package:client/business/trip/service/trip_service.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
-import 'package:client/common/widgets/preference_button.dart';
+import 'package:client/common/utils/date_util.dart';
 import 'package:client/common/widgets/return_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 class TripOverviewPage extends StatefulWidget {
-  const TripOverviewPage({super.key});
+  final String tripId;
+
+  const TripOverviewPage({
+    super.key,
+    required this.tripId,
+  });
 
   @override
   State<TripOverviewPage> createState() => _TripOverviewPageState();
@@ -21,7 +27,7 @@ class _TripOverviewPageState extends State<TripOverviewPage> {
     // 初始化数据
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final service = context.read<TripService>();
-      service.fetchTripData();
+      service.fetchTripData(tripId: widget.tripId);
     });
   }
 
@@ -32,12 +38,18 @@ class _TripOverviewPageState extends State<TripOverviewPage> {
       hasAppBar: true,
       bottom: false,
       leading: ReturnButton(),
-      actions: [PreferenceButton()],
       child: Consumer<TripService>(
         builder: (context, service, child) {
           if (service.isLoading) {
             return const Center(
               child: CircularProgressIndicator(),
+            );
+          }
+
+          final trip = service.trip;
+          if (trip == null) {
+            return const Center(
+              child: Text('暂无行程数据'),
             );
           }
 
@@ -51,7 +63,7 @@ class _TripOverviewPageState extends State<TripOverviewPage> {
                   SizedBox(
                     width: double.infinity,
                     child: Text(
-                      service.title,
+                      trip.title,
                       style: TextStyle(
                         fontSize: 30.sp,
                         fontWeight: AppFontWeight.bold,
@@ -67,32 +79,33 @@ class _TripOverviewPageState extends State<TripOverviewPage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        '2025/01/25 | 10天',
+                        '${DateUtil.formatDate(trip.startTs)} | ${trip.dailyTrips.length}天',
                         style: TextStyle(
                           fontSize: 20.sp,
                           fontWeight: AppFontWeight.regular,
                           color: AppColor.primaryFont,
                         ),
                       ),
-                      _buildParticipantsSection(service),
                     ],
                   ),
-                  SizedBox(height: 70.h),
-                  ...service.days.map((day) {
+                  SizedBox(height: 10.h),
+                  Text(
+                    trip.description,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: AppFontWeight.regular,
+                      color: AppColor.secondaryFont,
+                    ),
+                  ),
+                  SizedBox(height: 30.h),
+                  ...trip.dailyTrips.map((dailyTrip) {
                     return Column(
                       children: [
-                        _buildDaySection(
-                          day: day.day,
-                          date: day.date,
-                          cities: day.cities,
-                          spots: day.spots,
-                        ),
+                        _buildDaySection(dailyTrip),
                         SizedBox(height: 15.h),
                       ],
                     );
                   }),
-                  _buildUnplannedSection(service),
-                  SizedBox(height: 15.h),
                   _buildAddDayButton(),
                   SizedBox(height: 20.h),
                 ],
@@ -104,108 +117,7 @@ class _TripOverviewPageState extends State<TripOverviewPage> {
     );
   }
 
-  Widget _buildParticipantsSection(TripService service) {
-    // 布局参数
-    final double avatarSize = 30.w; // 头像大小
-    final double avatarGap = 10.w; // 头像间距（负值表示重叠）
-    final double iconGap = 5.w; // 图标与头像组的间距
-
-    // 最多显示4个头像，第5个位置显示剩余数量
-    final maxVisibleAvatars = 4;
-    final displayedParticipants =
-        service.participants.take(maxVisibleAvatars).toList();
-    final remainingCount = service.participants.length - maxVisibleAvatars;
-
-    // 计算Stack的总宽度：头像宽度 * (显示的头像数 + 剩余数量显示) - 重叠部分
-    final stackWidth = avatarSize *
-            (displayedParticipants.length + (remainingCount > 0 ? 1 : 0)) -
-        (displayedParticipants.length - 1 + (remainingCount > 0 ? 1 : 0)) *
-            avatarGap;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // 参与者头像列表
-        SizedBox(
-          height: avatarSize,
-          width: stackWidth,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              ...List.generate(displayedParticipants.length, (index) {
-                final participant = displayedParticipants[index];
-                return Positioned(
-                  left: index * (avatarSize - avatarGap),
-                  child: Container(
-                    width: avatarSize,
-                    height: avatarSize,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColor.highlight,
-                        width: 1.w,
-                      ),
-                      color: AppColor.bg,
-                    ),
-                    child: ClipOval(
-                      child: Image.network(
-                        participant.avatar,
-                        width: avatarSize,
-                        height: avatarSize,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                );
-              }),
-              if (remainingCount > 0)
-                Positioned(
-                  left: displayedParticipants.length * (avatarSize - avatarGap),
-                  child: Container(
-                    width: avatarSize,
-                    height: avatarSize,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColor.buttonGrayBG,
-                    ),
-                    child: Center(
-                      child: Text(
-                        '+1$remainingCount',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: AppFontWeight.medium,
-                          color: AppColor.grayFont,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-        SizedBox(width: iconGap),
-        Container(
-          width: avatarSize,
-          height: avatarSize,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppColor.buttonGrayBG,
-          ),
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            icon: Icon(
-              Icons.group_add,
-              size: 18.sp,
-              color: AppColor.highlight,
-            ),
-            onPressed: () {},
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildUnplannedSection(TripService service) {
+  Widget _buildDaySection(DailyTrip dailyTrip) {
     return Container(
       padding: EdgeInsets.all(15.w),
       decoration: BoxDecoration(
@@ -219,7 +131,7 @@ class _TripOverviewPageState extends State<TripOverviewPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '待规划',
+                'Day ${dailyTrip.day}',
                 style: TextStyle(
                   fontSize: 18.sp,
                   fontWeight: AppFontWeight.semiBold,
@@ -227,65 +139,7 @@ class _TripOverviewPageState extends State<TripOverviewPage> {
                 ),
               ),
               Text(
-                '${service.unplannedSpots.length}个兴趣点位',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: AppFontWeight.regular,
-                  color: AppColor.primaryFont,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 10.h),
-          Divider(color: AppColor.bg),
-          SizedBox(height: 10.h),
-          Wrap(
-            spacing: 20.w,
-            runSpacing: 15.h,
-            children: service.unplannedSpots
-                .map((spot) => Text(
-                      spot.name,
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: AppFontWeight.regular,
-                        color: AppColor.primaryFont,
-                      ),
-                    ))
-                .toList(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDaySection({
-    required String day,
-    required String date,
-    required List<String> cities,
-    List<String>? spots,
-  }) {
-    return Container(
-      padding: EdgeInsets.all(15.w),
-      decoration: BoxDecoration(
-        color: AppColor.white,
-        borderRadius: BorderRadius.circular(AppConfig.boxRadius),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                day,
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: AppFontWeight.semiBold,
-                  color: AppColor.primaryFont,
-                ),
-              ),
-              Text(
-                date,
+                DateUtil.formatDate(dailyTrip.date),
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: AppFontWeight.regular,
@@ -295,49 +149,28 @@ class _TripOverviewPageState extends State<TripOverviewPage> {
             ],
           ),
           SizedBox(height: 10.h),
-          Divider(color: AppColor.bg),
-          SizedBox(height: 10.h),
-          Wrap(
-            runSpacing: 5.h,
-            children: cities.asMap().entries.map((entry) {
-              final isLast = entry.key == cities.length - 1;
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    entry.value,
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: AppFontWeight.medium,
-                      color: AppColor.primaryFont,
-                    ),
-                  ),
-                  if (!isLast)
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.w),
-                      child: Icon(
-                        Icons.arrow_forward_ios,
-                        size: 15.w,
-                        color: AppColor.primaryFont,
-                      ),
-                    ),
-                ],
-              );
-            }).toList(),
+          Text(
+            dailyTrip.notes,
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: AppFontWeight.regular,
+              color: AppColor.primaryFont,
+            ),
           ),
-          if (spots != null) ...[
+          if (dailyTrip.dailyItineraries.isNotEmpty) ...[
             SizedBox(height: 10.h),
             Divider(color: AppColor.bg),
             SizedBox(height: 10.h),
             Wrap(
               runSpacing: 5.h,
-              children: spots.asMap().entries.map((entry) {
-                final isLast = entry.key == spots.length - 1;
+              children: dailyTrip.dailyItineraries.asMap().entries.map((entry) {
+                final isLast =
+                    entry.key == dailyTrip.dailyItineraries.length - 1;
                 return Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      entry.value,
+                      entry.value.poi.nameCn,
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: AppFontWeight.regular,

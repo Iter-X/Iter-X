@@ -57,8 +57,10 @@ class Routes {
         Handler(handlerFunc: (context, params) => const CardSelectionPage()),
     profile: Handler(handlerFunc: (context, params) => const MinePage()),
     poiSearch: Handler(handlerFunc: (context, params) => const PoiSearchPage()),
-    tripOverview:
-        Handler(handlerFunc: (context, params) => const TripMainPage()),
+    tripOverview: Handler(handlerFunc: (context, params) {
+      final args = context!.settings!.arguments as Map<String, dynamic>;
+      return TripMainPage(tripId: args['tripId']);
+    }),
     selectDate:
         Handler(handlerFunc: (context, params) => const SelectDatePage()),
     creatingTrip: Handler(handlerFunc: (context, params) {

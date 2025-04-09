@@ -5,7 +5,12 @@ import 'package:client/common/material/bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 
 class TripMainPage extends StatefulWidget {
-  const TripMainPage({super.key});
+  final String tripId;
+  
+  const TripMainPage({
+    super.key,
+    required this.tripId,
+  });
 
   @override
   State<TripMainPage> createState() => _TripMainPageState();
@@ -14,13 +19,19 @@ class TripMainPage extends StatefulWidget {
 class _TripMainPageState extends State<TripMainPage> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = [
-    const TripOverviewPage(),
-    const Placeholder(), // 地图页面
-    const Placeholder(), // 图册页面
-    const Placeholder(), // 智能页面
-    const Placeholder(), // 记账页面
-  ];
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      TripOverviewPage(tripId: widget.tripId),
+      const Placeholder(), // 地图页面
+      const Placeholder(), // 图册页面
+      const Placeholder(), // 智能页面
+      const Placeholder(), // 记账页面
+    ];
+  }
 
   final List<BottomBarItem> _bottomBarItems = [
     BottomBarItem(
