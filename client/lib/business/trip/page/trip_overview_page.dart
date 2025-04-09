@@ -1,6 +1,7 @@
 import 'package:client/app/constants.dart';
-import 'package:client/business/trip/entity/trip.dart';
 import 'package:client/business/trip/service/trip_service.dart';
+import 'package:client/business/trip/widgets/trip_collaborators_section.dart';
+import 'package:client/business/trip/widgets/trip_day_section.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/utils/date_util.dart';
 import 'package:client/common/widgets/return_button.dart';
@@ -24,11 +25,36 @@ class _TripOverviewPageState extends State<TripOverviewPage> {
   @override
   void initState() {
     super.initState();
-    // 初始化数据
+    // Initialize data
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final service = context.read<TripService>();
       service.fetchTripData(tripId: widget.tripId);
     });
+  }
+
+  Widget _buildAddDayButton() {
+    return GestureDetector(
+      onTap: () {},
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.add_circle,
+            size: 20.w,
+            color: AppColor.primary.withOpacity(0.8),
+          ),
+          SizedBox(width: 10.w),
+          Text(
+            '添加一天',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: AppFontWeight.regular,
+              color: AppColor.primaryFont,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -86,6 +112,7 @@ class _TripOverviewPageState extends State<TripOverviewPage> {
                           color: AppColor.primaryFont,
                         ),
                       ),
+                      TripCollaboratorsSection(service: service),
                     ],
                   ),
                   SizedBox(height: 10.h),
@@ -101,7 +128,7 @@ class _TripOverviewPageState extends State<TripOverviewPage> {
                   ...trip.dailyTrips.map((dailyTrip) {
                     return Column(
                       children: [
-                        _buildDaySection(dailyTrip),
+                        TripDaySection(dailyTrip: dailyTrip),
                         SizedBox(height: 15.h),
                       ],
                     );
@@ -113,110 +140,6 @@ class _TripOverviewPageState extends State<TripOverviewPage> {
             ),
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildDaySection(DailyTrip dailyTrip) {
-    return Container(
-      padding: EdgeInsets.all(15.w),
-      decoration: BoxDecoration(
-        color: AppColor.white,
-        borderRadius: BorderRadius.circular(AppConfig.boxRadius),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Day ${dailyTrip.day}',
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: AppFontWeight.semiBold,
-                  color: AppColor.primaryFont,
-                ),
-              ),
-              Text(
-                DateUtil.formatDate(dailyTrip.date),
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: AppFontWeight.regular,
-                  color: AppColor.primaryFont,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 10.h),
-          Text(
-            dailyTrip.notes,
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: AppFontWeight.regular,
-              color: AppColor.primaryFont,
-            ),
-          ),
-          if (dailyTrip.dailyItineraries.isNotEmpty) ...[
-            SizedBox(height: 10.h),
-            Divider(color: AppColor.bg),
-            SizedBox(height: 10.h),
-            Wrap(
-              runSpacing: 5.h,
-              children: dailyTrip.dailyItineraries.asMap().entries.map((entry) {
-                final isLast =
-                    entry.key == dailyTrip.dailyItineraries.length - 1;
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      entry.value.poi.nameCn,
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: AppFontWeight.regular,
-                        color: AppColor.primaryFont,
-                      ),
-                    ),
-                    if (!isLast)
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8.w),
-                        child: Icon(
-                          Icons.arrow_forward_ios,
-                          size: 12.w,
-                          color: AppColor.primaryFont,
-                        ),
-                      ),
-                  ],
-                );
-              }).toList(),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAddDayButton() {
-    return GestureDetector(
-      onTap: () {},
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.add_circle,
-            size: 20.w,
-            color: AppColor.primary.withOpacity(0.8),
-          ),
-          SizedBox(width: 10.w),
-          Text(
-            '添加一天',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: AppFontWeight.regular,
-              color: AppColor.primaryFont,
-            ),
-          ),
-        ],
       ),
     );
   }
