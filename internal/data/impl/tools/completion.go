@@ -10,18 +10,17 @@ import (
 
 	"github.com/iter-x/iter-x/internal/biz/ai/core"
 	"github.com/iter-x/iter-x/internal/biz/do"
-	"github.com/iter-x/iter-x/internal/conf"
 )
 
-func NewCompletion(cfg *conf.Agent_ToolConfig, logger *zap.SugaredLogger) core.Tool {
+func NewCompletion(toolDo *do.Tool, logger *zap.SugaredLogger) core.Tool {
 	logger = logger.Named("tool.completion")
 	return &completionImpl{
-		BaseTool: core.NewBaseTool(cfg.GetName().String(), cfg.GetDescription(), logger),
+		BaseTool: core.NewBaseTool(toolDo.Name, toolDo.Description, logger),
 		cli: openai.NewClient(
-			option.WithAPIKey(cfg.GetApiKey()),
-			option.WithBaseURL(cfg.GetBaseUrl()),
+			option.WithAPIKey(toolDo.APIKey),
+			option.WithBaseURL(toolDo.BaseURL),
 		),
-		model: cfg.GetModel(),
+		model: toolDo.Model,
 	}
 }
 

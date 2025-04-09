@@ -1,49 +1,58 @@
 package tool
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
 	"github.com/iter-x/iter-x/internal/biz/ai/core"
-	"github.com/iter-x/iter-x/internal/conf"
+	"github.com/iter-x/iter-x/internal/biz/do"
+	"github.com/iter-x/iter-x/internal/biz/repository"
+	"github.com/iter-x/iter-x/internal/common/cnst"
 	"github.com/iter-x/iter-x/internal/data/impl/tools"
 	"go.uber.org/zap"
 )
 
 // Hub is the central manager for all tools
 type Hub struct {
-	tools  map[string]core.Tool
-	mu     sync.RWMutex
-	logger *zap.SugaredLogger
+	tools    map[string]core.Tool
+	toolRepo repository.ToolRepo
+	mu       sync.RWMutex
+	logger   *zap.SugaredLogger
 }
 
 // NewToolHub creates a new Hub instance
-func NewToolHub(cfg *conf.Agent, logger *zap.SugaredLogger) (*Hub, error) {
+func NewToolHub(toolRepo repository.ToolRepo, logger *zap.SugaredLogger) (*Hub, error) {
 	hub := &Hub{
-		tools:  make(map[string]core.Tool),
-		logger: logger.Named("tool.hub"),
+		tools:    make(map[string]core.Tool),
+		toolRepo: toolRepo,
+		logger:   logger.Named("tool.hub"),
 	}
 
-	// Register code use tools
-	for _, toolCfg := range cfg.GetTools() {
-		t, err := createTool(toolCfg, logger)
+	// Get all tools from database
+	allTool, err := toolRepo.ListTools(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("failed to list allTool: %v", err)
+	}
+
+	// Register all tools
+	for _, toolDo := range allTool {
+		if !toolDo.Enabled {
+			hub.logger.Infow("tool disabled, skipping", "name", toolDo.Name)
+			continue
+		}
+
+		// Create tool
+		t, err := createTool(toolDo, logger)
 		if err != nil {
-			hub.logger.Errorw("failed to create tool", "name", toolCfg.GetName(), "err", err)
-			return nil, fmt.Errorf("failed to create tool %s: %v", toolCfg.GetName(), err)
+			hub.logger.Errorw("failed to create tool", "name", toolDo.Name, "err", err)
+			return nil, fmt.Errorf("failed to create tool %s: %v", toolDo.Name, err)
 		}
 
+		// Register tool
 		if err := hub.RegisterTool(t); err != nil {
-			hub.logger.Errorw("failed to register tool", "name", toolCfg.GetName(), "err", err)
-			return nil, fmt.Errorf("failed to register tool %s: %v", toolCfg.GetName(), err)
-		}
-	}
-
-	// Register LLM use tools
-	for _, toolCfg := range cfg.GetLlmUseTools() {
-		t := tools.NewLLMUse(toolCfg, logger)
-		if err := hub.RegisterTool(t); err != nil {
-			hub.logger.Errorw("failed to register tool", "name", toolCfg.GetName(), "err", err)
-			return nil, fmt.Errorf("failed to register tool %s: %v", toolCfg.GetName(), err)
+			hub.logger.Errorw("failed to register tool", "name", toolDo.Name, "err", err)
+			return nil, fmt.Errorf("failed to register tool %s: %v", toolDo.Name, err)
 		}
 	}
 
@@ -67,14 +76,14 @@ func (h *Hub) RegisterTool(tool core.Tool) error {
 }
 
 // createTool creates a tool based on configuration
-func createTool(cfg *conf.Agent_ToolConfig, logger *zap.SugaredLogger) (core.Tool, error) {
-	switch cfg.GetName() {
-	case conf.Agent_Completion:
-		return tools.NewCompletion(cfg, logger), nil
-	case conf.Agent_InducingCreateTrip:
-		return tools.NewLLMUse(cfg.GetLlmUseConfig(), logger), nil
+func createTool(toolDo *do.Tool, logger *zap.SugaredLogger) (core.Tool, error) {
+	switch toolDo.Type {
+	case cnst.ToolTypeCodeUse:
+		return tools.NewCompletion(toolDo, logger), nil
+	case cnst.ToolTypeLLMUse:
+		return tools.NewLLMUse(toolDo, logger), nil
 	default:
-		return nil, fmt.Errorf("unknown tool: %s", cfg.GetName())
+		return nil, fmt.Errorf("unknown tool type: %s", toolDo.Type)
 	}
 }
 
