@@ -117,3 +117,19 @@ func ToDailyItinerariesProto(dis []*do.DailyItinerary) []*tripV1.DailyItinerary 
 	}
 	return list
 }
+
+func ToTripCollaboratorsProto(users []*do.User) []*tripV1.TripCollaborator {
+	if users == nil {
+		return nil
+	}
+	list := make([]*tripV1.TripCollaborator, 0, len(users))
+	for _, user := range users {
+		list = append(list, &tripV1.TripCollaborator{
+			Id:        user.ID.String(),
+			Username:  user.Username,
+			Nickname:  user.Nickname,
+			AvatarUrl: user.AvatarURL,
+		})
+	}
+	return list
+}

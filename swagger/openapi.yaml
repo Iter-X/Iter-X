@@ -880,6 +880,15 @@ components:
                         $ref: '#/components/schemas/trip.v1.DailyTrip'
                     type: array
             type: object
+        trip.v1.ListTripCollaboratorsResponse:
+            example:
+                collaborators: null
+            properties:
+                collaborators:
+                    items:
+                        $ref: '#/components/schemas/trip.v1.TripCollaborator'
+                    type: array
+            type: object
         trip.v1.ListTripsResponse:
             example:
                 trips: null
@@ -925,6 +934,22 @@ components:
                 updatedAt:
                     format: int32
                     type: integer
+            type: object
+        trip.v1.TripCollaborator:
+            example:
+                avatarUrl: ""
+                id: ""
+                nickname: ""
+                username: ""
+            properties:
+                avatarUrl:
+                    type: string
+                id:
+                    type: string
+                nickname:
+                    type: string
+                username:
+                    type: string
             type: object
         trip.v1.UpdateDailyTripRequest:
             example:
@@ -1886,6 +1911,43 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/trip.v1.UpdateTripResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - TripService
+    /api/v1/trips/{trip_id}/collaborators:
+        get:
+            operationId: TripService_ListTripCollaborators
+            parameters:
+                - example: ""
+                  in: path
+                  name: tripId
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.ListTripCollaboratorsResponse'
                     description: OK
                 "400":
                     content:

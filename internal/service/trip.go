@@ -209,3 +209,15 @@ func (s *Trip) ListDailyTrips(ctx context.Context, req *tripV1.ListDailyTripsReq
 	}
 	return &tripV1.ListDailyTripsResponse{DailyTrips: build.ToDailyTripsProto(dailyTrips)}, nil
 }
+
+func (s *Trip) ListTripCollaborators(ctx context.Context, req *tripV1.ListTripCollaboratorsRequest) (*tripV1.ListTripCollaboratorsResponse, error) {
+	tripId, err := uuid.Parse(req.GetTripId())
+	if err != nil {
+		return nil, xerr.ErrorInvalidTripId()
+	}
+	collaborators, err := s.tripBiz.ListTripCollaborators(ctx, tripId)
+	if err != nil {
+		return nil, err
+	}
+	return &tripV1.ListTripCollaboratorsResponse{Collaborators: build.ToTripCollaboratorsProto(collaborators)}, nil
+}

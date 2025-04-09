@@ -388,3 +388,24 @@ func (b *Trip) ListDailyTrips(ctx context.Context, req *bo.ListDailyTripsRequest
 
 	return dailyTrips, nil
 }
+
+func (b *Trip) ListTripCollaborators(ctx context.Context, tripId uuid.UUID) ([]*do.User, error) {
+	// First check if the trip exists
+	_, err := b.tripRepo.GetTrip(ctx, tripId)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, xerr.ErrorTripNotFound()
+		}
+		b.logger.Errorw("failed to get trip", "err", err)
+		return nil, xerr.ErrorGetTripFailed()
+	}
+
+	// Get collaborators
+	collaborators, err := b.tripRepo.ListTripCollaborators(ctx, tripId)
+	if err != nil {
+		b.logger.Errorw("failed to list trip collaborators", "err", err)
+		return nil, xerr.ErrorGetTripFailed()
+	}
+
+	return collaborators, nil
+}

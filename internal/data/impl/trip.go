@@ -153,3 +153,45 @@ func (r *tripRepositoryImpl) CreateDailyItinerary(ctx context.Context, dailyItin
 		Save(ctx)
 	return build.DailyItineraryRepositoryImplToEntity(row), err
 }
+
+func (r *tripRepositoryImpl) ListTripCollaborators(ctx context.Context, tripId uuid.UUID) ([]*do.User, error) {
+	cli := r.GetTx(ctx).Trip
+
+	// First get the trip to get the owner
+	tgtTrip, err := cli.Query().
+		Where(trip.ID(tripId)).
+		WithUser().
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get all collaborators
+	collaborators, err := cli.Query().
+		Where(trip.ID(tripId)).
+		QueryCollaborators().
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert to entities
+	users := build.AuthRepositoryImplToEntities(collaborators)
+
+	// Ensure owner is first in the list
+	owner := tgtTrip.Edges.User
+	if owner != nil {
+		ownerEntity := build.AuthRepositoryImplToEntity(owner)
+		// Remove owner from the list if present
+		for i, user := range users {
+			if user.ID == ownerEntity.ID {
+				users = append(users[:i], users[i+1:]...)
+				break
+			}
+		}
+		// Add owner at the beginning
+		users = append([]*do.User{ownerEntity}, users...)
+	}
+
+	return users, nil
+}
