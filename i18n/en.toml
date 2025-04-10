@@ -46,6 +46,12 @@ other = "External link cannot be empty"
 [INVALID_LANGUAGE]
 other = "Invalid language"
 
+[INVALID_USER_ID]
+other = "Invalid user"
+
+[INVALID_COLLABORATOR_STATUS]
+other = "Invalid collaborator status"
+
 [UNAUTHORIZED]
 other = "Unauthorized"
 
@@ -108,4 +114,13 @@ other = "Get cities failed"
 
 [GET_POIS_LIST_FAILED]
 other = "Get POIs failed"
+
+[ADD_COLLABORATORS_FAILED]
+other = "Add collaborators failed"
+
+[REMOVE_COLLABORATOR_FAILED]
+other = "Remove collaborator failed"
+
+[UPDATE_COLLABORATOR_STATUS_FAILED]
+other = "Update collaborator status failed"
 

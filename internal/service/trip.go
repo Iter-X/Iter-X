@@ -221,3 +221,60 @@ func (s *Trip) ListTripCollaborators(ctx context.Context, req *tripV1.ListTripCo
 	}
 	return &tripV1.ListTripCollaboratorsResponse{Collaborators: build.ToTripCollaboratorsProto(collaborators)}, nil
 }
+
+func (s *Trip) AddTripCollaborators(ctx context.Context, req *tripV1.AddTripCollaboratorsRequest) (*tripV1.AddTripCollaboratorsResponse, error) {
+	tripId, err := uuid.Parse(req.GetTripId())
+	if err != nil {
+		return nil, xerr.ErrorInvalidTripId()
+	}
+
+	userIds := make([]uuid.UUID, 0, len(req.GetUserIds()))
+	for _, id := range req.GetUserIds() {
+		userId, err := uuid.Parse(id)
+		if err != nil {
+			return nil, xerr.ErrorInvalidUserId()
+		}
+		userIds = append(userIds, userId)
+	}
+
+	collaborators, err := s.tripBiz.AddTripCollaborators(ctx, tripId, userIds)
+	if err != nil {
+		return nil, err
+	}
+	return &tripV1.AddTripCollaboratorsResponse{Collaborators: build.ToTripCollaboratorsProto(collaborators)}, nil
+}
+
+func (s *Trip) RemoveTripCollaborator(ctx context.Context, req *tripV1.RemoveTripCollaboratorRequest) (*tripV1.RemoveTripCollaboratorResponse, error) {
+	tripId, err := uuid.Parse(req.GetTripId())
+	if err != nil {
+		return nil, xerr.ErrorInvalidTripId()
+	}
+
+	userId, err := uuid.Parse(req.GetUserId())
+	if err != nil {
+		return nil, xerr.ErrorInvalidUserId()
+	}
+
+	if err := s.tripBiz.RemoveTripCollaborator(ctx, tripId, userId); err != nil {
+		return nil, err
+	}
+	return &tripV1.RemoveTripCollaboratorResponse{Status: "removed"}, nil
+}
+
+func (s *Trip) UpdateCollaboratorStatus(ctx context.Context, req *tripV1.UpdateCollaboratorStatusRequest) (*tripV1.UpdateCollaboratorStatusResponse, error) {
+	tripId, err := uuid.Parse(req.GetTripId())
+	if err != nil {
+		return nil, xerr.ErrorInvalidTripId()
+	}
+
+	userId, err := uuid.Parse(req.GetUserId())
+	if err != nil {
+		return nil, xerr.ErrorInvalidUserId()
+	}
+
+	collaborator, err := s.tripBiz.UpdateCollaboratorStatus(ctx, tripId, userId, req.GetStatus().String())
+	if err != nil {
+		return nil, err
+	}
+	return &tripV1.UpdateCollaboratorStatusResponse{Collaborator: build.ToTripCollaboratorProto(collaborator)}, nil
+}

@@ -9,9 +9,11 @@ import (
 	"github.com/iter-x/iter-x/internal/biz/do"
 	"github.com/iter-x/iter-x/internal/biz/repository"
 	"github.com/iter-x/iter-x/internal/data"
+	"github.com/iter-x/iter-x/internal/data/cnst"
 	"github.com/iter-x/iter-x/internal/data/ent"
 	"github.com/iter-x/iter-x/internal/data/ent/dailytrip"
 	"github.com/iter-x/iter-x/internal/data/ent/trip"
+	"github.com/iter-x/iter-x/internal/data/ent/tripcollaborator"
 	"github.com/iter-x/iter-x/internal/data/ent/trippoipool"
 	"github.com/iter-x/iter-x/internal/data/impl/build"
 )
@@ -55,7 +57,21 @@ func (r *tripRepositoryImpl) CreateTrip(ctx context.Context, trip *do.Trip) (*do
 		SetEndDate(trip.EndDate).
 		SetDays(trip.Days).
 		Save(ctx)
-	return r.ToEntity(row), err
+	if err != nil {
+		return nil, err
+	}
+
+	// Add creator as the first collaborator with 'accepted' status
+	_, err = r.GetTx(ctx).TripCollaborator.Create().
+		SetTripID(row.ID).
+		SetUserID(trip.UserID).
+		SetStatus(cnst.CollaboratorStatusAccepted).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.ToEntity(row), nil
 }
 
 func (r *tripRepositoryImpl) GetTrip(ctx context.Context, id uuid.UUID) (*do.Trip, error) {
@@ -155,46 +171,20 @@ func (r *tripRepositoryImpl) CreateDailyItinerary(ctx context.Context, dailyItin
 	return build.DailyItineraryRepositoryImplToEntity(row), err
 }
 
-func (r *tripRepositoryImpl) ListTripCollaborators(ctx context.Context, tripId uuid.UUID) ([]*do.User, error) {
+func (r *tripRepositoryImpl) ListTripCollaborators(ctx context.Context, tripId uuid.UUID) ([]*do.TripCollaborator, error) {
 	cli := r.GetTx(ctx).Trip
 
-	// First get the trip to get the owner
-	tgtTrip, err := cli.Query().
-		Where(trip.ID(tripId)).
-		WithUser().
-		Only(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	// Get all collaborators
+	// Get all collaborators through trip_collaborators with user information
 	collaborators, err := cli.Query().
 		Where(trip.ID(tripId)).
-		QueryCollaborators().
+		QueryTripCollaborators().
+		WithUser().
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	// Convert to entities
-	users := build.AuthRepositoryImplToEntities(collaborators)
-
-	// Ensure owner is first in the list
-	owner := tgtTrip.Edges.User
-	if owner != nil {
-		ownerEntity := build.AuthRepositoryImplToEntity(owner)
-		// Remove owner from the list if present
-		for i, user := range users {
-			if user.ID == ownerEntity.ID {
-				users = append(users[:i], users[i+1:]...)
-				break
-			}
-		}
-		// Add owner at the beginning
-		users = append([]*do.User{ownerEntity}, users...)
-	}
-
-	return users, nil
+	return build.TripCollaboratorRepositoryImplToEntities(collaborators), nil
 }
 
 func (r *tripRepositoryImpl) CreateTripPOIPool(ctx context.Context, tripPOIPool *do.TripPOIPool) (*do.TripPOIPool, error) {
@@ -221,4 +211,73 @@ func (r *tripRepositoryImpl) ListTripPOIPool(ctx context.Context, tripId uuid.UU
 		WithPoi().
 		All(ctx)
 	return build.TripPOIPoolRepositoryImplToEntities(rows), err
+}
+
+func (r *tripRepositoryImpl) AddTripCollaborators(ctx context.Context, tripId uuid.UUID, userIds []uuid.UUID) ([]*do.TripCollaborator, error) {
+	cli := r.GetTx(ctx).TripCollaborator
+
+	var collaborators []*ent.TripCollaborator
+	for _, userId := range userIds {
+		// Check if the user is already a collaborator
+		exists, err := cli.Query().
+			Where(
+				tripcollaborator.TripID(tripId),
+				tripcollaborator.UserID(userId),
+			).
+			Exist(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if exists {
+			continue
+		}
+
+		// Add new collaborator if not exists
+		collaborator, err := cli.Create().
+			SetTripID(tripId).
+			SetUserID(userId).
+			SetStatus(cnst.CollaboratorStatusInvited).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+		collaborators = append(collaborators, collaborator)
+	}
+
+	return build.TripCollaboratorRepositoryImplToEntities(collaborators), nil
+}
+
+func (r *tripRepositoryImpl) RemoveTripCollaborator(ctx context.Context, tripId uuid.UUID, userId uuid.UUID) error {
+	cli := r.GetTx(ctx).TripCollaborator
+
+	_, err := cli.Delete().
+		Where(
+			tripcollaborator.TripID(tripId),
+			tripcollaborator.UserID(userId),
+		).
+		Exec(ctx)
+	return err
+}
+
+func (r *tripRepositoryImpl) UpdateCollaboratorStatus(ctx context.Context, tripId uuid.UUID, userId uuid.UUID, status string) (*do.TripCollaborator, error) {
+	cli := r.GetTx(ctx).TripCollaborator
+
+	collaborator, err := cli.Query().
+		Where(
+			tripcollaborator.TripID(tripId),
+			tripcollaborator.UserID(userId),
+		).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	updated, err := collaborator.Update().
+		SetStatus(tripcollaborator.Status(status)).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return build.TripCollaboratorRepositoryImplToEntity(updated), nil
 }

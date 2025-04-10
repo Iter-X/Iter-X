@@ -34,7 +34,7 @@ func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("refresh_token", RefreshToken.Type),
 		edge.To("trip", Trip.Type),
-		edge.From("collaborated_trips", Trip.Type).Ref("collaborators"),
+		edge.To("trip_collaborators", TripCollaborator.Type),
 		edge.To("files", File.Type),
 		edge.To("preference", UserPreference.Type).Unique(),
 	}

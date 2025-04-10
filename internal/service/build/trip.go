@@ -119,18 +119,26 @@ func ToDailyItinerariesProto(dis []*do.DailyItinerary) []*tripV1.DailyItinerary 
 	return list
 }
 
-func ToTripCollaboratorsProto(users []*do.User) []*tripV1.TripCollaborator {
-	if users == nil {
+func ToTripCollaboratorProto(collaborator *do.TripCollaborator) *tripV1.TripCollaborator {
+	if collaborator == nil {
 		return nil
 	}
-	list := make([]*tripV1.TripCollaborator, 0, len(users))
-	for _, user := range users {
-		list = append(list, &tripV1.TripCollaborator{
-			Id:        user.ID.String(),
-			Username:  user.Username,
-			Nickname:  user.Nickname,
-			AvatarUrl: user.AvatarURL,
-		})
+	return &tripV1.TripCollaborator{
+		Id:        collaborator.ID.String(),
+		Username:  collaborator.Username,
+		Nickname:  collaborator.Nickname,
+		AvatarUrl: collaborator.AvatarURL,
+		Status:    tripV1.CollaboratorStatus(tripV1.CollaboratorStatus_value[collaborator.Status]),
+	}
+}
+
+func ToTripCollaboratorsProto(collaborators []*do.TripCollaborator) []*tripV1.TripCollaborator {
+	if collaborators == nil {
+		return nil
+	}
+	list := make([]*tripV1.TripCollaborator, 0, len(collaborators))
+	for _, collaborator := range collaborators {
+		list = append(list, ToTripCollaboratorProto(collaborator))
 	}
 	return list
 }

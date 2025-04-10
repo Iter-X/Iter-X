@@ -32,7 +32,7 @@ func (Trip) Edges() []ent.Edge {
 		edge.From("user", User.Type).Ref("trip").Field("user_id").Unique().Required(),
 		edge.To("daily_trip", DailyTrip.Type),
 		edge.To("daily_itinerary", DailyItinerary.Type),
-		edge.To("collaborators", User.Type),
+		edge.To("trip_collaborators", TripCollaborator.Type),
 		edge.To("poi_pool", TripPOIPool.Type),
 	}
 }

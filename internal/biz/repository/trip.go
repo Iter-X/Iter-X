@@ -34,7 +34,13 @@ type Trip[T *ent.Trip, R *do.Trip] interface {
 
 	CreateDailyItinerary(ctx context.Context, dailyItinerary *do.DailyItinerary) (*do.DailyItinerary, error)
 
-	ListTripCollaborators(ctx context.Context, tripId uuid.UUID) ([]*do.User, error)
+	ListTripCollaborators(ctx context.Context, tripId uuid.UUID) ([]*do.TripCollaborator, error)
+
+	AddTripCollaborators(ctx context.Context, tripId uuid.UUID, userIds []uuid.UUID) ([]*do.TripCollaborator, error)
+
+	RemoveTripCollaborator(ctx context.Context, tripId uuid.UUID, userId uuid.UUID) error
+
+	UpdateCollaboratorStatus(ctx context.Context, tripId uuid.UUID, userId uuid.UUID, status string) (*do.TripCollaborator, error)
 
 	CreateTripPOIPool(ctx context.Context, tripPOIPool *do.TripPOIPool) (*do.TripPOIPool, error)
 

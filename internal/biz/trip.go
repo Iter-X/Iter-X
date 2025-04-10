@@ -389,8 +389,17 @@ func (b *Trip) ListDailyTrips(ctx context.Context, req *bo.ListDailyTripsRequest
 	return dailyTrips, nil
 }
 
-func (b *Trip) ListTripCollaborators(ctx context.Context, tripId uuid.UUID) ([]*do.User, error) {
-	// First check if the trip exists
+func (b *Trip) ListTripCollaborators(ctx context.Context, tripId uuid.UUID) ([]*do.TripCollaborator, error) {
+	collaborators, err := b.tripRepo.ListTripCollaborators(ctx, tripId)
+	if err != nil {
+		b.logger.Errorw("failed to list trip collaborators", "err", err)
+		return nil, xerr.ErrorGetTripFailed()
+	}
+	return collaborators, nil
+}
+
+func (b *Trip) AddTripCollaborators(ctx context.Context, tripId uuid.UUID, userIds []uuid.UUID) ([]*do.TripCollaborator, error) {
+	// Check if trip exists
 	_, err := b.tripRepo.GetTrip(ctx, tripId)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -400,12 +409,48 @@ func (b *Trip) ListTripCollaborators(ctx context.Context, tripId uuid.UUID) ([]*
 		return nil, xerr.ErrorGetTripFailed()
 	}
 
-	// Get collaborators
-	collaborators, err := b.tripRepo.ListTripCollaborators(ctx, tripId)
+	collaborators, err := b.tripRepo.AddTripCollaborators(ctx, tripId, userIds)
 	if err != nil {
-		b.logger.Errorw("failed to list trip collaborators", "err", err)
+		b.logger.Errorw("failed to add trip collaborators", "err", err)
+		return nil, xerr.ErrorAddCollaboratorsFailed()
+	}
+	return collaborators, nil
+}
+
+func (b *Trip) RemoveTripCollaborator(ctx context.Context, tripId uuid.UUID, userId uuid.UUID) error {
+	// Check if trip exists
+	_, err := b.tripRepo.GetTrip(ctx, tripId)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return xerr.ErrorTripNotFound()
+		}
+		b.logger.Errorw("failed to get trip", "err", err)
+		return xerr.ErrorGetTripFailed()
+	}
+
+	err = b.tripRepo.RemoveTripCollaborator(ctx, tripId, userId)
+	if err != nil {
+		b.logger.Errorw("failed to remove trip collaborator", "err", err)
+		return xerr.ErrorRemoveCollaboratorFailed()
+	}
+	return nil
+}
+
+func (b *Trip) UpdateCollaboratorStatus(ctx context.Context, tripId uuid.UUID, userId uuid.UUID, status string) (*do.TripCollaborator, error) {
+	// Check if trip exists
+	_, err := b.tripRepo.GetTrip(ctx, tripId)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, xerr.ErrorTripNotFound()
+		}
+		b.logger.Errorw("failed to get trip", "err", err)
 		return nil, xerr.ErrorGetTripFailed()
 	}
 
-	return collaborators, nil
+	collaborator, err := b.tripRepo.UpdateCollaboratorStatus(ctx, tripId, userId, status)
+	if err != nil {
+		b.logger.Errorw("failed to update collaborator status", "err", err)
+		return nil, xerr.ErrorUpdateCollaboratorStatusFailed()
+	}
+	return collaborator, nil
 }

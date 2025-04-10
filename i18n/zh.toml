@@ -46,6 +46,12 @@ other = "外部链接不能为空"
 [INVALID_LANGUAGE]
 other = "无效的语言"
 
+[INVALID_USER_ID]
+other = "无效的用户"
+
+[INVALID_COLLABORATOR_STATUS]
+other = "无效的协作者状态"
+
 [UNAUTHORIZED]
 other = "未授权"
 
@@ -108,4 +114,13 @@ other = "获取城市列表失败"
 
 [GET_POIS_LIST_FAILED]
 other = "获取兴趣点位列表失败"
+
+[ADD_COLLABORATORS_FAILED]
+other = "添加协作者失败"
+
+[REMOVE_COLLABORATOR_FAILED]
+other = "删除协作者失败"
+
+[UPDATE_COLLABORATOR_STATUS_FAILED]
+other = "更新协作者状态失败"
 

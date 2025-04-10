@@ -102,6 +102,26 @@ service TripService {
       delete: "/api/v1/trips/{trip_id}/poi-pool/{poi_pool_id}"
     };
   }
+
+  rpc AddTripCollaborators(AddTripCollaboratorsRequest) returns (AddTripCollaboratorsResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/trips/{trip_id}/collaborators"
+      body: "*"
+    };
+  }
+
+  rpc RemoveTripCollaborator(RemoveTripCollaboratorRequest) returns (RemoveTripCollaboratorResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/trips/{trip_id}/collaborators/{user_id}"
+    };
+  }
+
+  rpc UpdateCollaboratorStatus(UpdateCollaboratorStatusRequest) returns (UpdateCollaboratorStatusResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/trips/{trip_id}/collaborators/{user_id}/status"
+      body: "*"
+    };
+  }
 }
 
 message Trip {
@@ -241,6 +261,13 @@ message TripCollaborator {
   string username = 2;
   string nickname = 3;
   string avatar_url = 4;
+  CollaboratorStatus status = 5;
+}
+
+enum CollaboratorStatus {
+  Invited = 0;
+  Accepted = 2;
+  Rejected = 3;
 }
 
 message DailyTrip {
@@ -313,4 +340,32 @@ message DeleteTripPOIPoolRequest {
 
 message DeleteTripPOIPoolResponse {
   string status = 1;
+}
+
+message AddTripCollaboratorsRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+  repeated string user_ids = 2 [(validatex.rules).repeated.min_items = 1];
+}
+
+message AddTripCollaboratorsResponse {
+  repeated TripCollaborator collaborators = 1;
+}
+
+message RemoveTripCollaboratorRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+  string user_id = 2 [(validatex.rules).string.uuid = true];
+}
+
+message RemoveTripCollaboratorResponse {
+  string status = 1;
+}
+
+message UpdateCollaboratorStatusRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+  string user_id = 2 [(validatex.rules).string.uuid = true];
+  CollaboratorStatus status = 3;
+}
+
+message UpdateCollaboratorStatusResponse {
+  TripCollaborator collaborator = 1;
 }
