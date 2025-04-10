@@ -44,10 +44,14 @@ class TripCollaboratorsSection extends StatelessWidget {
     final double avatarGap = 10.w;
     final double iconGap = 5.w;
 
+    // Filter only accepted collaborators
+    final acceptedCollaborators =
+        service.collaborators.where((c) => c.status == 'Accepted').toList();
+
     final maxVisibleAvatars = 4;
     final displayedCollaborators =
-        service.collaborators.take(maxVisibleAvatars).toList();
-    final remainingCount = service.collaborators.length - maxVisibleAvatars;
+        acceptedCollaborators.take(maxVisibleAvatars).toList();
+    final remainingCount = acceptedCollaborators.length - maxVisibleAvatars;
 
     final stackWidth = avatarSize *
             (displayedCollaborators.length + (remainingCount > 0 ? 1 : 0)) -

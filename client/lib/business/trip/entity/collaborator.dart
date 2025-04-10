@@ -3,6 +3,7 @@ class Collaborator {
   final String username;
   final String nickname;
   final String avatarUrl;
+  final String status; // Invited, Accepted, Rejected
 
   static const String defaultAvatar = 'assets/images/placeholder.png';
 
@@ -11,6 +12,7 @@ class Collaborator {
     required this.username,
     required this.nickname,
     required this.avatarUrl,
+    required this.status,
   });
 
   factory Collaborator.fromJson(Map<String, dynamic> json) {
@@ -19,6 +21,7 @@ class Collaborator {
       username: json['username'] as String,
       nickname: (json['nickname'] as String?) ?? '',
       avatarUrl: (json['avatarUrl'] as String?) ?? defaultAvatar,
+      status: json['status'] as String,
     );
   }
 }
