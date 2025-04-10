@@ -83,6 +83,25 @@ service TripService {
       get: "/api/v1/trips/{trip_id}/collaborators"
     };
   }
+
+  rpc ListTripPOIPool(ListTripPOIPoolRequest) returns (ListTripPOIPoolResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/trips/{trip_id}/poi-pool"
+    };
+  }
+
+  rpc CreateTripPOIPool(CreateTripPOIPoolRequest) returns (CreateTripPOIPoolResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/trips/{trip_id}/poi-pool"
+      body: "*"
+    };
+  }
+
+  rpc DeleteTripPOIPool(DeleteTripPOIPoolRequest) returns (DeleteTripPOIPoolResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/trips/{trip_id}/poi-pool/{poi_pool_id}"
+    };
+  }
 }
 
 message Trip {
@@ -95,6 +114,7 @@ message Trip {
   google.protobuf.Timestamp start_ts = 7;
   google.protobuf.Timestamp end_ts = 8;
   repeated DailyTrip daily_trips = 9;
+  repeated poi.v1.PointOfInterest poi_pool = 10;
 }
 
 message CreateTripManuallyRequest {
@@ -256,4 +276,41 @@ message PointsOfInterest {
   string country_name = 8;
   string state_name = 9;
   string image_url = 10;
+}
+
+message TripPOIPool {
+  string id = 1;
+  string trip_id = 2;
+  string poi_id = 3;
+  string notes = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  poi.v1.PointOfInterest poi = 7;
+}
+
+message ListTripPOIPoolRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+}
+
+message ListTripPOIPoolResponse {
+  repeated TripPOIPool poi_pool = 1;
+}
+
+message CreateTripPOIPoolRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+  string poi_id = 2 [(validatex.rules).string.uuid = true];
+  string notes = 3;
+}
+
+message CreateTripPOIPoolResponse {
+  TripPOIPool poi_pool = 1;
+}
+
+message DeleteTripPOIPoolRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+  string poi_pool_id = 2 [(validatex.rules).string.uuid = true];
+}
+
+message DeleteTripPOIPoolResponse {
+  string status = 1;
 }

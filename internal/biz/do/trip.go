@@ -35,6 +35,8 @@ type Trip struct {
 	DailyTrip []*DailyTrip `json:"daily_trip,omitempty"`
 	// DailyItinerary holds the value of the daily_itinerary edge.
 	DailyItinerary []*DailyItinerary `json:"daily_itinerary,omitempty"`
+	// PoiPool holds the value of the poi_pool edge.
+	PoiPool []*TripPOIPool `json:"poi_pool,omitempty"`
 }
 
 // DailyTrip is the model entity for the DailyTrip schema.
@@ -58,4 +60,23 @@ type DailyTrip struct {
 	Trip *Trip `json:"trip,omitempty"`
 	// DailyItinerary holds the value of the daily_itinerary edge.
 	DailyItinerary []*DailyItinerary `json:"daily_itinerary,omitempty"`
+}
+
+// TripPOIPool is the model entity for the TripPOIPool schema.
+type TripPOIPool struct {
+	// ID of the ent.
+	ID uuid.UUID `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// TripID holds the value of the "trip_id" field.
+	TripID uuid.UUID `json:"trip_id,omitempty"`
+	// PoiID holds the value of the "poi_id" field.
+	PoiID uuid.UUID `json:"poi_id,omitempty"`
+
+	// Trip holds the value of the trip edge.
+	Trip *Trip `json:"trip,omitempty"`
+	// Poi holds the value of the poi edge.
+	Poi *PointsOfInterest `json:"poi,omitempty"`
 }

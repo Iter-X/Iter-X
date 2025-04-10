@@ -12,6 +12,7 @@ import (
 	"github.com/iter-x/iter-x/internal/data/ent"
 	"github.com/iter-x/iter-x/internal/data/ent/dailytrip"
 	"github.com/iter-x/iter-x/internal/data/ent/trip"
+	"github.com/iter-x/iter-x/internal/data/ent/trippoipool"
 	"github.com/iter-x/iter-x/internal/data/impl/build"
 )
 
@@ -194,4 +195,30 @@ func (r *tripRepositoryImpl) ListTripCollaborators(ctx context.Context, tripId u
 	}
 
 	return users, nil
+}
+
+func (r *tripRepositoryImpl) CreateTripPOIPool(ctx context.Context, tripPOIPool *do.TripPOIPool) (*do.TripPOIPool, error) {
+	cli := r.GetTx(ctx).TripPOIPool
+
+	row, err := cli.Create().
+		SetTripID(tripPOIPool.TripID).
+		SetPoiID(tripPOIPool.PoiID).
+		Save(ctx)
+	return build.TripPOIPoolRepositoryImplToEntity(row), err
+}
+
+func (r *tripRepositoryImpl) DeleteTripPOIPool(ctx context.Context, id uuid.UUID) error {
+	cli := r.GetTx(ctx).TripPOIPool
+
+	return cli.DeleteOneID(id).Exec(ctx)
+}
+
+func (r *tripRepositoryImpl) ListTripPOIPool(ctx context.Context, tripId uuid.UUID) ([]*do.TripPOIPool, error) {
+	cli := r.GetTx(ctx).TripPOIPool
+
+	rows, err := cli.Query().
+		Where(trippoipool.TripID(tripId)).
+		WithPoi().
+		All(ctx)
+	return build.TripPOIPoolRepositoryImplToEntities(rows), err
 }

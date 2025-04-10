@@ -772,6 +772,26 @@ components:
                     format: int32
                     type: integer
             type: object
+        trip.v1.CreateTripPOIPoolRequest:
+            example:
+                notes: ""
+                poiId: ""
+                tripId: ""
+            properties:
+                notes:
+                    type: string
+                poiId:
+                    type: string
+                tripId:
+                    type: string
+            type: object
+        trip.v1.CreateTripPOIPoolResponse:
+            example:
+                poiPool: null
+            properties:
+                poiPool:
+                    $ref: '#/components/schemas/trip.v1.TripPOIPool'
+            type: object
         trip.v1.CreateTripResponse:
             example:
                 trip: null
@@ -850,6 +870,13 @@ components:
                 status:
                     type: string
             type: object
+        trip.v1.DeleteTripPOIPoolResponse:
+            example:
+                status: ""
+            properties:
+                status:
+                    type: string
+            type: object
         trip.v1.DeleteTripResponse:
             example:
                 status: ""
@@ -889,6 +916,15 @@ components:
                         $ref: '#/components/schemas/trip.v1.TripCollaborator'
                     type: array
             type: object
+        trip.v1.ListTripPOIPoolResponse:
+            example:
+                poiPool: null
+            properties:
+                poiPool:
+                    items:
+                        $ref: '#/components/schemas/trip.v1.TripPOIPool'
+                    type: array
+            type: object
         trip.v1.ListTripsResponse:
             example:
                 trips: null
@@ -905,6 +941,7 @@ components:
                 description: ""
                 endTs: 1741589979
                 id: ""
+                poiPool: null
                 startTs: 1741589979
                 status: true
                 title: ""
@@ -924,6 +961,10 @@ components:
                     type: integer
                 id:
                     type: string
+                poiPool:
+                    items:
+                        $ref: '#/components/schemas/poi.v1.PointOfInterest'
+                    type: array
                 startTs:
                     format: int32
                     type: integer
@@ -950,6 +991,33 @@ components:
                     type: string
                 username:
                     type: string
+            type: object
+        trip.v1.TripPOIPool:
+            example:
+                createdAt: 1741589979
+                id: ""
+                notes: ""
+                poi: null
+                poiId: ""
+                tripId: ""
+                updatedAt: 1741589979
+            properties:
+                createdAt:
+                    format: int32
+                    type: integer
+                id:
+                    type: string
+                notes:
+                    type: string
+                poi:
+                    $ref: '#/components/schemas/poi.v1.PointOfInterest'
+                poiId:
+                    type: string
+                tripId:
+                    type: string
+                updatedAt:
+                    format: int32
+                    type: integer
             type: object
         trip.v1.UpdateDailyTripRequest:
             example:
@@ -2160,6 +2228,128 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/trip.v1.UpdateDailyTripResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - TripService
+    /api/v1/trips/{trip_id}/poi-pool:
+        get:
+            operationId: TripService_ListTripPOIPool
+            parameters:
+                - example: ""
+                  in: path
+                  name: tripId
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.ListTripPOIPoolResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - TripService
+        post:
+            operationId: TripService_CreateTripPOIPool
+            parameters:
+                - example: ""
+                  in: path
+                  name: tripId
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/trip.v1.CreateTripPOIPoolRequest'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.CreateTripPOIPoolResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - TripService
+    /api/v1/trips/{trip_id}/poi-pool/{poi_pool_id}:
+        delete:
+            operationId: TripService_DeleteTripPOIPool
+            parameters:
+                - example: ""
+                  in: path
+                  name: tripId
+                  required: true
+                  schema:
+                    type: string
+                - example: ""
+                  in: path
+                  name: poiPoolId
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.DeleteTripPOIPoolResponse'
                     description: OK
                 "400":
                     content:

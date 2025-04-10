@@ -35,6 +35,12 @@ type Trip[T *ent.Trip, R *do.Trip] interface {
 	CreateDailyItinerary(ctx context.Context, dailyItinerary *do.DailyItinerary) (*do.DailyItinerary, error)
 
 	ListTripCollaborators(ctx context.Context, tripId uuid.UUID) ([]*do.User, error)
+
+	CreateTripPOIPool(ctx context.Context, tripPOIPool *do.TripPOIPool) (*do.TripPOIPool, error)
+
+	DeleteTripPOIPool(ctx context.Context, id uuid.UUID) error
+
+	ListTripPOIPool(ctx context.Context, tripId uuid.UUID) ([]*do.TripPOIPool, error)
 }
 
 type TripRepo = Trip[*ent.Trip, *do.Trip]
@@ -44,3 +50,15 @@ type DailyTrip[T *ent.DailyTrip, R *do.DailyTrip] interface {
 }
 
 type DailyTripRepo = DailyTrip[*ent.DailyTrip, *do.DailyTrip]
+
+type TripPOIPool[T *ent.TripPOIPool, R *do.TripPOIPool] interface {
+	BaseRepo[T, R]
+
+	CreateTripPOIPool(ctx context.Context, tripPOIPool *do.TripPOIPool) (*do.TripPOIPool, error)
+
+	DeleteTripPOIPool(ctx context.Context, id uuid.UUID) error
+
+	ListTripPOIPool(ctx context.Context, tripId uuid.UUID) ([]*do.TripPOIPool, error)
+}
+
+type TripPOIPoolRepo = TripPOIPool[*ent.TripPOIPool, *do.TripPOIPool]

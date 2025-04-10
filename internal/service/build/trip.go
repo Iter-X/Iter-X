@@ -22,6 +22,7 @@ func ToTripProto(t *do.Trip) *tripV1.Trip {
 		CreatedAt:   timestamppb.New(t.CreatedAt),
 		UpdatedAt:   timestamppb.New(t.UpdatedAt),
 		DailyTrips:  ToDailyTripsProto(t.DailyTrip),
+		PoiPool:     ToPointOfInterestsProto(t.PoiPool),
 	}
 }
 
@@ -132,4 +133,18 @@ func ToTripCollaboratorsProto(users []*do.User) []*tripV1.TripCollaborator {
 		})
 	}
 	return list
+}
+
+// ToPointOfInterestsProto converts a slice of TripPOIPool to a slice of PointOfInterest
+func ToPointOfInterestsProto(poiPools []*do.TripPOIPool) []*poiV1.PointOfInterest {
+	if poiPools == nil {
+		return nil
+	}
+	protoPois := make([]*poiV1.PointOfInterest, 0, len(poiPools))
+	for _, pool := range poiPools {
+		if pool.Poi != nil {
+			protoPois = append(protoPois, ToPointOfInterestProto(pool.Poi))
+		}
+	}
+	return protoPois
 }

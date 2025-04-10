@@ -70,3 +70,18 @@ type UpdateTripRequest struct {
 	EndDate     time.Time `json:"end_date"`
 	Status      bool      `json:"status"`
 }
+
+type ListTripPOIPoolRequest struct {
+	TripID string `json:"trip_id"`
+}
+
+type CreateTripPOIPoolRequest struct {
+	TripID string `json:"trip_id"`
+	PoiID  string `json:"poi_id"`
+	Notes  string `json:"notes"`
+}
+
+type DeleteTripPOIPoolRequest struct {
+	TripID    string `json:"trip_id"`
+	PoiPoolID string `json:"poi_pool_id"`
+}

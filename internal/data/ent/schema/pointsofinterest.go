@@ -48,6 +48,7 @@ func (PointsOfInterest) Edges() []ent.Edge {
 		edge.From("continent", Continent.Type).Ref("poi").Field("continent_id").Unique(),
 		edge.To("daily_itinerary", DailyItinerary.Type),
 		edge.To("poi_files", PointsOfInterestFiles.Type),
+		edge.To("trip_pools", TripPOIPool.Type),
 	}
 }
 
