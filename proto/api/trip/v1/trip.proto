@@ -122,6 +122,13 @@ service TripService {
       body: "*"
     };
   }
+
+  rpc AddDay(AddDayRequest) returns (AddDayResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/trips/{trip_id}/day"
+      body: "*"
+    };
+  }
 }
 
 message Trip {
@@ -368,4 +375,14 @@ message UpdateCollaboratorStatusRequest {
 
 message UpdateCollaboratorStatusResponse {
   TripCollaborator collaborator = 1;
+}
+
+message AddDayRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+  int32 after_day = 2;
+  string notes = 3;
+}
+
+message AddDayResponse {
+  DailyTrip daily_trip = 1;
 }

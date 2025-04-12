@@ -278,3 +278,25 @@ func (s *Trip) UpdateCollaboratorStatus(ctx context.Context, req *tripV1.UpdateC
 	}
 	return &tripV1.UpdateCollaboratorStatusResponse{Collaborator: build.ToTripCollaboratorProto(collaborator)}, nil
 }
+
+func (s *Trip) AddDay(ctx context.Context, req *tripV1.AddDayRequest) (*tripV1.AddDayResponse, error) {
+	tripId, err := uuid.Parse(req.GetTripId())
+	if err != nil {
+		return nil, xerr.ErrorInvalidTripId()
+	}
+
+	params := &bo.AddDayRequest{
+		TripID:   tripId,
+		AfterDay: req.GetAfterDay(),
+		Notes:    req.GetNotes(),
+	}
+
+	dailyTrip, err := s.tripBiz.AddDay(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+
+	return &tripV1.AddDayResponse{
+		DailyTrip: build.ToDailyTripProto(dailyTrip),
+	}, nil
+}

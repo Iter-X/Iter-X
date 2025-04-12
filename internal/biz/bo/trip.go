@@ -85,3 +85,10 @@ type DeleteTripPOIPoolRequest struct {
 	TripID    string `json:"trip_id"`
 	PoiPoolID string `json:"poi_pool_id"`
 }
+
+// AddDayRequest represents the request to add a new day to a trip
+type AddDayRequest struct {
+	TripID   uuid.UUID
+	AfterDay int32 // 0 means insert at the beginning, n means insert after the nth day
+	Notes    string
+}

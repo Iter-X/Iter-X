@@ -682,6 +682,27 @@ components:
                 uploadId:
                     type: string
             type: object
+        trip.v1.AddDayRequest:
+            example:
+                afterDay: 0
+                notes: ""
+                tripId: ""
+            properties:
+                afterDay:
+                    format: int32
+                    type: integer
+                notes:
+                    type: string
+                tripId:
+                    type: string
+            type: object
+        trip.v1.AddDayResponse:
+            example:
+                dailyTrip: null
+            properties:
+                dailyTrip:
+                    $ref: '#/components/schemas/trip.v1.DailyTrip'
+            type: object
         trip.v1.AddTripCollaboratorsRequest:
             example:
                 tripId: ""
@@ -2423,6 +2444,49 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/trip.v1.UpdateDailyTripResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - TripService
+    /api/v1/trips/{trip_id}/day:
+        post:
+            operationId: TripService_AddDay
+            parameters:
+                - example: ""
+                  in: path
+                  name: tripId
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/trip.v1.AddDayRequest'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.AddDayResponse'
                     description: OK
                 "400":
                     content:

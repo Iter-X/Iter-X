@@ -454,3 +454,72 @@ func (b *Trip) UpdateCollaboratorStatus(ctx context.Context, tripId uuid.UUID, u
 	}
 	return collaborator, nil
 }
+
+func (b *Trip) AddDay(ctx context.Context, req *bo.AddDayRequest) (*do.DailyTrip, error) {
+	// Get the trip to check if it exists and get the current number of days
+	trip, err := b.tripRepo.GetTrip(ctx, req.TripID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, xerr.ErrorTripNotFound()
+		}
+		b.logger.Errorw("failed to get trip", "err", err)
+		return nil, xerr.ErrorGetTripFailed()
+	}
+
+	// Get all daily trips to adjust their day numbers
+	dailyTrips, err := b.tripRepo.ListDailyTrips(ctx, req.TripID)
+	if err != nil {
+		b.logger.Errorw("failed to list daily trips", "err", err)
+		return nil, xerr.ErrorGetDailyTripListFailed()
+	}
+
+	// Validate afterDay
+	if req.AfterDay < 0 {
+		req.AfterDay = 0
+	} else if req.AfterDay > int32(len(dailyTrips)) {
+		req.AfterDay = int32(len(dailyTrips))
+	}
+
+	// Create a new daily trip with the appropriate day number
+	newDay := req.AfterDay + 1
+	// Calculate the date based on the trip's start date
+	date := trip.StartDate.AddDate(0, 0, int(newDay-1))
+	dailyTrip := &do.DailyTrip{
+		TripID: req.TripID,
+		Day:    newDay,
+		Date:   date,
+		Notes:  req.Notes,
+	}
+
+	// Create the daily trip
+	createdDailyTrip, err := b.tripRepo.CreateDailyTrip(ctx, dailyTrip)
+	if err != nil {
+		b.logger.Errorw("failed to create daily trip", "err", err)
+		return nil, xerr.ErrorCreateDailyTripFailed()
+	}
+
+	// Update the day numbers of all subsequent daily trips
+	for _, dt := range dailyTrips {
+		if dt.Day >= newDay {
+			dt.Day++
+			// Update the date based on the new day number
+			dt.Date = trip.StartDate.AddDate(0, 0, int(dt.Day-1))
+			_, err = b.tripRepo.UpdateDailyTrip(ctx, dt)
+			if err != nil {
+				b.logger.Errorw("failed to update daily trip day number", "err", err)
+				return nil, xerr.ErrorUpdateDailyTripFailed()
+			}
+		}
+	}
+
+	// Update the trip's days count and end date
+	trip.Days++
+	trip.EndDate = trip.StartDate.AddDate(0, 0, int(trip.Days-1))
+	_, err = b.tripRepo.UpdateTrip(ctx, trip)
+	if err != nil {
+		b.logger.Errorw("failed to update trip days count and end date", "err", err)
+		return nil, xerr.ErrorUpdateTripFailed()
+	}
+
+	return createdDailyTrip, nil
+}

@@ -96,6 +96,7 @@ func (r *tripRepositoryImpl) UpdateTrip(ctx context.Context, trip *do.Trip) (*do
 		SetDescription(trip.Description).
 		SetStartDate(trip.StartDate).
 		SetEndDate(trip.EndDate).
+		SetDays(trip.Days).
 		SetUpdatedAt(trip.UpdatedAt).
 		Save(ctx)
 	return r.ToEntity(row), err
