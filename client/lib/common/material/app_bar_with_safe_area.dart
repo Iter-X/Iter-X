@@ -19,6 +19,7 @@ class AppBarWithSafeArea extends StatelessWidget {
   final Widget? leading;
   final List<Widget>? actions;
   final Color? backgroundColor;
+  final Color? surfaceTintColor;
   final double? elevation;
   final PreferredSizeWidget? appBarBottom;
   final double? toolbarHeight;
@@ -43,6 +44,7 @@ class AppBarWithSafeArea extends StatelessWidget {
     this.leading,
     this.actions,
     this.backgroundColor,
+    this.surfaceTintColor,
     this.elevation,
     this.appBarBottom,
     this.toolbarHeight,
@@ -58,6 +60,8 @@ class AppBarWithSafeArea extends StatelessWidget {
           ? AppBar(
               backgroundColor: backgroundColor ?? Colors.transparent,
               elevation: elevation ?? 0,
+              surfaceTintColor:
+                  surfaceTintColor ?? Theme.of(context).colorScheme.surfaceTint,
               systemOverlayStyle: SystemUiOverlayStyle(
                 statusBarColor: Colors.transparent,
                 statusBarIconBrightness:

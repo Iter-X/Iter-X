@@ -187,7 +187,7 @@ class _TripOverviewPageState extends State<TripOverviewPage> {
       backgroundColor: AppColor.bg,
       hasAppBar: true,
       bottom: false,
-      elevation: 0,
+      surfaceTintColor: AppColor.bg,
       leading: ReturnButton(),
       actions: [
         PreferenceButton(
