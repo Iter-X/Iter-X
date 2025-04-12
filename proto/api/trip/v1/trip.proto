@@ -140,8 +140,9 @@ message Trip {
   string description = 6;
   google.protobuf.Timestamp start_ts = 7;
   google.protobuf.Timestamp end_ts = 8;
-  repeated DailyTrip daily_trips = 9;
-  repeated poi.v1.PointOfInterest poi_pool = 10;
+  int32 days = 9;
+  repeated DailyTrip daily_trips = 10;
+  repeated poi.v1.PointOfInterest poi_pool = 11;
 }
 
 message CreateTripManuallyRequest {

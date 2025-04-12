@@ -987,6 +987,7 @@ components:
             example:
                 createdAt: 1741589979
                 dailyTrips: null
+                days: 0
                 description: ""
                 endTs: 1741589979
                 id: ""
@@ -1003,6 +1004,9 @@ components:
                     items:
                         $ref: '#/components/schemas/trip.v1.DailyTrip'
                     type: array
+                days:
+                    format: int32
+                    type: integer
                 description:
                     type: string
                 endTs:

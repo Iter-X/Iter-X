@@ -23,6 +23,7 @@ func ToTripProto(t *do.Trip) *tripV1.Trip {
 		UpdatedAt:   timestamppb.New(t.UpdatedAt),
 		DailyTrips:  ToDailyTripsProto(t.DailyTrip),
 		PoiPool:     ToPointOfInterestsProto(t.PoiPool),
+		Days:        int32(t.Days),
 	}
 }
 
