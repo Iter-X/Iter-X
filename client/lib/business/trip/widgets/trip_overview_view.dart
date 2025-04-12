@@ -1,19 +1,19 @@
 import 'package:client/app/constants.dart';
 import 'package:client/business/trip/entity/trip.dart';
+import 'package:client/business/trip/service/trip_service.dart';
 import 'package:client/common/utils/date_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class TripDaySection extends StatelessWidget {
-  final DailyTrip dailyTrip;
+class TripOverviewView extends StatelessWidget {
+  final TripService service;
 
-  const TripDaySection({
+  const TripOverviewView({
     super.key,
-    required this.dailyTrip,
+    required this.service,
   });
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildDaySection(BuildContext context, DailyTrip dailyTrip) {
     return GestureDetector(
       onTap: () {},
       child: Container(
@@ -90,6 +90,55 @@ class TripDaySection extends StatelessWidget {
                 }).toList(),
               ),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAddDayButton() {
+    return GestureDetector(
+      onTap: () {},
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.add_circle,
+            size: 20.w,
+            color: AppColor.primary.withOpacity(0.8),
+          ),
+          SizedBox(width: 10.w),
+          Text(
+            '添加一天',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: AppFontWeight.regular,
+              color: AppColor.primaryFont,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.only(left: 20.w, right: 20.w, top: 60.h),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...service.trip!.dailyTrips.map((dailyTrip) {
+              return Column(
+                children: [
+                  _buildDaySection(context, dailyTrip),
+                  SizedBox(height: 15.h),
+                ],
+              );
+            }),
+            _buildAddDayButton(),
+            SizedBox(height: 20.h),
           ],
         ),
       ),

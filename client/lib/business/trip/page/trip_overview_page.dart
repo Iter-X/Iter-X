@@ -1,7 +1,8 @@
 import 'package:client/app/constants.dart';
 import 'package:client/business/trip/service/trip_service.dart';
 import 'package:client/business/trip/widgets/trip_collaborators_section.dart';
-import 'package:client/business/trip/widgets/trip_day_section.dart';
+import 'package:client/business/trip/widgets/trip_detail_view.dart';
+import 'package:client/business/trip/widgets/trip_overview_view.dart';
 import 'package:client/business/trip/widgets/trip_settings_drawer.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/utils/date_util.dart';
@@ -34,31 +35,6 @@ class _TripOverviewPageState extends State<TripOverviewPage> {
       final service = context.read<TripService>();
       service.fetchTripData(tripId: widget.tripId);
     });
-  }
-
-  Widget _buildAddDayButton() {
-    return GestureDetector(
-      onTap: () {},
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.add_circle,
-            size: 20.w,
-            color: AppColor.primary.withOpacity(0.8),
-          ),
-          SizedBox(width: 10.w),
-          Text(
-            '添加一天',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: AppFontWeight.regular,
-              color: AppColor.primaryFont,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   void _showSettingsMenu(BuildContext context) {
@@ -135,52 +111,6 @@ class _TripOverviewPageState extends State<TripOverviewPage> {
     );
   }
 
-  Widget _buildDetailView(TripService service) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.only(left: 20.w, right: 20.w, top: 60.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ...service.trip!.dailyTrips.map((dailyTrip) {
-              return Column(
-                children: [
-                  TripDaySection(dailyTrip: dailyTrip),
-                  SizedBox(height: 15.h),
-                ],
-              );
-            }),
-            _buildAddDayButton(),
-            SizedBox(height: 20.h),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOverviewView(TripService service) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.only(left: 20.w, right: 20.w, top: 60.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ...service.trip!.dailyTrips.map((dailyTrip) {
-              return Column(
-                children: [
-                  TripDaySection(dailyTrip: dailyTrip),
-                  SizedBox(height: 15.h),
-                ],
-              );
-            }),
-            _buildAddDayButton(),
-            SizedBox(height: 20.h),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return AppBarWithSafeArea(
@@ -214,8 +144,8 @@ class _TripOverviewPageState extends State<TripOverviewPage> {
               _buildHeader(service),
               Expanded(
                 child: _isDetailView
-                    ? _buildDetailView(service)
-                    : _buildOverviewView(service),
+                    ? TripDetailView(service: service)
+                    : TripOverviewView(service: service),
               ),
             ],
           );
