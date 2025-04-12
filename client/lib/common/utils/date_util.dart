@@ -16,4 +16,9 @@ class DateUtil {
     final days = end.difference(start).inDays;
     return '${formatDate(start)} | ${days}天';
   }
+
+  static String formatTime(DateTime date) {
+    final formatter = DateFormat('HH:mm');
+    return formatter.format(date);
+  }
 } 

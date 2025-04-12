@@ -43,6 +43,7 @@ class AppColor {
   static const int _themePrimaryValue = 0xFF1D1F1E;
   static const Color theme = Color(_themePrimaryValue);
   static const Color divider = Color(0xFFE9E9E9);
+  static const Color border = Color(0xFFE9E9E9);
   static const Color scaffoldBackgroundColor = Color(0xFFF2F2F2);
 
   static const Color title = Color(0xFF000000);
