@@ -7,6 +7,7 @@ class Constants {
 
 class AppConfig {
   static double boxRadius = 24.w;
+  static double imageRadius = 18.w;
   static double cornerRadius = 200.r;
   static const String assetBaseDir = 'assets/images';
 }

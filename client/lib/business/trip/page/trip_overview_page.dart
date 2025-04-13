@@ -25,7 +25,7 @@ class TripOverviewPage extends StatefulWidget {
 }
 
 class _TripOverviewPageState extends State<TripOverviewPage> {
-  bool _isDetailView = false;
+  bool _isDetailView = true;
 
   @override
   void initState() {
