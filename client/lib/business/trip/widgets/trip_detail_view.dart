@@ -217,6 +217,254 @@ class POIItem extends StatelessWidget {
   }
 }
 
+class DayHeader extends StatelessWidget {
+  final DailyTrip dailyTrip;
+
+  const DayHeader({
+    super.key,
+    required this.dailyTrip,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Day ${dailyTrip.day}',
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: AppFontWeight.semiBold,
+                color: AppColor.primaryFont,
+              ),
+            ),
+            Text(
+              DateUtil.formatDate(dailyTrip.date),
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: AppFontWeight.regular,
+                color: AppColor.primaryFont,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 10.h),
+        Text(
+          dailyTrip.notes,
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: AppFontWeight.regular,
+            color: AppColor.primaryFont,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class DragIndicator extends StatelessWidget {
+  final bool isTop;
+  final bool isVisible;
+
+  const DragIndicator({
+    super.key,
+    this.isTop = false,
+    required this.isVisible,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isVisible) return const SizedBox.shrink();
+
+    return Stack(
+      children: [
+        Positioned(
+          left: 0,
+          top: isTop ? 4.h : null,
+          bottom: isTop ? null : 4.h,
+          child: Container(
+            width: 8.w,
+            height: 8.w,
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: AppColor.primary.withOpacity(.6),
+                width: 2.h,
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          left: 8.w,
+          top: isTop ? 7.h : null,
+          bottom: isTop ? null : 7.h,
+          right: 0,
+          child: Container(
+            height: 2.h,
+            color: AppColor.primary.withOpacity(.6),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class POIList extends StatelessWidget {
+  final List<DailyItinerary> itineraries;
+  final String tripId;
+
+  const POIList({
+    super.key,
+    required this.itineraries,
+    required this.tripId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ...itineraries.asMap().entries.map((entry) {
+          final index = entry.key;
+          final itinerary = entry.value;
+          final isLast = index == itineraries.length - 1;
+
+          return DragTarget<DailyItinerary>(
+            onWillAcceptWithDetails: (data) => true,
+            onAcceptWithDetails: (data) {
+              print('Dropped before item ${index + 1}');
+            },
+            builder: (context, candidateData, rejectedData) {
+              return Stack(
+                children: [
+                  Column(
+                    children: [
+                      POIItem(
+                        key: ValueKey(itinerary.id),
+                        poi: itinerary.poi,
+                        tripId: tripId,
+                        isLast: isLast,
+                        onDragStarted: () {
+                          print('Drag started for ${itinerary.poi.nameCn}');
+                        },
+                        onDragEnded: () {
+                          print('Drag ended for ${itinerary.poi.nameCn}');
+                        },
+                      ),
+                    ],
+                  ),
+                  Positioned(
+                    bottom: !isLast ? 43.h + 16.h : 43.h,
+                    height: 43.h,
+                    left: 0,
+                    right: 0,
+                    child: DragTarget<DailyItinerary>(
+                      onWillAcceptWithDetails: (data) => true,
+                      onAcceptWithDetails: (data) {
+                        print('Dropped before item ${index + 1}');
+                      },
+                      builder: (context, candidateData, rejectedData) {
+                        return Container(
+                          child: candidateData.isNotEmpty
+                              ? DragIndicator(isTop: true, isVisible: true)
+                              : null,
+                        );
+                      },
+                    ),
+                  ),
+                  Positioned(
+                    top: 43.h,
+                    height: 43.h,
+                    left: 0,
+                    right: 0,
+                    child: DragTarget<DailyItinerary>(
+                      onWillAcceptWithDetails: (data) => true,
+                      onAcceptWithDetails: (data) {
+                        print('Dropped after item ${index + 1}');
+                      },
+                      builder: (context, candidateData, rejectedData) {
+                        return Container(
+                          child: candidateData.isNotEmpty
+                              ? DragIndicator(isTop: false, isVisible: true)
+                              : null,
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        }),
+      ],
+    );
+  }
+}
+
+class DayContent extends StatelessWidget {
+  final DailyTrip dailyTrip;
+  final String tripId;
+
+  const DayContent({
+    super.key,
+    required this.dailyTrip,
+    required this.tripId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (dailyTrip.dailyItineraries.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      children: [
+        SizedBox(height: 10.h),
+        Divider(color: AppColor.bg),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Timeline column
+            Column(
+              children: dailyTrip.dailyItineraries.map((itinerary) {
+                final poi = itinerary.poi;
+                IconData poiIcon;
+                switch (poi.type.toLowerCase()) {
+                  case 'city':
+                    poiIcon = Icons.location_city;
+                    break;
+                  case 'airport':
+                    poiIcon = Icons.flight;
+                    break;
+                  default:
+                    poiIcon = Icons.landscape;
+                }
+                return Timeline(
+                  icon: poiIcon,
+                  isFirst: dailyTrip.dailyItineraries.indexOf(itinerary) == 0,
+                  isLast: dailyTrip.dailyItineraries.indexOf(itinerary) ==
+                      dailyTrip.dailyItineraries.length - 1,
+                );
+              }).toList(),
+            ),
+            SizedBox(width: 20.w),
+            // POI items column
+            Expanded(
+              child: POIList(
+                itineraries: dailyTrip.dailyItineraries,
+                tripId: tripId,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
 class TripDetailView extends StatelessWidget {
   final TripService service;
 
@@ -231,7 +479,6 @@ class TripDetailView extends StatelessWidget {
       child: DragTarget<DailyItinerary>(
         onWillAcceptWithDetails: (data) => true,
         onAcceptWithDetails: (data) {
-          // TODO: 处理拖拽结束后的逻辑
           print('Dropped in day ${dailyTrip.day}');
         },
         builder: (context, candidateData, rejectedData) {
@@ -249,244 +496,11 @@ class TripDetailView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Day ${dailyTrip.day}',
-                      style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: AppFontWeight.semiBold,
-                        color: AppColor.primaryFont,
-                      ),
-                    ),
-                    Text(
-                      DateUtil.formatDate(dailyTrip.date),
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: AppFontWeight.regular,
-                        color: AppColor.primaryFont,
-                      ),
-                    ),
-                  ],
+                DayHeader(dailyTrip: dailyTrip),
+                DayContent(
+                  dailyTrip: dailyTrip,
+                  tripId: service.trip!.id,
                 ),
-                SizedBox(height: 10.h),
-                Text(
-                  dailyTrip.notes,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: AppFontWeight.regular,
-                    color: AppColor.primaryFont,
-                  ),
-                ),
-                if (dailyTrip.dailyItineraries.isNotEmpty) ...[
-                  SizedBox(height: 10.h),
-                  Divider(color: AppColor.bg),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Timeline column
-                      Column(
-                        children: dailyTrip.dailyItineraries.map((itinerary) {
-                          final poi = itinerary.poi;
-                          IconData poiIcon;
-                          switch (poi.type.toLowerCase()) {
-                            case 'city':
-                              poiIcon = Icons.location_city;
-                              break;
-                            case 'airport':
-                              poiIcon = Icons.flight;
-                              break;
-                            default:
-                              poiIcon = Icons.landscape;
-                          }
-                          return Timeline(
-                            icon: poiIcon,
-                            isFirst:
-                                dailyTrip.dailyItineraries.indexOf(itinerary) ==
-                                    0,
-                            isLast:
-                                dailyTrip.dailyItineraries.indexOf(itinerary) ==
-                                    dailyTrip.dailyItineraries.length - 1,
-                          );
-                        }).toList(),
-                      ),
-                      SizedBox(width: 20.w),
-                      // POI items column
-                      Expanded(
-                        child: Column(
-                          children: [
-                            ...dailyTrip.dailyItineraries
-                                .asMap()
-                                .entries
-                                .map((entry) {
-                              final index = entry.key;
-                              final itinerary = entry.value;
-                              final isLast = index ==
-                                  dailyTrip.dailyItineraries.length - 1;
-                              return DragTarget<DailyItinerary>(
-                                onWillAcceptWithDetails: (data) => true,
-                                onAcceptWithDetails: (data) {
-                                  // TODO: 处理拖拽结束后的逻辑
-                                  print(
-                                      'Dropped before item ${index + 1} in day ${dailyTrip.day}');
-                                },
-                                builder:
-                                    (context, candidateData, rejectedData) {
-                                  return Stack(
-                                    children: [
-                                      Column(
-                                        children: [
-                                          POIItem(
-                                            key: ValueKey(itinerary.id),
-                                            poi: itinerary.poi,
-                                            tripId: service.trip!.id,
-                                            isLast: isLast,
-                                            onDragStarted: () {
-                                              // TODO: 处理拖拽开始时的逻辑
-                                              print(
-                                                  'Drag started for ${itinerary.poi.nameCn}');
-                                            },
-                                            onDragEnded: () {
-                                              // TODO: 处理拖拽结束时的逻辑
-                                              print(
-                                                  'Drag ended for ${itinerary.poi.nameCn}');
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                      // Invisible drag targets
-                                      Positioned(
-                                        bottom: !isLast ? 43.h + 16.h : 43.h,
-                                        height: 43.h,
-                                        left: 0,
-                                        right: 0,
-                                        child: DragTarget<DailyItinerary>(
-                                          onWillAcceptWithDetails: (data) =>
-                                              true,
-                                          onAcceptWithDetails: (data) {
-                                            print(
-                                                'Dropped before item ${index + 1} in day ${dailyTrip.day}');
-                                          },
-                                          builder: (context, candidateData,
-                                              rejectedData) {
-                                            return Container(
-                                              child: candidateData.isNotEmpty
-                                                  ? Stack(
-                                                      children: [
-                                                        Positioned(
-                                                          left: 0,
-                                                          top: 4.h,
-                                                          child: Container(
-                                                            width: 8.w,
-                                                            height: 8.w,
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              color: Colors
-                                                                  .transparent,
-                                                              shape: BoxShape
-                                                                  .circle,
-                                                              border:
-                                                                  Border.all(
-                                                                color: AppColor
-                                                                    .primary
-                                                                    .withOpacity(
-                                                                        .6),
-                                                                width: 2.h,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        Positioned(
-                                                          left: 8.w,
-                                                          top: 7.h,
-                                                          right: 0,
-                                                          child: Container(
-                                                            height: 2.h,
-                                                            color: AppColor
-                                                                .primary
-                                                                .withOpacity(
-                                                                    .6),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    )
-                                                  : null,
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                      Positioned(
-                                        top: 43.h,
-                                        height: 43.h,
-                                        left: 0,
-                                        right: 0,
-                                        child: DragTarget<DailyItinerary>(
-                                          onWillAcceptWithDetails: (data) =>
-                                              true,
-                                          onAcceptWithDetails: (data) {
-                                            print(
-                                                'Dropped after item ${index + 1} in day ${dailyTrip.day}');
-                                          },
-                                          builder: (context, candidateData,
-                                              rejectedData) {
-                                            return Container(
-                                              child: candidateData.isNotEmpty
-                                                  ? Stack(
-                                                      children: [
-                                                        Positioned(
-                                                          left: 0,
-                                                          bottom: 4.h,
-                                                          child: Container(
-                                                            width: 8.w,
-                                                            height: 8.w,
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              color: Colors
-                                                                  .transparent,
-                                                              shape: BoxShape
-                                                                  .circle,
-                                                              border:
-                                                                  Border.all(
-                                                                color: AppColor
-                                                                    .primary
-                                                                    .withOpacity(
-                                                                        .6),
-                                                                width: 2.h,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        Positioned(
-                                                          left: 8.w,
-                                                          bottom: 7.h,
-                                                          right: 0,
-                                                          child: Container(
-                                                            height: 2.h,
-                                                            color: AppColor
-                                                                .primary
-                                                                .withOpacity(
-                                                                    .6),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    )
-                                                  : null,
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            }),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
               ],
             ),
           );
