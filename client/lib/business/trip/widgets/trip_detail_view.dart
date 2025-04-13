@@ -125,6 +125,8 @@ class POIItem extends StatelessWidget {
                         fontWeight: AppFontWeight.medium,
                         color: AppColor.primaryFont,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     if (poi.nameEn.isNotEmpty) ...[
                       Text(
@@ -134,6 +136,8 @@ class POIItem extends StatelessWidget {
                           fontWeight: AppFontWeight.regular,
                           color: AppColor.primaryFont,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ],
@@ -184,7 +188,12 @@ class TripDetailView extends StatelessWidget {
     return GestureDetector(
       onTap: () {},
       child: Container(
-        padding: EdgeInsets.all(15.w),
+        padding: EdgeInsets.only(
+          left: 15.w,
+          right: 15.w,
+          top: 15.w,
+          bottom: dailyTrip.dailyItineraries.isEmpty ? 15.w : 0,
+        ),
         decoration: BoxDecoration(
           color: AppColor.white,
           borderRadius: BorderRadius.circular(AppConfig.boxRadius),
