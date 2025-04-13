@@ -82,6 +82,7 @@ class POIItem extends StatelessWidget {
   final bool isLast;
   final Key key;
   final String tripId;
+  final int day;
   final VoidCallback? onDragStarted;
   final VoidCallback? onDragEnded;
 
@@ -90,6 +91,7 @@ class POIItem extends StatelessWidget {
     required this.poi,
     required this.isLast,
     required this.tripId,
+    required this.day,
     this.onDragStarted,
     this.onDragEnded,
   }) : super(key: key);
@@ -107,23 +109,59 @@ class POIItem extends StatelessWidget {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       ),
-      feedback: Material(
-        elevation: 4,
-        child: Container(
-          width: 200.w,
-          padding: EdgeInsets.all(8.w),
-          decoration: BoxDecoration(
-            color: AppColor.white,
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          child: Text(
-            poi.nameCn,
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: AppFontWeight.medium,
-              color: AppColor.primaryFont,
+      feedback: Container(
+        width: 260.w,
+        padding: EdgeInsets.all(8.w),
+        decoration: BoxDecoration(
+          color: AppColor.white.withOpacity(0.95),
+          borderRadius: BorderRadius.circular(AppConfig.imageRadius),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
-          ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Day $day',
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: AppFontWeight.medium,
+                color: AppColor.grayFont,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              poi.nameCn,
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: AppFontWeight.medium,
+                color: AppColor.primaryFont,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (poi.nameEn.isNotEmpty) ...[
+              SizedBox(height: 4.h),
+              Text(
+                poi.nameEn,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: AppFontWeight.regular,
+                  color: AppColor.primaryFont,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ],
         ),
       ),
       onDragStarted: onDragStarted,
@@ -316,11 +354,13 @@ class DragIndicator extends StatelessWidget {
 class POIList extends StatelessWidget {
   final List<DailyItinerary> itineraries;
   final String tripId;
+  final int day;
 
   const POIList({
     super.key,
     required this.itineraries,
     required this.tripId,
+    required this.day,
   });
 
   @override
@@ -347,6 +387,7 @@ class POIList extends StatelessWidget {
                         poi: itinerary.poi,
                         tripId: tripId,
                         isLast: isLast,
+                        day: day,
                         onDragStarted: () {
                           print('Drag started for ${itinerary.poi.nameCn}');
                         },
@@ -456,6 +497,7 @@ class DayContent extends StatelessWidget {
               child: POIList(
                 itineraries: dailyTrip.dailyItineraries,
                 tripId: tripId,
+                day: dailyTrip.day,
               ),
             ),
           ],
