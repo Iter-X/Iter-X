@@ -23,8 +23,8 @@ class Timeline extends StatelessWidget {
     final double iconHeight = 32.w;
     final double iconWidth = 32.w;
     // Calculate height based on POIItem structure
-    // POIItem height = top padding (15.h) + image height (56.w) + bottom padding (15.h)
-    final double itemHeight = 15.h + 56.w + 15.h;
+    // POIItem height = top padding (15.h) + image height (56.h) + bottom padding (15.h)
+    final double itemHeight = 15.h + 56.h + 15.h;
     final double textDividerHeight = 16.h;
     // Add TextDivider height if not last item
     final double totalHeight =
@@ -80,98 +80,139 @@ class Timeline extends StatelessWidget {
 class POIItem extends StatelessWidget {
   final POI poi;
   final bool isLast;
+  final Key key;
+  final String tripId;
+  final VoidCallback? onDragStarted;
+  final VoidCallback? onDragEnded;
 
   const POIItem({
-    super.key,
+    required this.key,
     required this.poi,
     required this.isLast,
-  });
+    required this.tripId,
+    this.onDragStarted,
+    this.onDragEnded,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 15.h),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // POI image
-              ClipRRect(
-                borderRadius: BorderRadius.circular(AppConfig.imageRadius),
-                child: Container(
-                  width: 56.w,
-                  height: 56.w,
-                  color: AppColor.bg,
-                  child: Icon(
-                    Icons.image_not_supported,
-                    size: 24.w,
-                    color: AppColor.primaryFont.withOpacity(.8),
+    return LongPressDraggable<DailyItinerary>(
+      data: DailyItinerary(
+        id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
+        tripId: tripId,
+        dailyTripId: 'temp_daily_${DateTime.now().millisecondsSinceEpoch}',
+        poiId: poi.id,
+        poi: poi,
+        notes: '',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      feedback: Material(
+        elevation: 4,
+        child: Container(
+          width: 200.w,
+          padding: EdgeInsets.all(8.w),
+          decoration: BoxDecoration(
+            color: AppColor.white,
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child: Text(
+            poi.nameCn,
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: AppFontWeight.medium,
+              color: AppColor.primaryFont,
+            ),
+          ),
+        ),
+      ),
+      onDragStarted: onDragStarted,
+      onDragCompleted: onDragEnded,
+      child: Column(
+        key: key,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 15.h),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // POI image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppConfig.imageRadius),
+                  child: Container(
+                    width: 56.h,
+                    height: 56.h,
+                    color: AppColor.bg,
+                    child: Icon(
+                      Icons.image_not_supported,
+                      size: 24.w,
+                      color: AppColor.primaryFont.withOpacity(.8),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(width: 10.w),
-              // POI name and description
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      poi.nameCn,
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: AppFontWeight.medium,
-                        color: AppColor.primaryFont,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (poi.nameEn.isNotEmpty) ...[
+                SizedBox(width: 10.w),
+                // POI name and description
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
                       Text(
-                        poi.nameEn,
+                        poi.nameCn,
                         style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: AppFontWeight.regular,
+                          fontSize: 16.sp,
+                          fontWeight: AppFontWeight.medium,
                           color: AppColor.primaryFont,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
+                      if (poi.nameEn.isNotEmpty) ...[
+                        Text(
+                          poi.nameEn,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: AppFontWeight.regular,
+                            color: AppColor.primaryFont,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ],
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (!isLast) ...[
-          TextDivider(
-            color: AppColor.bg,
-            height: 16.h,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.directions_car,
-                  size: 16.w,
-                  color: AppColor.grayFont,
-                ),
-                SizedBox(width: 5.w),
-                Text(
-                  '385km | 3h47m',
-                  style: TextStyle(
-                    fontSize: 10.sp,
-                    fontWeight: AppFontWeight.medium,
-                    color: AppColor.grayFont,
                   ),
                 ),
               ],
             ),
           ),
+          if (!isLast) ...[
+            TextDivider(
+              color: AppColor.bg,
+              height: 16.h,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.directions_car,
+                    size: 16.w,
+                    color: AppColor.grayFont,
+                  ),
+                  SizedBox(width: 5.w),
+                  Text(
+                    '385km | 3h47m',
+                    style: TextStyle(
+                      fontSize: 10.sp,
+                      fontWeight: AppFontWeight.medium,
+                      color: AppColor.grayFont,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
@@ -187,99 +228,269 @@ class TripDetailView extends StatelessWidget {
   Widget _buildDaySection(BuildContext context, DailyTrip dailyTrip) {
     return GestureDetector(
       onTap: () {},
-      child: Container(
-        padding: EdgeInsets.only(
-          left: 15.w,
-          right: 15.w,
-          top: 15.w,
-          bottom: dailyTrip.dailyItineraries.isEmpty ? 15.w : 0,
-        ),
-        decoration: BoxDecoration(
-          color: AppColor.white,
-          borderRadius: BorderRadius.circular(AppConfig.boxRadius),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: DragTarget<DailyItinerary>(
+        onWillAcceptWithDetails: (data) => true,
+        onAcceptWithDetails: (data) {
+          // TODO: 处理拖拽结束后的逻辑
+          print('Dropped in day ${dailyTrip.day}');
+        },
+        builder: (context, candidateData, rejectedData) {
+          return Container(
+            padding: EdgeInsets.only(
+              left: 15.w,
+              right: 15.w,
+              top: 15.w,
+              bottom: dailyTrip.dailyItineraries.isEmpty ? 15.w : 0,
+            ),
+            decoration: BoxDecoration(
+              color: AppColor.white,
+              borderRadius: BorderRadius.circular(AppConfig.boxRadius),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Day ${dailyTrip.day}',
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: AppFontWeight.semiBold,
-                    color: AppColor.primaryFont,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Day ${dailyTrip.day}',
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: AppFontWeight.semiBold,
+                        color: AppColor.primaryFont,
+                      ),
+                    ),
+                    Text(
+                      DateUtil.formatDate(dailyTrip.date),
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: AppFontWeight.regular,
+                        color: AppColor.primaryFont,
+                      ),
+                    ),
+                  ],
                 ),
+                SizedBox(height: 10.h),
                 Text(
-                  DateUtil.formatDate(dailyTrip.date),
+                  dailyTrip.notes,
                   style: TextStyle(
-                    fontSize: 14.sp,
+                    fontSize: 16.sp,
                     fontWeight: AppFontWeight.regular,
                     color: AppColor.primaryFont,
                   ),
                 ),
-              ],
-            ),
-            SizedBox(height: 10.h),
-            Text(
-              dailyTrip.notes,
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: AppFontWeight.regular,
-                color: AppColor.primaryFont,
-              ),
-            ),
-            if (dailyTrip.dailyItineraries.isNotEmpty) ...[
-              SizedBox(height: 10.h),
-              Divider(color: AppColor.bg),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Timeline column
-                  Column(
-                    children: dailyTrip.dailyItineraries.map((itinerary) {
-                      final poi = itinerary.poi;
-                      IconData poiIcon;
-                      switch (poi.type.toLowerCase()) {
-                        case 'city':
-                          poiIcon = Icons.location_city;
-                          break;
-                        case 'airport':
-                          poiIcon = Icons.flight;
-                          break;
-                        default:
-                          poiIcon = Icons.landscape;
-                      }
-                      return Timeline(
-                        icon: poiIcon,
-                        isFirst:
-                            dailyTrip.dailyItineraries.indexOf(itinerary) == 0,
-                        isLast: dailyTrip.dailyItineraries.indexOf(itinerary) ==
-                            dailyTrip.dailyItineraries.length - 1,
-                      );
-                    }).toList(),
-                  ),
-                  SizedBox(width: 20.w),
-                  // POI items column
-                  Expanded(
-                    child: Column(
-                      children: dailyTrip.dailyItineraries.map((itinerary) {
-                        return POIItem(
-                          poi: itinerary.poi,
-                          isLast:
-                              dailyTrip.dailyItineraries.indexOf(itinerary) ==
-                                  dailyTrip.dailyItineraries.length - 1,
-                        );
-                      }).toList(),
-                    ),
+                if (dailyTrip.dailyItineraries.isNotEmpty) ...[
+                  SizedBox(height: 10.h),
+                  Divider(color: AppColor.bg),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Timeline column
+                      Column(
+                        children: dailyTrip.dailyItineraries.map((itinerary) {
+                          final poi = itinerary.poi;
+                          IconData poiIcon;
+                          switch (poi.type.toLowerCase()) {
+                            case 'city':
+                              poiIcon = Icons.location_city;
+                              break;
+                            case 'airport':
+                              poiIcon = Icons.flight;
+                              break;
+                            default:
+                              poiIcon = Icons.landscape;
+                          }
+                          return Timeline(
+                            icon: poiIcon,
+                            isFirst:
+                                dailyTrip.dailyItineraries.indexOf(itinerary) ==
+                                    0,
+                            isLast:
+                                dailyTrip.dailyItineraries.indexOf(itinerary) ==
+                                    dailyTrip.dailyItineraries.length - 1,
+                          );
+                        }).toList(),
+                      ),
+                      SizedBox(width: 20.w),
+                      // POI items column
+                      Expanded(
+                        child: Column(
+                          children: [
+                            ...dailyTrip.dailyItineraries
+                                .asMap()
+                                .entries
+                                .map((entry) {
+                              final index = entry.key;
+                              final itinerary = entry.value;
+                              final isLast = index ==
+                                  dailyTrip.dailyItineraries.length - 1;
+                              return DragTarget<DailyItinerary>(
+                                onWillAcceptWithDetails: (data) => true,
+                                onAcceptWithDetails: (data) {
+                                  // TODO: 处理拖拽结束后的逻辑
+                                  print(
+                                      'Dropped before item ${index + 1} in day ${dailyTrip.day}');
+                                },
+                                builder:
+                                    (context, candidateData, rejectedData) {
+                                  return Stack(
+                                    children: [
+                                      Column(
+                                        children: [
+                                          POIItem(
+                                            key: ValueKey(itinerary.id),
+                                            poi: itinerary.poi,
+                                            tripId: service.trip!.id,
+                                            isLast: isLast,
+                                            onDragStarted: () {
+                                              // TODO: 处理拖拽开始时的逻辑
+                                              print(
+                                                  'Drag started for ${itinerary.poi.nameCn}');
+                                            },
+                                            onDragEnded: () {
+                                              // TODO: 处理拖拽结束时的逻辑
+                                              print(
+                                                  'Drag ended for ${itinerary.poi.nameCn}');
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                      // Invisible drag targets
+                                      Positioned(
+                                        bottom: !isLast ? 43.h + 16.h : 43.h,
+                                        height: 43.h,
+                                        left: 0,
+                                        right: 0,
+                                        child: DragTarget<DailyItinerary>(
+                                          onWillAcceptWithDetails: (data) =>
+                                              true,
+                                          onAcceptWithDetails: (data) {
+                                            print(
+                                                'Dropped before item ${index + 1} in day ${dailyTrip.day}');
+                                          },
+                                          builder: (context, candidateData,
+                                              rejectedData) {
+                                            return Container(
+                                              child: candidateData.isNotEmpty
+                                                  ? Stack(
+                                                      children: [
+                                                        Positioned(
+                                                          left: 0,
+                                                          top: 4.h,
+                                                          child: Container(
+                                                            width: 8.w,
+                                                            height: 8.w,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Colors
+                                                                  .transparent,
+                                                              shape: BoxShape
+                                                                  .circle,
+                                                              border:
+                                                                  Border.all(
+                                                                color: AppColor
+                                                                    .primary
+                                                                    .withOpacity(
+                                                                        .6),
+                                                                width: 2.h,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Positioned(
+                                                          left: 8.w,
+                                                          top: 7.h,
+                                                          right: 0,
+                                                          child: Container(
+                                                            height: 2.h,
+                                                            color: AppColor
+                                                                .primary
+                                                                .withOpacity(
+                                                                    .6),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    )
+                                                  : null,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 43.h,
+                                        height: 43.h,
+                                        left: 0,
+                                        right: 0,
+                                        child: DragTarget<DailyItinerary>(
+                                          onWillAcceptWithDetails: (data) =>
+                                              true,
+                                          onAcceptWithDetails: (data) {
+                                            print(
+                                                'Dropped after item ${index + 1} in day ${dailyTrip.day}');
+                                          },
+                                          builder: (context, candidateData,
+                                              rejectedData) {
+                                            return Container(
+                                              child: candidateData.isNotEmpty
+                                                  ? Stack(
+                                                      children: [
+                                                        Positioned(
+                                                          left: 0,
+                                                          bottom: 4.h,
+                                                          child: Container(
+                                                            width: 8.w,
+                                                            height: 8.w,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Colors
+                                                                  .transparent,
+                                                              shape: BoxShape
+                                                                  .circle,
+                                                              border:
+                                                                  Border.all(
+                                                                color: AppColor
+                                                                    .primary
+                                                                    .withOpacity(
+                                                                        .6),
+                                                                width: 2.h,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Positioned(
+                                                          left: 8.w,
+                                                          bottom: 7.h,
+                                                          right: 0,
+                                                          child: Container(
+                                                            height: 2.h,
+                                                            color: AppColor
+                                                                .primary
+                                                                .withOpacity(
+                                                                    .6),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    )
+                                                  : null,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            }),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
-              ),
-            ],
-          ],
-        ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
