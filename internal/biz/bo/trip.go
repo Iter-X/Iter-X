@@ -92,3 +92,12 @@ type AddDayRequest struct {
 	AfterDay int32 // 0 means insert at the beginning, n means insert after the nth day
 	Notes    string
 }
+
+// MoveItineraryItemRequest represents the request to move an itinerary item to a new position
+type MoveItineraryItemRequest struct {
+	TripID           string `json:"trip_id"`
+	DailyTripID      string `json:"daily_trip_id"`
+	DailyItineraryID string `json:"daily_itinerary_id"`
+	Day              int32  `json:"day"`
+	AfterOrder       int32  `json:"after_order"`
+}

@@ -22,6 +22,8 @@ type DailyItinerary struct {
 	PoiID uuid.UUID `json:"poi_id,omitempty"`
 	// Notes holds the value of the "notes" field.
 	Notes string `json:"notes,omitempty"`
+	// Order holds the value of the "order" field.
+	Order int8 `json:"order,omitempty"`
 
 	// Trip holds the value of the trip edge.
 	Trip *Trip `json:"trip,omitempty"`

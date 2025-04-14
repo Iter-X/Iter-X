@@ -72,6 +72,7 @@ func ToDailyItineraryProto(di *do.DailyItinerary) *tripV1.DailyItinerary {
 		CreatedAt:   timestamppb.New(di.CreatedAt),
 		UpdatedAt:   timestamppb.New(di.UpdatedAt),
 		Poi:         ToPointOfInterestProto(di.Poi),
+		Order:       int32(di.Order),
 	}
 }
 

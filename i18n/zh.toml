@@ -52,6 +52,12 @@ other = "无效的用户"
 [INVALID_COLLABORATOR_STATUS]
 other = "无效的协作者状态"
 
+[DAILY_ITINERARY_NOT_FOUND]
+other = "每日行程未找到"
+
+[INVALID_DAILY_ITINERARY_ID]
+other = "无效的每日行程ID"
+
 [UNAUTHORIZED]
 other = "未授权"
 
@@ -123,4 +129,16 @@ other = "删除协作者失败"
 
 [UPDATE_COLLABORATOR_STATUS_FAILED]
 other = "更新协作者状态失败"
+
+[GET_DAILY_ITINERARY_FAILED]
+other = "获取每日行程失败"
+
+[LIST_DAILY_ITINERARIES_FAILED]
+other = "获取每日行程列表失败"
+
+[UPDATE_DAILY_ITINERARY_FAILED]
+other = "更新每日行程失败"
+
+[DELETE_DAILY_ITINERARY_FAILED]
+other = ""
 
