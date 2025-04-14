@@ -300,3 +300,37 @@ func (s *Trip) AddDay(ctx context.Context, req *tripV1.AddDayRequest) (*tripV1.A
 		DailyTrip: build.ToDailyTripProto(dailyTrip),
 	}, nil
 }
+
+func (s *Trip) MoveItineraryItem(ctx context.Context, req *tripV1.MoveItineraryItemRequest) (*tripV1.MoveItineraryItemResponse, error) {
+	tripId, err := uuid.Parse(req.GetTripId())
+	if err != nil {
+		return nil, xerr.ErrorInvalidTripId()
+	}
+
+	dailyTripId, err := uuid.Parse(req.GetDailyTripId())
+	if err != nil {
+		return nil, xerr.ErrorInvalidDailyTripId()
+	}
+
+	dailyItineraryId, err := uuid.Parse(req.GetDailyItineraryId())
+	if err != nil {
+		return nil, xerr.ErrorInvalidDailyItineraryId()
+	}
+
+	params := &bo.MoveItineraryItemRequest{
+		TripID:           tripId.String(),
+		DailyTripID:      dailyTripId.String(),
+		DailyItineraryID: dailyItineraryId.String(),
+		Day:              req.GetDay(),
+		AfterOrder:       req.GetAfterOrder(),
+	}
+
+	trip, err := s.tripBiz.MoveItineraryItem(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+
+	return &tripV1.MoveItineraryItemResponse{
+		Trip: build.ToTripProto(trip),
+	}, nil
+}

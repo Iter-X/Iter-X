@@ -129,6 +129,13 @@ service TripService {
       body: "*"
     };
   }
+
+  rpc MoveItineraryItem(MoveItineraryItemRequest) returns (MoveItineraryItemResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/trips/{trip_id}/itineraries/move"
+      body: "*"
+    };
+  }
 }
 
 message Trip {
@@ -291,13 +298,14 @@ message DailyTrip {
 
 message DailyItinerary {
   string id = 1;
-  string trip_id = 2;
-  string daily_trip_id = 3;
-  string poi_id = 4;
-  string notes = 5;
-  google.protobuf.Timestamp created_at = 6;
-  google.protobuf.Timestamp updated_at = 7;
-  poi.v1.PointOfInterest poi = 8;
+  google.protobuf.Timestamp created_at = 2;
+  google.protobuf.Timestamp updated_at = 3;
+  string trip_id = 4;
+  string daily_trip_id = 5;
+  string poi_id = 6;
+  string notes = 7;
+  int32 order = 8;
+  poi.v1.PointOfInterest poi = 9;
 }
 
 message PointsOfInterest {
@@ -386,4 +394,16 @@ message AddDayRequest {
 
 message AddDayResponse {
   DailyTrip daily_trip = 1;
+}
+
+message MoveItineraryItemRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+  string daily_trip_id = 2 [(validatex.rules).string.uuid = true];
+  string daily_itinerary_id = 3 [(validatex.rules).string.uuid = true];
+  int32 day = 4;
+  int32 after_order = 5;
+}
+
+message MoveItineraryItemResponse {
+  Trip trip = 1;
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/iter-x/iter-x/internal/data"
 	"github.com/iter-x/iter-x/internal/data/cnst"
 	"github.com/iter-x/iter-x/internal/data/ent"
+	"github.com/iter-x/iter-x/internal/data/ent/dailyitinerary"
 	"github.com/iter-x/iter-x/internal/data/ent/dailytrip"
 	"github.com/iter-x/iter-x/internal/data/ent/trip"
 	"github.com/iter-x/iter-x/internal/data/ent/tripcollaborator"
@@ -80,8 +81,10 @@ func (r *tripRepositoryImpl) GetTrip(ctx context.Context, id uuid.UUID) (*do.Tri
 	row, err := cli.Query().
 		Where(trip.ID(id)).
 		WithDailyTrip(func(q *ent.DailyTripQuery) {
+			q.Order(ent.Asc(dailytrip.FieldDay))
 			q.WithDailyItinerary(func(q *ent.DailyItineraryQuery) {
-				q.WithPoi()
+				q.Order(ent.Asc("order")).
+					WithPoi()
 			})
 		}).
 		Only(ctx)
@@ -163,13 +166,81 @@ func (r *tripRepositoryImpl) ListDailyTrips(ctx context.Context, tripId uuid.UUI
 func (r *tripRepositoryImpl) CreateDailyItinerary(ctx context.Context, dailyItinerary *do.DailyItinerary) (*do.DailyItinerary, error) {
 	cli := r.GetTx(ctx).DailyItinerary
 
+	// Get the current max order for this daily trip
+	var maxOrder int
+	count, err := cli.Query().
+		Where(dailyitinerary.DailyTripID(dailyItinerary.DailyTripID)).
+		Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if count > 0 {
+		// If there are existing records, get the max order
+		maxOrder, err = cli.Query().
+			Where(dailyitinerary.DailyTripID(dailyItinerary.DailyTripID)).
+			Aggregate(ent.Max("order")).
+			Int(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	row, err := cli.Create().
 		SetTripID(dailyItinerary.TripID).
 		SetDailyTripID(dailyItinerary.DailyTripID).
 		SetPoiID(dailyItinerary.PoiID).
 		SetNotes(dailyItinerary.Notes).
+		SetOrder(int8(maxOrder + 1)).
 		Save(ctx)
 	return build.DailyItineraryRepositoryImplToEntity(row), err
+}
+
+func (r *tripRepositoryImpl) GetDailyItinerary(ctx context.Context, tripId, dailyTripId, dailyItineraryId uuid.UUID) (*do.DailyItinerary, error) {
+	cli := r.GetTx(ctx).DailyItinerary
+
+	row, err := cli.Query().
+		Where(
+			dailyitinerary.ID(dailyItineraryId),
+			dailyitinerary.TripID(tripId),
+			dailyitinerary.DailyTripID(dailyTripId),
+		).
+		WithPoi().
+		Only(ctx)
+	return build.DailyItineraryRepositoryImplToEntity(row), err
+}
+
+func (r *tripRepositoryImpl) ListDailyItinerariesByDay(ctx context.Context, tripId uuid.UUID, day int32) ([]*do.DailyItinerary, error) {
+	cli := r.GetTx(ctx).DailyItinerary
+
+	rows, err := cli.Query().
+		Where(
+			dailyitinerary.HasDailyTripWith(
+				dailytrip.TripID(tripId),
+				dailytrip.Day(day),
+			),
+		).
+		Order(ent.Asc(dailyitinerary.FieldOrder)).
+		WithPoi().
+		All(ctx)
+	return build.DailyItineraryRepositoryImplToEntities(rows), err
+}
+
+func (r *tripRepositoryImpl) UpdateDailyItinerary(ctx context.Context, dailyItinerary *do.DailyItinerary) (*do.DailyItinerary, error) {
+	cli := r.GetTx(ctx).DailyItinerary
+
+	row, err := cli.UpdateOneID(dailyItinerary.ID).
+		SetOrder(dailyItinerary.Order).
+		SetNotes(dailyItinerary.Notes).
+		SetUpdatedAt(dailyItinerary.UpdatedAt).
+		Save(ctx)
+	return build.DailyItineraryRepositoryImplToEntity(row), err
+}
+
+func (r *tripRepositoryImpl) DeleteDailyItinerary(ctx context.Context, id uuid.UUID) error {
+	cli := r.GetTx(ctx).DailyItinerary
+
+	return cli.DeleteOneID(id).Exec(ctx)
 }
 
 func (r *tripRepositoryImpl) ListTripCollaborators(ctx context.Context, tripId uuid.UUID) ([]*do.TripCollaborator, error) {
