@@ -144,7 +144,10 @@ class _TripOverviewPageState extends State<TripOverviewPage> {
               _buildHeader(service),
               Expanded(
                 child: _isDetailView
-                    ? TripDetailView(service: service)
+                    ? TripDetailView(
+                        tripId: widget.tripId,
+                        service: service,
+                      )
                     : TripOverviewView(service: service),
               ),
             ],
