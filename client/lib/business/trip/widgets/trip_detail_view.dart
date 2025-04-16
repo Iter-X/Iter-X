@@ -2,9 +2,11 @@ import 'package:client/app/constants.dart';
 import 'package:client/business/trip/entity/trip.dart';
 import 'package:client/business/trip/service/trip_service.dart';
 import 'package:client/common/utils/date_util.dart';
+import 'package:client/common/utils/toast.dart';
 import 'package:client/common/widgets/text_divider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
 class Timeline extends StatelessWidget {
   final IconData icon;
@@ -83,8 +85,10 @@ class POIItem extends StatelessWidget {
   final Key key;
   final String tripId;
   final int day;
+  final DailyItinerary itinerary;
   final VoidCallback? onDragStarted;
   final VoidCallback? onDragEnded;
+  final Function(DailyItinerary)? onItemDropped;
 
   const POIItem({
     required this.key,
@@ -92,165 +96,177 @@ class POIItem extends StatelessWidget {
     required this.isLast,
     required this.tripId,
     required this.day,
+    required this.itinerary,
     this.onDragStarted,
     this.onDragEnded,
+    this.onItemDropped,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return LongPressDraggable<DailyItinerary>(
-      data: DailyItinerary(
-        id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
-        tripId: tripId,
-        dailyTripId: 'temp_daily_${DateTime.now().millisecondsSinceEpoch}',
-        poiId: poi.id,
-        poi: poi,
-        notes: '',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ),
-      feedback: Container(
-        width: 260.w,
-        padding: EdgeInsets.all(8.w),
-        decoration: BoxDecoration(
-          color: AppColor.white.withOpacity(0.95),
-          borderRadius: BorderRadius.circular(AppConfig.imageRadius),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Day $day',
-              style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: AppFontWeight.medium,
-                color: AppColor.grayFont,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            SizedBox(height: 4.h),
-            Text(
-              poi.nameCn,
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: AppFontWeight.medium,
-                color: AppColor.primaryFont,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            if (poi.nameEn.isNotEmpty) ...[
-              SizedBox(height: 4.h),
-              Text(
-                poi.nameEn,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: AppFontWeight.regular,
-                  color: AppColor.primaryFont,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ],
-        ),
-      ),
-      onDragStarted: onDragStarted,
-      onDragCompleted: onDragEnded,
-      child: Column(
-        key: key,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 15.h),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // POI image
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(AppConfig.imageRadius),
-                  child: Container(
-                    width: 56.h,
-                    height: 56.h,
-                    color: AppColor.bg,
-                    child: Icon(
-                      Icons.image_not_supported,
-                      size: 24.w,
-                      color: AppColor.primaryFont.withOpacity(.8),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 10.w),
-                // POI name and description
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        poi.nameCn,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: AppFontWeight.medium,
-                          color: AppColor.primaryFont,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (poi.nameEn.isNotEmpty) ...[
-                        Text(
-                          poi.nameEn,
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: AppFontWeight.regular,
-                            color: AppColor.primaryFont,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ],
-                  ),
+    return DragTarget<DailyItinerary>(
+      onWillAccept: (data) => data != null && data.id != itinerary.id,
+      onAccept: (data) {
+        if (onItemDropped != null) {
+          onItemDropped!(data);
+        }
+      },
+      builder: (context, candidateData, rejectedData) {
+        return LongPressDraggable<DailyItinerary>(
+          data: itinerary,
+          feedback: Container(
+            width: 260.w,
+            padding: EdgeInsets.all(8.w),
+            decoration: BoxDecoration(
+              color: AppColor.white.withOpacity(0.95),
+              borderRadius: BorderRadius.circular(AppConfig.imageRadius),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
-          ),
-          if (!isLast) ...[
-            TextDivider(
-              color: AppColor.bg,
-              height: 16.h,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.directions_car,
-                    size: 16.w,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Day $day',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: AppFontWeight.medium,
                     color: AppColor.grayFont,
                   ),
-                  SizedBox(width: 5.w),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  poi.nameCn,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: AppFontWeight.medium,
+                    color: AppColor.primaryFont,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (poi.nameEn.isNotEmpty) ...[
+                  SizedBox(height: 4.h),
                   Text(
-                    '385km | 3h47m',
+                    poi.nameEn,
                     style: TextStyle(
-                      fontSize: 10.sp,
-                      fontWeight: AppFontWeight.medium,
-                      color: AppColor.grayFont,
+                      fontSize: 14.sp,
+                      fontWeight: AppFontWeight.regular,
+                      color: AppColor.primaryFont,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
+            ),
+          ),
+          onDragStarted: onDragStarted,
+          onDragCompleted: onDragEnded,
+          child: Container(
+            decoration: BoxDecoration(
+              color: candidateData.isNotEmpty
+                  ? AppColor.primary.withOpacity(0.1)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(AppConfig.imageRadius),
+            ),
+            child: Column(
+              key: key,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 15.h),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // POI image
+                      ClipRRect(
+                        borderRadius:
+                            BorderRadius.circular(AppConfig.imageRadius),
+                        child: Container(
+                          width: 56.h,
+                          height: 56.h,
+                          color: AppColor.bg,
+                          child: Icon(
+                            Icons.image_not_supported,
+                            size: 24.w,
+                            color: AppColor.primaryFont.withOpacity(.8),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 10.w),
+                      // POI name and description
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              poi.nameCn,
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: AppFontWeight.medium,
+                                color: AppColor.primaryFont,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (poi.nameEn.isNotEmpty) ...[
+                              Text(
+                                poi.nameEn,
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: AppFontWeight.regular,
+                                  color: AppColor.primaryFont,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (!isLast) ...[
+                  TextDivider(
+                    color: AppColor.bg,
+                    height: 16.h,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.directions_car,
+                          size: 16.w,
+                          color: AppColor.grayFont,
+                        ),
+                        SizedBox(width: 5.w),
+                        Text(
+                          '385km | 3h47m',
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            fontWeight: AppFontWeight.medium,
+                            color: AppColor.grayFont,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
-              ),
+              ],
             ),
-          ],
-        ],
-      ),
+          ),
+        );
+      },
     );
   }
 }
@@ -374,8 +390,16 @@ class POIList extends StatelessWidget {
 
           return DragTarget<DailyItinerary>(
             onWillAcceptWithDetails: (data) => true,
-            onAcceptWithDetails: (data) {
-              print('Dropped before item ${index + 1}');
+            onAcceptWithDetails: (data) async {
+              // Move item before the current item
+              final service = Provider.of<TripService>(context, listen: false);
+              await service.moveItineraryItem(
+                tripId: tripId,
+                dailyTripId: data.data.dailyTripId,
+                itineraryId: data.data.id,
+                newDay: day,
+                newIndex: index,
+              );
             },
             builder: (context, candidateData, rejectedData) {
               return Stack(
@@ -388,11 +412,15 @@ class POIList extends StatelessWidget {
                         tripId: tripId,
                         isLast: isLast,
                         day: day,
+                        itinerary: itinerary,
                         onDragStarted: () {
                           print('Drag started for ${itinerary.poi.nameCn}');
                         },
                         onDragEnded: () {
                           print('Drag ended for ${itinerary.poi.nameCn}');
+                        },
+                        onItemDropped: (data) {
+                          // Handle item dropped
                         },
                       ),
                     ],
@@ -404,8 +432,17 @@ class POIList extends StatelessWidget {
                     right: 0,
                     child: DragTarget<DailyItinerary>(
                       onWillAcceptWithDetails: (data) => true,
-                      onAcceptWithDetails: (data) {
-                        print('Dropped before item ${index + 1}');
+                      onAcceptWithDetails: (data) async {
+                        // Move item before the current item
+                        final service =
+                            Provider.of<TripService>(context, listen: false);
+                        await service.moveItineraryItem(
+                          tripId: tripId,
+                          dailyTripId: data.data.dailyTripId,
+                          itineraryId: data.data.id,
+                          newDay: day,
+                          newIndex: index,
+                        );
                       },
                       builder: (context, candidateData, rejectedData) {
                         return Container(
@@ -423,8 +460,17 @@ class POIList extends StatelessWidget {
                     right: 0,
                     child: DragTarget<DailyItinerary>(
                       onWillAcceptWithDetails: (data) => true,
-                      onAcceptWithDetails: (data) {
-                        print('Dropped after item ${index + 1}');
+                      onAcceptWithDetails: (data) async {
+                        // Move item after the current item
+                        final service =
+                            Provider.of<TripService>(context, listen: false);
+                        await service.moveItineraryItem(
+                          tripId: tripId,
+                          dailyTripId: data.data.dailyTripId,
+                          itineraryId: data.data.id,
+                          newDay: day,
+                          newIndex: index + 1,
+                        );
                       },
                       builder: (context, candidateData, rejectedData) {
                         return Container(
@@ -508,10 +554,12 @@ class DayContent extends StatelessWidget {
 }
 
 class TripDetailView extends StatelessWidget {
+  final String tripId;
   final TripService service;
 
   const TripDetailView({
     super.key,
+    required this.tripId,
     required this.service,
   });
 
@@ -519,9 +567,22 @@ class TripDetailView extends StatelessWidget {
     return GestureDetector(
       onTap: () {},
       child: DragTarget<DailyItinerary>(
-        onWillAcceptWithDetails: (data) => true,
-        onAcceptWithDetails: (data) {
-          print('Dropped in day ${dailyTrip.day}');
+        onWillAccept: (data) => data != null,
+        onAccept: (data) async {
+          try {
+            await service.moveItineraryItem(
+              tripId: tripId,
+              dailyTripId: data.dailyTripId,
+              itineraryId: data.id,
+              newDay: dailyTrip.day,
+              newIndex: dailyTrip.dailyItineraries.isEmpty
+                  ? 0
+                  : dailyTrip.dailyItineraries.length,
+            );
+          } catch (e) {
+            print('Error moving itinerary item: $e');
+            ToastX.show('Failed to move item');
+          }
         },
         builder: (context, candidateData, rejectedData) {
           return Container(
