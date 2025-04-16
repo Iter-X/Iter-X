@@ -548,8 +548,11 @@ func (b *Trip) MoveItineraryItem(ctx context.Context, req *bo.MoveItineraryItemR
 		return nil, xerr.ErrorGetDailyItineraryFailed()
 	}
 
-	if dailyItinerary.TripID != tripId {
-		return nil, xerr.ErrorInvalidDailyItineraryId()
+	// Get the current daily trip to check if we're moving to the same position
+	currentDailyTrip, err := b.tripRepo.GetDailyTrip(ctx, tripId, dailyTripId)
+	if err != nil {
+		b.logger.Errorw("failed to get current daily trip", "err", err)
+		return nil, xerr.ErrorGetDailyTripFailed()
 	}
 
 	// 2. Get all itineraries for the target day
@@ -559,7 +562,29 @@ func (b *Trip) MoveItineraryItem(ctx context.Context, req *bo.MoveItineraryItemR
 		return nil, xerr.ErrorListDailyItinerariesFailed()
 	}
 
-	// 3. Get the target daily trip
+	// 3. Calculate the actual insertion position
+	var insertOrder int32
+	if req.AfterOrder < 0 {
+		insertOrder = 0
+	} else if req.AfterOrder > int32(len(itineraries)) {
+		insertOrder = int32(len(itineraries))
+	} else {
+		insertOrder = req.AfterOrder
+	}
+
+	// If moving to the same day and same position, return the current trip
+	sameDaySameOrder := currentDailyTrip.Day == req.Day && int32(dailyItinerary.Order) == insertOrder+1
+	sameDayOnlyOneItem := currentDailyTrip.Day == req.Day && len(itineraries) == 1
+	if sameDaySameOrder || sameDayOnlyOneItem {
+		completeTrip, err := b.tripRepo.GetTrip(ctx, tripId)
+		if err != nil {
+			b.logger.Errorw("failed to get complete trip", "err", err)
+			return nil, xerr.ErrorGetTripFailed()
+		}
+		return completeTrip, nil
+	}
+
+	// 4. Get the target daily trip
 	targetDailyTrips, err := b.tripRepo.ListDailyTrips(ctx, tripId)
 	if err != nil {
 		b.logger.Errorw("failed to list daily trips", "err", err)
@@ -579,19 +604,9 @@ func (b *Trip) MoveItineraryItem(ctx context.Context, req *bo.MoveItineraryItemR
 		return nil, xerr.ErrorDailyTripNotFound()
 	}
 
-	// 4. Calculate the actual insertion position
-	var insertOrder int32
-	if req.AfterOrder < 0 {
-		insertOrder = 0
-	} else if req.AfterOrder >= int32(len(itineraries)) {
-		insertOrder = int32(len(itineraries))
-	} else {
-		insertOrder = req.AfterOrder
-	}
-
 	// 5. Update the order of all itineraries after the insertion point
 	for _, it := range itineraries {
-		if it.Order >= int8(insertOrder) {
+		if it.Order > int8(insertOrder) {
 			it.Order++
 			_, err = b.tripRepo.UpdateDailyItinerary(ctx, it)
 			if err != nil {
@@ -601,13 +616,43 @@ func (b *Trip) MoveItineraryItem(ctx context.Context, req *bo.MoveItineraryItemR
 		}
 	}
 
+	// 5.1 Get and update the order of itineraries in the original day
+	originalDailyTrip, err := b.tripRepo.GetDailyTrip(ctx, tripId, dailyTripId)
+	if err != nil {
+		b.logger.Errorw("failed to get original daily trip", "err", err)
+		return nil, xerr.ErrorGetDailyTripFailed()
+	}
+
+	// Only update original day's order if moving between different days
+	if originalDailyTrip.Day != req.Day {
+		originalDayItineraries, err := b.tripRepo.ListDailyItinerariesByDay(ctx, tripId, originalDailyTrip.Day)
+		if err != nil {
+			b.logger.Errorw("failed to list original day itineraries", "err", err)
+			return nil, xerr.ErrorListDailyItinerariesFailed()
+		}
+
+		// Update the order of itineraries after the removed item in the original day
+		for _, it := range originalDayItineraries {
+			if it.Order > dailyItinerary.Order {
+				it.Order--
+				_, err = b.tripRepo.UpdateDailyItinerary(ctx, it)
+				if err != nil {
+					b.logger.Errorw("failed to update original day itinerary order", "err", err)
+					return nil, xerr.ErrorUpdateDailyItineraryFailed()
+				}
+			}
+		}
+	}
+
 	// 6. Create a new daily itinerary with the updated information
 	newItinerary := &do.DailyItinerary{
+		CreatedAt:   dailyItinerary.CreatedAt,
+		UpdatedAt:   time.Now(),
 		TripID:      tripId,
 		DailyTripID: targetDailyTrip.ID,
 		PoiID:       dailyItinerary.PoiID,
 		Notes:       dailyItinerary.Notes,
-		Order:       int8(insertOrder),
+		Order:       int8(insertOrder + 1),
 	}
 
 	_, err = b.tripRepo.CreateDailyItinerary(ctx, newItinerary)
@@ -617,7 +662,7 @@ func (b *Trip) MoveItineraryItem(ctx context.Context, req *bo.MoveItineraryItemR
 	}
 
 	// 7. Delete the old daily itinerary
-	err = b.tripRepo.DeleteDailyItinerary(ctx, dailyItineraryId)
+	err = b.tripRepo.DeleteDailyItinerary(ctx, dailyItinerary.ID)
 	if err != nil {
 		b.logger.Errorw("failed to delete old daily itinerary", "err", err)
 		return nil, xerr.ErrorDeleteDailyItineraryFailed()

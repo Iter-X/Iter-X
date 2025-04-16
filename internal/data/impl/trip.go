@@ -166,32 +166,14 @@ func (r *tripRepositoryImpl) ListDailyTrips(ctx context.Context, tripId uuid.UUI
 func (r *tripRepositoryImpl) CreateDailyItinerary(ctx context.Context, dailyItinerary *do.DailyItinerary) (*do.DailyItinerary, error) {
 	cli := r.GetTx(ctx).DailyItinerary
 
-	// Get the current max order for this daily trip
-	var maxOrder int
-	count, err := cli.Query().
-		Where(dailyitinerary.DailyTripID(dailyItinerary.DailyTripID)).
-		Count(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if count > 0 {
-		// If there are existing records, get the max order
-		maxOrder, err = cli.Query().
-			Where(dailyitinerary.DailyTripID(dailyItinerary.DailyTripID)).
-			Aggregate(ent.Max("order")).
-			Int(ctx)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	row, err := cli.Create().
+		SetCreatedAt(dailyItinerary.CreatedAt).
+		SetUpdatedAt(dailyItinerary.UpdatedAt).
 		SetTripID(dailyItinerary.TripID).
 		SetDailyTripID(dailyItinerary.DailyTripID).
 		SetPoiID(dailyItinerary.PoiID).
 		SetNotes(dailyItinerary.Notes).
-		SetOrder(int8(maxOrder + 1)).
+		SetOrder(dailyItinerary.Order).
 		Save(ctx)
 	return build.DailyItineraryRepositoryImplToEntity(row), err
 }
