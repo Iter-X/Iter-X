@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:client/app/constants.dart';
 import 'package:client/business/trip/service/trip_service.dart';
+import 'package:client/business/trip/widgets/edit_title_widget.dart';
 import 'package:client/business/trip/widgets/trip_collaborators_section.dart';
 import 'package:client/business/trip/widgets/trip_detail_view.dart';
 import 'package:client/business/trip/widgets/trip_overview_view.dart';
@@ -26,6 +29,7 @@ class TripOverviewPage extends StatefulWidget {
 
 class _TripOverviewPageState extends State<TripOverviewPage> {
   bool _isDetailView = true;
+  bool _isShowEditTitle = false;
 
   @override
   void initState() {
@@ -76,17 +80,24 @@ class _TripOverviewPageState extends State<TripOverviewPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(height: 20.h),
-          SizedBox(
-            width: double.infinity,
-            child: Text(
-              service.trip!.title,
-              style: TextStyle(
-                fontSize: 30.sp,
-                fontWeight: AppFontWeight.bold,
-                color: AppColor.primaryFont,
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _isShowEditTitle = true;
+              });
+            },
+            child: SizedBox(
+              width: double.infinity,
+              child: Text(
+                service.trip!.title,
+                style: TextStyle(
+                  fontSize: 30.sp,
+                  fontWeight: AppFontWeight.bold,
+                  color: AppColor.primaryFont,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
           SizedBox(height: 5.h),
@@ -113,47 +124,94 @@ class _TripOverviewPageState extends State<TripOverviewPage> {
 
   @override
   Widget build(BuildContext context) {
-    return AppBarWithSafeArea(
-      backgroundColor: AppColor.bg,
-      hasAppBar: true,
-      bottom: false,
-      surfaceTintColor: AppColor.bg,
-      leading: ReturnButton(),
-      actions: [
-        PreferenceButton(
-          onTap: () => _showSettingsMenu(context),
+    return Stack(
+      children: [
+        AppBarWithSafeArea(
+          backgroundColor: AppColor.bg,
+          hasAppBar: true,
+          bottom: false,
+          surfaceTintColor: AppColor.bg,
+          leading: ReturnButton(),
+          actions: [
+            PreferenceButton(
+              onTap: () => _showSettingsMenu(context),
+            ),
+          ],
+          child: Consumer<TripService>(
+            builder: (context, service, child) {
+              if (service.isLoading) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+
+              final trip = service.trip;
+              if (trip == null) {
+                return const Center(
+                  child: Text('暂无行程数据'),
+                );
+              }
+
+              return Column(
+                children: [
+                  _buildHeader(service),
+                  Expanded(
+                    child: _isDetailView
+                        ? TripDetailView(
+                            tripId: widget.tripId,
+                            service: service,
+                          )
+                        : TripOverviewView(service: service),
+                  ),
+                ],
+              );
+            },
+          ),
         ),
-      ],
-      child: Consumer<TripService>(
-        builder: (context, service, child) {
-          if (service.isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          final trip = service.trip;
-          if (trip == null) {
-            return const Center(
-              child: Text('暂无行程数据'),
-            );
-          }
-
-          return Column(
-            children: [
-              _buildHeader(service),
-              Expanded(
-                child: _isDetailView
-                    ? TripDetailView(
-                        tripId: widget.tripId,
-                        service: service,
-                      )
-                    : TripOverviewView(service: service),
+        if (_isShowEditTitle) ...[
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _isShowEditTitle = false;
+                });
+              },
+              child: ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
+                  child: Container(
+                    color: AppColor.primary.withOpacity(0.5),
+                  ),
+                ),
               ),
-            ],
-          );
-        },
-      ),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Column(
+              children: [
+                EditTitleWidget(
+                  initialTitle: context.read<TripService>().trip?.title ?? '',
+                  onSave: (newTitle) async {
+                    final service = context.read<TripService>();
+                    if (service.trip != null) {
+                      await service.updateTrip(
+                        tripId: service.trip!.id,
+                        title: newTitle,
+                      );
+                      setState(() {
+                        _isShowEditTitle = false;
+                      });
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

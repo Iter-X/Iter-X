@@ -1,17 +1,27 @@
+import 'dart:ui';
+
 import 'package:client/app/constants.dart';
 import 'package:client/business/trip/entity/trip.dart';
 import 'package:client/business/trip/service/trip_service.dart';
+import 'package:client/business/trip/widgets/edit_title_widget.dart';
 import 'package:client/common/utils/date_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class TripOverviewView extends StatelessWidget {
+class TripOverviewView extends StatefulWidget {
   final TripService service;
 
   const TripOverviewView({
     super.key,
     required this.service,
   });
+
+  @override
+  State<TripOverviewView> createState() => _TripOverviewViewState();
+}
+
+class _TripOverviewViewState extends State<TripOverviewView> {
+  bool _isShowEditTitle = false;
 
   Widget _buildDaySection(BuildContext context, DailyTrip dailyTrip) {
     return GestureDetector(
@@ -123,25 +133,75 @@ class TripOverviewView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.only(left: 20.w, right: 20.w, top: 60.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ...service.trip!.dailyTrips.map((dailyTrip) {
-              return Column(
-                children: [
-                  _buildDaySection(context, dailyTrip),
-                  SizedBox(height: 15.h),
-                ],
-              );
-            }),
-            _buildAddDayButton(),
-            SizedBox(height: 20.h),
-          ],
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(left: 20.w, right: 20.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ...widget.service.trip!.dailyTrips.map((dailyTrip) {
+                  return Column(
+                    children: [
+                      _buildDaySection(context, dailyTrip),
+                      SizedBox(height: 15.h),
+                    ],
+                  );
+                }),
+                _buildAddDayButton(),
+                SizedBox(height: 20.h),
+              ],
+            ),
+          ),
         ),
-      ),
+        if (_isShowEditTitle) ...[
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _isShowEditTitle = false;
+                });
+              },
+              child: ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
+                  child: Container(
+                    color: AppColor.primary.withOpacity(0.5),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Column(
+              children: [
+                EditTitleWidget(
+                  initialTitle: widget.service.trip?.title ?? '',
+                  onSave: (newTitle) async {
+                    if (widget.service.trip != null) {
+                      await widget.service.updateTrip(
+                        tripId: widget.service.trip!.id,
+                        title: newTitle,
+                      );
+                      setState(() {
+                        _isShowEditTitle = false;
+                      });
+                    }
+                  },
+                ),
+                Container(
+                  height: MediaQuery.of(context).padding.bottom,
+                  color: AppColor.bottomBar,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

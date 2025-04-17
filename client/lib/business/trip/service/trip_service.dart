@@ -50,6 +50,46 @@ class TripService extends ChangeNotifier {
     }
   }
 
+  // 更新行程
+  Future<void> updateTrip({
+    required String tripId,
+    String? title,
+    String? description,
+    DateTime? startTs,
+    DateTime? endTs,
+    int? duration,
+    bool? status,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final HttpResultBean result = await Http.instance.put(
+        TripApi.updateTripUrl(tripId),
+        data: {
+          if (title != null) 'title': title,
+          if (description != null) 'description': description,
+          if (startTs != null) 'start_ts': startTs.toIso8601String(),
+          if (endTs != null) 'end_ts': endTs.toIso8601String(),
+          if (duration != null) 'duration': duration,
+          if (status != null) 'status': status,
+        },
+      );
+
+      if (result.isSuccess() && result.data['trip'] != null) {
+        _trip = Trip.fromJson(result.data['trip']);
+      }
+
+      notifyListeners();
+    } catch (e) {
+      print('Error updating trip: $e');
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // 获取合作者
   Future<void> fetchCollaborators(String tripId) async {
     _loadingCollaborators = true;
