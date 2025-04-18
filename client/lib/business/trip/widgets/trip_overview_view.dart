@@ -181,16 +181,22 @@ class _TripOverviewViewState extends State<TripOverviewView> {
               children: [
                 EditTitleWidget(
                   initialTitle: widget.service.trip?.title ?? '',
-                  onSave: (newTitle) async {
+                  initialDescription: widget.service.trip?.description ?? '',
+                  initialStartTs: widget.service.trip?.startTs,
+                  initialEndTs: widget.service.trip?.endTs,
+                  initialDuration: widget.service.trip?.dailyTrips.length ?? 1,
+                  onSave: (newTitle, newDescription, newStartTs, newEndTs, newDuration) async {
                     if (widget.service.trip != null) {
                       await widget.service.updateTrip(
                         tripId: widget.service.trip!.id,
                         title: newTitle,
+                        description: newDescription,
+                        startTs: newStartTs,
+                        endTs: newEndTs,
+                        duration: newDuration,
                       );
-                      setState(() {
-                        _isShowEditTitle = false;
-                      });
                     }
+                    Navigator.pop(context);
                   },
                 ),
                 Container(

@@ -194,17 +194,25 @@ class _TripOverviewPageState extends State<TripOverviewPage> {
               children: [
                 EditTitleWidget(
                   initialTitle: context.read<TripService>().trip?.title ?? '',
-                  onSave: (newTitle) async {
+                  initialDescription: context.read<TripService>().trip?.description ?? '',
+                  initialStartTs: context.read<TripService>().trip?.startTs,
+                  initialEndTs: context.read<TripService>().trip?.endTs,
+                  initialDuration: context.read<TripService>().trip?.dailyTrips.length ?? 1,
+                  onSave: (newTitle, newDescription, newStartTs, newEndTs, newDuration) async {
                     final service = context.read<TripService>();
                     if (service.trip != null) {
                       await service.updateTrip(
                         tripId: service.trip!.id,
                         title: newTitle,
+                        description: newDescription,
+                        startTs: newStartTs,
+                        endTs: newEndTs,
+                        duration: newDuration,
                       );
-                      setState(() {
-                        _isShowEditTitle = false;
-                      });
                     }
+                    setState(() {
+                      _isShowEditTitle = false;
+                    });
                   },
                 ),
               ],

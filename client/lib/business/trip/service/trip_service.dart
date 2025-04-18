@@ -58,7 +58,6 @@ class TripService extends ChangeNotifier {
     DateTime? startTs,
     DateTime? endTs,
     int? duration,
-    bool? status,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -69,10 +68,9 @@ class TripService extends ChangeNotifier {
         data: {
           if (title != null) 'title': title,
           if (description != null) 'description': description,
-          if (startTs != null) 'start_ts': startTs.toIso8601String(),
-          if (endTs != null) 'end_ts': endTs.toIso8601String(),
+          if (startTs != null) 'start_ts': startTs.toUtc().toIso8601String(),
+          if (endTs != null) 'end_ts': endTs.toUtc().toIso8601String(),
           if (duration != null) 'duration': duration,
-          if (status != null) 'status': status,
         },
       );
 

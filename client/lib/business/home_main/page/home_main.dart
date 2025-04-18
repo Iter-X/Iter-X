@@ -32,24 +32,26 @@ class _HomeMainPageState extends BaseState<HomeMainPage> {
       backgroundColor: AppColor.bg,
       bottomColor: AppColor.bottomBar,
       bottomBarCfg: BottomNavConfig(
-        items: [
-          BottomBarItem(
-            iconImage: 'ic_home.png',
-            selectedIconImage: 'ic_home_selected.png',
+          items: [
+            BottomBarItem(
+              iconImage: 'ic_home.png',
+              selectedIconImage: 'ic_home_selected.png',
+            ),
+            BottomBarItem(
+              iconImage: 'ic_mine.png',
+              selectedIconImage: 'ic_mine_selected.png',
+            ),
+          ],
+          selectedIndex: _selectedIndex,
+          onIndexChanged: (index) => setState(() => _selectedIndex = index),
+          centerButton: BaseImage.asset(
+            name: 'ic_add.png',
+            size: 38.w,
           ),
-          BottomBarItem(
-            iconImage: 'ic_mine.png',
-            selectedIconImage: 'ic_mine_selected.png',
+          onCenterButtonTap: () => go(Routes.tripOverview,
+              arguments: {'tripId': "23f56f45-8801-4c68-9844-63f906b90b90"})
+          // go(Routes.createTripHome),
           ),
-        ],
-        selectedIndex: _selectedIndex,
-        onIndexChanged: (index) => setState(() => _selectedIndex = index),
-        centerButton: BaseImage.asset(
-          name: 'ic_add.png',
-          size: 38.w,
-        ),
-        onCenterButtonTap: () => go(Routes.createTripHome),
-      ),
       child: _pages[_selectedIndex],
     );
   }
