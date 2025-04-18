@@ -58,6 +58,9 @@ other = "每日行程未找到"
 [INVALID_DAILY_ITINERARY_ID]
 other = "无效的每日行程ID"
 
+[INVALID_DURATION]
+other = "无效的天数"
+
 [UNAUTHORIZED]
 other = "未授权"
 
@@ -140,5 +143,8 @@ other = "获取每日行程列表失败"
 other = "更新每日行程失败"
 
 [DELETE_DAILY_ITINERARY_FAILED]
-other = ""
+other = "删除每日行程失败"
+
+[MOVE_TO_POI_POOL_FAILED]
+other = "移动兴趣点到点位池失败"
 

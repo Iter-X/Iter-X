@@ -24,15 +24,17 @@ type Trip struct {
 	cityRepo repository.CityRepo
 	logger   *zap.SugaredLogger
 	agentHub *agent.Hub
+	repository.Transaction
 }
 
-func NewTrip(tripRepo repository.TripRepo, poiRepo repository.PointsOfInterestRepo, cityRepo repository.CityRepo, logger *zap.SugaredLogger, agentHub *agent.Hub) *Trip {
+func NewTrip(tripRepo repository.TripRepo, poiRepo repository.PointsOfInterestRepo, cityRepo repository.CityRepo, logger *zap.SugaredLogger, agentHub *agent.Hub, transaction repository.Transaction) *Trip {
 	return &Trip{
-		tripRepo: tripRepo,
-		poiRepo:  poiRepo,
-		cityRepo: cityRepo,
-		logger:   logger.Named("biz.tripRepo"),
-		agentHub: agentHub,
+		tripRepo:    tripRepo,
+		poiRepo:     poiRepo,
+		cityRepo:    cityRepo,
+		logger:      logger.Named("biz.trip"),
+		agentHub:    agentHub,
+		Transaction: transaction,
 	}
 }
 
@@ -233,24 +235,137 @@ func (b *Trip) UpdateTrip(ctx context.Context, req *bo.UpdateTripRequest) (*do.T
 		return nil, xerr.ErrorInvalidTripId()
 	}
 
-	trip, err := b.tripRepo.GetTrip(ctx, tripId)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			return nil, xerr.ErrorTripNotFound()
+	var updatedTrip *do.Trip
+	err = b.Exec(ctx, func(ctx context.Context) error {
+		trip, err := b.tripRepo.GetTrip(ctx, tripId)
+		if err != nil {
+			if ent.IsNotFound(err) {
+				return xerr.ErrorTripNotFound()
+			}
+			b.logger.Errorw("failed to get tripRepo", "err", err)
+			return xerr.ErrorGetTripFailed()
 		}
-		b.logger.Errorw("failed to get tripRepo", "err", err)
-		return nil, xerr.ErrorGetTripFailed()
-	}
 
-	trip.Title = req.Title
-	trip.StartDate = req.StartDate
-	trip.EndDate = req.EndDate
-	trip.UpdatedAt = time.Now()
+		// Update basic trip info
+		trip.Title = req.Title
+		trip.Description = req.Description
+		trip.UpdatedAt = time.Now()
 
-	updatedTrip, err := b.tripRepo.UpdateTrip(ctx, trip)
+		// Calculate duration based on start/end dates if available
+		var duration int8
+		if req.StartDate.Second() != 0 && req.EndDate.Second() != 0 {
+			// Calculate duration from start and end dates
+			days := int8(req.EndDate.Sub(req.StartDate).Hours()/24) + 1
+			if days < 1 {
+				return xerr.ErrorInvalidDuration()
+			}
+			duration = days
+			trip.StartDate = req.StartDate
+			trip.EndDate = req.EndDate
+		} else {
+			// Use provided duration
+			duration = req.Duration
+			if duration < 1 {
+				return xerr.ErrorInvalidDuration()
+			}
+			if !req.StartDate.IsZero() && req.StartDate.Year() > 1970 {
+				trip.StartDate = req.StartDate
+				trip.EndDate = req.StartDate.AddDate(0, 0, int(duration-1))
+			}
+		}
+
+		// Get current daily trips
+		dailyTrips, err := b.tripRepo.ListDailyTrips(ctx, tripId)
+		if err != nil {
+			b.logger.Errorw("failed to list daily trips", "err", err)
+			return xerr.ErrorGetDailyTripListFailed()
+		}
+
+		// Update dates for each day if start date is provided
+		if trip.StartDate.Second() != 0 {
+			for _, dailyTrip := range dailyTrips {
+				dailyTrip.Date = trip.StartDate.AddDate(0, 0, int(dailyTrip.Day-1))
+				_, err = b.tripRepo.UpdateDailyTrip(ctx, dailyTrip)
+				if err != nil {
+					b.logger.Errorw("failed to update daily trip date", "err", err)
+					return xerr.ErrorUpdateDailyTripFailed()
+				}
+			}
+		}
+
+		// Handle duration changes
+		currentDays := trip.Days
+		if duration > currentDays {
+			// Add new days
+			for day := currentDays + 1; day <= duration; day++ {
+				dailyTrip := &do.DailyTrip{
+					TripID: tripId,
+					Day:    int32(day),
+					Date:   trip.StartDate.AddDate(0, 0, int(day-1)),
+				}
+				_, err = b.tripRepo.CreateDailyTrip(ctx, dailyTrip)
+				if err != nil {
+					b.logger.Errorw("failed to create new daily trip", "err", err)
+					return xerr.ErrorCreateDailyTripFailed()
+				}
+			}
+		} else if duration < currentDays {
+			// Remove days from the end and move POIs to pool
+			for _, dailyTrip := range dailyTrips {
+				if dailyTrip.Day > int32(duration) {
+					// Get itineraries for the day
+					itineraries, err := b.tripRepo.ListDailyItinerariesByDay(ctx, tripId, dailyTrip.Day)
+					if err != nil {
+						b.logger.Errorw("failed to list daily itineraries", "err", err)
+						return xerr.ErrorListDailyItinerariesFailed()
+					}
+
+					// Move POIs to pool
+					for _, itinerary := range itineraries {
+						poolItem := &do.TripPOIPool{
+							TripID:    tripId,
+							PoiID:     itinerary.PoiID,
+							CreatedAt: time.Now(),
+							UpdatedAt: time.Now(),
+							UpdatedBy: trip.UserID,
+							CreatedBy: trip.UserID,
+						}
+						_, err = b.tripRepo.CreateTripPOIPool(ctx, poolItem)
+						if err != nil {
+							b.logger.Errorw("failed to create POI pool item", "err", err)
+							return xerr.ErrorMoveToPoiPoolFailed()
+						}
+
+						// Delete the itinerary
+						err = b.tripRepo.DeleteDailyItinerary(ctx, itinerary.ID)
+						if err != nil {
+							b.logger.Errorw("failed to delete daily itinerary", "err", err)
+							return xerr.ErrorDeleteDailyItineraryFailed()
+						}
+					}
+
+					// Delete the daily trip
+					err = b.tripRepo.DeleteDailyTrip(ctx, dailyTrip.ID)
+					if err != nil {
+						b.logger.Errorw("failed to delete daily trip", "err", err)
+						return xerr.ErrorDeleteDailyTripFailed()
+					}
+				}
+			}
+		}
+
+		trip.Days = duration
+		updatedTrip, err = b.tripRepo.UpdateTrip(ctx, trip)
+		if err != nil {
+			b.logger.Errorw("failed to update trip", "err", err)
+			return xerr.ErrorUpdateTripFailed()
+		}
+
+		return nil
+	})
+
 	if err != nil {
-		b.logger.Errorw("failed to update tripRepo", "err", err)
-		return nil, xerr.ErrorUpdateTripFailed()
+		return nil, err
 	}
 
 	return updatedTrip, nil

@@ -192,7 +192,7 @@ message UpdateTripRequest {
   string description = 3;
   google.protobuf.Timestamp start_ts = 4;
   google.protobuf.Timestamp end_ts = 5;
-  bool status = 7;
+  int32 duration = 6;
 }
 
 message UpdateTripResponse {

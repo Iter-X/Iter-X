@@ -112,13 +112,20 @@ func (s *Trip) GetTrip(ctx context.Context, req *tripV1.GetTripRequest) (*tripV1
 }
 
 func (s *Trip) UpdateTrip(ctx context.Context, req *tripV1.UpdateTripRequest) (*tripV1.UpdateTripResponse, error) {
+	if err := validateTimeParams(req.Duration, req.StartTs, req.EndTs); err != nil {
+		return nil, err
+	}
 	params := &bo.UpdateTripRequest{
 		ID:          req.GetId(),
 		Title:       req.GetTitle(),
 		Description: req.GetDescription(),
 		StartDate:   req.GetStartTs().AsTime(),
 		EndDate:     req.GetEndTs().AsTime(),
-		Status:      req.GetStatus(),
+	}
+	if req.GetDuration() > cnst.MaxDay {
+		params.Duration = cnst.MaxDay
+	} else {
+		params.Duration = int8(req.GetDuration())
 	}
 	trip, err := s.tripBiz.UpdateTrip(ctx, params)
 	if err != nil {

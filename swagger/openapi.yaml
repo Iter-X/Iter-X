@@ -1168,14 +1168,17 @@ components:
         trip.v1.UpdateTripRequest:
             example:
                 description: ""
+                duration: 0
                 endTs: 1741589979
                 id: ""
                 startTs: 1741589979
-                status: true
                 title: ""
             properties:
                 description:
                     type: string
+                duration:
+                    format: int32
+                    type: integer
                 endTs:
                     format: int32
                     type: integer
@@ -1184,8 +1187,6 @@ components:
                 startTs:
                     format: int32
                     type: integer
-                status:
-                    type: boolean
                 title:
                     type: string
             type: object

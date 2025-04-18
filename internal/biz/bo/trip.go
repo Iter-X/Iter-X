@@ -68,7 +68,7 @@ type UpdateTripRequest struct {
 	Description string    `json:"description"`
 	StartDate   time.Time `json:"start_date"`
 	EndDate     time.Time `json:"end_date"`
-	Status      bool      `json:"status"`
+	Duration    int8      `json:"duration"`
 }
 
 type ListTripPOIPoolRequest struct {

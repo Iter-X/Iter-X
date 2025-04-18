@@ -70,6 +70,10 @@ type TripPOIPool struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// UpdatedBy holds the value of the "updated_by" field.
+	UpdatedBy uuid.UUID `json:"updated_by,omitempty"`
+	// CreatedBy holds the value of the "created_by" field.
+	CreatedBy uuid.UUID `json:"created_by,omitempty"`
 	// TripID holds the value of the "trip_id" field.
 	TripID uuid.UUID `json:"trip_id,omitempty"`
 	// PoiID holds the value of the "poi_id" field.

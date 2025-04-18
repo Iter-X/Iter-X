@@ -58,6 +58,9 @@ other = "Daily itinerary not found"
 [INVALID_DAILY_ITINERARY_ID]
 other = "Invalid daily itinerary ID"
 
+[INVALID_DURATION]
+other = "Invalid days"
+
 [UNAUTHORIZED]
 other = "Unauthorized"
 
@@ -140,5 +143,8 @@ other = "Get daily itineraries failed"
 other = "Update daily itinerary failed"
 
 [DELETE_DAILY_ITINERARY_FAILED]
-other = ""
+other = "Delete daily itinerary failed"
+
+[MOVE_TO_POI_POOL_FAILED]
+other = "Move POI to POI pool failed"
 

@@ -16,3 +16,5 @@ const (
 	// TripCreationMethodVoice represents voice-based trip creation
 	TripCreationMethodVoice // voice
 )
+
+const MaxDay = 99

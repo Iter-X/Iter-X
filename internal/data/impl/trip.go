@@ -245,8 +245,12 @@ func (r *tripRepositoryImpl) CreateTripPOIPool(ctx context.Context, tripPOIPool 
 	cli := r.GetTx(ctx).TripPOIPool
 
 	row, err := cli.Create().
+		SetCreatedAt(tripPOIPool.CreatedAt).
+		SetUpdatedAt(tripPOIPool.UpdatedAt).
 		SetTripID(tripPOIPool.TripID).
 		SetPoiID(tripPOIPool.PoiID).
+		SetCreatedBy(tripPOIPool.CreatedBy).
+		SetUpdatedBy(tripPOIPool.UpdatedBy).
 		Save(ctx)
 	return build.TripPOIPoolRepositoryImplToEntity(row), err
 }
