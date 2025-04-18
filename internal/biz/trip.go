@@ -368,7 +368,13 @@ func (b *Trip) UpdateTrip(ctx context.Context, req *bo.UpdateTripRequest) (*do.T
 		return nil, err
 	}
 
-	return updatedTrip, nil
+	completeTrip, err := b.tripRepo.GetTrip(ctx, updatedTrip.ID)
+	if err != nil {
+		b.logger.Errorw("failed to get complete trip", "err", err)
+		return nil, xerr.ErrorGetTripFailed()
+	}
+
+	return completeTrip, nil
 }
 
 func (b *Trip) DeleteTrip(ctx context.Context, id uuid.UUID) error {
