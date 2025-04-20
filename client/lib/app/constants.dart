@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:amap_flutter_base/amap_flutter_base.dart';
 
 class Constants {
   static final String appName = '';
@@ -78,4 +79,12 @@ class AppColor {
   static const Color c_999999 = Color(0xFF999999);
   static const Color c_f2f2f2 = Color(0xFFF2F2F2);
   static const Color c_375F77 = Color(0xFF375F77);
+}
+
+class AMapConfig {
+  static const AMapPrivacyStatement privacyStatement = AMapPrivacyStatement(
+    hasContains: true,
+    hasShow: true,
+    hasAgree: true,
+  );
 }

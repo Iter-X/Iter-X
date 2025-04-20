@@ -1,4 +1,5 @@
 import 'package:client/app/constants.dart';
+import 'package:client/business/trip/page/trip_map_page.dart';
 import 'package:client/business/trip/page/trip_overview_page.dart';
 import 'package:client/common/material/app_bar_with_safe_area.dart';
 import 'package:client/common/material/bottom_nav_bar.dart';
@@ -6,7 +7,7 @@ import 'package:flutter/material.dart';
 
 class TripMainPage extends StatefulWidget {
   final String tripId;
-  
+
   const TripMainPage({
     super.key,
     required this.tripId,
@@ -26,10 +27,10 @@ class _TripMainPageState extends State<TripMainPage> {
     super.initState();
     _pages = [
       TripOverviewPage(tripId: widget.tripId),
-      const Placeholder(), // 地图页面
       const Placeholder(), // 图册页面
       const Placeholder(), // 智能页面
       const Placeholder(), // 记账页面
+      TripMapPage(tripId: widget.tripId),
     ];
   }
 

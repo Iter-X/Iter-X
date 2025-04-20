@@ -58,6 +58,8 @@ dependencies:
   # 日历转换 https://pub.dev/packages/lunar
   lunar: ^1.7.3
   lottie: ^3.2.0
+  amap_flutter_map: ^3.0.0
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:
@@ -69,6 +71,9 @@ flutter:
   assets:
     - assets/images/
     - assets/lottie/
+    - assets/maps/
+    - assets/maps/amap/
+    - .env
   fonts:
     - family: AlibabaPuHuiTi3
       fonts:
