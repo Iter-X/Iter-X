@@ -1,3 +1,5 @@
 CFBundleDisplayName = "一特旅行";
 NSMicrophoneUsageDescription = "该应用需要访问您的麦克风";
 NSSpeechRecognitionUsageDescription = "该应用需要语音识别权限";
+NSLocationWhenInUseUsageDescription = "该应用在使用过程中需要访问您的位置，以提供基于位置的服务";
+NSLocationAlwaysUsageDescription = "该应用需要始终访问您的位置，即使在后台运行时，也能持续进行位置追踪";
