@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:amap_flutter_base/amap_flutter_base.dart';
 import 'package:amap_flutter_map/amap_flutter_map.dart';
 import 'package:client/app/constants.dart';
@@ -57,6 +59,50 @@ class _TripMapPageState extends State<TripMapPage> {
     }
   }
 
+  Future<BitmapDescriptor> _createNumberedMarker(int number) async {
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    final Size size = const Size(80, 80);
+
+    // Draw circle background
+    final paint = Paint()
+      ..color = AppColor.highlight
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(
+        Offset(size.width / 2, size.height / 2), size.width / 2, paint);
+
+    // Draw number
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: number.toString(),
+        style: const TextStyle(
+          color: AppColor.secondary,
+          fontSize: 42,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset(
+        (size.width - textPainter.width) / 2,
+        (size.height - textPainter.height) / 2,
+      ),
+    );
+
+    final ui.Image image = await recorder.endRecording().toImage(
+          size.width.toInt(),
+          size.height.toInt(),
+        );
+    final ByteData? byteData =
+        await image.toByteData(format: ui.ImageByteFormat.png);
+    final Uint8List uint8List = byteData!.buffer.asUint8List();
+
+    return BitmapDescriptor.fromBytes(uint8List);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<TripService>(
@@ -84,24 +130,40 @@ class _TripMapPageState extends State<TripMapPage> {
           });
         }).toList();
 
-        return AMapWidget(
-          apiKey: amapApiKey,
-          privacyStatement: AMapConfig.privacyStatement,
-          initialCameraPosition: CameraPosition(
-            target: locations.isNotEmpty
-                ? locations.first
-                : const LatLng(39.909187, 116.397451),
-            zoom: 10,
+        return FutureBuilder<List<Marker>>(
+          future: Future.wait(
+            List.generate(
+              locations.length,
+              (index) async {
+                final marker = await _createNumberedMarker(index + 1);
+                return Marker(
+                  position: locations[index],
+                  icon: marker,
+                  anchor: const Offset(0.5, 0.5),
+                );
+              },
+            ),
           ),
-          markers: locations.map((location) {
-            return Marker(
-              position: location,
-              icon: BitmapDescriptor.defaultMarker,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            return AMapWidget(
+              apiKey: amapApiKey,
+              privacyStatement: AMapConfig.privacyStatement,
+              initialCameraPosition: CameraPosition(
+                target: locations.isNotEmpty
+                    ? locations.first
+                    : const LatLng(39.909187, 116.397451),
+                zoom: 10,
+              ),
+              markers: snapshot.data!.toSet(),
+              polylines: _buildPolylines(trip),
+              mapType: MapType.normal,
+              customStyleOptions: _customStyleOptions,
             );
-          }).toSet(),
-          polylines: _buildPolylines(trip),
-          mapType: MapType.normal,
-          customStyleOptions: _customStyleOptions,
+          },
         );
       },
     );
