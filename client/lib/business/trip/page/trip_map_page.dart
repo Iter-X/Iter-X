@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:amap_flutter_base/amap_flutter_base.dart';
@@ -8,6 +9,7 @@ import 'package:client/business/trip/service/trip_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 class TripMapPage extends StatefulWidget {
@@ -23,10 +25,16 @@ class TripMapPage extends StatefulWidget {
 }
 
 class _TripMapPageState extends State<TripMapPage> {
-  // 高德地图配置
   late final AMapApiKey amapApiKey;
 
   CustomStyleOptions? _customStyleOptions;
+
+  final List<Color> _dailyColors = [
+    AppColor.highlight,
+    // AppColor.primary,
+    // AppColor.secondary,
+    // AppColor.bg,
+  ];
 
   @override
   void initState() {
@@ -59,7 +67,8 @@ class _TripMapPageState extends State<TripMapPage> {
     }
   }
 
-  Future<BitmapDescriptor> _createNumberedMarker(int number) async {
+  Future<BitmapDescriptor> _createNumberedMarker(
+      int dayNumber, int sequenceNumber) async {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(recorder);
     final Size size = const Size(80, 80);
@@ -74,10 +83,10 @@ class _TripMapPageState extends State<TripMapPage> {
     // Draw number
     final textPainter = TextPainter(
       text: TextSpan(
-        text: number.toString(),
+        text: '$dayNumber.$sequenceNumber',
         style: const TextStyle(
           color: AppColor.secondary,
-          fontSize: 42,
+          fontSize: 32,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -101,6 +110,71 @@ class _TripMapPageState extends State<TripMapPage> {
     final Uint8List uint8List = byteData!.buffer.asUint8List();
 
     return BitmapDescriptor.fromBytes(uint8List);
+  }
+
+  Future<List<LatLng>> _getRoutePoints(LatLng start, LatLng end) async {
+    try {
+      final response = await http.get(
+        Uri.parse(
+          'https://restapi.amap.com/v3/direction/driving?origin=${start.longitude},${start.latitude}&destination=${end.longitude},${end.latitude}&key=${dotenv.env['AMAP_WEB_KEY']}',
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == '1' && data['route'] != null) {
+          final path = data['route']['paths'][0];
+          final points = path['steps'].map<LatLng>((step) {
+            final location = step['polyline'].split(';')[0].split(',');
+            return LatLng(
+              double.parse(location[1]),
+              double.parse(location[0]),
+            );
+          }).toList();
+          return points;
+        }
+      }
+    } catch (e) {
+      debugPrint('Failed to get route points: $e');
+    }
+    // Fallback to direct line if route planning fails
+    return [start, end];
+  }
+
+  Future<Set<Polyline>> _buildPolylines(Trip trip) async {
+    final polylines = <Polyline>{};
+
+    // Create polylines for each day's trip
+    for (var dayIndex = 0; dayIndex < trip.dailyTrips.length; dayIndex++) {
+      final dailyTrip = trip.dailyTrips[dayIndex];
+      if (dailyTrip.dailyItineraries.length < 2) continue;
+
+      final points = <LatLng>[];
+      for (var i = 0; i < dailyTrip.dailyItineraries.length - 1; i++) {
+        final start = LatLng(
+          dailyTrip.dailyItineraries[i].poi.latitude,
+          dailyTrip.dailyItineraries[i].poi.longitude,
+        );
+        final end = LatLng(
+          dailyTrip.dailyItineraries[i + 1].poi.latitude,
+          dailyTrip.dailyItineraries[i + 1].poi.longitude,
+        );
+        final routePoints = await _getRoutePoints(start, end);
+        points.addAll(routePoints);
+      }
+
+      polylines.add(
+        Polyline(
+          points: points,
+          color: _dailyColors[dayIndex % _dailyColors.length],
+          width: 5,
+          capType: CapType.arrow,
+          alpha: 0.8,
+        ),
+      );
+    }
+
+    return polylines;
   }
 
   @override
@@ -132,66 +206,56 @@ class _TripMapPageState extends State<TripMapPage> {
 
         return FutureBuilder<List<Marker>>(
           future: Future.wait(
-            List.generate(
-              locations.length,
-              (index) async {
-                final marker = await _createNumberedMarker(index + 1);
-                return Marker(
-                  position: locations[index],
-                  icon: marker,
-                  anchor: const Offset(0.5, 0.5),
-                );
-              },
-            ),
+            trip.dailyTrips.asMap().entries.expand((entry) {
+              final dayNumber = entry.key + 1;
+              return List.generate(
+                entry.value.dailyItineraries.length,
+                (index) async {
+                  final marker =
+                      await _createNumberedMarker(dayNumber, index + 1);
+                  return Marker(
+                    position: LatLng(
+                      entry.value.dailyItineraries[index].poi.latitude,
+                      entry.value.dailyItineraries[index].poi.longitude,
+                    ),
+                    icon: marker,
+                    anchor: const Offset(0.5, 0.5),
+                  );
+                },
+              );
+            }).toList(),
           ),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
             }
 
-            return AMapWidget(
-              apiKey: amapApiKey,
-              privacyStatement: AMapConfig.privacyStatement,
-              initialCameraPosition: CameraPosition(
-                target: locations.isNotEmpty
-                    ? locations.first
-                    : const LatLng(39.909187, 116.397451),
-                zoom: 10,
-              ),
-              markers: snapshot.data!.toSet(),
-              polylines: _buildPolylines(trip),
-              mapType: MapType.normal,
-              customStyleOptions: _customStyleOptions,
+            return FutureBuilder<Set<Polyline>>(
+              future: _buildPolylines(trip),
+              builder: (context, polylineSnapshot) {
+                if (!polylineSnapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                return AMapWidget(
+                  apiKey: amapApiKey,
+                  privacyStatement: AMapConfig.privacyStatement,
+                  initialCameraPosition: CameraPosition(
+                    target: locations.isNotEmpty
+                        ? locations.first
+                        : const LatLng(39.909187, 116.397451),
+                    zoom: 10,
+                  ),
+                  markers: snapshot.data!.toSet(),
+                  polylines: polylineSnapshot.data!,
+                  mapType: MapType.normal,
+                  customStyleOptions: _customStyleOptions,
+                );
+              },
             );
           },
         );
       },
     );
-  }
-
-  Set<Polyline> _buildPolylines(Trip trip) {
-    final polylines = <Polyline>{};
-
-    // 为每一天的行程创建折线
-    for (final dailyTrip in trip.dailyTrips) {
-      if (dailyTrip.dailyItineraries.length < 2) continue;
-
-      final points = dailyTrip.dailyItineraries.map((itinerary) {
-        return LatLng(
-          itinerary.poi.latitude,
-          itinerary.poi.longitude,
-        );
-      }).toList();
-
-      polylines.add(
-        Polyline(
-          points: points,
-          color: AppColor.primary,
-          width: 3,
-        ),
-      );
-    }
-
-    return polylines;
   }
 }
