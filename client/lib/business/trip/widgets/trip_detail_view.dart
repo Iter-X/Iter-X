@@ -503,50 +503,74 @@ class DayContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (dailyTrip.dailyItineraries.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
     return Column(
       children: [
         SizedBox(height: 10.h),
-        Divider(color: AppColor.bg),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Timeline column
-            Column(
-              children: dailyTrip.dailyItineraries.map((itinerary) {
-                final poi = itinerary.poi;
-                IconData poiIcon;
-                switch (poi.type.toLowerCase()) {
-                  case 'city':
-                    poiIcon = Icons.location_city;
-                    break;
-                  case 'airport':
-                    poiIcon = Icons.flight;
-                    break;
-                  default:
-                    poiIcon = Icons.landscape;
-                }
-                return Timeline(
-                  icon: poiIcon,
-                  isFirst: dailyTrip.dailyItineraries.indexOf(itinerary) == 0,
-                  isLast: dailyTrip.dailyItineraries.indexOf(itinerary) ==
-                      dailyTrip.dailyItineraries.length - 1,
-                );
-              }).toList(),
-            ),
-            SizedBox(width: 20.w),
-            // POI items column
-            Expanded(
-              child: POIList(
-                itineraries: dailyTrip.dailyItineraries,
-                tripId: tripId,
-                day: dailyTrip.day,
+        if (dailyTrip.dailyItineraries.isNotEmpty) ...[
+          Divider(color: AppColor.bg),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Timeline column
+              Column(
+                children: dailyTrip.dailyItineraries.map((itinerary) {
+                  final poi = itinerary.poi;
+                  IconData poiIcon;
+                  switch (poi.type.toLowerCase()) {
+                    case 'city':
+                      poiIcon = Icons.location_city;
+                      break;
+                    case 'airport':
+                      poiIcon = Icons.flight;
+                      break;
+                    default:
+                      poiIcon = Icons.landscape;
+                  }
+                  return Timeline(
+                    icon: poiIcon,
+                    isFirst: dailyTrip.dailyItineraries.indexOf(itinerary) == 0,
+                    isLast: dailyTrip.dailyItineraries.indexOf(itinerary) ==
+                        dailyTrip.dailyItineraries.length - 1,
+                  );
+                }).toList(),
               ),
+              SizedBox(width: 20.w),
+              // POI items column
+              Expanded(
+                child: POIList(
+                  itineraries: dailyTrip.dailyItineraries,
+                  tripId: tripId,
+                  day: dailyTrip.day,
+                ),
+              ),
+            ],
+          ),
+        ],
+        Divider(color: AppColor.bg),
+        SizedBox(height: 15.h),
+        Center(
+          child: GestureDetector(
+            onTap: () {},
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.add_circle,
+                  size: 22.w,
+                  color: AppColor.primary.withOpacity(0.8),
+                ),
+                SizedBox(width: 10.w),
+                Text(
+                  '添加',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: AppFontWeight.regular,
+                    color: AppColor.primaryFont,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ],
     );
@@ -589,8 +613,8 @@ class TripDetailView extends StatelessWidget {
             padding: EdgeInsets.only(
               left: 15.w,
               right: 15.w,
-              top: 15.w,
-              bottom: dailyTrip.dailyItineraries.isEmpty ? 15.w : 0,
+              top: 15.h,
+              bottom: 15.h,
             ),
             decoration: BoxDecoration(
               color: AppColor.white,
@@ -612,31 +636,6 @@ class TripDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildAddDayButton() {
-    return GestureDetector(
-      onTap: () {},
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.add_circle,
-            size: 20.w,
-            color: AppColor.primary.withOpacity(0.8),
-          ),
-          SizedBox(width: 10.w),
-          Text(
-            '添加一天',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: AppFontWeight.regular,
-              color: AppColor.primaryFont,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -653,7 +652,6 @@ class TripDetailView extends StatelessWidget {
                 ],
               );
             }),
-            _buildAddDayButton(),
             SizedBox(height: 20.h),
           ],
         ),

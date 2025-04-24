@@ -27,7 +27,7 @@ class _TripOverviewViewState extends State<TripOverviewView> {
     return GestureDetector(
       onTap: () {},
       child: Container(
-        padding: EdgeInsets.all(15.w),
+        padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 15.w),
         decoration: BoxDecoration(
           color: AppColor.white,
           borderRadius: BorderRadius.circular(AppConfig.boxRadius),
@@ -100,6 +100,33 @@ class _TripOverviewViewState extends State<TripOverviewView> {
                 }).toList(),
               ),
             ],
+            SizedBox(height: 10.h),
+            Divider(color: AppColor.bg),
+            SizedBox(height: 15.h),
+            Center(
+              child: GestureDetector(
+                onTap: () {},
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.add_circle,
+                      size: 22.w,
+                      color: AppColor.primary.withOpacity(0.8),
+                    ),
+                    SizedBox(width: 10.w),
+                    Text(
+                      '添加',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: AppFontWeight.regular,
+                        color: AppColor.primaryFont,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -149,7 +176,6 @@ class _TripOverviewViewState extends State<TripOverviewView> {
                     ],
                   );
                 }),
-                _buildAddDayButton(),
                 SizedBox(height: 20.h),
               ],
             ),
@@ -185,7 +211,8 @@ class _TripOverviewViewState extends State<TripOverviewView> {
                   initialStartTs: widget.service.trip?.startTs,
                   initialEndTs: widget.service.trip?.endTs,
                   initialDuration: widget.service.trip?.dailyTrips.length ?? 1,
-                  onSave: (newTitle, newDescription, newStartTs, newEndTs, newDuration) async {
+                  onSave: (newTitle, newDescription, newStartTs, newEndTs,
+                      newDuration) async {
                     if (widget.service.trip != null) {
                       await widget.service.updateTrip(
                         tripId: widget.service.trip!.id,
