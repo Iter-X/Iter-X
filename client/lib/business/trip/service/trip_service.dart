@@ -1,3 +1,8 @@
+import 'package:client/app/apis/trip.dart';
+import 'package:client/business/trip/entity/collaborator.dart';
+import 'package:client/business/trip/entity/trip.dart';
+import 'package:client/common/dio/http.dart';
+import 'package:client/common/dio/http_result_bean.dart';
 import 'package:flutter/material.dart';
 
 class TripService extends ChangeNotifier {
@@ -6,201 +11,164 @@ class TripService extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
 
-  // 行程标题
-  final String _title = '美西自驾10日游';
+  // 当前行程数据
+  Trip? _trip;
 
-  String get title => _title;
+  Trip? get trip => _trip;
 
-  // 行程参与者列表
-  final List<TripParticipant> _participants = [];
+  // 合作者数据
+  List<Collaborator> _collaborators = [];
 
-  List<TripParticipant> get participants => _participants;
+  List<Collaborator> get collaborators => _collaborators;
+  bool _loadingCollaborators = false;
 
-  // 待规划的景点列表
-  final List<UnplannedSpot> _unplannedSpots = [];
+  bool get loadingCollaborators => _loadingCollaborators;
 
-  List<UnplannedSpot> get unplannedSpots => _unplannedSpots;
-
-  // 行程日程列表
-  final List<TripDay> _days = [];
-
-  List<TripDay> get days => _days;
-
-  // 模拟从服务器获取数据
-  Future<void> fetchTripData() async {
+  // 获取行程数据
+  Future<void> fetchTripData({required String tripId}) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      // 模拟网络延迟
-      await Future.delayed(const Duration(milliseconds: 500));
+      final HttpResultBean result = await Http.instance.get(
+        TripApi.getTripDetailUrl(tripId),
+      );
 
-      // 模拟获取参与者数据
-      _participants.addAll([
-        TripParticipant(
-          id: '1',
-          name: '用户1',
-          avatar: 'https://robohash.org/1.png?size=200x200',
-        ),
-        TripParticipant(
-          id: '2',
-          name: '用户2',
-          avatar: 'https://robohash.org/2.png?size=200x200',
-        ),
-        TripParticipant(
-          id: '3',
-          name: '用户3',
-          avatar: 'https://robohash.org/3.png?size=200x200',
-        ),
-        TripParticipant(
-          id: '4',
-          name: '用户4',
-          avatar: 'https://robohash.org/4.png?size=200x200',
-        ),
-        TripParticipant(
-          id: '5',
-          name: '用户5',
-          avatar: 'https://robohash.org/5.png?size=200x200',
-        ),
-        TripParticipant(
-          id: '6',
-          name: '用户6',
-          avatar: 'https://robohash.org/6.png?size=200x200',
-        ),
-      ]);
-
-      // 模拟获取待规划景点数据
-      _unplannedSpots.addAll([
-        UnplannedSpot(
-          id: '1',
-          name: '优胜美地国家公园',
-          description: '国家公园',
-        ),
-        UnplannedSpot(
-          id: '2',
-          name: '洛杉矶',
-          description: '城市',
-        ),
-      ]);
-
-      // 模拟获取行程日数据
-      _days.addAll([
-        TripDay(
-          id: '1',
-          day: 'Day 1',
-          date: '2025/01/25 周六',
-          cities: ['厦门', '旧金山'],
-        ),
-        TripDay(
-          id: '2',
-          day: 'Day 2',
-          date: '2025/01/26 周日',
-          cities: ['旧金山'],
-          spots: ['金门公园', '双峰', '渔人码头', '金门大桥'],
-        ),
-        TripDay(
-          id: '3',
-          day: 'Day 3',
-          date: '2025/01/27 周一',
-          cities: ['旧金山', '红杉树国家公园'],
-          spots: ['斯坦福大学', '红杉树国家公园', 'Apple', 'Google'],
-        ),
-      ]);
+      if (result.isSuccess() && result.data['trip'] != null) {
+        _trip = Trip.fromJson(result.data['trip']);
+        // 获取行程数据后，获取合作者
+        await fetchCollaborators(tripId);
+      }
 
       notifyListeners();
     } catch (e) {
-      // Handle any exceptions that might occur during data fetching
       print('Error fetching trip data: $e');
+      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
+  // 更新行程
+  Future<void> updateTrip({
+    required String tripId,
+    String? title,
+    String? description,
+    DateTime? startTs,
+    DateTime? endTs,
+    int? duration,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final HttpResultBean result = await Http.instance.put(
+        TripApi.updateTripUrl(tripId),
+        data: {
+          if (title != null) 'title': title,
+          if (description != null) 'description': description,
+          if (startTs != null) 'start_ts': startTs.toUtc().toIso8601String(),
+          if (endTs != null) 'end_ts': endTs.toUtc().toIso8601String(),
+          if (duration != null) 'duration': duration,
+        },
+      );
+
+      if (result.isSuccess() && result.data['trip'] != null) {
+        _trip = Trip.fromJson(result.data['trip']);
+      }
+
+      notifyListeners();
+    } catch (e) {
+      print('Error updating trip: $e');
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // 获取合作者
+  Future<void> fetchCollaborators(String tripId) async {
+    _loadingCollaborators = true;
+    notifyListeners();
+
+    try {
+      final HttpResultBean result = await Http.instance.get(
+        TripApi.listTripCollaboratorsUrl(tripId),
+      );
+
+      if (result.isSuccess() && result.data['collaborators'] != null) {
+        _collaborators = (result.data['collaborators'] as List)
+            .map((e) => Collaborator.fromJson(e))
+            .toList();
+      }
+
+      notifyListeners();
+    } catch (e) {
+      print('Error fetching collaborators: $e');
+      rethrow;
+    } finally {
+      _loadingCollaborators = false;
+      notifyListeners();
+    }
+  }
+
   // 清空数据（用于刷新或重置）
   void clearData() {
-    _participants.clear();
-    _unplannedSpots.clear();
-    _days.clear();
+    _trip = null;
+    _collaborators = [];
     notifyListeners();
   }
 
-  // 添加参与者
-  void addParticipant(TripParticipant participant) {
-    _participants.add(participant);
-    notifyListeners();
+  // Move itinerary item to a new position
+  Future<void> moveItineraryItem({
+    required String tripId,
+    required String dailyTripId,
+    required String itineraryId,
+    required int newDay,
+    required int newIndex,
+  }) async {
+    try {
+      final HttpResultBean result = await Http.instance.post(
+        TripApi.moveItineraryItemUrl(tripId),
+        data: {
+          'daily_trip_id': dailyTripId,
+          'daily_itinerary_id': itineraryId,
+          'day': newDay,
+          'after_order': newIndex,
+        },
+      );
+
+      if (result.isSuccess() && _trip != null) {
+        // Update local state with the returned data
+        if (result.data['trip'] != null) {
+          final updatedTrip = Trip.fromJson(result.data['trip']);
+
+          // Update only the changed daily trips
+          for (var updatedDailyTrip in updatedTrip.dailyTrips) {
+            final existingDailyTrip = _trip!.dailyTrips.firstWhere(
+              (dt) => dt.id == updatedDailyTrip.id,
+              orElse: () => updatedDailyTrip,
+            );
+
+            // Update the daily itineraries
+            existingDailyTrip.dailyItineraries.clear();
+            existingDailyTrip.dailyItineraries
+                .addAll(updatedDailyTrip.dailyItineraries);
+          }
+
+          notifyListeners();
+        }
+      } else if (!result.isSuccess()) {
+        // Only refresh data if the move operation failed
+        await fetchTripData(tripId: tripId);
+      }
+    } catch (e) {
+      print('Error moving itinerary item: $e');
+      // Only refresh data if there was an error
+      await fetchTripData(tripId: tripId);
+      rethrow;
+    }
   }
-
-  // 移除参与者
-  void removeParticipant(TripParticipant participant) {
-    _participants.remove(participant);
-    notifyListeners();
-  }
-
-  // 添加待规划景点
-  void addUnplannedSpot(UnplannedSpot spot) {
-    _unplannedSpots.add(spot);
-    notifyListeners();
-  }
-
-  // 移除待规划景点
-  void removeUnplannedSpot(UnplannedSpot spot) {
-    _unplannedSpots.remove(spot);
-    notifyListeners();
-  }
-
-  // 添加行程日
-  void addDay(TripDay day) {
-    _days.add(day);
-    notifyListeners();
-  }
-
-  // 移除行程日
-  void removeDay(TripDay day) {
-    _days.remove(day);
-    notifyListeners();
-  }
-}
-
-// 行程参与者模型
-class TripParticipant {
-  final String id;
-  final String name;
-  final String avatar;
-
-  TripParticipant({
-    required this.id,
-    required this.name,
-    required this.avatar,
-  });
-}
-
-// 待规划景点模型
-class UnplannedSpot {
-  final String id;
-  final String name;
-  final String description;
-
-  UnplannedSpot({
-    required this.id,
-    required this.name,
-    required this.description,
-  });
-}
-
-// 行程日模型
-class TripDay {
-  final String id;
-  final String day;
-  final String date;
-  final List<String> cities; // 主要城市列表
-  final List<String>? spots; // 景点列表
-
-  TripDay({
-    required this.id,
-    required this.day,
-    required this.date,
-    required this.cities,
-    this.spots,
-  });
 }

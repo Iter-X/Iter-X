@@ -27,3 +27,10 @@ type City struct {
 	// State holds the value of the state edge.
 	State *State `json:"state,omitempty"`
 }
+
+func (c *City) GetNameCn() string {
+	if c == nil {
+		return ""
+	}
+	return c.NameCn
+}

@@ -22,6 +22,8 @@ func ToTripProto(t *do.Trip) *tripV1.Trip {
 		CreatedAt:   timestamppb.New(t.CreatedAt),
 		UpdatedAt:   timestamppb.New(t.UpdatedAt),
 		DailyTrips:  ToDailyTripsProto(t.DailyTrip),
+		PoiPool:     ToPointOfInterestsProto(t.PoiPool),
+		Days:        int32(t.Days),
 	}
 }
 
@@ -70,6 +72,7 @@ func ToDailyItineraryProto(di *do.DailyItinerary) *tripV1.DailyItinerary {
 		CreatedAt:   timestamppb.New(di.CreatedAt),
 		UpdatedAt:   timestamppb.New(di.UpdatedAt),
 		Poi:         ToPointOfInterestProto(di.Poi),
+		Order:       int32(di.Order),
 	}
 }
 
@@ -116,4 +119,42 @@ func ToDailyItinerariesProto(dis []*do.DailyItinerary) []*tripV1.DailyItinerary 
 		list = append(list, ToDailyItineraryProto(v))
 	}
 	return list
+}
+
+func ToTripCollaboratorProto(collaborator *do.TripCollaborator) *tripV1.TripCollaborator {
+	if collaborator == nil {
+		return nil
+	}
+	return &tripV1.TripCollaborator{
+		Id:        collaborator.ID.String(),
+		Username:  collaborator.Username,
+		Nickname:  collaborator.Nickname,
+		AvatarUrl: collaborator.AvatarURL,
+		Status:    tripV1.CollaboratorStatus(tripV1.CollaboratorStatus_value[collaborator.Status]),
+	}
+}
+
+func ToTripCollaboratorsProto(collaborators []*do.TripCollaborator) []*tripV1.TripCollaborator {
+	if collaborators == nil {
+		return nil
+	}
+	list := make([]*tripV1.TripCollaborator, 0, len(collaborators))
+	for _, collaborator := range collaborators {
+		list = append(list, ToTripCollaboratorProto(collaborator))
+	}
+	return list
+}
+
+// ToPointOfInterestsProto converts a slice of TripPOIPool to a slice of PointOfInterest
+func ToPointOfInterestsProto(poiPools []*do.TripPOIPool) []*poiV1.PointOfInterest {
+	if poiPools == nil {
+		return nil
+	}
+	protoPois := make([]*poiV1.PointOfInterest, 0, len(poiPools))
+	for _, pool := range poiPools {
+		if pool.Poi != nil {
+			protoPois = append(protoPois, ToPointOfInterestProto(pool.Poi))
+		}
+	}
+	return protoPois
 }

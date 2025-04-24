@@ -68,5 +68,36 @@ type UpdateTripRequest struct {
 	Description string    `json:"description"`
 	StartDate   time.Time `json:"start_date"`
 	EndDate     time.Time `json:"end_date"`
-	Status      bool      `json:"status"`
+	Duration    int8      `json:"duration"`
+}
+
+type ListTripPOIPoolRequest struct {
+	TripID string `json:"trip_id"`
+}
+
+type CreateTripPOIPoolRequest struct {
+	TripID string `json:"trip_id"`
+	PoiID  string `json:"poi_id"`
+	Notes  string `json:"notes"`
+}
+
+type DeleteTripPOIPoolRequest struct {
+	TripID    string `json:"trip_id"`
+	PoiPoolID string `json:"poi_pool_id"`
+}
+
+// AddDayRequest represents the request to add a new day to a trip
+type AddDayRequest struct {
+	TripID   uuid.UUID
+	AfterDay int32 // 0 means insert at the beginning, n means insert after the nth day
+	Notes    string
+}
+
+// MoveItineraryItemRequest represents the request to move an itinerary item to a new position
+type MoveItineraryItemRequest struct {
+	TripID           string `json:"trip_id"`
+	DailyTripID      string `json:"daily_trip_id"`
+	DailyItineraryID string `json:"daily_itinerary_id"`
+	Day              int32  `json:"day"`
+	AfterOrder       int32  `json:"after_order"`
 }

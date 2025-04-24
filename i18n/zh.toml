@@ -43,6 +43,24 @@ other = "必须至少选择一个城市"
 [MISSING_LINK]
 other = "外部链接不能为空"
 
+[INVALID_LANGUAGE]
+other = "无效的语言"
+
+[INVALID_USER_ID]
+other = "无效的用户"
+
+[INVALID_COLLABORATOR_STATUS]
+other = "无效的协作者状态"
+
+[DAILY_ITINERARY_NOT_FOUND]
+other = "每日行程未找到"
+
+[INVALID_DAILY_ITINERARY_ID]
+other = "无效的每日行程ID"
+
+[INVALID_DURATION]
+other = "无效的天数"
+
 [UNAUTHORIZED]
 other = "未授权"
 
@@ -105,4 +123,28 @@ other = "获取城市列表失败"
 
 [GET_POIS_LIST_FAILED]
 other = "获取兴趣点位列表失败"
+
+[ADD_COLLABORATORS_FAILED]
+other = "添加协作者失败"
+
+[REMOVE_COLLABORATOR_FAILED]
+other = "删除协作者失败"
+
+[UPDATE_COLLABORATOR_STATUS_FAILED]
+other = "更新协作者状态失败"
+
+[GET_DAILY_ITINERARY_FAILED]
+other = "获取每日行程失败"
+
+[LIST_DAILY_ITINERARIES_FAILED]
+other = "获取每日行程列表失败"
+
+[UPDATE_DAILY_ITINERARY_FAILED]
+other = "更新每日行程失败"
+
+[DELETE_DAILY_ITINERARY_FAILED]
+other = "删除每日行程失败"
+
+[MOVE_TO_POI_POOL_FAILED]
+other = "移动兴趣点到点位池失败"
 

@@ -1,22 +1,14 @@
-/*
- * @Description: 
- * @Version: 0.1
- * @Autor: GiottoLLL7
- * @Date: 2025-03-14 13:13:11
- * @LastEditors: GiottoLLL7
- * @LastEditTime: 2025-03-19 00:38:47
- */
 import 'package:client/business/auth/page/input_code.dart';
 import 'package:client/business/auth/page/login.dart';
 import 'package:client/business/auth/page/phone_login.dart';
 import 'package:client/business/create_trip/page/card_selection.dart';
 import 'package:client/business/create_trip/page/create_trip_home.dart';
-import 'package:client/business/create_trip/page/select_date.dart';
+import 'package:client/business/create_trip/page/creating_trip.dart';
 import 'package:client/business/create_trip/page/poi_search.dart';
+import 'package:client/business/create_trip/page/select_date.dart';
 import 'package:client/business/home_main/page/home_main.dart';
 import 'package:client/business/mine/page/mine_page.dart';
 import 'package:client/business/trip/page/trip_main_page.dart';
-import 'package:client/business/create_trip/page/creating_trip.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 
@@ -65,9 +57,12 @@ class Routes {
         Handler(handlerFunc: (context, params) => const CardSelectionPage()),
     profile: Handler(handlerFunc: (context, params) => const MinePage()),
     poiSearch: Handler(handlerFunc: (context, params) => const PoiSearchPage()),
-    tripOverview:
-        Handler(handlerFunc: (context, params) => const TripMainPage()),
-    selectDate: Handler(handlerFunc: (context, params) => const SelectDatePage()),
+    tripOverview: Handler(handlerFunc: (context, params) {
+      final args = context!.settings!.arguments as Map<String, dynamic>;
+      return TripMainPage(tripId: args['tripId']);
+    }),
+    selectDate:
+        Handler(handlerFunc: (context, params) => const SelectDatePage()),
     creatingTrip: Handler(handlerFunc: (context, params) {
       final args = context!.settings!.arguments as Map<String, dynamic>;
       return CreatingTripPage(params: args['params']);

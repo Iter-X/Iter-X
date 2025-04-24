@@ -682,6 +682,48 @@ components:
                 uploadId:
                     type: string
             type: object
+        trip.v1.AddDayRequest:
+            example:
+                afterDay: 0
+                notes: ""
+                tripId: ""
+            properties:
+                afterDay:
+                    format: int32
+                    type: integer
+                notes:
+                    type: string
+                tripId:
+                    type: string
+            type: object
+        trip.v1.AddDayResponse:
+            example:
+                dailyTrip: null
+            properties:
+                dailyTrip:
+                    $ref: '#/components/schemas/trip.v1.DailyTrip'
+            type: object
+        trip.v1.AddTripCollaboratorsRequest:
+            example:
+                tripId: ""
+                userIds: ""
+            properties:
+                tripId:
+                    type: string
+                userIds:
+                    items:
+                        type: string
+                    type: array
+            type: object
+        trip.v1.AddTripCollaboratorsResponse:
+            example:
+                collaborators: null
+            properties:
+                collaborators:
+                    items:
+                        $ref: '#/components/schemas/trip.v1.TripCollaborator'
+                    type: array
+            type: object
         trip.v1.CreateDailyTripRequest:
             example:
                 date: 1741589979
@@ -772,6 +814,26 @@ components:
                     format: int32
                     type: integer
             type: object
+        trip.v1.CreateTripPOIPoolRequest:
+            example:
+                notes: ""
+                poiId: ""
+                tripId: ""
+            properties:
+                notes:
+                    type: string
+                poiId:
+                    type: string
+                tripId:
+                    type: string
+            type: object
+        trip.v1.CreateTripPOIPoolResponse:
+            example:
+                poiPool: null
+            properties:
+                poiPool:
+                    $ref: '#/components/schemas/trip.v1.TripPOIPool'
+            type: object
         trip.v1.CreateTripResponse:
             example:
                 trip: null
@@ -785,6 +847,7 @@ components:
                 dailyTripId: ""
                 id: ""
                 notes: ""
+                order: 0
                 poi: null
                 poiId: ""
                 tripId: ""
@@ -799,6 +862,9 @@ components:
                     type: string
                 notes:
                     type: string
+                order:
+                    format: int32
+                    type: integer
                 poi:
                     $ref: '#/components/schemas/poi.v1.PointOfInterest'
                 poiId:
@@ -850,6 +916,13 @@ components:
                 status:
                     type: string
             type: object
+        trip.v1.DeleteTripPOIPoolResponse:
+            example:
+                status: ""
+            properties:
+                status:
+                    type: string
+            type: object
         trip.v1.DeleteTripResponse:
             example:
                 status: ""
@@ -880,6 +953,24 @@ components:
                         $ref: '#/components/schemas/trip.v1.DailyTrip'
                     type: array
             type: object
+        trip.v1.ListTripCollaboratorsResponse:
+            example:
+                collaborators: null
+            properties:
+                collaborators:
+                    items:
+                        $ref: '#/components/schemas/trip.v1.TripCollaborator'
+                    type: array
+            type: object
+        trip.v1.ListTripPOIPoolResponse:
+            example:
+                poiPool: null
+            properties:
+                poiPool:
+                    items:
+                        $ref: '#/components/schemas/trip.v1.TripPOIPool'
+                    type: array
+            type: object
         trip.v1.ListTripsResponse:
             example:
                 trips: null
@@ -889,13 +980,50 @@ components:
                         $ref: '#/components/schemas/trip.v1.Trip'
                     type: array
             type: object
+        trip.v1.MoveItineraryItemRequest:
+            example:
+                afterOrder: 0
+                dailyItineraryId: ""
+                dailyTripId: ""
+                day: 0
+                tripId: ""
+            properties:
+                afterOrder:
+                    format: int32
+                    type: integer
+                dailyItineraryId:
+                    type: string
+                dailyTripId:
+                    type: string
+                day:
+                    format: int32
+                    type: integer
+                tripId:
+                    type: string
+            type: object
+        trip.v1.MoveItineraryItemResponse:
+            example:
+                trip: null
+            properties:
+                trip:
+                    $ref: '#/components/schemas/trip.v1.Trip'
+            type: object
+        trip.v1.RemoveTripCollaboratorResponse:
+            example:
+                status: ""
+            properties:
+                status:
+                    type: string
+            type: object
         trip.v1.Trip:
             example:
                 createdAt: 1741589979
                 dailyTrips: null
+                days: 0
                 description: ""
                 endTs: 1741589979
                 id: ""
+                poiPool: null
                 startTs: 1741589979
                 status: true
                 title: ""
@@ -908,6 +1036,9 @@ components:
                     items:
                         $ref: '#/components/schemas/trip.v1.DailyTrip'
                     type: array
+                days:
+                    format: int32
+                    type: integer
                 description:
                     type: string
                 endTs:
@@ -915,6 +1046,10 @@ components:
                     type: integer
                 id:
                     type: string
+                poiPool:
+                    items:
+                        $ref: '#/components/schemas/poi.v1.PointOfInterest'
+                    type: array
                 startTs:
                     format: int32
                     type: integer
@@ -925,6 +1060,82 @@ components:
                 updatedAt:
                     format: int32
                     type: integer
+            type: object
+        trip.v1.TripCollaborator:
+            example:
+                avatarUrl: ""
+                id: ""
+                nickname: ""
+                status: Invited
+                username: ""
+            properties:
+                avatarUrl:
+                    type: string
+                id:
+                    type: string
+                nickname:
+                    type: string
+                status:
+                    enum:
+                        - Invited
+                        - Accepted
+                        - Rejected
+                    format: enum
+                    type: string
+                username:
+                    type: string
+            type: object
+        trip.v1.TripPOIPool:
+            example:
+                createdAt: 1741589979
+                id: ""
+                notes: ""
+                poi: null
+                poiId: ""
+                tripId: ""
+                updatedAt: 1741589979
+            properties:
+                createdAt:
+                    format: int32
+                    type: integer
+                id:
+                    type: string
+                notes:
+                    type: string
+                poi:
+                    $ref: '#/components/schemas/poi.v1.PointOfInterest'
+                poiId:
+                    type: string
+                tripId:
+                    type: string
+                updatedAt:
+                    format: int32
+                    type: integer
+            type: object
+        trip.v1.UpdateCollaboratorStatusRequest:
+            example:
+                status: Invited
+                tripId: ""
+                userId: ""
+            properties:
+                status:
+                    enum:
+                        - Invited
+                        - Accepted
+                        - Rejected
+                    format: enum
+                    type: string
+                tripId:
+                    type: string
+                userId:
+                    type: string
+            type: object
+        trip.v1.UpdateCollaboratorStatusResponse:
+            example:
+                collaborator: null
+            properties:
+                collaborator:
+                    $ref: '#/components/schemas/trip.v1.TripCollaborator'
             type: object
         trip.v1.UpdateDailyTripRequest:
             example:
@@ -957,14 +1168,17 @@ components:
         trip.v1.UpdateTripRequest:
             example:
                 description: ""
+                duration: 0
                 endTs: 1741589979
                 id: ""
                 startTs: 1741589979
-                status: true
                 title: ""
             properties:
                 description:
                     type: string
+                duration:
+                    format: int32
+                    type: integer
                 endTs:
                     format: int32
                     type: integer
@@ -973,8 +1187,6 @@ components:
                 startTs:
                     format: int32
                     type: integer
-                status:
-                    type: boolean
                 title:
                     type: string
             type: object
@@ -984,6 +1196,15 @@ components:
             properties:
                 trip:
                     $ref: '#/components/schemas/trip.v1.Trip'
+            type: object
+        user.v1.GetSupportedLanguagesResponse:
+            example:
+                languages: null
+            properties:
+                languages:
+                    items:
+                        $ref: '#/components/schemas/user.v1.Language'
+                    type: array
             type: object
         user.v1.GetUserInfoResponse:
             example:
@@ -1015,6 +1236,26 @@ components:
                 username:
                     type: string
             type: object
+        user.v1.GetUserPreferencesResponse:
+            example:
+                preference: null
+            properties:
+                preference:
+                    $ref: '#/components/schemas/user.v1.UserPreference'
+            type: object
+        user.v1.Language:
+            example:
+                code: ""
+                name: ""
+                nativeName: ""
+            properties:
+                code:
+                    type: string
+                name:
+                    type: string
+                nativeName:
+                    type: string
+            type: object
         user.v1.UpdateUserInfoRequest:
             example:
                 avatarUrl: ""
@@ -1030,6 +1271,57 @@ components:
             type: object
         user.v1.UpdateUserInfoResponse:
             properties: {}
+            type: object
+        user.v1.UpdateUserPreferencesRequest:
+            example:
+                preference: null
+            properties:
+                preference:
+                    $ref: '#/components/schemas/user.v1.UserPreference'
+            type: object
+        user.v1.UpdateUserPreferencesResponse:
+            properties: {}
+            type: object
+        user.v1.UserPreference:
+            example:
+                appLanguage: ""
+                communityNotification: true
+                contentPush: true
+                darkMode: System
+                defaultCity: ""
+                distanceUnit: Kilometer
+                timeFormat: H24
+                tripReminder: true
+            properties:
+                appLanguage:
+                    type: string
+                communityNotification:
+                    type: boolean
+                contentPush:
+                    type: boolean
+                darkMode:
+                    enum:
+                        - System
+                        - "Off"
+                        - "On"
+                    format: enum
+                    type: string
+                defaultCity:
+                    type: string
+                distanceUnit:
+                    enum:
+                        - Kilometer
+                        - Mile
+                    format: enum
+                    type: string
+                timeFormat:
+                    enum:
+                        - H24
+                        - H12
+                    format: enum
+                    type: string
+                tripReminder:
+                    type: boolean
             type: object
     securitySchemes:
         BearerAuth:
@@ -1827,6 +2119,177 @@ paths:
                     description: Internal Server Error
             tags:
                 - TripService
+    /api/v1/trips/{trip_id}/collaborators:
+        get:
+            operationId: TripService_ListTripCollaborators
+            parameters:
+                - example: ""
+                  in: path
+                  name: tripId
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.ListTripCollaboratorsResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - TripService
+        post:
+            operationId: TripService_AddTripCollaborators
+            parameters:
+                - example: ""
+                  in: path
+                  name: tripId
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/trip.v1.AddTripCollaboratorsRequest'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.AddTripCollaboratorsResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - TripService
+    /api/v1/trips/{trip_id}/collaborators/{user_id}:
+        delete:
+            operationId: TripService_RemoveTripCollaborator
+            parameters:
+                - example: ""
+                  in: path
+                  name: tripId
+                  required: true
+                  schema:
+                    type: string
+                - example: ""
+                  in: path
+                  name: userId
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.RemoveTripCollaboratorResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - TripService
+    /api/v1/trips/{trip_id}/collaborators/{user_id}/status:
+        put:
+            operationId: TripService_UpdateCollaboratorStatus
+            parameters:
+                - example: ""
+                  in: path
+                  name: tripId
+                  required: true
+                  schema:
+                    type: string
+                - example: ""
+                  in: path
+                  name: userId
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/trip.v1.UpdateCollaboratorStatusRequest'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.UpdateCollaboratorStatusResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - TripService
     /api/v1/trips/{trip_id}/daily:
         get:
             operationId: TripService_ListDailyTrips
@@ -2039,6 +2502,214 @@ paths:
                     description: Internal Server Error
             tags:
                 - TripService
+    /api/v1/trips/{trip_id}/day:
+        post:
+            operationId: TripService_AddDay
+            parameters:
+                - example: ""
+                  in: path
+                  name: tripId
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/trip.v1.AddDayRequest'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.AddDayResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - TripService
+    /api/v1/trips/{trip_id}/itineraries/move:
+        post:
+            operationId: TripService_MoveItineraryItem
+            parameters:
+                - example: ""
+                  in: path
+                  name: tripId
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/trip.v1.MoveItineraryItemRequest'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.MoveItineraryItemResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - TripService
+    /api/v1/trips/{trip_id}/poi-pool:
+        get:
+            operationId: TripService_ListTripPOIPool
+            parameters:
+                - example: ""
+                  in: path
+                  name: tripId
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.ListTripPOIPoolResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - TripService
+        post:
+            operationId: TripService_CreateTripPOIPool
+            parameters:
+                - example: ""
+                  in: path
+                  name: tripId
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/trip.v1.CreateTripPOIPoolRequest'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.CreateTripPOIPoolResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - TripService
+    /api/v1/trips/{trip_id}/poi-pool/{poi_pool_id}:
+        delete:
+            operationId: TripService_DeleteTripPOIPool
+            parameters:
+                - example: ""
+                  in: path
+                  name: tripId
+                  required: true
+                  schema:
+                    type: string
+                - example: ""
+                  in: path
+                  name: poiPoolId
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trip.v1.DeleteTripPOIPoolResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - TripService
     /api/v1/trips/card:
         post:
             operationId: TripService_CreateTripFromCard
@@ -2191,6 +2862,101 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/user.v1.UpdateUserInfoResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - UserService
+    /api/v1/user/preferences:
+        get:
+            operationId: UserService_GetUserPreferences
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.GetUserPreferencesResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - UserService
+        put:
+            operationId: UserService_UpdateUserPreferences
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.UpdateUserPreferencesRequest'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.UpdateUserPreferencesResponse'
+                    description: OK
+                "400":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BadRequest'
+                    description: Bad Request
+                "401":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Unauthorized'
+                    description: Unauthorized
+                "500":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InternalServerError'
+                    description: Internal Server Error
+            tags:
+                - UserService
+    /api/v1/user/supported-languages:
+        get:
+            operationId: UserService_GetSupportedLanguages
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.GetSupportedLanguagesResponse'
                     description: OK
                 "400":
                     content:

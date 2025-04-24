@@ -6,20 +6,21 @@ import (
 
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
+	"go.uber.org/zap"
 
 	"github.com/iter-x/iter-x/internal/biz/ai/core"
 	"github.com/iter-x/iter-x/internal/biz/do"
-	"github.com/iter-x/iter-x/internal/conf"
 )
 
-func NewCompletion(cfg *conf.Agent_ToolConfig) core.Tool {
+func NewCompletion(toolDo *do.Tool, logger *zap.SugaredLogger) core.Tool {
+	logger = logger.Named("tool.completion")
 	return &completionImpl{
-		BaseTool: core.NewBaseTool(cfg.GetName().String(), cfg.GetDescription()),
+		BaseTool: core.NewBaseTool(toolDo.Name, toolDo.Description, logger),
 		cli: openai.NewClient(
-			option.WithAPIKey(cfg.GetApiKey()),
-			option.WithBaseURL(cfg.GetBaseUrl()),
+			option.WithAPIKey(toolDo.APIKey),
+			option.WithBaseURL(toolDo.BaseURL),
 		),
-		model: cfg.GetModel(),
+		model: toolDo.Model,
 	}
 }
 
@@ -36,23 +37,46 @@ func (l completionImpl) Execute(ctx context.Context, inputAny any) (any, error) 
 	)
 
 	if input, ok = inputAny.(*do.ToolCompletionInput); !ok {
+		l.Logger.Errorw("invalid input type", "type", fmt.Sprintf("%T", input))
 		return nil, fmt.Errorf("invalid input type: %T", input)
 	}
 
+	l.Logger.Debugw("executing completion", "model", l.model, "messages", input.Messages)
 	resp, err := l.cli.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Messages: convertMessages(input.Messages),
 		Model:    l.model,
 		Tools:    convertTools(input.Tools),
 	})
 	if err != nil {
+		l.Logger.Errorw("failed to execute completion", "err", err)
 		return nil, err
 	}
 
 	if len(resp.Choices) == 0 {
+		l.Logger.Warnw("no choices returned from completion")
 		return nil, nil
 	}
 
-	return &do.ToolCompletionOutput{Content: resp.Choices[0].Message.Content}, nil
+	if resp.Choices[0].FinishReason == "function_call" || resp.Choices[0].FinishReason == "tool_calls" {
+		res := make([]do.ToolCallOutput, 0, len(resp.Choices[0].Message.ToolCalls))
+		for _, t := range resp.Choices[0].Message.ToolCalls {
+			res = append(res, do.ToolCallOutput{
+				ID: t.ID,
+				Function: do.ToolCallOutputFunction{
+					Arguments: t.Function.Arguments,
+					Name:      t.Function.Name,
+				},
+				Type: string(t.Type),
+			})
+		}
+		l.Logger.Debugw("completion returned tool calls", "tool_calls", res)
+		return &do.ToolCompletionOutput[[]do.ToolCallOutput]{
+			Content: res,
+		}, nil
+	}
+
+	l.Logger.Debugw("completion returned content", "content", resp.Choices[0].Message.Content)
+	return &do.ToolCompletionOutput[string]{Content: resp.Choices[0].Message.Content}, nil
 }
 
 func convertMessages(messages []do.ToolCompletionInputMessage) []openai.ChatCompletionMessageParamUnion {

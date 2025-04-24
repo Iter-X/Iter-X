@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+
 	"github.com/iter-x/iter-x/internal/biz/do"
 )
 
@@ -21,6 +22,8 @@ type (
 		Name() string
 		// GetPrompt returns the prompt used by the agent
 		GetPrompt() Prompt
+		// GetToolNames returns the names of tools used by the agent
+		GetToolNames() []string
 		Execute(context.Context, any) (any, error)
 	}
 )

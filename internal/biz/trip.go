@@ -2,11 +2,10 @@ package biz
 
 import (
 	"context"
-	"fmt"
-	"github.com/ifuryst/lol"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/ifuryst/lol"
 	"go.uber.org/zap"
 
 	"github.com/iter-x/iter-x/internal/biz/ai/agent"
@@ -25,16 +24,101 @@ type Trip struct {
 	cityRepo repository.CityRepo
 	logger   *zap.SugaredLogger
 	agentHub *agent.Hub
+	repository.Transaction
 }
 
-func NewTrip(tripRepo repository.TripRepo, poiRepo repository.PointsOfInterestRepo, cityRepo repository.CityRepo, logger *zap.SugaredLogger, agentHub *agent.Hub) *Trip {
+func NewTrip(tripRepo repository.TripRepo, poiRepo repository.PointsOfInterestRepo, cityRepo repository.CityRepo, logger *zap.SugaredLogger, agentHub *agent.Hub, transaction repository.Transaction) *Trip {
 	return &Trip{
-		tripRepo: tripRepo,
-		poiRepo:  poiRepo,
-		cityRepo: cityRepo,
-		logger:   logger.Named("biz.tripRepo"),
-		agentHub: agentHub,
+		tripRepo:    tripRepo,
+		poiRepo:     poiRepo,
+		cityRepo:    cityRepo,
+		logger:      logger.Named("biz.trip"),
+		agentHub:    agentHub,
+		Transaction: transaction,
 	}
+}
+
+func (b *Trip) createTripFromPlan(ctx context.Context, claims *auth.Claims, req *bo.CreateTripRequest, pois []*do.PointsOfInterest) (*do.Trip, error) {
+	// Get the TripPlanner from the agentHub
+	tripPlanner, err := b.agentHub.GetAgent(cnst.AgentTripPlanner)
+	if err != nil {
+		b.logger.Errorw("failed to get TripPlanner", "err", err)
+		return nil, xerr.ErrorCreateTripFailed()
+	}
+
+	tripPlannerOutput, err := tripPlanner.Execute(ctx, &do.TripPlannerInput{
+		StartDate: req.StartDate,
+		EndDate:   req.EndDate,
+		Duration:  req.Duration,
+		POIs:      pois,
+	})
+	if err != nil {
+		b.logger.Errorw("failed to plan trip with TripPlanner", "err", err)
+		return nil, xerr.ErrorCreateTripFailed()
+	}
+
+	output, ok := tripPlannerOutput.(*do.TripPlannerOutput)
+	if !ok || output == nil {
+		b.logger.Errorw("failed to cast TripPlannerOutput", "err", err)
+		return nil, xerr.ErrorCreateTripFailed()
+	}
+
+	trip := &do.Trip{
+		UserID:      claims.UID,
+		Title:       output.Title,
+		Description: output.Description,
+		StartDate:   output.StartDate,
+		EndDate:     output.EndDate,
+		Days:        int8(output.TotalDays),
+	}
+
+	createdTrip, err := b.tripRepo.CreateTrip(ctx, trip)
+	if err != nil {
+		b.logger.Errorw("failed to create trip", "err", err)
+		return nil, xerr.ErrorCreateTripFailed()
+	}
+
+	dailyTrips := make([]*do.DailyTrip, 0, len(output.DailyItineraries))
+	for _, dailyPlan := range output.DailyItineraries {
+		dailyTrip := &do.DailyTrip{
+			TripID: createdTrip.ID,
+			Day:    int32(dailyPlan.Day),
+			Date:   dailyPlan.Date,
+			Notes:  dailyPlan.Notes,
+		}
+
+		createdDailyTrip, err := b.tripRepo.CreateDailyTrip(ctx, dailyTrip)
+		if err != nil {
+			b.logger.Errorw("failed to create daily trip", "err", err)
+			return nil, xerr.ErrorCreateDailyTripFailed()
+		}
+
+		for _, poi := range dailyPlan.POIs {
+			dailyItinerary := &do.DailyItinerary{
+				TripID:      createdTrip.ID,
+				DailyTripID: createdDailyTrip.ID,
+				PoiID:       poi.Id,
+				Notes:       poi.Notes,
+			}
+
+			_, err = b.tripRepo.CreateDailyItinerary(ctx, dailyItinerary)
+			if err != nil {
+				b.logger.Errorw("failed to create daily itinerary", "err", err)
+				return nil, xerr.ErrorCreateDailyItineraryFailed()
+			}
+		}
+
+		dailyTrips = append(dailyTrips, createdDailyTrip)
+	}
+
+	// Get complete trip with all relationships
+	completeTrip, err := b.tripRepo.GetTrip(ctx, createdTrip.ID)
+	if err != nil {
+		b.logger.Errorw("failed to get complete trip", "err", err)
+		return nil, xerr.ErrorGetTripFailed()
+	}
+
+	return completeTrip, nil
 }
 
 func (b *Trip) CreateTrip(ctx context.Context, req *bo.CreateTripRequest) (*do.Trip, error) {
@@ -89,94 +173,9 @@ func (b *Trip) CreateTrip(ctx context.Context, req *bo.CreateTripRequest) (*do.T
 			return nil, xerr.ErrorCreateTripFailed()
 		}
 
-		// Extract POI IDs
-		poiIds := make([]string, 0, len(pois))
-		for _, poi := range pois {
-			poiIds = append(poiIds, poi.ID.String())
-		}
+		return b.createTripFromPlan(ctx, claims, req, pois)
 
-		// Get the TripPlanner from the agentHub
-		tripPlanner, err := b.agentHub.GetAgent(cnst.AgentTripPlanner)
-		if err != nil {
-			b.logger.Errorw("failed to get TripPlanner", "err", err)
-			return nil, xerr.ErrorCreateTripFailed()
-		}
-
-		tripPlannerOutput, err := tripPlanner.Execute(ctx, &do.TripPlannerInput{
-			StartDate: req.StartDate,
-			EndDate:   req.EndDate,
-			Duration:  req.Duration,
-			POIs:      pois,
-		})
-		if err != nil {
-			b.logger.Errorw("failed to plan trip with TripPlanner", "err", err)
-			return nil, xerr.ErrorCreateTripFailed()
-		}
-
-		rawTrip, ok := tripPlannerOutput.(*do.TripPlannerOutput)
-		if !ok || len(*rawTrip) == 0 {
-			b.logger.Errorw("failed to cast TripPlannerOutput", "err", err, "ok", ok, "rawTrip", rawTrip)
-			return nil, xerr.ErrorCreateTripFailed()
-		}
-
-		var days int8
-		if req.Duration > 0 {
-			days = int8(req.Duration)
-		} else {
-			days = int8(req.EndDate.Sub(req.StartDate).Hours()/24) + 1
-		}
-		trip := &do.Trip{
-			UserID:    claims.UID,
-			Title:     fmt.Sprintf("%s%d日游", req.Destination, days),
-			StartDate: req.StartDate,
-			EndDate:   req.EndDate,
-			Days:      days,
-		}
-
-		createdTrip, err := b.tripRepo.CreateTrip(ctx, trip)
-		if err != nil {
-			b.logger.Errorw("failed to create trip", "err", err)
-			return nil, xerr.ErrorCreateTripFailed()
-		}
-
-		for _, dailyPlan := range *rawTrip {
-			dailyTrip := &do.DailyTrip{
-				TripID: createdTrip.ID,
-				Day:    int32(dailyPlan.Day),
-				Date:   dailyPlan.Date,
-				Notes:  dailyPlan.Title,
-			}
-
-			createdDailyTrip, err := b.tripRepo.CreateDailyTrip(ctx, dailyTrip)
-			if err != nil {
-				b.logger.Errorw("failed to create daily trip", "err", err)
-				return nil, xerr.ErrorCreateDailyTripFailed()
-			}
-
-			for _, poi := range dailyPlan.POIs {
-				dailyItinerary := &do.DailyItinerary{
-					TripID:      createdTrip.ID,
-					DailyTripID: createdDailyTrip.ID,
-					PoiID:       poi.Id,
-					Notes:       poi.Notes,
-				}
-
-				_, err = b.tripRepo.CreateDailyItinerary(ctx, dailyItinerary)
-				if err != nil {
-					b.logger.Errorw("failed to create daily itinerary", "err", err)
-					return nil, xerr.ErrorCreateDailyItineraryFailed()
-				}
-			}
-		}
-
-		return createdTrip, nil
 	case cnst.TripCreationMethodCard:
-		tripPlanner, err := b.agentHub.GetAgent(cnst.AgentTripPlanner)
-		if err != nil {
-			b.logger.Errorw("failed to get TripPlanner", "err", err)
-			return nil, xerr.ErrorCreateTripFailed()
-		}
-
 		poiIds := make([]uuid.UUID, 0, len(req.PoiIds))
 		for _, poiId := range req.PoiIds {
 			parsedPoiId, err := uuid.Parse(poiId)
@@ -204,77 +203,8 @@ func (b *Trip) CreateTrip(ctx context.Context, req *bo.CreateTripRequest) (*do.T
 			}
 		}
 
-		tripPlannerInput := &do.TripPlannerInput{
-			StartDate: req.StartDate,
-			EndDate:   req.EndDate,
-			Duration:  req.Duration,
-			POIs:      pois,
-		}
+		return b.createTripFromPlan(ctx, claims, req, pois)
 
-		tripPlannerOutput, err := tripPlanner.Execute(ctx, tripPlannerInput)
-		if err != nil {
-			b.logger.Errorw("failed to plan trip with TripPlanner", "err", err)
-			return nil, xerr.ErrorCreateTripFailed()
-		}
-
-		rawTrip, ok := tripPlannerOutput.(*do.TripPlannerOutput)
-		if !ok {
-			b.logger.Errorw("failed to cast TripPlannerOutput", "err", err)
-			return nil, xerr.ErrorCreateTripFailed()
-		}
-
-		var days int8
-		if req.Duration > 0 {
-			days = int8(req.Duration)
-		} else {
-			days = int8(req.EndDate.Sub(req.StartDate).Hours()/24) + 1
-		}
-
-		trip := &do.Trip{
-			UserID:    claims.UID,
-			Title:     fmt.Sprintf("自定义%d日游", days),
-			StartDate: req.StartDate,
-			EndDate:   req.EndDate,
-			Days:      days,
-		}
-
-		createdTrip, err := b.tripRepo.CreateTrip(ctx, trip)
-		if err != nil {
-			b.logger.Errorw("failed to create trip", "err", err)
-			return nil, xerr.ErrorCreateTripFailed()
-		}
-
-		for _, dailyPlan := range *rawTrip {
-			dailyTrip := &do.DailyTrip{
-				TripID: createdTrip.ID,
-				Day:    int32(dailyPlan.Day),
-				Date:   dailyPlan.Date,
-				Notes:  dailyPlan.Title,
-			}
-
-			createdDailyTrip, err := b.tripRepo.CreateDailyTrip(ctx, dailyTrip)
-			if err != nil {
-				b.logger.Errorw("failed to create daily trip", "err", err)
-				return nil, xerr.ErrorCreateDailyTripFailed()
-			}
-
-			for _, poi := range dailyPlan.POIs {
-				dailyItinerary := &do.DailyItinerary{
-					TripID:      createdTrip.ID,
-					DailyTripID: createdDailyTrip.ID,
-					PoiID:       poi.Id,
-					Notes:       poi.Notes,
-				}
-
-				_, err = b.tripRepo.CreateDailyItinerary(ctx, dailyItinerary)
-				if err != nil {
-					b.logger.Errorw("failed to create daily itinerary", "err", err)
-					return nil, xerr.ErrorCreateDailyItineraryFailed()
-				}
-			}
-		}
-
-		return createdTrip, nil
 	case cnst.TripCreationMethodExternalLink:
 		// TODO: Handle external link creation
 		return nil, xerr.ErrorCreateTripFailed()
@@ -305,27 +235,146 @@ func (b *Trip) UpdateTrip(ctx context.Context, req *bo.UpdateTripRequest) (*do.T
 		return nil, xerr.ErrorInvalidTripId()
 	}
 
-	trip, err := b.tripRepo.GetTrip(ctx, tripId)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			return nil, xerr.ErrorTripNotFound()
+	var updatedTrip *do.Trip
+	err = b.Exec(ctx, func(ctx context.Context) error {
+		trip, err := b.tripRepo.GetTrip(ctx, tripId)
+		if err != nil {
+			if ent.IsNotFound(err) {
+				return xerr.ErrorTripNotFound()
+			}
+			b.logger.Errorw("failed to get tripRepo", "err", err)
+			return xerr.ErrorGetTripFailed()
 		}
-		b.logger.Errorw("failed to get tripRepo", "err", err)
+
+		// Update basic trip info
+		trip.Title = req.Title
+		trip.Description = req.Description
+		trip.UpdatedAt = time.Now()
+
+		// Calculate duration based on start/end dates if available
+		var duration int8
+		if req.StartDate.Second() != 0 && req.EndDate.Second() != 0 {
+			// Calculate duration from start and end dates
+			days := int8(req.EndDate.Sub(req.StartDate).Hours()/24) + 1
+			if days < 1 {
+				return xerr.ErrorInvalidDuration()
+			}
+			duration = days
+			trip.StartDate = req.StartDate
+			trip.EndDate = req.EndDate
+		} else {
+			// Use provided duration
+			duration = req.Duration
+			if duration < 1 {
+				return xerr.ErrorInvalidDuration()
+			}
+			if !req.StartDate.IsZero() && req.StartDate.Year() > 1970 {
+				trip.StartDate = req.StartDate
+				trip.EndDate = req.StartDate.AddDate(0, 0, int(duration-1))
+			}
+		}
+
+		// Get current daily trips
+		dailyTrips, err := b.tripRepo.ListDailyTrips(ctx, tripId)
+		if err != nil {
+			b.logger.Errorw("failed to list daily trips", "err", err)
+			return xerr.ErrorGetDailyTripListFailed()
+		}
+
+		// Update dates for each day if start date is provided
+		if trip.StartDate.Second() != 0 {
+			for _, dailyTrip := range dailyTrips {
+				dailyTrip.Date = trip.StartDate.AddDate(0, 0, int(dailyTrip.Day-1))
+				_, err = b.tripRepo.UpdateDailyTrip(ctx, dailyTrip)
+				if err != nil {
+					b.logger.Errorw("failed to update daily trip date", "err", err)
+					return xerr.ErrorUpdateDailyTripFailed()
+				}
+			}
+		}
+
+		// Handle duration changes
+		currentDays := trip.Days
+		if duration > currentDays {
+			// Add new days
+			for day := currentDays + 1; day <= duration; day++ {
+				dailyTrip := &do.DailyTrip{
+					TripID: tripId,
+					Day:    int32(day),
+					Date:   trip.StartDate.AddDate(0, 0, int(day-1)),
+				}
+				_, err = b.tripRepo.CreateDailyTrip(ctx, dailyTrip)
+				if err != nil {
+					b.logger.Errorw("failed to create new daily trip", "err", err)
+					return xerr.ErrorCreateDailyTripFailed()
+				}
+			}
+		} else if duration < currentDays {
+			// Remove days from the end and move POIs to pool
+			for _, dailyTrip := range dailyTrips {
+				if dailyTrip.Day > int32(duration) {
+					// Get itineraries for the day
+					itineraries, err := b.tripRepo.ListDailyItinerariesByDay(ctx, tripId, dailyTrip.Day)
+					if err != nil {
+						b.logger.Errorw("failed to list daily itineraries", "err", err)
+						return xerr.ErrorListDailyItinerariesFailed()
+					}
+
+					// Move POIs to pool
+					for _, itinerary := range itineraries {
+						poolItem := &do.TripPOIPool{
+							TripID:    tripId,
+							PoiID:     itinerary.PoiID,
+							CreatedAt: time.Now(),
+							UpdatedAt: time.Now(),
+							UpdatedBy: trip.UserID,
+							CreatedBy: trip.UserID,
+						}
+						_, err = b.tripRepo.CreateTripPOIPool(ctx, poolItem)
+						if err != nil {
+							b.logger.Errorw("failed to create POI pool item", "err", err)
+							return xerr.ErrorMoveToPoiPoolFailed()
+						}
+
+						// Delete the itinerary
+						err = b.tripRepo.DeleteDailyItinerary(ctx, itinerary.ID)
+						if err != nil {
+							b.logger.Errorw("failed to delete daily itinerary", "err", err)
+							return xerr.ErrorDeleteDailyItineraryFailed()
+						}
+					}
+
+					// Delete the daily trip
+					err = b.tripRepo.DeleteDailyTrip(ctx, dailyTrip.ID)
+					if err != nil {
+						b.logger.Errorw("failed to delete daily trip", "err", err)
+						return xerr.ErrorDeleteDailyTripFailed()
+					}
+				}
+			}
+		}
+
+		trip.Days = duration
+		updatedTrip, err = b.tripRepo.UpdateTrip(ctx, trip)
+		if err != nil {
+			b.logger.Errorw("failed to update trip", "err", err)
+			return xerr.ErrorUpdateTripFailed()
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	completeTrip, err := b.tripRepo.GetTrip(ctx, updatedTrip.ID)
+	if err != nil {
+		b.logger.Errorw("failed to get complete trip", "err", err)
 		return nil, xerr.ErrorGetTripFailed()
 	}
 
-	trip.Title = req.Title
-	trip.StartDate = req.StartDate
-	trip.EndDate = req.EndDate
-	trip.UpdatedAt = time.Now()
-
-	updatedTrip, err := b.tripRepo.UpdateTrip(ctx, trip)
-	if err != nil {
-		b.logger.Errorw("failed to update tripRepo", "err", err)
-		return nil, xerr.ErrorUpdateTripFailed()
-	}
-
-	return updatedTrip, nil
+	return completeTrip, nil
 }
 
 func (b *Trip) DeleteTrip(ctx context.Context, id uuid.UUID) error {
@@ -459,4 +508,293 @@ func (b *Trip) ListDailyTrips(ctx context.Context, req *bo.ListDailyTripsRequest
 	}
 
 	return dailyTrips, nil
+}
+
+func (b *Trip) ListTripCollaborators(ctx context.Context, tripId uuid.UUID) ([]*do.TripCollaborator, error) {
+	collaborators, err := b.tripRepo.ListTripCollaborators(ctx, tripId)
+	if err != nil {
+		b.logger.Errorw("failed to list trip collaborators", "err", err)
+		return nil, xerr.ErrorGetTripFailed()
+	}
+	return collaborators, nil
+}
+
+func (b *Trip) AddTripCollaborators(ctx context.Context, tripId uuid.UUID, userIds []uuid.UUID) ([]*do.TripCollaborator, error) {
+	// Check if trip exists
+	_, err := b.tripRepo.GetTrip(ctx, tripId)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, xerr.ErrorTripNotFound()
+		}
+		b.logger.Errorw("failed to get trip", "err", err)
+		return nil, xerr.ErrorGetTripFailed()
+	}
+
+	collaborators, err := b.tripRepo.AddTripCollaborators(ctx, tripId, userIds)
+	if err != nil {
+		b.logger.Errorw("failed to add trip collaborators", "err", err)
+		return nil, xerr.ErrorAddCollaboratorsFailed()
+	}
+	return collaborators, nil
+}
+
+func (b *Trip) RemoveTripCollaborator(ctx context.Context, tripId uuid.UUID, userId uuid.UUID) error {
+	// Check if trip exists
+	_, err := b.tripRepo.GetTrip(ctx, tripId)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return xerr.ErrorTripNotFound()
+		}
+		b.logger.Errorw("failed to get trip", "err", err)
+		return xerr.ErrorGetTripFailed()
+	}
+
+	err = b.tripRepo.RemoveTripCollaborator(ctx, tripId, userId)
+	if err != nil {
+		b.logger.Errorw("failed to remove trip collaborator", "err", err)
+		return xerr.ErrorRemoveCollaboratorFailed()
+	}
+	return nil
+}
+
+func (b *Trip) UpdateCollaboratorStatus(ctx context.Context, tripId uuid.UUID, userId uuid.UUID, status string) (*do.TripCollaborator, error) {
+	// Check if trip exists
+	_, err := b.tripRepo.GetTrip(ctx, tripId)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, xerr.ErrorTripNotFound()
+		}
+		b.logger.Errorw("failed to get trip", "err", err)
+		return nil, xerr.ErrorGetTripFailed()
+	}
+
+	collaborator, err := b.tripRepo.UpdateCollaboratorStatus(ctx, tripId, userId, status)
+	if err != nil {
+		b.logger.Errorw("failed to update collaborator status", "err", err)
+		return nil, xerr.ErrorUpdateCollaboratorStatusFailed()
+	}
+	return collaborator, nil
+}
+
+func (b *Trip) AddDay(ctx context.Context, req *bo.AddDayRequest) (*do.DailyTrip, error) {
+	// Get the trip to check if it exists and get the current number of days
+	trip, err := b.tripRepo.GetTrip(ctx, req.TripID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, xerr.ErrorTripNotFound()
+		}
+		b.logger.Errorw("failed to get trip", "err", err)
+		return nil, xerr.ErrorGetTripFailed()
+	}
+
+	// Get all daily trips to adjust their day numbers
+	dailyTrips, err := b.tripRepo.ListDailyTrips(ctx, req.TripID)
+	if err != nil {
+		b.logger.Errorw("failed to list daily trips", "err", err)
+		return nil, xerr.ErrorGetDailyTripListFailed()
+	}
+
+	// Validate afterDay
+	if req.AfterDay < 0 {
+		req.AfterDay = 0
+	} else if req.AfterDay > int32(len(dailyTrips)) {
+		req.AfterDay = int32(len(dailyTrips))
+	}
+
+	// Create a new daily trip with the appropriate day number
+	newDay := req.AfterDay + 1
+	// Calculate the date based on the trip's start date
+	date := trip.StartDate.AddDate(0, 0, int(newDay-1))
+	dailyTrip := &do.DailyTrip{
+		TripID: req.TripID,
+		Day:    newDay,
+		Date:   date,
+		Notes:  req.Notes,
+	}
+
+	// Create the daily trip
+	createdDailyTrip, err := b.tripRepo.CreateDailyTrip(ctx, dailyTrip)
+	if err != nil {
+		b.logger.Errorw("failed to create daily trip", "err", err)
+		return nil, xerr.ErrorCreateDailyTripFailed()
+	}
+
+	// Update the day numbers of all subsequent daily trips
+	for _, dt := range dailyTrips {
+		if dt.Day >= newDay {
+			dt.Day++
+			// Update the date based on the new day number
+			dt.Date = trip.StartDate.AddDate(0, 0, int(dt.Day-1))
+			_, err = b.tripRepo.UpdateDailyTrip(ctx, dt)
+			if err != nil {
+				b.logger.Errorw("failed to update daily trip day number", "err", err)
+				return nil, xerr.ErrorUpdateDailyTripFailed()
+			}
+		}
+	}
+
+	// Update the trip's days count and end date
+	trip.Days++
+	trip.EndDate = trip.StartDate.AddDate(0, 0, int(trip.Days-1))
+	_, err = b.tripRepo.UpdateTrip(ctx, trip)
+	if err != nil {
+		b.logger.Errorw("failed to update trip days count and end date", "err", err)
+		return nil, xerr.ErrorUpdateTripFailed()
+	}
+
+	return createdDailyTrip, nil
+}
+
+func (b *Trip) MoveItineraryItem(ctx context.Context, req *bo.MoveItineraryItemRequest) (*do.Trip, error) {
+	tripId, err := uuid.Parse(req.TripID)
+	if err != nil {
+		return nil, xerr.ErrorInvalidTripId()
+	}
+	dailyTripId, err := uuid.Parse(req.DailyTripID)
+	if err != nil {
+		return nil, xerr.ErrorInvalidDailyTripId()
+	}
+	dailyItineraryId, err := uuid.Parse(req.DailyItineraryID)
+	if err != nil {
+		return nil, xerr.ErrorInvalidDailyItineraryId()
+	}
+
+	// 1. Get the itinerary to move and verify it belongs to the trip
+	dailyItinerary, err := b.tripRepo.GetDailyItinerary(ctx, tripId, dailyTripId, dailyItineraryId)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, xerr.ErrorDailyItineraryNotFound()
+		}
+		b.logger.Errorw("failed to get daily itinerary", "err", err)
+		return nil, xerr.ErrorGetDailyItineraryFailed()
+	}
+
+	// Get the current daily trip to check if we're moving to the same position
+	currentDailyTrip, err := b.tripRepo.GetDailyTrip(ctx, tripId, dailyTripId)
+	if err != nil {
+		b.logger.Errorw("failed to get current daily trip", "err", err)
+		return nil, xerr.ErrorGetDailyTripFailed()
+	}
+
+	// 2. Get all itineraries for the target day
+	itineraries, err := b.tripRepo.ListDailyItinerariesByDay(ctx, tripId, req.Day)
+	if err != nil {
+		b.logger.Errorw("failed to list daily itineraries", "err", err)
+		return nil, xerr.ErrorListDailyItinerariesFailed()
+	}
+
+	// 3. Calculate the actual insertion position
+	var insertOrder int32
+	if req.AfterOrder < 0 {
+		insertOrder = 0
+	} else if req.AfterOrder > int32(len(itineraries)) {
+		insertOrder = int32(len(itineraries))
+	} else {
+		insertOrder = req.AfterOrder
+	}
+
+	// If moving to the same day and same position, return the current trip
+	sameDaySameOrder := currentDailyTrip.Day == req.Day && int32(dailyItinerary.Order) == insertOrder+1
+	sameDayOnlyOneItem := currentDailyTrip.Day == req.Day && len(itineraries) == 1
+	if sameDaySameOrder || sameDayOnlyOneItem {
+		completeTrip, err := b.tripRepo.GetTrip(ctx, tripId)
+		if err != nil {
+			b.logger.Errorw("failed to get complete trip", "err", err)
+			return nil, xerr.ErrorGetTripFailed()
+		}
+		return completeTrip, nil
+	}
+
+	// 4. Get the target daily trip
+	targetDailyTrips, err := b.tripRepo.ListDailyTrips(ctx, tripId)
+	if err != nil {
+		b.logger.Errorw("failed to list daily trips", "err", err)
+		return nil, xerr.ErrorGetDailyTripListFailed()
+	}
+
+	var targetDailyTrip *do.DailyTrip
+	for _, dt := range targetDailyTrips {
+		if dt.Day == req.Day {
+			targetDailyTrip = dt
+			break
+		}
+	}
+
+	if targetDailyTrip == nil {
+		b.logger.Errorw("target daily trip not found", "day", req.Day)
+		return nil, xerr.ErrorDailyTripNotFound()
+	}
+
+	// 5. Update the order of all itineraries after the insertion point
+	for _, it := range itineraries {
+		if it.Order > int8(insertOrder) {
+			it.Order++
+			_, err = b.tripRepo.UpdateDailyItinerary(ctx, it)
+			if err != nil {
+				b.logger.Errorw("failed to update daily itinerary order", "err", err)
+				return nil, xerr.ErrorUpdateDailyItineraryFailed()
+			}
+		}
+	}
+
+	// 5.1 Get and update the order of itineraries in the original day
+	originalDailyTrip, err := b.tripRepo.GetDailyTrip(ctx, tripId, dailyTripId)
+	if err != nil {
+		b.logger.Errorw("failed to get original daily trip", "err", err)
+		return nil, xerr.ErrorGetDailyTripFailed()
+	}
+
+	// Only update original day's order if moving between different days
+	if originalDailyTrip.Day != req.Day {
+		originalDayItineraries, err := b.tripRepo.ListDailyItinerariesByDay(ctx, tripId, originalDailyTrip.Day)
+		if err != nil {
+			b.logger.Errorw("failed to list original day itineraries", "err", err)
+			return nil, xerr.ErrorListDailyItinerariesFailed()
+		}
+
+		// Update the order of itineraries after the removed item in the original day
+		for _, it := range originalDayItineraries {
+			if it.Order > dailyItinerary.Order {
+				it.Order--
+				_, err = b.tripRepo.UpdateDailyItinerary(ctx, it)
+				if err != nil {
+					b.logger.Errorw("failed to update original day itinerary order", "err", err)
+					return nil, xerr.ErrorUpdateDailyItineraryFailed()
+				}
+			}
+		}
+	}
+
+	// 6. Create a new daily itinerary with the updated information
+	newItinerary := &do.DailyItinerary{
+		CreatedAt:   dailyItinerary.CreatedAt,
+		UpdatedAt:   time.Now(),
+		TripID:      tripId,
+		DailyTripID: targetDailyTrip.ID,
+		PoiID:       dailyItinerary.PoiID,
+		Notes:       dailyItinerary.Notes,
+		Order:       int8(insertOrder + 1),
+	}
+
+	_, err = b.tripRepo.CreateDailyItinerary(ctx, newItinerary)
+	if err != nil {
+		b.logger.Errorw("failed to create new daily itinerary", "err", err)
+		return nil, xerr.ErrorCreateDailyItineraryFailed()
+	}
+
+	// 7. Delete the old daily itinerary
+	err = b.tripRepo.DeleteDailyItinerary(ctx, dailyItinerary.ID)
+	if err != nil {
+		b.logger.Errorw("failed to delete old daily itinerary", "err", err)
+		return nil, xerr.ErrorDeleteDailyItineraryFailed()
+	}
+
+	// 8. Get the complete trip with all relationships
+	completeTrip, err := b.tripRepo.GetTrip(ctx, tripId)
+	if err != nil {
+		b.logger.Errorw("failed to get complete trip", "err", err)
+		return nil, xerr.ErrorGetTripFailed()
+	}
+
+	return completeTrip, nil
 }

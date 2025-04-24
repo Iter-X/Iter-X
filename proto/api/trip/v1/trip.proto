@@ -77,6 +77,65 @@ service TripService {
       get: "/api/v1/trips/{trip_id}/daily"
     };
   }
+
+  rpc ListTripCollaborators(ListTripCollaboratorsRequest) returns (ListTripCollaboratorsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/trips/{trip_id}/collaborators"
+    };
+  }
+
+  rpc ListTripPOIPool(ListTripPOIPoolRequest) returns (ListTripPOIPoolResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/trips/{trip_id}/poi-pool"
+    };
+  }
+
+  rpc CreateTripPOIPool(CreateTripPOIPoolRequest) returns (CreateTripPOIPoolResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/trips/{trip_id}/poi-pool"
+      body: "*"
+    };
+  }
+
+  rpc DeleteTripPOIPool(DeleteTripPOIPoolRequest) returns (DeleteTripPOIPoolResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/trips/{trip_id}/poi-pool/{poi_pool_id}"
+    };
+  }
+
+  rpc AddTripCollaborators(AddTripCollaboratorsRequest) returns (AddTripCollaboratorsResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/trips/{trip_id}/collaborators"
+      body: "*"
+    };
+  }
+
+  rpc RemoveTripCollaborator(RemoveTripCollaboratorRequest) returns (RemoveTripCollaboratorResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/trips/{trip_id}/collaborators/{user_id}"
+    };
+  }
+
+  rpc UpdateCollaboratorStatus(UpdateCollaboratorStatusRequest) returns (UpdateCollaboratorStatusResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/trips/{trip_id}/collaborators/{user_id}/status"
+      body: "*"
+    };
+  }
+
+  rpc AddDay(AddDayRequest) returns (AddDayResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/trips/{trip_id}/day"
+      body: "*"
+    };
+  }
+
+  rpc MoveItineraryItem(MoveItineraryItemRequest) returns (MoveItineraryItemResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/trips/{trip_id}/itineraries/move"
+      body: "*"
+    };
+  }
 }
 
 message Trip {
@@ -88,7 +147,9 @@ message Trip {
   string description = 6;
   google.protobuf.Timestamp start_ts = 7;
   google.protobuf.Timestamp end_ts = 8;
-  repeated DailyTrip daily_trips = 9;
+  int32 days = 9;
+  repeated DailyTrip daily_trips = 10;
+  repeated poi.v1.PointOfInterest poi_pool = 11;
 }
 
 message CreateTripManuallyRequest {
@@ -131,7 +192,7 @@ message UpdateTripRequest {
   string description = 3;
   google.protobuf.Timestamp start_ts = 4;
   google.protobuf.Timestamp end_ts = 5;
-  bool status = 7;
+  int32 duration = 6;
 }
 
 message UpdateTripResponse {
@@ -202,6 +263,28 @@ message ListDailyTripsResponse {
   repeated DailyTrip daily_trips = 1;
 }
 
+message ListTripCollaboratorsRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+}
+
+message ListTripCollaboratorsResponse {
+  repeated TripCollaborator collaborators = 1;
+}
+
+message TripCollaborator {
+  string id = 1;
+  string username = 2;
+  string nickname = 3;
+  string avatar_url = 4;
+  CollaboratorStatus status = 5;
+}
+
+enum CollaboratorStatus {
+  Invited = 0;
+  Accepted = 2;
+  Rejected = 3;
+}
+
 message DailyTrip {
   string id = 1;
   google.protobuf.Timestamp created_at = 2;
@@ -215,13 +298,14 @@ message DailyTrip {
 
 message DailyItinerary {
   string id = 1;
-  string trip_id = 2;
-  string daily_trip_id = 3;
-  string poi_id = 4;
-  string notes = 5;
-  google.protobuf.Timestamp created_at = 6;
-  google.protobuf.Timestamp updated_at = 7;
-  poi.v1.PointOfInterest poi = 8;
+  google.protobuf.Timestamp created_at = 2;
+  google.protobuf.Timestamp updated_at = 3;
+  string trip_id = 4;
+  string daily_trip_id = 5;
+  string poi_id = 6;
+  string notes = 7;
+  int32 order = 8;
+  poi.v1.PointOfInterest poi = 9;
 }
 
 message PointsOfInterest {
@@ -235,4 +319,91 @@ message PointsOfInterest {
   string country_name = 8;
   string state_name = 9;
   string image_url = 10;
+}
+
+message TripPOIPool {
+  string id = 1;
+  string trip_id = 2;
+  string poi_id = 3;
+  string notes = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  poi.v1.PointOfInterest poi = 7;
+}
+
+message ListTripPOIPoolRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+}
+
+message ListTripPOIPoolResponse {
+  repeated TripPOIPool poi_pool = 1;
+}
+
+message CreateTripPOIPoolRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+  string poi_id = 2 [(validatex.rules).string.uuid = true];
+  string notes = 3;
+}
+
+message CreateTripPOIPoolResponse {
+  TripPOIPool poi_pool = 1;
+}
+
+message DeleteTripPOIPoolRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+  string poi_pool_id = 2 [(validatex.rules).string.uuid = true];
+}
+
+message DeleteTripPOIPoolResponse {
+  string status = 1;
+}
+
+message AddTripCollaboratorsRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+  repeated string user_ids = 2 [(validatex.rules).repeated.min_items = 1];
+}
+
+message AddTripCollaboratorsResponse {
+  repeated TripCollaborator collaborators = 1;
+}
+
+message RemoveTripCollaboratorRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+  string user_id = 2 [(validatex.rules).string.uuid = true];
+}
+
+message RemoveTripCollaboratorResponse {
+  string status = 1;
+}
+
+message UpdateCollaboratorStatusRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+  string user_id = 2 [(validatex.rules).string.uuid = true];
+  CollaboratorStatus status = 3;
+}
+
+message UpdateCollaboratorStatusResponse {
+  TripCollaborator collaborator = 1;
+}
+
+message AddDayRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+  int32 after_day = 2;
+  string notes = 3;
+}
+
+message AddDayResponse {
+  DailyTrip daily_trip = 1;
+}
+
+message MoveItineraryItemRequest {
+  string trip_id = 1 [(validatex.rules).string.uuid = true];
+  string daily_trip_id = 2 [(validatex.rules).string.uuid = true];
+  string daily_itinerary_id = 3 [(validatex.rules).string.uuid = true];
+  int32 day = 4;
+  int32 after_order = 5;
+}
+
+message MoveItineraryItemResponse {
+  Trip trip = 1;
 }

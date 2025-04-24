@@ -43,6 +43,24 @@ other = "Must choose at least one city"
 [MISSING_LINK]
 other = "External link cannot be empty"
 
+[INVALID_LANGUAGE]
+other = "Invalid language"
+
+[INVALID_USER_ID]
+other = "Invalid user"
+
+[INVALID_COLLABORATOR_STATUS]
+other = "Invalid collaborator status"
+
+[DAILY_ITINERARY_NOT_FOUND]
+other = "Daily itinerary not found"
+
+[INVALID_DAILY_ITINERARY_ID]
+other = "Invalid daily itinerary ID"
+
+[INVALID_DURATION]
+other = "Invalid days"
+
 [UNAUTHORIZED]
 other = "Unauthorized"
 
@@ -105,4 +123,28 @@ other = "Get cities failed"
 
 [GET_POIS_LIST_FAILED]
 other = "Get POIs failed"
+
+[ADD_COLLABORATORS_FAILED]
+other = "Add collaborators failed"
+
+[REMOVE_COLLABORATOR_FAILED]
+other = "Remove collaborator failed"
+
+[UPDATE_COLLABORATOR_STATUS_FAILED]
+other = "Update collaborator status failed"
+
+[GET_DAILY_ITINERARY_FAILED]
+other = "Get daily itinerary failed"
+
+[LIST_DAILY_ITINERARIES_FAILED]
+other = "Get daily itineraries failed"
+
+[UPDATE_DAILY_ITINERARY_FAILED]
+other = "Update daily itinerary failed"
+
+[DELETE_DAILY_ITINERARY_FAILED]
+other = "Delete daily itinerary failed"
+
+[MOVE_TO_POI_POOL_FAILED]
+other = "Move POI to POI pool failed"
 

@@ -112,13 +112,20 @@ func (s *Trip) GetTrip(ctx context.Context, req *tripV1.GetTripRequest) (*tripV1
 }
 
 func (s *Trip) UpdateTrip(ctx context.Context, req *tripV1.UpdateTripRequest) (*tripV1.UpdateTripResponse, error) {
+	if err := validateTimeParams(req.Duration, req.StartTs, req.EndTs); err != nil {
+		return nil, err
+	}
 	params := &bo.UpdateTripRequest{
 		ID:          req.GetId(),
 		Title:       req.GetTitle(),
 		Description: req.GetDescription(),
 		StartDate:   req.GetStartTs().AsTime(),
 		EndDate:     req.GetEndTs().AsTime(),
-		Status:      req.GetStatus(),
+	}
+	if req.GetDuration() > cnst.MaxDay {
+		params.Duration = cnst.MaxDay
+	} else {
+		params.Duration = int8(req.GetDuration())
 	}
 	trip, err := s.tripBiz.UpdateTrip(ctx, params)
 	if err != nil {
@@ -208,4 +215,129 @@ func (s *Trip) ListDailyTrips(ctx context.Context, req *tripV1.ListDailyTripsReq
 		return nil, err
 	}
 	return &tripV1.ListDailyTripsResponse{DailyTrips: build.ToDailyTripsProto(dailyTrips)}, nil
+}
+
+func (s *Trip) ListTripCollaborators(ctx context.Context, req *tripV1.ListTripCollaboratorsRequest) (*tripV1.ListTripCollaboratorsResponse, error) {
+	tripId, err := uuid.Parse(req.GetTripId())
+	if err != nil {
+		return nil, xerr.ErrorInvalidTripId()
+	}
+	collaborators, err := s.tripBiz.ListTripCollaborators(ctx, tripId)
+	if err != nil {
+		return nil, err
+	}
+	return &tripV1.ListTripCollaboratorsResponse{Collaborators: build.ToTripCollaboratorsProto(collaborators)}, nil
+}
+
+func (s *Trip) AddTripCollaborators(ctx context.Context, req *tripV1.AddTripCollaboratorsRequest) (*tripV1.AddTripCollaboratorsResponse, error) {
+	tripId, err := uuid.Parse(req.GetTripId())
+	if err != nil {
+		return nil, xerr.ErrorInvalidTripId()
+	}
+
+	userIds := make([]uuid.UUID, 0, len(req.GetUserIds()))
+	for _, id := range req.GetUserIds() {
+		userId, err := uuid.Parse(id)
+		if err != nil {
+			return nil, xerr.ErrorInvalidUserId()
+		}
+		userIds = append(userIds, userId)
+	}
+
+	collaborators, err := s.tripBiz.AddTripCollaborators(ctx, tripId, userIds)
+	if err != nil {
+		return nil, err
+	}
+	return &tripV1.AddTripCollaboratorsResponse{Collaborators: build.ToTripCollaboratorsProto(collaborators)}, nil
+}
+
+func (s *Trip) RemoveTripCollaborator(ctx context.Context, req *tripV1.RemoveTripCollaboratorRequest) (*tripV1.RemoveTripCollaboratorResponse, error) {
+	tripId, err := uuid.Parse(req.GetTripId())
+	if err != nil {
+		return nil, xerr.ErrorInvalidTripId()
+	}
+
+	userId, err := uuid.Parse(req.GetUserId())
+	if err != nil {
+		return nil, xerr.ErrorInvalidUserId()
+	}
+
+	if err := s.tripBiz.RemoveTripCollaborator(ctx, tripId, userId); err != nil {
+		return nil, err
+	}
+	return &tripV1.RemoveTripCollaboratorResponse{Status: "removed"}, nil
+}
+
+func (s *Trip) UpdateCollaboratorStatus(ctx context.Context, req *tripV1.UpdateCollaboratorStatusRequest) (*tripV1.UpdateCollaboratorStatusResponse, error) {
+	tripId, err := uuid.Parse(req.GetTripId())
+	if err != nil {
+		return nil, xerr.ErrorInvalidTripId()
+	}
+
+	userId, err := uuid.Parse(req.GetUserId())
+	if err != nil {
+		return nil, xerr.ErrorInvalidUserId()
+	}
+
+	collaborator, err := s.tripBiz.UpdateCollaboratorStatus(ctx, tripId, userId, req.GetStatus().String())
+	if err != nil {
+		return nil, err
+	}
+	return &tripV1.UpdateCollaboratorStatusResponse{Collaborator: build.ToTripCollaboratorProto(collaborator)}, nil
+}
+
+func (s *Trip) AddDay(ctx context.Context, req *tripV1.AddDayRequest) (*tripV1.AddDayResponse, error) {
+	tripId, err := uuid.Parse(req.GetTripId())
+	if err != nil {
+		return nil, xerr.ErrorInvalidTripId()
+	}
+
+	params := &bo.AddDayRequest{
+		TripID:   tripId,
+		AfterDay: req.GetAfterDay(),
+		Notes:    req.GetNotes(),
+	}
+
+	dailyTrip, err := s.tripBiz.AddDay(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+
+	return &tripV1.AddDayResponse{
+		DailyTrip: build.ToDailyTripProto(dailyTrip),
+	}, nil
+}
+
+func (s *Trip) MoveItineraryItem(ctx context.Context, req *tripV1.MoveItineraryItemRequest) (*tripV1.MoveItineraryItemResponse, error) {
+	tripId, err := uuid.Parse(req.GetTripId())
+	if err != nil {
+		return nil, xerr.ErrorInvalidTripId()
+	}
+
+	dailyTripId, err := uuid.Parse(req.GetDailyTripId())
+	if err != nil {
+		return nil, xerr.ErrorInvalidDailyTripId()
+	}
+
+	dailyItineraryId, err := uuid.Parse(req.GetDailyItineraryId())
+	if err != nil {
+		return nil, xerr.ErrorInvalidDailyItineraryId()
+	}
+
+	params := &bo.MoveItineraryItemRequest{
+		TripID:           tripId.String(),
+		DailyTripID:      dailyTripId.String(),
+		DailyItineraryID: dailyItineraryId.String(),
+		Day:              req.GetDay(),
+		AfterOrder:       req.GetAfterOrder(),
+	}
+
+	trip, err := s.tripBiz.MoveItineraryItem(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+
+	return &tripV1.MoveItineraryItemResponse{
+		Trip: build.ToTripProto(trip),
+	}, nil
 }

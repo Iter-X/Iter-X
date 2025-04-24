@@ -101,56 +101,40 @@ func (pm *PromptManager) ListVersions(agentName string) ([]PromptVersion, error)
 	return result, nil
 }
 
-// Prompt implements the core.Prompt interface
+// Prompt represents a prompt
 type Prompt struct {
-	rounds  []PromptRound
+	system  string
+	user    string
 	version string
 }
 
-// PromptRound represents a round of conversation
-type PromptRound struct {
-	System string
-	User   string
-}
-
 // NewPrompt creates a new Prompt instance
-func NewPrompt(rounds []PromptRound, version string) core.Prompt {
+func NewPrompt(system, user, version string) core.Prompt {
 	return &Prompt{
-		rounds:  rounds,
+		system:  system,
+		user:    user,
 		version: version,
 	}
 }
 
 // GetSystemPrompt returns the system prompt
 func (p *Prompt) GetSystemPrompt() string {
-	if len(p.rounds) == 0 {
-		return ""
-	}
-	return p.rounds[0].System
+	return p.system
 }
 
 // GetUserPrompt returns the user prompt
 func (p *Prompt) GetUserPrompt() string {
-	if len(p.rounds) == 0 {
-		return ""
-	}
-	return p.rounds[0].User
+	return p.user
 }
 
 // GetSystemPromptByRound returns the system prompt for a specific round
 func (p *Prompt) GetSystemPromptByRound(round int) string {
-	if len(p.rounds) < round {
-		return ""
-	}
-	return p.rounds[round-1].System
+	return p.system
 }
 
 // GetUserPromptByRound returns the user prompt for a specific round
 func (p *Prompt) GetUserPromptByRound(round int) string {
-	if len(p.rounds) < round {
-		return ""
-	}
-	return p.rounds[round-1].User
+	return p.user
 }
 
 // GetVersion returns the prompt version

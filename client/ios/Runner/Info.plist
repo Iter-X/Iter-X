@@ -56,5 +56,13 @@
 	<string>This application needs to access your microphone</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>This application needs the speech recognition permission</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs to access your location while using the app to provide location-based services</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This app needs to access to your location at all times, even when the app is in the background, to support continuous location tracking</string>
+	<key>MAMapKey</key>
+	<string>a7ab521952039e2e202efc7473bb9626</string>
+	<key>io.flutter.embedded_views_preview</key>
+    <true/>
 </dict>
 </plist>

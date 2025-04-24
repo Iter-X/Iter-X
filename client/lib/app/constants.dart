@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:amap_flutter_base/amap_flutter_base.dart';
 
 class Constants {
   static final String appName = '';
@@ -7,6 +8,7 @@ class Constants {
 
 class AppConfig {
   static double boxRadius = 24.w;
+  static double imageRadius = 18.w;
   static double cornerRadius = 200.r;
   static const String assetBaseDir = 'assets/images';
 }
@@ -43,6 +45,7 @@ class AppColor {
   static const int _themePrimaryValue = 0xFF1D1F1E;
   static const Color theme = Color(_themePrimaryValue);
   static const Color divider = Color(0xFFE9E9E9);
+  static const Color border = Color(0xFFE9E9E9);
   static const Color scaffoldBackgroundColor = Color(0xFFF2F2F2);
 
   static const Color title = Color(0xFF000000);
@@ -76,4 +79,12 @@ class AppColor {
   static const Color c_999999 = Color(0xFF999999);
   static const Color c_f2f2f2 = Color(0xFFF2F2F2);
   static const Color c_375F77 = Color(0xFF375F77);
+}
+
+class AMapConfig {
+  static const AMapPrivacyStatement privacyStatement = AMapPrivacyStatement(
+    hasContains: true,
+    hasShow: true,
+    hasAgree: true,
+  );
 }

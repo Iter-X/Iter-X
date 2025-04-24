@@ -17,6 +17,7 @@ func DailyItineraryRepositoryImplToEntity(po *ent.DailyItinerary) *do.DailyItine
 		DailyTripID: po.DailyTripID,
 		PoiID:       po.PoiID,
 		Notes:       po.Notes,
+		Order:       po.Order,
 		Trip:        TripRepositoryImplToEntity(po.Edges.Trip),
 		DailyTrip:   DailyTripRepositoryImplToEntity(po.Edges.DailyTrip),
 		Poi:         PointsOfInterestRepositoryImplToEntity(po.Edges.Poi),

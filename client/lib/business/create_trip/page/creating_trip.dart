@@ -30,7 +30,7 @@ class _CreatingTripPageState extends BaseState<CreatingTripPage> {
   @override
   void initState() {
     super.initState();
-    // _createTrip();
+    _createTrip();
     _startTipsAnimation();
   }
 
