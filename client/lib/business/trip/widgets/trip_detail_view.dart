@@ -2,6 +2,7 @@ import 'package:client/app/constants.dart';
 import 'package:client/business/trip/entity/trip.dart';
 import 'package:client/business/trip/service/trip_service.dart';
 import 'package:client/common/utils/date_util.dart';
+import 'package:client/common/utils/logger.dart';
 import 'package:client/common/utils/toast.dart';
 import 'package:client/common/widgets/text_divider.dart';
 import 'package:flutter/material.dart';
@@ -492,11 +493,13 @@ class POIList extends StatelessWidget {
 }
 
 class DayContent extends StatelessWidget {
+  final TripService service;
   final DailyTrip dailyTrip;
   final String tripId;
 
   const DayContent({
     super.key,
+    required this.service,
     required this.dailyTrip,
     required this.tripId,
   });
@@ -550,7 +553,40 @@ class DayContent extends StatelessWidget {
         SizedBox(height: 15.h),
         Center(
           child: GestureDetector(
-            onTap: () {},
+            onTap: () async {
+              try {
+                final newDailyTrip = await service.addDay(
+                  tripId: service.trip!.id,
+                  afterDay: dailyTrip.day,
+                  notes: '',
+                );
+                if (newDailyTrip != null) {
+                  // 获取从当前天数开始的新列表
+                  final updatedDays = await service.fetchDailyTripsFromDay(
+                    tripId: service.trip!.id,
+                    fromDay: dailyTrip.day,
+                  );
+                  if (updatedDays.isNotEmpty && service.trip != null) {
+                    // 找到当前天数在列表中的位置
+                    final index = service.trip!.dailyTrips.indexWhere(
+                      (day) => day.day == dailyTrip.day,
+                    );
+                    if (index != -1) {
+                      // 使用service方法更新数据
+                      service.updateDailyTripsFromIndex(
+                        index: index,
+                        updatedDays: updatedDays,
+                      );
+                    }
+                  }
+                } else {
+                  ToastX.show('添加失败');
+                }
+              } catch (e) {
+                BaseLogger.e('Error adding day: $e');
+                ToastX.show('添加失败');
+              }
+            },
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -625,8 +661,9 @@ class TripDetailView extends StatelessWidget {
               children: [
                 DayHeader(dailyTrip: dailyTrip),
                 DayContent(
+                  service: service,
                   dailyTrip: dailyTrip,
-                  tripId: service.trip!.id,
+                  tripId: tripId,
                 ),
               ],
             ),

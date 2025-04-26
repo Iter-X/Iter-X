@@ -3,6 +3,7 @@ import 'package:client/business/trip/entity/collaborator.dart';
 import 'package:client/business/trip/entity/trip.dart';
 import 'package:client/common/dio/http.dart';
 import 'package:client/common/dio/http_result_bean.dart';
+import 'package:client/common/utils/logger.dart';
 import 'package:flutter/material.dart';
 
 class TripService extends ChangeNotifier {
@@ -80,7 +81,7 @@ class TripService extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      print('Error updating trip: $e');
+      BaseLogger.d('Error updating trip: $e');
       rethrow;
     } finally {
       _isLoading = false;
@@ -106,7 +107,7 @@ class TripService extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      print('Error fetching collaborators: $e');
+      BaseLogger.d('Error fetching collaborators: $e');
       rethrow;
     } finally {
       _loadingCollaborators = false;
@@ -165,10 +166,72 @@ class TripService extends ChangeNotifier {
         await fetchTripData(tripId: tripId);
       }
     } catch (e) {
-      print('Error moving itinerary item: $e');
-      // Only refresh data if there was an error
-      await fetchTripData(tripId: tripId);
+      BaseLogger.d('Error moving itinerary item: $e');
       rethrow;
+    }
+  }
+
+  Future<DailyTrip?> addDay({
+    required String tripId,
+    required int afterDay,
+    required String notes,
+  }) async {
+    try {
+      final HttpResultBean result = await Http.instance.post(
+        TripApi.addDayUrl(tripId),
+        data: {
+          'afterDay': afterDay,
+          'notes': notes,
+        },
+      );
+
+      if (result.isSuccess() && result.data['dailyTrip'] != null) {
+        return DailyTrip.fromJson(result.data['dailyTrip']);
+      }
+      return null;
+    } catch (e) {
+      BaseLogger.d('Error adding day: $e');
+      rethrow;
+    }
+  }
+
+  // 获取从指定天数开始的行程数据
+  Future<List<DailyTrip>> fetchDailyTripsFromDay({
+    required String tripId,
+    required int fromDay,
+  }) async {
+    try {
+      final HttpResultBean result = await Http.instance.get(
+        TripApi.getTripDetailUrl(tripId),
+      );
+
+      if (result.isSuccess() && result.data['trip'] != null) {
+        final updatedTrip = Trip.fromJson(result.data['trip']);
+        // 找到从指定天数开始的所有天数
+        final index = updatedTrip.dailyTrips.indexWhere((day) => day.day >= fromDay);
+        if (index != -1) {
+          return updatedTrip.dailyTrips.sublist(index);
+        }
+      }
+      return [];
+    } catch (e) {
+      BaseLogger.d('Error fetching daily trips: $e');
+      rethrow;
+    }
+  }
+
+  // 更新指定位置的行程数据
+  void updateDailyTripsFromIndex({
+    required int index,
+    required List<DailyTrip> updatedDays,
+  }) {
+    if (_trip != null) {
+      _trip!.dailyTrips.replaceRange(
+        index,
+        _trip!.dailyTrips.length,
+        updatedDays,
+      );
+      notifyListeners();
     }
   }
 }

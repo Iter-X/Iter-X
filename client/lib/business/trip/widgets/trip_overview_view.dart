@@ -5,6 +5,8 @@ import 'package:client/business/trip/entity/trip.dart';
 import 'package:client/business/trip/service/trip_service.dart';
 import 'package:client/business/trip/widgets/edit_title_widget.dart';
 import 'package:client/common/utils/date_util.dart';
+import 'package:client/common/utils/logger.dart';
+import 'package:client/common/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -105,7 +107,37 @@ class _TripOverviewViewState extends State<TripOverviewView> {
             SizedBox(height: 15.h),
             Center(
               child: GestureDetector(
-                onTap: () {},
+                onTap: () async {
+                  try {
+                    final newDailyTrip = await widget.service.addDay(
+                      tripId: widget.service.trip!.id,
+                      afterDay: dailyTrip.day,
+                      notes: '',
+                    );
+                    if (newDailyTrip != null) {
+                      final updatedDays = await widget.service.fetchDailyTripsFromDay(
+                        tripId: widget.service.trip!.id,
+                        fromDay: dailyTrip.day,
+                      );
+                      if (updatedDays.isNotEmpty && widget.service.trip != null) {
+                        final index = widget.service.trip!.dailyTrips.indexWhere(
+                          (day) => day.day == dailyTrip.day,
+                        );
+                        if (index != -1) {
+                          widget.service.updateDailyTripsFromIndex(
+                            index: index,
+                            updatedDays: updatedDays,
+                          );
+                        }
+                      }
+                    } else {
+                      ToastX.show('添加失败');
+                    }
+                  } catch (e) {
+                    BaseLogger.e('Error adding day: $e');
+                    ToastX.show('添加失败');
+                  }
+                },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
