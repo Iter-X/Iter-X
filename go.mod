@@ -15,7 +15,6 @@ require (
 	github.com/aliyun/aliyun-oss-go-sdk v3.0.2+incompatible
 	github.com/bytedance/sonic v1.13.2
 	github.com/elastic/go-elasticsearch/v8 v8.17.1
-	github.com/emicklei/proto v1.14.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.6.0
@@ -26,7 +25,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/nicksnyder/go-i18n/v2 v2.5.1
 	github.com/openai/openai-go v0.1.0-alpha.67
-	github.com/protoc-gen/protoc-gen-go-errors v0.3.2
+	github.com/protoc-gen/protoc-gen-go-errors v0.3.3
 	github.com/protoc-gen/protoc-gen-openapiv3 v0.7.6
 	github.com/protoc-gen/protoc-gen-validatex v0.8.5
 	github.com/redis/go-redis/v9 v9.7.3
